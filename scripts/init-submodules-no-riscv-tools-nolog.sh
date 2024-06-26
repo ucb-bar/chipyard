@@ -74,6 +74,7 @@ cd "$RDIR"
             toolchains/libgloss \
             generators/gemmini \
             generators/rocket-chip \
+            generators/compress-acc \
             sims/firesim \
             software/nvdla-workload \
             software/coremark \
@@ -120,6 +121,9 @@ cd "$RDIR"
 
     # Non-recursive clone
     git submodule update --init generators/rocket-chip
+
+    # Non-recursive clone
+    git submodule update --init generators/compress-acc
 
     # Minimal non-recursive clone to initialize sbt dependencies
     git submodule update --init sims/firesim
