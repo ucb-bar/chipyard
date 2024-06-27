@@ -13,6 +13,8 @@ usage() {
     echo "  -i <insns> : Instructions after PC to take checkpoint at [default 0]"
     echo "  -m <isa>   : ISA to pass to spike for checkpoint generation [default rv64gc]"
     echo "  -o <out>   : Output directory to store the checkpoint in. [default <elf>.<pc>.<insns>.loadarch]"
+    echo "  -r <mem>   : Memory regions to pass to spike. Passed to spike's '-m' flag. [default starting at 0x80000000 with 256MiB]"
+    echo "  -v         : Verbose"
     exit "$1"
 }
 
@@ -22,6 +24,8 @@ PC="0x80000000"
 INSNS=0
 ISA="rv64gc"
 OUTPATH=""
+MEMOVERRIDE=""
+VERBOSE=0
 while [ "$1" != "" ];
 do
     case $1 in
@@ -45,6 +49,11 @@ do
         -o )
             shift
             OUTPATH=$1 ;;
+        -r )
+            shift
+            MEMOVERRIDE=$1 ;;
+        -v )
+            VERBOSE=1 ;;
 	* )
 	    error "Invalid option $1"
 	    usage 1 ;;
@@ -52,7 +61,15 @@ do
     shift
 done
 
-BASEMEM="$((0x80000000)):$((0x10000000))"
+if [[ $VERBOSE -eq 1 ]] ; then
+    set -x
+fi
+
+if [ -z "$MEMOVERRIDE" ] ; then
+    BASEMEM="$((0x80000000)):$((0x10000000))"
+else
+    BASEMEM=$MEMOVERRIDE
+fi
 SPIKEFLAGS="-p$NHARTS --pmpregions=0 --isa=$ISA -m$BASEMEM"
 BASENAME=$(basename -- $BINARY)
 
@@ -138,3 +155,5 @@ rm -rf mem.0x80000000.bin
 
 riscv64-unknown-elf-ld -Tdata=0x80000000 -nmagic --defsym tohost=0x$TOHOST --defsym fromhost=0x$FROMHOST -o $LOADMEM_ELF $RAWMEM_ELF
 rm -rf $RAWMEM_ELF
+
+echo "Ensure that at minimum you have memory regions corresponding to $BASEMEM in downstream RTL tooling"

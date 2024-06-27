@@ -28,6 +28,7 @@ class ClockGroupParameterModifier(
     sinkFn:   ClockGroupSinkParameters   => ClockGroupSinkParameters   = { s => s })(
     implicit p: Parameters, v: ValName) extends LazyModule {
   val node = ClockGroupAdapterNode(sourceFn, sinkFn)
+  override def shouldBeInlined = true
   lazy val module = new LazyRawModuleImp(this) {
     (node.out zip node.in).map { case ((o, _), (i, _)) =>
       (o.member.data zip i.member.data).foreach { case (oD, iD) => oD := iD }

@@ -12,7 +12,8 @@ import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
 import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
-import freechips.rocketchip.diplomacy.{LazyModule, AsynchronousCrossing}
+import freechips.rocketchip.diplomacy.{LazyModule}
+import freechips.rocketchip.prci.{AsynchronousCrossing}
 import testchipip.iceblk.{BlockDeviceKey, BlockDeviceConfig}
 import testchipip.cosim.{TracePortKey, TracePortParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
@@ -367,6 +368,12 @@ class FireSimRadianceClusterSynConfig extends Config(
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
   new chipyard.RadianceClusterSynConfig)
+
+class FireSimQuadRocketSbusRingNoCConfig extends Config(
+  new chipyard.config.WithNoTraceIO ++
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks++
+  new chipyard.QuadRocketSbusRingNoCConfig)
 
 class FireSimLargeBoomSV39CospikeConfig extends Config(
   new firesim.firesim.WithCospikeBridge ++

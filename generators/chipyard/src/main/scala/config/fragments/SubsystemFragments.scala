@@ -2,7 +2,7 @@ package chipyard.config
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.diplomacy.{DTSTimebase}
+import freechips.rocketchip.resources.{DTSTimebase}
 import sifive.blocks.inclusivecache.{InclusiveCachePortParameters}
 
 // Replaces the L2 with a broadcast manager for maintaining coherence

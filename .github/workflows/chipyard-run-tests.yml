@@ -777,6 +777,29 @@ jobs:
           group-key: "group-peripherals"
           project-key: "chipyard-llcchiplet"
 
+  chipyard-rerocc-run-tests:
+    name: chipyard-rerocc-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-rerocc"
+
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
     needs: prepare-chipyard-accels
@@ -868,6 +891,29 @@ jobs:
         with:
           group-key: "group-accels"
           project-key: "chipyard-mempress"
+
+  chipyard-compressacc-run-tests:
+    name: chipyard-compressacc-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-compressacc"
 
 
   tracegen-boomv3-run-tests:
@@ -1143,10 +1189,12 @@ jobs:
             chipyard-tethered-run-tests,
             chipyard-symmetric-run-tests,
             chipyard-llcchiplet-run-tests,
+            chipyard-rerocc-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
             chipyard-prefetchers-run-tests,
             chipyard-mempress-run-tests,
+            chipyard-compressacc-run-tests,
             chipyard-constellation-run-tests,
             tracegen-boomv3-run-tests,
             tracegen-boomv4-run-tests,
