@@ -3,7 +3,8 @@ package chipyard
 import chipyard.config.AbstractConfig
 import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.devices.tilelink.BootROMLocated
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing, BigIntHexContext}
+import freechips.rocketchip.prci.AsynchronousCrossing
+import freechips.rocketchip.resources.BigIntHexContext
 import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.Config
 import radiance.memory._
