@@ -462,7 +462,6 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
   cfg.bootargs = nullptr;
   cfg.isa = isastr;
   cfg.priv = "MSU";
-  cfg.varch = "vlen:128,elen:64";
   cfg.misaligned = false;
   cfg.endianness = endianness_little;
   cfg.pmpregions = pmpregions;
