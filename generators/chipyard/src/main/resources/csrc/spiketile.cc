@@ -1076,7 +1076,7 @@ void chipyard_simif_t::loadmem(size_t base, const char* fname) {
   } loadmem_memif(this, tcm_base);
 
   reg_t entry;
-  load_elf(fname, &loadmem_memif, &entry);
+  load_elf(fname, &loadmem_memif, &entry, 0);
 }
 
 bool insn_should_fence(uint64_t bits) {
