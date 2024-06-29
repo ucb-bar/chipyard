@@ -142,7 +142,8 @@ echo "quit" >> $CMDS_FILE
 echo "spike -d --debug-cmd=$CMDS_FILE $SPIKEFLAGS $BINARY" > $SPIKECMD_FILE
 
 echo "Capturing state at checkpoint to spikeout"
-spike -d --debug-cmd=$CMDS_FILE $SPIKEFLAGS $BINARY 2> $LOADARCH_FILE
+echo $NHARTS > $LOADARCH_FILE
+spike -d --debug-cmd=$CMDS_FILE $SPIKEFLAGS $BINARY 2>> $LOADARCH_FILE
 
 
 echo "Finding tohost/fromhost in elf file"
