@@ -16,7 +16,9 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.prci._
 
-case class SpikeCoreParams() extends CoreParams {
+case class SpikeCoreParams(
+  nPMPs: Int = 16
+) extends CoreParams {
   val useVM = true
   val useHypervisor = false
   val useSupervisor = true
@@ -33,7 +35,6 @@ case class SpikeCoreParams() extends CoreParams {
   val nLocalInterrupts = 0
   val useNMI = false
   val nPTECacheEntries = 0
-  val nPMPs = 16
   val pmpGranularity = 4
   val nBreakpoints = 0
   val useBPWatch = false
@@ -115,6 +116,7 @@ class SpikeTile(
   val masterNode = visibilityNode
   val slaveNode = TLIdentityNode()
 
+  // Note: Rocket doesn't support zicntr but Spike does (err on the side of having Rocket's ISA)
   override def isaDTS = "rv64imafdcv_zicsr_zifencei_zihpm_zvl128b_zve64d"
 
   // Required entry of CPU device in the device tree for interrupt purpose

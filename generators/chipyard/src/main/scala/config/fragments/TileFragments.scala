@@ -71,6 +71,8 @@ class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
       core = tp.tileParams.core.copy(nPMPs = n)))
     case tp: boom.v4.common.BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       core = tp.tileParams.core.copy(nPMPs = n)))
+    case tp: chipyard.SpikeTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPMPs = n)))
     case other => other
   }
 })

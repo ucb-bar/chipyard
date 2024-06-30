@@ -67,6 +67,10 @@ class dmiRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: DmiRocket
 
+class dmiCheckpointingRocketConfig extends Config(
+  new chipyard.config.WithNPMPs(0) ++                            // remove PMPs (reduce non-core arch state)
+  new dmiRocketConfig)
+
 class ManyPeripheralsRocketConfig extends Config(
   new testchipip.iceblk.WithBlockDevice ++                   // add block-device module to peripherybus
   new testchipip.soc.WithOffchipBusClient(MBUS) ++           // OBUS provides backing memory to the MBUS
