@@ -28,8 +28,8 @@ import firesim.configs._
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMLocated(x) => {
-    val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
-    val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
+    val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(MaxXLen)}.img")
+    val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(MaxXLen)}.img")
 
     val bootROMPath = if (chipyardBootROM.exists()) {
       chipyardBootROM.getAbsolutePath()
@@ -204,7 +204,7 @@ class WithFireSimTestChipConfigTweaks extends Config(
   //  Crossing specifications
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
-  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.rocket.WithRationalCDCs ++   // Add rational crossings between RocketTile and uncore
   new boom.v3.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
   new WithFireSimDesignTweaks
 )
@@ -383,5 +383,5 @@ class FireSimLargeBoomSV39CospikeConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks++
-  new chipyard.config.WithSV39 ++
+  new freechips.rocketchip.rocket.WithSV39 ++
   new chipyard.LargeBoomV3Config)

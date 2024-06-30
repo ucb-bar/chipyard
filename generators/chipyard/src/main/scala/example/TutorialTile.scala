@@ -26,6 +26,8 @@ case class MyCoreParams(
   bhtEntries: Int = 16,
   enableToFromHostCaching: Boolean = false,
 ) extends CoreParams {
+  val xLen: Int = 32
+  val pgLevels: Int = 2
   val useVM: Boolean = true
   val useHypervisor: Boolean = false
   val useUser: Boolean = true
@@ -245,8 +247,6 @@ class WithNMyCores(n: Int = 1) extends Config((site, here, up) => {
   }
   // Configurate # of bytes in one memory / IO transaction. For RV64, one load/store instruction can transfer 8 bytes at most.
   case SystemBusKey => up(SystemBusKey, site).copy(beatBytes = 8)
-  // The # of instruction bits. Use maximum # of bits if your core supports both 32 and 64 bits.
-  case XLen => 64
   case NumTiles => up(NumTiles) + n
 })
 // DOC include end: Config fragment
