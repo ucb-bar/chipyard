@@ -16,8 +16,8 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   // Set up tiles
   //==================================
-  new freechips.rocketchip.subsystem.WithAsynchronousRocketTiles(depth=8, sync=3) ++ // Add async crossings between RocketTile and uncore
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++                             // 1 RocketTile
+  new freechips.rocketchip.rocket.WithAsynchronousCDCs(depth=8, sync=3) ++ // Add async crossings between RocketTile and uncore
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++                      // 1 RocketTile
 
   //==================================
   // Set up I/O

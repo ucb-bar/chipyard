@@ -5,7 +5,7 @@ import chisel3._
 import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams, PgLevels}
+import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
 
 import cva6.{CVA6TileAttachParams}
 import sodor.common.{SodorTileAttachParams}
@@ -75,14 +75,6 @@ class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
   }
 })
 
-class WithRocketCacheRowBits(rowBits: Int = 64) extends Config((site, here, up) => {
-  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem)) map {
-    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      dcache = tp.tileParams.dcache.map(_.copy(rowBits = rowBits)),
-      icache = tp.tileParams.icache.map(_.copy(rowBits = rowBits))
-    ))
-  }
-})
 
 class WithRocketICacheScratchpad extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
@@ -117,22 +109,14 @@ class WithTilePrefetchers extends Config((site, here, up) => {
   }
 })
 
-// Adds boundary buffers to RocketTiles, which places buffers between the caches and the TileLink interface
-// This typically makes it easier to close timing
-class WithRocketBoundaryBuffers(buffers: Option[RocketTileBoundaryBufferParams] = Some(RocketTileBoundaryBufferParams(true))) extends Config((site, here, up) => {
-  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem)) map {
-    case tp: RocketTileAttachParams => tp.copy(tileParams=tp.tileParams.copy(
-      boundaryBuffers=buffers
-    ))
-  }
-})
-
 // Uses SV48 if possible, otherwise default to the Rocket Chip core default
 class WithSV48IfPossible extends Config((site, here, up) => {
-  case PgLevels => if (site(XLen) == 64) 4 /* Sv48 */ else up(PgLevels)
-})
-
-// Uses SV39 if possible, otherwise default to the Rocket Chip core default
-class WithSV39 extends Config((site, here, up) => {
-  case PgLevels => { require(site(XLen) == 64); 3; }
+  case TilesLocated(loc) => up(TilesLocated(loc), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core =
+      tp.tileParams.core.copy(pgLevels = 4)))
+    case tp: boom.v3.common.BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core =
+      tp.tileParams.core.copy(pgLevels = 4)))
+    case tp: boom.v4.common.BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core =
+      tp.tileParams.core.copy(pgLevels = 4)))
+  }
 })

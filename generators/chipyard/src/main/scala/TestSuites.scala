@@ -3,7 +3,7 @@ package chipyard
 import scala.collection.mutable.{LinkedHashSet}
 
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.tile.{XLen, TileParams}
+import freechips.rocketchip.tile.{TileParams}
 import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite, RocketTestSuite}
 
@@ -64,7 +64,7 @@ class TestSuiteHelper
   * Add generic tests (asm, bmark, regression) for all cores.
   */
   def addGenericTestSuites(tiles: Seq[TileParams])(implicit p: Parameters) = {
-    val xlen = p(XLen)
+    val xlen = p(MaxXLen)
     tiles.find(_.tileId == 0).map { tileParams =>
       val coreParams = tileParams.core
       val vm = coreParams.useVM

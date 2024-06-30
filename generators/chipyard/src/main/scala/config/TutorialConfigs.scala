@@ -27,7 +27,7 @@ class TutorialStarterConfig extends Config(
   // CUSTOMIZE THE CORE
   // Uncomment out one (or multiple) of the lines below, and choose
   // how many cores you want.
-  // new freechips.rocketchip.subsystem.WithNBigCores(1) ++    // Specify we want some number of Rocket cores
+  // new freechips.rocketchip.rocket.WithNBigCores(1) ++    // Specify we want some number of Rocket cores
   // new boom.v3.common.WithNSmallBooms(1) ++                     // Specify we want some number of BOOM cores
 
   // CUSTOMIZE the L2
@@ -46,7 +46,7 @@ class TutorialMMIOConfig extends Config(
   // new chipyard.example.WithGCD(useAXI4=true) ++  // Use AXI4 version
 
   // For this demonstration we assume the base system is a single-core Rocket, for fast elaboration
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig
 )
 
@@ -90,6 +90,6 @@ class TutorialNoCConfig extends Config(
   new chipyard.example.WithStreamingPassthrough ++
 
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
+  new freechips.rocketchip.rocket.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig
 )
