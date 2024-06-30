@@ -462,7 +462,6 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
   cfg.bootargs = nullptr;
   cfg.isa = isastr;
   cfg.priv = "MSU";
-  cfg.varch = "vlen:128,elen:64";
   cfg.misaligned = false;
   cfg.endianness = endianness_little;
   cfg.pmpregions = pmpregions;
@@ -1076,7 +1075,7 @@ void chipyard_simif_t::loadmem(size_t base, const char* fname) {
   } loadmem_memif(this, tcm_base);
 
   reg_t entry;
-  load_elf(fname, &loadmem_memif, &entry);
+  load_elf(fname, &loadmem_memif, &entry, 0);
 }
 
 bool insn_should_fence(uint64_t bits) {
