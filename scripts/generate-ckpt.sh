@@ -14,7 +14,6 @@ ISA="rv64gc"
 OUTPATH=""
 MEMOVERRIDE=""
 VERBOSE=0
-DTB=
 DTS=
 TYPE="defaultspikedts"
 
@@ -41,10 +40,9 @@ usage() {
     echo "  Group: Use Spike default DTS with modifications (can choose multiple)"
     echo "    -n <n>     : Number of harts [default $NHARTS]"
     echo "    -m <isa>   : ISA to pass to spike for checkpoint generation [default $ISA]"
-    echo "  Group: Use custom DT{B,S} (choose one)"
-    echo "    Important Note: a dt{b,s} only affects the devices used, pmps, mmu."
-    echo "                    the isa string and num. of harts from the dt{b,s} is inferred from this script to pass to the spike --isa and -p flags, respectively."
-    echo "    -d <dtb>   : DTB file to use. Passed to spike's '--dtb' flag. [default is to use ${DTB:-none}]"
+    echo "  Group: Use custom DTS"
+    echo "    Important Note: a dts only affects the devices used, pmps, mmu."
+    echo "                    the isa string and num. of harts from the dts is inferred from this script to pass to the spike --isa and -p flags, respectively."
     echo "    -s <dts>   : DTS file to use. Converted to a DTB then passed to spike's '--dtb' flag. [default is to use ${DTS:-none}]"
     exit "$1"
 }
@@ -80,10 +78,6 @@ do
             MEMOVERRIDE=$1 ;;
         -v )
             VERBOSE=1 ;;
-	-d )
-	    shift
-	    TYPE="customdts"
-	    DTB=$1 ;;
 	-s )
 	    shift
 	    TYPE="customdts"
@@ -118,6 +112,7 @@ else
 fi
 SPIKEFLAGS+=" -m$BASEMEM"
 
+DTB=
 if [ ! -z "$DTS" ] ; then
     dtc -I dts -O dtb -o $OUTPATH/tmp.dtb $(readlink -f $DTS)
     DTB=$OUTPATH/tmp.dtb

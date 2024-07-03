@@ -129,12 +129,12 @@ class WithRocketBoundaryBuffers(buffers: Option[RocketTileBoundaryBufferParams] 
   }
 })
 
-// Uses SV48 if possible, otherwise default to the Rocket Chip core default
-class WithSV48IfPossible extends Config((site, here, up) => {
-  case PgLevels => if (site(XLen) == 64) 4 /* Sv48 */ else up(PgLevels)
+// Use SV48
+class WithSV48 extends Config((site, here, up) => {
+  case PgLevels => { require(site(XLen) == 64); 4; }
 })
 
-// Uses SV39 if possible, otherwise default to the Rocket Chip core default
+// Use SV39
 class WithSV39 extends Config((site, here, up) => {
   case PgLevels => { require(site(XLen) == 64); 3; }
 })
