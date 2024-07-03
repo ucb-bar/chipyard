@@ -41,10 +41,10 @@ case $1 in
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv
         ;;
-    chipyard-dmirocket)
+    chipyard-cospikeckptdmirocket)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
-        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
+        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch
         ;;
     chipyard-boomv3)
         run_bmark
@@ -55,15 +55,15 @@ case $1 in
     chipyard-shuttle)
         run_bmark ${mapping[$1]}
         ;;
-    chipyard-dmiboomv3)
+    chipyard-ckptdmiboomv3)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
-        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
+        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch
         ;;
-    chipyard-dmiboomv4)
+    chipyard-ckptdmiboomv4)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
-        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
+        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch
         ;;
     chipyard-spike)
         run_bmark
