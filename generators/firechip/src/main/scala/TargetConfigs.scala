@@ -271,10 +271,10 @@ class FireSimSmallSystemConfig extends Config(
   new chipyard.RocketConfig)
 
 class FireSimDmiRocketConfig extends Config(
+  new chipyard.harness.WithSerialTLTiedOff ++ // (must be at top) tieoff any bridges that connect to serialTL so only DMI port is connected
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks ++
-  new testchipip.serdes.WithNoSerialTL ++ // disable serial TL so that only DMI port is connected
   new chipyard.dmiRocketConfig)
 
 //*****************************************************************
