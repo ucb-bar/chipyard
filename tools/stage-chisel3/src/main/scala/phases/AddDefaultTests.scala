@@ -13,8 +13,7 @@ import firrtl.annotations.{Annotation, NoTargetAnnotation}
 import firrtl.options._
 import firrtl.options.Viewer._
 import freechips.rocketchip.system.{RocketTestSuite, TestGeneration}
-import freechips.rocketchip.subsystem.{TilesLocated, InSubsystem}
-import freechips.rocketchip.tile.XLen
+import freechips.rocketchip.subsystem.{TilesLocated, InSubsystem, MaxXLen}
 
 import chipyard.TestSuiteHelper
 import chipyard.TestSuitesKey
@@ -34,7 +33,7 @@ class AddDefaultTests extends Phase with PreservesAll[Phase] with HasChipyardSta
     // Use Xlen as a proxy for detecting if we are a processor-like target
     // The underlying test suites expect this field to be defined
     val tileParams = p(TilesLocated(InSubsystem)) map (tp => tp.tileParams)
-    if (p.lift(XLen).nonEmpty)
+    if (p.lift(MaxXLen).nonEmpty)
       // If a custom test suite is set up, use the custom test suite
       annotations += CustomMakefragSnippet(p(TestSuitesKey).apply(tileParams, suiteHelper, p))
 

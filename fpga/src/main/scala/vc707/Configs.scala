@@ -8,7 +8,6 @@ import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{RegionType, AddressSet}
 import freechips.rocketchip.resources.{DTSModel, DTSTimebase}
-import freechips.rocketchip.tile.{XLen}
 
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}

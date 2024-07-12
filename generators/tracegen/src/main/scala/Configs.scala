@@ -7,14 +7,15 @@ import freechips.rocketchip.groundtest.{TraceGenParams, TraceGenTileAttachParams
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.BaseConfig
 import freechips.rocketchip.rocket.DCacheParams
-import freechips.rocketchip.tile.{MaxHartIdBits, XLen}
+import freechips.rocketchip.tile.{MaxHartIdBits}
 import scala.math.{max, min}
 
 class WithTraceGen(
   n: Int = 2,
   overrideMemOffset: Option[BigInt] = None)(
   params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nSets = 16, nWays = 1) },
-  nReqs: Int = 8192
+  nReqs: Int = 8192,
+  wordBits: Int = 64
 ) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     val prev = up(TilesLocated(InSubsystem), site)
@@ -25,7 +26,7 @@ class WithTraceGen(
         tileParams = TraceGenParams(
           tileId = i + idOffset,
           dcache = Some(dcp),
-          wordBits = site(XLen),
+          wordBits = wordBits,
           addrBits = 48,
           addrBag = {
             val nSets = dcp.nSets
@@ -53,7 +54,8 @@ class WithBoomV3TraceGen(
   n: Int = 2,
   overrideMemOffset: Option[BigInt] = None)(
   params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nMSHRs = 4, nSets = 16, nWays = 2) },
-  nReqs: Int = 8192
+  nReqs: Int = 8192,
+  wordBits: Int = 64
 ) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     val prev = up(TilesLocated(InSubsystem), site)
@@ -64,7 +66,7 @@ class WithBoomV3TraceGen(
         tileParams = boom.v3.lsu.BoomTraceGenParams(
           tileId = i + idOffset,
           dcache = Some(dcp),
-          wordBits = site(XLen),
+          wordBits = wordBits,
           addrBits = 48,
           addrBag = {
             val nSets = dcp.nSets
@@ -89,7 +91,8 @@ class WithBoomV4TraceGen(
   n: Int = 2,
   overrideMemOffset: Option[BigInt] = None)(
   params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nMSHRs = 4, nSets = 16, nWays = 2) },
-  nReqs: Int = 8192
+  nReqs: Int = 8192,
+  wordBits: Int = 64
 ) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     val prev = up(TilesLocated(InSubsystem), site)
@@ -100,7 +103,7 @@ class WithBoomV4TraceGen(
         tileParams = boom.v4.lsu.BoomTraceGenParams(
           tileId = i + idOffset,
           dcache = Some(dcp),
-          wordBits = site(XLen),
+          wordBits = wordBits,
           addrBits = 48,
           addrBag = {
             val nSets = dcp.nSets
@@ -125,7 +128,8 @@ class WithL2TraceGen(
   n: Int = 2,
   overrideMemOffset: Option[BigInt] = None)(
   params: Seq[DCacheParams] = List.fill(n){ DCacheParams(nSets = 16, nWays = 1) },
-  nReqs: Int = 8192
+  nReqs: Int = 8192,
+  wordBits: Int = 64
 ) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => {
     val prev = up(TilesLocated(InSubsystem), site)
@@ -137,7 +141,7 @@ class WithL2TraceGen(
         tileParams = TraceGenParams(
           tileId = i + idOffset,
           dcache = Some(dcp),
-          wordBits = site(XLen),
+          wordBits = wordBits,
           addrBits = 48,
           addrBag = {
             val sbp = site(SystemBusKey)
