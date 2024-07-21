@@ -151,7 +151,12 @@
 [submodule "tools/midas-targetutils"]
 	path = tools/midas-targetutils
 	url = https://github.com/firesim/midas-targetutils.git
-
+[submodule "generators/rerocc"]
+	path = generators/rerocc
+	url = https://github.com/ucb-bar/rerocc.git
+[submodule "generators/compress-acc"]
+	path = generators/compress-acc
+  url = https://github.com/ucb-bar/compress-acc.git
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git

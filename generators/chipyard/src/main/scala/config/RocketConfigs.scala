@@ -1,7 +1,7 @@
 package chipyard
 
 import org.chipsalliance.cde.config.{Config}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import freechips.rocketchip.prci.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem.{InCluster}
 
 // --------------
@@ -10,6 +10,10 @@ import freechips.rocketchip.subsystem.{InCluster}
 
 class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)
+
+class DualRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(2) ++
   new chipyard.config.AbstractConfig)
 
 class TinyRocketConfig extends Config(

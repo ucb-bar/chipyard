@@ -157,16 +157,16 @@ long_name = $(MODEL_PACKAGE).$(MODEL).$(CONFIG)
 
 # classpaths
 CLASSPATH_CACHE ?= $(base_dir)/.classpath_cache
-CHIPYARD_CLASSPATH ?= $(CLASSPATH_CACHE)/chipyard.jar
+# The generator classpath must contain the Generator main
+GENERATOR_CLASSPATH ?= $(CLASSPATH_CACHE)/$(SBT_PROJECT).jar
+# The tapeout classpath must contain MacroCompiler
 TAPEOUT_CLASSPATH ?= $(CLASSPATH_CACHE)/tapeout.jar
-# if *_CLASSPATH is a true java classpath, it can be colon-delimited list of paths (on *nix)
-CHIPYARD_CLASSPATH_TARGETS ?= $(subst :, ,$(CHIPYARD_CLASSPATH))
-TAPEOUT_CLASSPATH_TARGETS ?= $(subst :, ,$(TAPEOUT_CLASSPATH))
 
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
+FIRTOOL_LOG_FILE ?= $(build_dir)/$(long_name).firtool.log
 
 # chisel anno modification output
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
@@ -209,10 +209,6 @@ EXT_INCDIRS ?=
 
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img bootrom.radiance.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
-
-# custom *.bin argument files needed for Radiance
-ARGSROM_FILES   ?= args.bin op_a.bin op_b.bin
-ARGSROM_TARGETS ?= $(addprefix $(base_dir)/sims/, $(ARGSROM_FILES))
 
 # files that contain lists of files needed for VCS or Verilator simulation
 SIM_FILE_REQS =

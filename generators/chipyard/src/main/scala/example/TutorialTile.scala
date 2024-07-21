@@ -14,7 +14,7 @@ import freechips.rocketchip.interrupts._
 import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.amba.axi4._
-import freechips.rocketchip.prci.ClockSinkParameters
+import freechips.rocketchip.prci._
 
 // Example parameter class copied from CVA6, not included in documentation but for compile check only
 // If you are here for documentation, DO NOT copy MyCoreParams and MyTileParams directly - always figure

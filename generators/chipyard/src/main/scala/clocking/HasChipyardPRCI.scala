@@ -37,9 +37,10 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesHierarchicalElement
 
   // Set up clock domain
   private val tlbus = locateTLBusWrapper(prciParams.slaveWhere)
-  val prci_ctrl_domain = tlbus.generateSynchronousDomain.suggestName("chipyard_prcictrl_domain")
+  val prci_ctrl_domain = tlbus.generateSynchronousDomain("ChipyardPRCICtrl")
+    .suggestName("chipyard_prcictrl_domain")
 
-  val prci_ctrl_bus = Option.when(prciParams.generatePRCIXBar) { prci_ctrl_domain { TLXbar() } }
+  val prci_ctrl_bus = Option.when(prciParams.generatePRCIXBar) { prci_ctrl_domain { TLXbar(nameSuffix = Some("prcibus")) } }
   prci_ctrl_bus.foreach(xbar => tlbus.coupleTo("prci_ctrl") { (xbar
     := TLFIFOFixer(TLFIFOFixer.all)
     := TLBuffer()
@@ -70,13 +71,13 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesHierarchicalElement
   }
   val tileClockGater     = Option.when(prciParams.enableTileClockGating) { prci_ctrl_domain {
     val clock_gater = LazyModule(new TileClockGater(prciParams.baseAddress + 0x00000, tlbus.beatBytes))
-    clock_gater.tlNode := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := prci_ctrl_bus.get
+    clock_gater.tlNode := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes, nameSuffix = Some("TileClockGater")) := prci_ctrl_bus.get
     clock_gater
   } }
   val tileResetSetter    = Option.when(prciParams.enableTileResetSetting) { prci_ctrl_domain {
     val reset_setter = LazyModule(new TileResetSetter(prciParams.baseAddress + 0x10000, tlbus.beatBytes,
       tile_prci_domains.map(_._2.tile_reset_domain.clockNode.portParams(0).name.get).toSeq, Nil))
-    reset_setter.tlNode := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes) := prci_ctrl_bus.get
+    reset_setter.tlNode := TLFragmenter(tlbus.beatBytes, tlbus.blockBytes, nameSuffix = Some("TileResetSetter")) := prci_ctrl_bus.get
     reset_setter
   } }
 

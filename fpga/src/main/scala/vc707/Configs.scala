@@ -6,7 +6,8 @@ import org.chipsalliance.cde.config.{Config, Parameters}
 import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
 import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
-import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
+import freechips.rocketchip.diplomacy.{RegionType, AddressSet}
+import freechips.rocketchip.resources.{DTSModel, DTSTimebase}
 import freechips.rocketchip.tile.{XLen}
 
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}

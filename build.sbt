@@ -98,8 +98,8 @@ lazy val chisel6Settings = Seq(
   addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % "6.0.0" cross CrossVersion.full)
 )
 lazy val chisel3Settings = Seq(
-  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % "3.6.0"),
-  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.6.0" cross CrossVersion.full)
+  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % "3.6.1"),
+  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.6.1" cross CrossVersion.full)
 )
 
 lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++ Seq(
@@ -172,8 +172,9 @@ val stageDir = if (chisel6) "tools/stage/src/main/scala" else "tools/stage-chise
 lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
     dsptools, rocket_dsp_utils,
-    radiance, gemmini, icenet, tracegen, cva6, nvdla, radiance, sodor, ibex, fft_generator,
-    constellation, mempress, barf, shuttle, caliptra_aes)
+    radiance, gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
+    constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
+    compressacc)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
     libraryDependencies ++= Seq(
@@ -182,6 +183,11 @@ lazy val chipyard = (project in file("generators/chipyard"))
   )
   .settings(commonSettings)
   .settings(Compile / unmanagedSourceDirectories += file(stageDir))
+
+lazy val compressacc = (project in file("generators/compress-acc"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
 
 lazy val mempress = (project in file("generators/mempress"))
   .dependsOn(rocketchip)
@@ -264,6 +270,11 @@ lazy val caliptra_aes = (project in file("generators/caliptra-aes-acc"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
+lazy val rerocc = (project in file("generators/rerocc"))
+  .dependsOn(rocketchip, constellation, boom)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
 lazy val rocc_acc_utils = (project in file("generators/rocc-acc-utils"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -342,6 +353,6 @@ lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val fpga_platforms = (project in file("./fpga"))
+lazy val chipyard_fpga = (project in file("./fpga"))
   .dependsOn(chipyard, fpga_shells)
   .settings(commonSettings)

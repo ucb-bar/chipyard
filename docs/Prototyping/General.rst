@@ -30,7 +30,7 @@ For example:
 
     # converts to
 
-    make SBT_PROJECT=fpga_platforms MODEL=VCU118FPGATestHarness VLOG_MODEL=VCU118FPGATestHarness MODEL_PACKAGE=chipyard.fpga.vcu118 CONFIG=RocketVCU118Config CONFIG_PACKAGE=chipyard.fpga.vcu118 GENERATOR_PACKAGE=chipyard TB=none TOP=ChipTop BOARD=vcu118 FPGA_BRAND=... bitstream
+    make SBT_PROJECT=chipyard_fpga MODEL=VCU118FPGATestHarness VLOG_MODEL=VCU118FPGATestHarness MODEL_PACKAGE=chipyard.fpga.vcu118 CONFIG=RocketVCU118Config CONFIG_PACKAGE=chipyard.fpga.vcu118 GENERATOR_PACKAGE=chipyard TB=none TOP=ChipTop BOARD=vcu118 FPGA_BRAND=... bitstream
 
 Some ``SUB_PROJECT`` defaults are already defined for use, including ``vcu118`` and ``arty``.
 These default ``SUB_PROJECT``'s setup the necessary test harnesses, packages, and more for the Chipyard make system.

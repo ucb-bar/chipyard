@@ -1,7 +1,6 @@
 package chipyard
 
 import org.chipsalliance.cde.config.{Config}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 
 // ------------------------------------------------------------
 // Configs which demonstrate modifying the uncore memory system
