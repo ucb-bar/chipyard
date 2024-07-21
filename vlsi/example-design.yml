@@ -2,7 +2,7 @@
 
 # Generate Make include to aid in flow
 vlsi.core.build_system: make
-vlsi.core.max_threads: 12
+vlsi.core.max_threads: 36
 
 # Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
 vlsi.inputs.power_spec_mode: "auto"
@@ -10,7 +10,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_uncore_clock", period: "2ns", uncertainty: "0.1ns"}
+  {name: "clock_uncore", period: "2.5ns", uncertainty: "0.1ns"}
 ]
 
 # Specify pin properties
