@@ -1,6 +1,7 @@
 package firesim.firesim
 
 import java.io.File
+import chipyard.WithRadBootROM
 
 import chisel3._
 import chisel3.util.{log2Up}
@@ -365,6 +366,7 @@ class FireSimRadianceClusterSynConfig extends Config(
   new chipyard.harness.WithHarnessBinderClockFreqMHz(500.0) ++
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
+  new WithRadBootROM ++
   new WithFireSimConfigTweaks ++
   new chipyard.RadianceClusterSynConfig)
 
