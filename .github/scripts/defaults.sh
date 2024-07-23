@@ -27,7 +27,7 @@ REMOTE_COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
 declare -A grouping
 grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boomv3 chipyard-boomv4 chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone chipyard-prefetchers chipyard-shuttle"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboomv3 chipyard-dmiboomv4 chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike chipyard-tethered chipyard-symmetric chipyard-llcchiplet"
-grouping["group-accels"]="chipyard-compressacc chipyard-mempress chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla chipyard-aes256ecb chipyard-rerocc"
+grouping["group-accels"]="chipyard-compressacc chipyard-mempress chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla chipyard-aes256ecb chipyard-rerocc chipyard-rocketvector chipyard-shuttlevector"
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boomv3 tracegen-boomv4"
 grouping["group-other"]="icenet testchipip constellation rocketchip-amba rocketchip-tlsimple rocketchip-tlwidth rocketchip-tlxbar chipyard-clusters"
@@ -71,6 +71,8 @@ mapping["chipyard-constellation"]=" CONFIG=SharedNoCConfig"
 mapping["chipyard-clusters"]=" CONFIG=ClusteredRocketConfig verilog"
 mapping["chipyard-aes256ecb"]=" CONFIG=AES256ECBRocketConfig"
 mapping["chipyard-rerocc"]=" CONFIG=ReRoCCTestConfig"
+mapping["chipyard-rocketvector"]=" CONFIG=MINV128D64RocketCosimConfig"
+mapping["chipyard-shuttlevector"]=" CONFIG=GENV256D128ShuttleCosimConfig"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
 mapping["firesim"]="TARGET_CONFIG=WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig"
