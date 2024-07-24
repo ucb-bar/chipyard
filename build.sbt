@@ -1,6 +1,8 @@
 import Tests._
 
 val chisel6 = sys.env.get("USE_CHISEL6").isDefined
+val chisel6Version = "6.5.0"
+val chisel3Version = "3.6.1"
 val chiselTestVersion = if (chisel6) "6.0.0" else "0.6.0"
 val scalaVersionFromChisel = if (chisel6) "2.13.12" else "2.13.10"
 
@@ -94,12 +96,12 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 
 lazy val chisel6Settings = Seq(
-  libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % "6.0.0"),
-  addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % "6.0.0" cross CrossVersion.full)
+  libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % chisel6Version),
+  addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % chisel6Version cross CrossVersion.full)
 )
 lazy val chisel3Settings = Seq(
-  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % "3.6.1"),
-  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.6.1" cross CrossVersion.full)
+  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chisel3Version),
+  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chisel3Version cross CrossVersion.full)
 )
 
 lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++ Seq(
