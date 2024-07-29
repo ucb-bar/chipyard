@@ -1,0 +1,34 @@
+name: bump-minor-version-and-tag
+
+on: workflow_dispatch
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  tagger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Get previous tag'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: 'Get next minor version'
+        id: semvers
+        uses: "WyriHaximus/github-action-next-semvers@v1"
+        with:
+          version: ${{ steps.previoustag.outputs.tag }}
+      - name: 'Output a new tag with new minor version'
+        run: |
+          curl --request POST \
+            --url https://api.github.com/repos/${{ github.repository }}/git/refs \
+            --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+            --data @- << EOF
+          {
+            "ref": "refs/tags/${{ steps.semvers.outputs.minor }}",
+            "sha": "${{ github.sha }}"
+          }
+          EOF
