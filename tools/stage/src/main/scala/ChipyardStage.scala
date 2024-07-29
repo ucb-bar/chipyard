@@ -36,7 +36,10 @@ final class ChipyardChiselStage extends ChiselStage {
 }
 
 class ChipyardStage extends ChiselStage {
-  override val shell = new Shell("chipyard") with ChipyardCli with circt.stage.CLI
+  override val shell = new Shell("chipyard") with ChipyardCli with circt.stage.CLI {
+    // These are added by firrtl.options.Shell (which we must extend because we are a Stage)
+    override protected def includeLoggerOptions = false
+  }
   override def run(annotations: AnnotationSeq): AnnotationSeq = {
 
     val pm = new PhaseManager(

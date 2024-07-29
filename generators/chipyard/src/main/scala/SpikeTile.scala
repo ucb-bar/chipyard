@@ -19,6 +19,8 @@ import freechips.rocketchip.prci._
 case class SpikeCoreParams(
   nPMPs: Int = 16
 ) extends CoreParams {
+  val xLen = 64
+  val pgLevels = 5
   val useVM = true
   val useHypervisor = false
   val useSupervisor = true
@@ -66,6 +68,8 @@ case class SpikeCoreParams(
   val useConditionalZero = false
 
   override def vLen = 128
+  override def eLen = 64
+  override def vfLen = 64
   override def vMemDataBits = 128
 }
 

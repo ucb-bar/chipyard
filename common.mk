@@ -341,7 +341,9 @@ run-binary-debug: check-binary $(BINARY).run.debug
 run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
 
 %.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
+ifeq (1,$(DUMP_BINARY))
 	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
+endif
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
 		$(PERMISSIVE_ON) \
 		$(call get_common_sim_flags,$*) \

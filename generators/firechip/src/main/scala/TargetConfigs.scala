@@ -5,19 +5,13 @@ import java.io.File
 import chisel3._
 import chisel3.util.{log2Up}
 import org.chipsalliance.cde.config.{Parameters, Config}
-import freechips.rocketchip.groundtest.TraceGenParams
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.rocket.DCacheParams
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.devices.tilelink.{BootROMLocated, BootROMParams}
-import freechips.rocketchip.devices.debug.{DebugModuleParams, DebugModuleKey}
-import freechips.rocketchip.diplomacy.{LazyModule}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
+import freechips.rocketchip.devices.debug.{DebugModuleKey}
 import freechips.rocketchip.prci.{AsynchronousCrossing}
-import testchipip.iceblk.{BlockDeviceKey, BlockDeviceConfig}
-import testchipip.cosim.{TracePortKey, TracePortParams}
-import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
-import scala.math.{min, max}
+import testchipip.cosim.{TracePortKey}
 
 import chipyard.clocking.{ChipyardPRCIControlKey}
 import chipyard.harness.{HarnessClockInstantiatorKey}
@@ -28,8 +22,8 @@ import firesim.configs._
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMLocated(x) => {
-    val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
-    val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(XLen)}.img")
+    val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(MaxXLen)}.img")
+    val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(MaxXLen)}.img")
 
     val bootROMPath = if (chipyardBootROM.exists()) {
       chipyardBootROM.getAbsolutePath()
@@ -92,10 +86,10 @@ class WithMinimalFireSimDesignTweaks extends Config(
   new WithBootROM ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
+  // Optional: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
+  new chipyard.config.WithNoDebug ++
   // Required*: Removes thousands of assertions that would be synthesized (* pending PriorityMux bugfix)
-  new WithoutTLMonitors ++
-  // Required: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
-  new chipyard.config.WithNoDebug
+  new WithoutTLMonitors
 )
 
 // Non-frequency tweaks that are generally applied to all firesim configs
@@ -109,8 +103,8 @@ class WithFireSimDesignTweaks extends Config(
   new testchipip.serdes.WithSerialTLWidth(4) ++
   // Required*: Scale default baud rate with periphery bus frequency
   new chipyard.config.WithUART(
-    baudrate=BigInt(3686400L), 
-    txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer, 
+    baudrate=BigInt(3686400L),
+    txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer,
   new chipyard.config.WithNoUART() ++       // so we overwrite the default one
   // Optional: Adds IO to attach tracerV bridges
   new chipyard.config.WithTraceIO ++
@@ -204,7 +198,7 @@ class WithFireSimTestChipConfigTweaks extends Config(
   //  Crossing specifications
   new chipyard.config.WithCbusToPbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossing between PBUS and CBUS
   new chipyard.config.WithSbusToMbusCrossingType(AsynchronousCrossing()) ++ // Add Async crossings between backside of L2 and MBUS
-  new freechips.rocketchip.subsystem.WithRationalRocketTiles ++   // Add rational crossings between RocketTile and uncore
+  new freechips.rocketchip.rocket.WithRationalCDCs ++   // Add rational crossings between RocketTile and uncore
   new boom.v3.common.WithRationalBoomTiles ++ // Add rational crossings between BoomTile and uncore
   new WithFireSimDesignTweaks
 )
@@ -275,6 +269,13 @@ class FireSimSmallSystemConfig extends Config(
   new chipyard.config.WithUARTInitBaudRate(BigInt(3686400L)) ++
   new freechips.rocketchip.subsystem.WithInclusiveCache(nWays = 2, capacityKB = 64) ++
   new chipyard.RocketConfig)
+
+class FireSimDmiRocketConfig extends Config(
+  new chipyard.harness.WithSerialTLTiedOff ++ // (must be at top) tieoff any bridges that connect to serialTL so only DMI port is connected
+  new WithDefaultFireSimBridges ++
+  new WithDefaultMemModel ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.dmiRocketConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomV3Config
@@ -383,5 +384,5 @@ class FireSimLargeBoomSV39CospikeConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
   new WithFireSimConfigTweaks++
-  new chipyard.config.WithSV39 ++
+  new freechips.rocketchip.rocket.WithSV39 ++
   new chipyard.LargeBoomV3Config)
