@@ -4,13 +4,13 @@
 
 ## Quick Links
 
-* **Stable Documentation**: https://chipyard.readthedocs.io/
+* **Latest Documentation**: https://chipyard.readthedocs.io/
 * **User Question Forum**: https://groups.google.com/forum/#!forum/chipyard
 * **Bugs and Feature Requests**: https://github.com/ucb-bar/chipyard/issues
 
 ## Using Chipyard
 
-To get started using Chipyard, see the stable documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
+To get started using Chipyard, see the documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
 
 ## What is Chipyard
 
@@ -22,7 +22,7 @@ Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb
 
 ## Resources
 
-* Chipyard Stable Documentation: https://chipyard.readthedocs.io/
+* Chipyard Documentation: https://chipyard.readthedocs.io/
 * Chipyard (x FireSim) Tutorial: https://fires.im/tutorial-recent/
 * Chipyard Basics slides: https://fires.im/asplos23-slides-pdf/02_chipyard_basics.pdf
 
