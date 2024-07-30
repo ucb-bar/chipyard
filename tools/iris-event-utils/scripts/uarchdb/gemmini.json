@@ -1,0 +1,13 @@
+{
+    "event_names": ["CMD", "LOOP_CONV", "LOOP_MM", "ROB_ISSUE", "LD_ISSUE", "ST_ISSUE", "EX_ISSUE", "ST_RET", 
+                    "LD_RET", "EX_RET", "MESH_FIRE", "A_GARBAGE", "B_GARBAGE", "D_GARBAGE", "A_0_PAD", "B_0_PAD", "D_0_PAD", 
+                    "A_ACC->MESH", "B_ACC->MESH", "D_ACC->MESH", "A_SP->MESH", "B_SP->MESH", "D_SP->MESH", "ACC_WR_0", 
+                    "ACC_WR_1", "SP_RD_A0", "SP_RD_D1", "LOOP_MM_CMD", "LOOP_CONV_CMD", "SP_RD_B0", "FLUSH", "SP_WR_0"],
+    "event_types": ["inst_bytes", "bytes", "bytes", "inst_bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", 
+                    "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", 
+                    "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes", "bytes"],
+    "start_stages": ["CMD", "LOOP_CONV_CMD", "LOOP_MM_CMD"],
+    "split_stages": ["CMD", "LOOP_CONV", "MM_LOOP"],
+    "end_stages": ["ST_RET", "LD_RET", "EX_RET", "ST_ISSUE", "LD_ISSUE", "LOOP_MM", "LOOP_CONV", "A_ACC->MESH", 
+                    "B_ACC->MESH", "D_ACC->MESH", "A_SP->MESH", "B_SP->MESH", "D_SP->MESH", "A_0_PAD", "B_0_PAD", "D_0_PAD", "ACC_WR_0", "ACC_WR_1"]
+}

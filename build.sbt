@@ -156,6 +156,10 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
 // -- Chipyard-managed External Projects --
 
+lazy val irisEventUtils = (project in file ("tools/iris-event-utils"))
+  .settings(commonSettings)
+  .settings(chiselSettings)
+
 // Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS
 lazy val midasTargetUtils = (project in file ("sims/firesim/sim/midas/targetutils"))
