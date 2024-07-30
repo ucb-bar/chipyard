@@ -170,7 +170,6 @@ MFC_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
 MFC_FILELIST = $(GEN_COLLATERAL_DIR)/filelist.f
 MFC_BB_MODS_FILELIST = $(GEN_COLLATERAL_DIR)/firrtl_black_box_resource_files.f
 MFC_TOP_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/seq_mems.json
-MFC_MODEL_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/tb_seq_mems.json
 
 # macrocompiler smems in/output
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
