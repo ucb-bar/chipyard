@@ -111,8 +111,6 @@ do
             SKIP_LIST+=(10) ;;
         --skip-clean)
             SKIP_LIST+=(11) ;;
-        --force | -f | --skip-validate) # Deprecated flags
-            ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -204,8 +202,7 @@ if ! type conda >& /dev/null; then
     return 1  # don't want to exit here because this file is sourced
 fi
 
-# if we're sourcing this in a sub process that has conda in the PATH but not as a function, init it again
-conda activate --help >& /dev/null || source $(conda info --base)/etc/profile.d/conda.sh
+source $(conda info --base)/etc/profile.d/conda.sh
 \0
 END_CONDA_ACTIVATE
 
@@ -213,7 +210,6 @@ END_CONDA_ACTIVATE
 $CONDA_ACTIVATE_PREAMBLE
 conda activate $CONDA_ENV_NAME
 source $CYDIR/scripts/fix-open-files.sh"
-
 fi
 
 if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
@@ -273,10 +269,8 @@ if run_step "6"; then
         pushd $CYDIR/sims/firesim &&
         (
             set -e # Subshells un-set "set -e" so it must be re enabled
-            echo $CYDIR
             source sourceme-manager.sh --skip-ssh-setup
             pushd sim
-            make target-classpath
             make firesim-main-classpath
             popd
         )
