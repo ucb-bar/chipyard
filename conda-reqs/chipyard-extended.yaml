@@ -16,7 +16,6 @@ dependencies:
     - constructor
 
     # misc
-    - pre-commit
     - readline
 
     # firemarshal deps
