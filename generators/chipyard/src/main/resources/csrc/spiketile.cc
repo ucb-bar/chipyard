@@ -304,7 +304,7 @@ extern "C" void spike_tile(int hartid, char* isa,
                                                    icache_sourceids, dcache_sourceids,
                                                    tcm_base, tcm_size,
                                                    isastr->c_str(), pmpregions);
-    processor_t* p = new processor_t(isa_parser,
+    processor_t* p = new processor_t(isa,
                                      DEFAULT_PRIV_,
                                      &simif->get_cfg(),
                                      simif,
