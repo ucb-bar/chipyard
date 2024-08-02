@@ -8,6 +8,9 @@ updates:
     schedule:
       interval: "daily"
     directory: /
+    labels:
+      - "dependencies"
+      - "changelog:omit"
     # ignore certain submodules
     ignore:
       - dependency-name: "generators/gemmini"
@@ -21,3 +24,6 @@ updates:
     schedule:
       interval: "daily"
     directory: /
+    labels:
+      - "dependencies"
+      - "changelog:omit"
