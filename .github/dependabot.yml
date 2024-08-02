@@ -1,0 +1,18 @@
+version: 2
+
+updates:
+  # submit a PR for bumping submodules daily (for selected submodules).
+  # updates a submodule to the latest commit on the branch given in .gitmodules.
+  # if branch not given, then it defaults to the main/master branch.
+  - package-ecosystem: gitsubmodule
+    schedule:
+      interval: "daily"
+    directory: /
+    # ignore certain submodules
+    ignore:
+      - dependency-name: "generators/gemmini"
+      - dependency-name: "generators/rocket-chip"
+      - dependency-name: "generators/rocket-chip-blocks"
+      - dependency-name: "generators/rocket-chip-inclusive-cache"
+      - dependency-name: "toolchains/riscv-tools/riscv-tests"
+      - dependency-name: "toolchains/riscv-tools/riscv-tools-feedstock"
