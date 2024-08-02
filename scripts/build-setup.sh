@@ -152,6 +152,15 @@ if run_step "1"; then
       LOCKFILE=$CONDA_LOCK_REQS/conda-requirements-$TOOLCHAIN_TYPE-linux-64-lean.conda-lock.yml
     fi
 
+    # create conda-lock only environment to be used in this section.
+    # done with cloning base then installing conda lock to speed up dependency solving.
+    rm -rf $CYDIR/.conda-lock-env &&
+    conda create -y -p $CYDIR/.conda-lock-env --clone base &&
+    source $(conda info --base)/etc/profile.d/conda.sh &&
+    conda activate $CYDIR/.conda-lock-env &&
+    conda install -y -c conda-forge -p $CYDIR/.conda-lock-env $(grep "conda-lock" $CONDA_REQS/chipyard-base.yaml | sed 's/^ \+-//')
+    exit_if_last_command_failed
+
     if [ "$USE_UNPINNED_DEPS" = true ]; then
         # auto-gen the lockfiles
         $CYDIR/scripts/generate-conda-lockfiles.sh
