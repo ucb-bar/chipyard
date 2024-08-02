@@ -15,7 +15,7 @@ defaults:
     shell: bash -leo pipefail {0}
 
 env:
-  REMOTE_WORK_DIR: ${{ secrets.BUILDDIR }}/cy-ci-shared/cy-${{ github.sha }}
+  REMOTE_WORK_DIR: /tmp/cy-ci-shared/cy-${{ github.sha }}
   JAVA_TMP_DIR: /tmp/cy-${{ github.sha }}-full
 
 jobs:

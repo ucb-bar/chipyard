@@ -8,6 +8,9 @@ updates:
     schedule:
       interval: "daily"
     directory: /
+    labels:
+      - "dependencies"
+      - "changelog:omit"
     # ignore certain submodules
     ignore:
       - dependency-name: "generators/gemmini"
@@ -16,3 +19,11 @@ updates:
       - dependency-name: "generators/rocket-chip-inclusive-cache"
       - dependency-name: "toolchains/riscv-tools/riscv-tests"
       - dependency-name: "toolchains/riscv-tools/riscv-tools-feedstock"
+  # submit a PR for bumping GH-A dependencies
+  - package-ecosystem: github-actions
+    schedule:
+      interval: "daily"
+    directory: /
+    labels:
+      - "dependencies"
+      - "changelog:omit"
