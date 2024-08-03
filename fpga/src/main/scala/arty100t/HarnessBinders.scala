@@ -126,8 +126,12 @@ class WithArty100TPMODUART extends WithArty100TUART("G2", "F3")
 class WithArty100TJTAG extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: JTAGPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-    val harnessIO = IO(chiselTypeOf(port.io)).suggestName("jtag")
-    harnessIO <> port.io
+    val harnessIO = IO(new JTAGChipIO(false)).suggestName("jtag")
+    harnessIO.TDO := port.io.TDO
+    port.io.TCK := harnessIO.TCK
+    port.io.TDI := harnessIO.TDI
+    port.io.TMS := harnessIO.TMS
+    port.io.reset.foreach(_ := th.referenceReset)
 
     ath.sdc.addClock("JTCK", IOPin(harnessIO.TCK), 10)
     ath.sdc.addGroup(clocks = Seq("JTCK"))
@@ -138,6 +142,7 @@ class WithArty100TJTAG extends HarnessBinder({
       ("E2", IOPin(harnessIO.TDI)),
       ("D4", IOPin(harnessIO.TDO))
     )
+    
     packagePinsWithPackageIOs foreach { case (pin, io) => {
       ath.xdc.addPackagePin(io, pin)
       ath.xdc.addIOStandard(io, "LVCMOS33")
