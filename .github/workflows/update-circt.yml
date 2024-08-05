@@ -1,10 +1,9 @@
 name: update-circt
 
-# TODO: update weekly (to avoid spam)
+# update weekly
 on:
   schedule:
-    - cron: 0,15,30,45 * * * *
-    #- cron: 0 0 * * 1
+    - cron: 0 0 * * 1
 
 defaults:
   run:
