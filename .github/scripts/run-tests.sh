@@ -135,9 +135,9 @@ case $1 in
         make -C $LOCAL_CHIPYARD_DIR/generators/rerocc/tests
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rerocc/tests/rerocc.riscv LOADMEM=1
         ;;
-    chipard-rocketvector|chipyard-shuttlevector)
-	run-binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-sgemm.riscv
-	run-binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-strcmp.riscv
+    chipyard-rocketvector|chipyard-shuttlevector)
+	run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-sgemm.riscv LOADMEM=1
+	run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-strcmp.riscv LOADMEM=1
 	;;
     tracegen)
         run_tracegen
