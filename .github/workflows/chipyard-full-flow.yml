@@ -84,6 +84,7 @@ jobs:
           eval "$(conda shell.bash hook)"
           mkdir ${{ env.JAVA_TMP_DIR }}
           export MAKEFLAGS="-j32"
+          git submodule sync
           ./build-setup.sh -v
       - name: Run config finder
         run: |

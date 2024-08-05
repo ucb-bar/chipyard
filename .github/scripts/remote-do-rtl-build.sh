@@ -15,6 +15,7 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 cd $REMOTE_CHIPYARD_DIR
+git submodule sync
 ./scripts/init-submodules-no-riscv-tools.sh
 
 # Constellation can run without espresso, but this improves
