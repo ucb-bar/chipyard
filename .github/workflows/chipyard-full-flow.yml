@@ -18,6 +18,7 @@ env:
   # temporary directories should be located in /scratch (since it's larger)
   REMOTE_WORK_DIR: /scratch/buildbot/cy-ci-shared/cy-workdir-${{ github.sha }}
   JAVA_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-javatmpdir-${{ github.sha }}
+  GIT_SSH_COMMAND: "ssh -v"
 
 jobs:
   cancel-prior-workflows:
