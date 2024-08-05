@@ -5,24 +5,20 @@ runs:
   steps:
     - name: Create conda environments
       run: |
+        conda env list
         if conda env list | grep -q "envs/${{ env.conda-env-name-no-time }}"; then
           echo "Using pre-existing conda environments with prefix ${{ env.conda-env-name-no-time }}"
         else
           echo "Creating a conda environment for each toolchain with the toolchain installed"
-          conda activate base
-          conda-lock install --conda $(which conda) -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools ./conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml
-          conda deactivate
-
-          echo "Add extra toolchain collateral + CIRCT to RISC-V install area"
-          git submodule update --init ./tools/install-circt
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
-          ./scripts/build-toolchain-extra.sh riscv-tools -p $CONDA_PREFIX/riscv-tools
-          ./tools/install-circt/bin/download-release-or-nightly-circt.sh \
-              -f circt-full-shared-linux-x64.tar.gz \
-              -i $CONDA_PREFIX \
-              -v version-file \
-              -x ./conda-reqs/circt.json \
-              -g ${{ github.token }}
-          conda deactivate
+          ./build-setup.sh \
+            --conda-env-name ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d) \
+            --github-token ${{ github.token }} \
+            --verbose \
+            --skip-submodules \
+            --skip-ctags \
+            --skip-precompile \
+            --skip-firesim \
+            --skip-marshal \
+            --skip-clean
         fi
       shell: bash -leo pipefail {0}

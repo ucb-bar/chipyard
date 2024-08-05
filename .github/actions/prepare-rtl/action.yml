@@ -13,10 +13,6 @@ inputs:
     description: type of build
     required: false
     default: "sim"
-  toolchain:
-    description: toolchain to use
-    required: false
-    default: "riscv-tools"
 
 runs:
   using: "composite"
@@ -32,7 +28,7 @@ runs:
 
     - name: Run RTL build if not cached
       run: |
-        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
+        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
         if [[ "${{ steps.rtl-build-id.outputs.cache-hit }}" != 'true' ]]; then
           echo "Cache miss on ${{ inputs.group-key }}-${{ github.sha }}"
           ./.github/scripts/${{ inputs.build-script }} ${{ inputs.group-key }} ${{ inputs.build-type }}
