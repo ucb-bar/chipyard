@@ -15,8 +15,9 @@ defaults:
     shell: bash -leo pipefail {0}
 
 env:
-  REMOTE_WORK_DIR: /tmp/cy-ci-shared/cy-${{ github.sha }}
-  JAVA_TMP_DIR: /tmp/cy-${{ github.sha }}-full
+  # temporary directories should be located in /scratch (since it's larger)
+  REMOTE_WORK_DIR: /scratch/buildbot/cy-ci-shared/cy-workdir-${{ github.sha }}
+  JAVA_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-javatmpdir-${{ github.sha }}
 
 jobs:
   cancel-prior-workflows:
