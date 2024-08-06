@@ -136,9 +136,11 @@ case $1 in
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rerocc/tests/rerocc.riscv LOADMEM=1
         ;;
     chipyard-rocketvector|chipyard-shuttlevector)
-	run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-sgemm.riscv LOADMEM=1
-	run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-strcmp.riscv LOADMEM=1
-	;;
+        run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-sgemm.riscv LOADMEM=1
+        run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-strcmp.riscv LOADMEM=1
+        run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-daxpy.riscv LOADMEM=1
+        run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-memcpy.riscv LOADMEM=1
+        ;;
     tracegen)
         run_tracegen
         ;;
