@@ -487,6 +487,7 @@ class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
       val cfg = SpikeCosimConfig(
         isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
         priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
+        maxpglevels = tiles.headOption.map(_.tileParams.core.pgLevels).getOrElse(0),
         mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
         mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
         pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
