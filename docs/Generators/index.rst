@@ -23,6 +23,7 @@ so changes to the generators themselves will automatically be used when building
    BOOM
    Constellation
    Gemmini
+   Saturn
    IceNet
    TestChipIP
    Rocket-Chip-Generators
