@@ -34,8 +34,8 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 // ----------------
 
 class RadianceBaseConfig(argsBinFilename: String = "args.bin") extends Config(
-  // NOTE: when changing these, remember to change +define+NUM_CORES/THREADS/WARPS in
-  // radiance.mk as well!
+  // NOTE: when changing these, remember to change NUM_CORES/THREADS/WARPS in
+  // the verilog source as well!
   new radiance.subsystem.WithSimtConfig(nWarps = 8, nCoreLanes = 8, nMemLanes = 8, nSrcIds = 32) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++

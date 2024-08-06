@@ -87,6 +87,7 @@ ifneq ($(EXT_FILELISTS),)
 	cat $(EXT_FILELISTS) >> $(VLSI_RTL)
 endif
 endif
+	$(vlsi_dir)/make_syn_f.sh $(build_dir)
 
 #########################################################################################
 # srams
