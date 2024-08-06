@@ -176,7 +176,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
     dsptools, rocket_dsp_utils,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
     constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
-    compressacc)
+    compressacc, saturn)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
     libraryDependencies ++= Seq(
@@ -198,6 +198,11 @@ lazy val mempress = (project in file("generators/mempress"))
 
 lazy val barf = (project in file("generators/bar-fetchers"))
   .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val saturn = (project in file("generators/saturn"))
+  .dependsOn(rocketchip, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
