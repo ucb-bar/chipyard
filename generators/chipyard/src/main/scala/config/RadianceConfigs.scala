@@ -8,7 +8,7 @@ import freechips.rocketchip.resources.BigIntHexContext
 import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.Config
 import radiance.memory._
-import radiance.subsystem.WithRadianceSharedMem
+import radiance.subsystem.{RadianceGemminiDataType, WithRadianceSharedMem}
 
 class WithRadROMs(address: BigInt, size: Int, filename: String) extends Config((site, here, up) => {
   case RadianceROMsLocated() => Some(up(RadianceROMsLocated()).getOrElse(Seq()) ++
@@ -49,8 +49,8 @@ class RadianceBaseConfig(argsBinFilename: String = "args.bin") extends Config(
 
 class RadianceClusterConfig extends Config(
   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
-  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
-  // new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8, dataType = RadianceGemminiDataType.FP16) ++
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8, dataType = RadianceGemminiDataType.FP16) ++
   new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), useVxCache = false) ++
   // new radiance.subsystem.WithRadianceFrameBuffer(x"ff018000", 16, 0x8000, x"ff011000", "fb0") ++
   // 
