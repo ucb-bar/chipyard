@@ -36,7 +36,9 @@ grouping["group-fpga"]="arty35t arty100t nexysvideo vc707 vcu118"
 # key value store to get the build strings
 declare -A mapping
 mapping["chipyard-rocket"]=" CONFIG=QuadChannelRocketConfig"
-mapping["chipyard-dmirocket"]=" CONFIG=dmiCospikeCheckpointingRocketConfig"
+# TODO: Verilator chokes on cospikeCheckpointingRocketConfig
+# mapping["chipyard-dmirocket"]=" CONFIG=dmiCospikeCheckpointingRocketConfig"
+mapping["chipyard-dmirocket"]=" CONFIG=dmiRocketConfig"
 mapping["chipyard-mempress"]=" CONFIG=MempressRocketConfig"
 mapping["chipyard-compressacc"]=" CONFIG=ZstdCompressorRocketConfig"
 mapping["chipyard-prefetchers"]=" CONFIG=PrefetchingRocketConfig"
