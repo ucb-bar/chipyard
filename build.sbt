@@ -242,7 +242,7 @@ lazy val cva6 = (project in file("generators/cva6"))
   .settings(commonSettings)
 
 lazy val ara = (project in file("generators/ara"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
