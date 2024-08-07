@@ -41,7 +41,7 @@ case $1 in
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv
         ;;
-    chipyard-cospikeckptdmirocket)
+    chipyard-dmirocket)
         # Test checkpoint-restore without cospike
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch EXTRA_SIM_FLAGS="+cospike-enable=0"
@@ -57,12 +57,12 @@ case $1 in
     chipyard-shuttle)
         run_bmark ${mapping[$1]}
         ;;
-    chipyard-ckptdmiboomv3)
+    chipyard-dmiboomv3)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch
         ;;
-    chipyard-ckptdmiboomv4)
+    chipyard-dmiboomv4)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch

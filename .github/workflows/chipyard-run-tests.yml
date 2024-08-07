@@ -591,7 +591,7 @@ jobs:
           group-key: "group-cores"
           project-key: "chipyard-spike"
 
-  chipyard-cospikeckptdmirocket-run-tests:
+  chipyard-dmirocket-run-tests:
     name: chipyard-dmirocket-run-tests
     needs: prepare-chipyard-peripherals
     runs-on: as4
@@ -612,10 +612,10 @@ jobs:
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-peripherals"
-          project-key: "chipyard-cospikeckptdmirocket"
+          project-key: "chipyard-dmirocket"
 
-  chipyard-ckptdmiboomv3-run-tests:
-    name: chipyard-ckptdmiboomv3-run-tests
+  chipyard-dmiboomv3-run-tests:
+    name: chipyard-dmiboomv3-run-tests
     needs: prepare-chipyard-peripherals
     runs-on: as4
     steps:
@@ -635,10 +635,10 @@ jobs:
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-peripherals"
-          project-key: "chipyard-ckptdmiboomv3"
+          project-key: "chipyard-dmiboomv3"
 
-  chipyard-ckptdmiboomv4-run-tests:
-    name: chipyard-ckptdmiboomv4-run-tests
+  chipyard-dmiboomv4-run-tests:
+    name: chipyard-dmiboomv4-run-tests
     needs: prepare-chipyard-peripherals
     runs-on: as4
     steps:
@@ -658,7 +658,7 @@ jobs:
         uses: ./.github/actions/run-tests
         with:
           group-key: "group-peripherals"
-          project-key: "chipyard-ckptdmiboomv4"
+          project-key: "chipyard-dmiboomv4"
 
   chipyard-spiflashwrite-run-tests:
     name: chipyard-spiflashwrite-run-tests
@@ -1225,9 +1225,9 @@ jobs:
             chipyard-cva6-run-tests,
             chipyard-ibex-run-tests,
             chipyard-sodor-run-tests,
-            chipyard-ckptdmiboomv3-run-tests,
-            chipyard-ckptdmiboomv4-run-tests,
-            chipyard-cospikeckptdmirocket-run-tests,
+            chipyard-dmiboomv3-run-tests,
+            chipyard-dmiboomv4-run-tests,
+            chipyard-dmirocket-run-tests,
             chipyard-spiflashwrite-run-tests,
             chipyard-manyperipherals-run-tests,
             chipyard-tethered-run-tests,
