@@ -81,7 +81,7 @@ class MultiNoCConfig extends Config(
         "L2 InclusiveCache[2]" -> 5, "L2 InclusiveCache[3]" -> 6),
       outNodeMapping = ListMap(
         "system[0]" -> 0, "system[1]" -> 3,  "system[2]" -> 4 , "system[3]" -> 7,
-        "serial_tl_0" -> 0)),
+        "ram[0]" -> 0)),
     NoCParams(
       topology        = TerminalRouter(BidirectionalTorus1D(8)),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
