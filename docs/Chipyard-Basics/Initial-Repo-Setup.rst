@@ -41,12 +41,11 @@ Next, we install `libmamba <https://www.anaconda.com/blog/a-faster-conda-for-a-g
     conda install -n base conda-libmamba-solver
     conda config --set solver libmamba
 
-Finally we need to install ``conda-lock`` into the ``base`` conda environment.
-This is done by the following:
+Next ensure that you are able to use Conda.
+By default after Conda's setup you should already be in the ``base`` environment but you can run the following to enter it if needed:
 
 .. code-block:: shell
 
-    conda install -n base conda-lock==1.4.0
     conda activate base
 
 

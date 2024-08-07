@@ -95,18 +95,11 @@ This stores all collateral for the tests (srcs, generated-srcs, sim binary, etc)
 Other CI Setup
 --------------
 
-To get the CI to work correctly you need to create the following GH Repository Secrets
-
-| Secret | Value |
-| -------| ------------- |
-| BUILDDIR | the directory to use on the build server |
-
-Additionally, you need to install conda on the build servers that exist.
+You need to install conda on the build servers that exist.
 
 Notes on CIRCLE CI
 ------------------
 This code is heavily based on the origin [CircleCI]() work. There a quite a few differences
-- CCI supports workflow level variables, in GA we must define things like `BUILDSERVER: ${{ secrets.BUILDSERVER }}` in every job
 - CCI allows a much larger cache. The entire CY directory with toolchains and RTL could be cached, with GA there is a 5Gb total cache limit
 - GA support more parallel jobs 20 vs 4
 - GA seems to allow much longer run times

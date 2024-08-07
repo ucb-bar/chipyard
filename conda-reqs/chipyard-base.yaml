@@ -32,4 +32,6 @@ dependencies:
     - openjdk=20
     - dtc
     - verilator==5.022
-    - conda-lock=1.4
+
+    # used in build-setup.sh as well
+    - conda-lock=2.5.7

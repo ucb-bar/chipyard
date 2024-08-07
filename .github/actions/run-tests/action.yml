@@ -12,17 +12,14 @@ inputs:
     description: rtl build script to use
     required: false
     default: "run-tests.sh"
-  toolchain:
-    description: toolchain to use
-    required: false
-    default: "riscv-tools"
 
 runs:
   using: "composite"
   steps:
     - name: Init submodules (since only the RTL is cached)
       run: |
-        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
+        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+        git submodule sync
         ./scripts/init-submodules-no-riscv-tools.sh
       shell: bash -leo pipefail {0}
 
@@ -31,10 +28,9 @@ runs:
       uses: ./.github/actions/prepare-rtl
       with:
         group-key: ${{ inputs.group-key }}
-        toolchain: ${{ inputs.toolchain }}
 
     - name: Run RTL tests
       run: |
-        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-${{ inputs.toolchain }}
+        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
         ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
       shell: bash -leo pipefail {0}

@@ -13,11 +13,9 @@ defaults:
 
 env:
   tools-cache-version: v17
-  CI_DIR: ${{ secrets.BUILDDIR }}
   JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
   conda-env-name-no-time: cy-${{ github.run_id }}
   workflow-timestamp: ${{ github.event.pull_request.updated_at }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   cancel-prior-workflows:
@@ -25,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
@@ -40,10 +38,10 @@ jobs:
       needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -75,7 +73,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Cleanup conda
@@ -109,14 +107,14 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
       - name: Check commits of each submodule
         run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
             .github/scripts/check-commit.sh
 
   documentation-check:
@@ -131,14 +129,14 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
       - name: Check that documentation builds with no warnings/errors
         run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
           make -C docs html
       - name: Show error log from sphinx if failed
         if: ${{ failure() }}
@@ -157,7 +155,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -166,7 +164,7 @@ jobs:
         id: genkey
         run: |
           echo "extra-tests-cache-key=extra-tests-${{ github.sha }}" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: build-extra-tools-cache
         with:
           path: extra-tests-install
@@ -174,7 +172,7 @@ jobs:
           restore-keys: ${{ steps.genkey.outputs.extra-tests-cache-key }}
       - name: Build extra tests
         run: |
-            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
             .github/scripts/build-extra-tests.sh
 
   prepare-chipyard-cores:
@@ -189,7 +187,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -211,7 +209,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -233,7 +231,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -255,7 +253,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -277,7 +275,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -299,7 +297,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -321,7 +319,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -346,21 +344,21 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
         uses: ./.github/actions/create-conda-env
       - name: Build Gemmini FireMarshal
         run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
           cd ${{ github.workspace }} && ./scripts/init-submodules-no-riscv-tools.sh
           cd ${{ github.workspace }} && source ./scripts/fix-open-files.sh
           git submodule update --init software/firemarshal && cd software/firemarshal && ./init-submodules.sh
           cd ${{ github.workspace }}/generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d build gemmini-smoke.json
       - name: Running Gemmini FireMarshal smoke test
         run: |
-          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)-riscv-tools
+          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
           cd ${{ github.workspace }}/generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d launch -s gemmini-smoke.json
 
   chipyard-rocket-run-tests:
@@ -375,7 +373,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -398,7 +396,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -421,7 +419,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -444,7 +442,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -490,7 +488,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -513,7 +511,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -536,7 +534,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -559,7 +557,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -582,7 +580,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -605,7 +603,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -628,7 +626,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -674,7 +672,7 @@ jobs:
           rm -rf ${{ github.workspace }}/.* || true
           ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -697,7 +695,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -720,7 +718,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -743,7 +741,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -766,7 +764,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -789,7 +787,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -799,6 +797,52 @@ jobs:
         with:
           group-key: "group-accels"
           project-key: "chipyard-rerocc"
+
+  chipyard-rocketvector-run-tests:
+    name: chipyard-rocketvector-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-rocketvector"
+
+  chipyard-shuttlevector-run-tests:
+    name: chipyard-shuttlevector-run-tests
+    needs: prepare-chipyard-accels
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-accels"
+          project-key: "chipyard-shuttlevector"
 
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
@@ -812,7 +856,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -835,7 +879,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -858,7 +902,7 @@ jobs:
   #           rm -rf ${{ github.workspace }}/.* || true
   #           ls -alh .
   #     - name: Checkout
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
   #     - name: Git workaround
   #       uses: ./.github/actions/git-workaround
   #     - name: Create conda env
@@ -881,7 +925,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -904,7 +948,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -928,7 +972,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -974,7 +1018,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -997,7 +1041,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -1020,7 +1064,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -1043,7 +1087,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -1082,7 +1126,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -1105,7 +1149,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -1129,7 +1173,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -1153,7 +1197,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -1190,6 +1234,8 @@ jobs:
             chipyard-symmetric-run-tests,
             chipyard-llcchiplet-run-tests,
             chipyard-rerocc-run-tests,
+            chipyard-rocketvector-run-tests,
+            chipyard-shuttlevector-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
             chipyard-prefetchers-run-tests,
