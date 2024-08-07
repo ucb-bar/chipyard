@@ -151,3 +151,6 @@
 [submodule "generators/saturn"]
 	path = generators/saturn
 	url = https://github.com/ucb-bar/saturn-vectors.git
+[submodule "software/firesim-paper-workloads"]
+	path = software/firesim-paper-workloads
+	url = https://github.com/firesim/firesim-paper-workloads.git
