@@ -9,6 +9,8 @@ Example Ara configurations are listed in ``generators/chipyard/src/main/scala/co
 
 To compile simulators using Ara, you must pass an additional ``USE_ARA`` flag to the makefile.
 
+.. Note:: Ara only supports VCS for simulation
+
 .. code-block:: shell
 
      make CONFIG=V4096Ara2LaneRocketConfig USE_ARA=1

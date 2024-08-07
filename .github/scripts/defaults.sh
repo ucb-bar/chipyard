@@ -75,7 +75,7 @@ mapping["chipyard-aes256ecb"]=" CONFIG=AES256ECBRocketConfig"
 mapping["chipyard-rerocc"]=" CONFIG=ReRoCCTestConfig"
 mapping["chipyard-rocketvector"]=" CONFIG=MINV128D64RocketConfig"
 mapping["chipyard-shuttlevector"]=" CONFIG=GENV256D128ShuttleConfig"
-mapping["chipyard-shuttleara"]=" CONFIG=V4096Ara2LaneShuttleConfig USE_ARA=1"
+mapping["chipyard-shuttleara"]=" CONFIG=V4096Ara2LaneShuttleConfig USE_ARA=1 verilog"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
 mapping["firesim"]="TARGET_CONFIG=WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig"

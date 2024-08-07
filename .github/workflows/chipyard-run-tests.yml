@@ -844,29 +844,6 @@ jobs:
           group-key: "group-accels"
           project-key: "chipyard-shuttlevector"
 
-  chipyard-shuttleara-run-tests:
-    name: chipyard-shuttleara-run-tests
-    needs: prepare-chipyard-accels
-    runs-on: as4
-    steps:
-      - name: Delete old checkout
-        run: |
-            ls -alh .
-            rm -rf ${{ github.workspace }}/* || true
-            rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Git workaround
-        uses: ./.github/actions/git-workaround
-      - name: Create conda env
-        uses: ./.github/actions/create-conda-env
-      - name: Run tests
-        uses: ./.github/actions/run-tests
-        with:
-          group-key: "group-accels"
-          project-key: "chipyard-shuttleara"
-
   chipyard-gemmini-run-tests:
     name: chipyard-gemmini-run-tests
     needs: prepare-chipyard-accels
@@ -1259,7 +1236,6 @@ jobs:
             chipyard-rerocc-run-tests,
             chipyard-rocketvector-run-tests,
             chipyard-shuttlevector-run-tests,
-            chipyard-shuttleara-run-tests,
             chipyard-gemmini-run-tests,
             chipyard-manymmioaccels-run-tests, # chipyard-nvdla-run-tests,
             chipyard-prefetchers-run-tests,
