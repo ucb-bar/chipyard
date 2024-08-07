@@ -98,13 +98,15 @@ See ``./build-setup.sh --help`` for more details on what this does and how to di
 
 .. Warning:: Using ``git`` directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
 
+.. Note:: If the ``build-setup.sh`` script fails on conflict issues, sometimes it helps to run ``conda update -n base --all`` to upgrade all packages in the conda environment.
+
 .. Note:: By default, the ``build-setup.sh`` script installs extra toolchain utilities (RISC-V tests, PK, Spike, etc) to ``$CONDA_PREFIX/<toolchain-type>``. Thus, if you uninstall the compiler using ``conda remove`` these utilities/tests will also have to be re-installed/built.
 
 .. Note:: If you already have a working conda environment setup, separate Chipyard clones can use that pre-used environment in combination with running the aforementioned scripts yourself (``init-submodules...``, ``build-toolchain...``, etc).
 
 .. Note:: If you are a power user and would like to build your own compiler/toolchain, you can refer to the https://github.com/ucb-bar/riscv-tools-feedstock repository (submoduled in the ``toolchains/*`` directories) on how to build the compiler yourself.
 
-By running the following command you should see a environment listed with the path ``$CHIPYARD_DIRECTORY/.conda-env``.
+By running the following command you should see an environment listed with the path ``$CHIPYARD_DIRECTORY/.conda-env``.
 
 .. code-block:: shell
 
