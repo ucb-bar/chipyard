@@ -111,7 +111,6 @@ jobs:
           source env.sh
           cd sims/verilator
           make verilog
-
       - name: VLSI test
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
@@ -167,7 +166,32 @@ jobs:
           # make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
           # make drc
           # make lvs
-
+      - name: Run FireChip bridge tests
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+          pushd sims/firesim
+          source sourceme-manager.sh --skip-ssh-setup
+          popd
+          cd sims/firesim-staging
+          ls -alh
+          ls -alh firesim-symlink
+          ls -alh firesim-symlink/.
+          export TEST_DISABLE_VERILATOR=1
+          export TEST_DISABLE_VIVADO=1
+          make launch-sbt SBT_COMMAND=";project firechip; testOnly firechip.test.core.bridges.BridgeTests"
+      - name: Run FireChip FireSim target tests
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+          pushd sims/firesim
+          source sourceme-manager.sh --skip-ssh-setup
+          popd
+          cd sims/firesim-staging
+          export TEST_MINIMAL_BENCHMARKS=1 # seems like dhrystone is the longest so this doesn't affect runtime much
+          make launch-sbt SBT_COMMAND=";project firechip; testOnly firechip.test.core.firesim.CITests"
 
   cleanup:
     name: cleanup

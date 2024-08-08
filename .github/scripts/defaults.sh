@@ -78,8 +78,6 @@ mapping["chipyard-shuttlevector"]=" CONFIG=GENV256D128ShuttleConfig"
 mapping["chipyard-shuttleara"]=" CONFIG=V4096Ara2LaneShuttleConfig USE_ARA=1 verilog"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
-mapping["firesim"]="TARGET_CONFIG=WithNIC_DDR3FRFCFSLLC4MB_FireSimRocketConfig"
-mapping["fireboom"]="TARGET_CONFIG=DDR3FRFCFSLLC4MB_FireSimLargeBoomConfig"
 mapping["icenet"]="SUB_PROJECT=icenet"
 mapping["testchipip"]="SUB_PROJECT=testchipip"
 mapping["rocketchip-amba"]="SUB_PROJECT=rocketchip CONFIG=AMBAUnitTestConfig"
