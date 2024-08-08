@@ -133,3 +133,11 @@ class WithNoResetSynchronizers extends Config((site, here, up) => {
 class WithNoClockTap extends Config((site, here, up) => {
   case ClockTapKey => false
 })
+
+// Adds a reset pipeline after the ResetSynchronizer in chipyard's clock/reset path
+// This assists with PD and timing of sync reset
+// NOTE: This will likely result in spurious early assertions when reset-assertion
+// is propagating through the pipeline. You may ignore these in RTL simulators
+class WithSyncResetPipeStages(stages: Int) extends Config((site, here, up) => {
+  case ChipyardPRCIControlKey => up(ChipyardPRCIControlKey).copy(resetPipeStages = stages)
+})
