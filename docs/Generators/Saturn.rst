@@ -5,6 +5,7 @@ Saturn is a parameterized RISC-V Vector Unit generator currently supporting inte
 Saturn implements a compact short-vector-length vector microarchitecture suitable for deployment in a DSP-optimized core or area-efficient general-purpose core.
 
 More documentation on Saturn will be released in the future.
+A partial listing of supported Saturn configurations is in ``generators/chipyard/src/main/scala/config/SaturnConfigs.scala``.
 
  * Full support for `V` application-profile RVV 1.0
  * Precise traps with virtual memory

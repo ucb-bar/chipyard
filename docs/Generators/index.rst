@@ -36,3 +36,4 @@ so changes to the generators themselves will automatically be used when building
    Mempress
    CompressAcc
    Prefetchers
+   Ara

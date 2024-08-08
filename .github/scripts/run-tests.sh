@@ -144,6 +144,14 @@ case $1 in
         run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-daxpy.riscv LOADMEM=1
         run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-memcpy.riscv LOADMEM=1
         ;;
+    chipyard-shuttleara)
+        # Ara does not work with verilator
+        # run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-sgemm.riscv LOADMEM=1
+        # Ara cannot run strcmp
+        # run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-strcmp.riscv LOADMEM=1
+        # run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-daxpy.riscv LOADMEM=1
+        # run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-memcpy.riscv LOADMEM=1
+        ;;
     tracegen)
         run_tracegen
         ;;
