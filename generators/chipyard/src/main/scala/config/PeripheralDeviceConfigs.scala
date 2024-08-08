@@ -67,6 +67,18 @@ class dmiRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: DmiRocket
 
+class dmiCospikeCheckpointingRocketConfig extends Config(
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tl
+  new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
+  new chipyard.harness.WithCospike ++                   // attach spike-cosim
+  new chipyard.config.WithTraceIO ++                    // enable the traceio
+  new chipyard.config.WithNPMPs(0) ++                   // remove PMPs (reduce non-core arch state)
+  new freechips.rocketchip.rocket.WithDebugROB ++       // cospike needs wdata given by the unsynth. debug rom
+  new freechips.rocketchip.rocket.WithCease(false) ++   // remove xrocket ISA extension
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+
 class ManyPeripheralsRocketConfig extends Config(
   new testchipip.iceblk.WithBlockDevice ++                   // add block-device module to peripherybus
   new testchipip.soc.WithOffchipBusClient(MBUS) ++           // OBUS provides backing memory to the MBUS

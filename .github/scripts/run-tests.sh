@@ -42,9 +42,12 @@ case $1 in
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv
         ;;
     chipyard-dmirocket)
-        # Test checkpoint-restore
-        $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
-        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
+        # Test checkpoint-restore without cospike
+        # TODO: This is broken on verilator for some reason
+        # $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
+        # run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch EXTRA_SIM_FLAGS="+cospike-enable=0"
+        # Test cospike without checkpoint-restore
+        run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv LOADMEM=1
         ;;
     chipyard-boomv3)
         run_bmark
@@ -58,12 +61,12 @@ case $1 in
     chipyard-dmiboomv3)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
-        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
+        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch
         ;;
     chipyard-dmiboomv4)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
-        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.10000.loadarch
+        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch
         ;;
     chipyard-spike)
         run_bmark

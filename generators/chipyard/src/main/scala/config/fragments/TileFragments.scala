@@ -71,6 +71,8 @@ class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
       core = tp.tileParams.core.copy(nPMPs = n)))
     case tp: boom.v4.common.BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       core = tp.tileParams.core.copy(nPMPs = n)))
+    case tp: chipyard.SpikeTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPMPs = n)))
     case other => other
   }
 })
@@ -109,8 +111,8 @@ class WithTilePrefetchers extends Config((site, here, up) => {
   }
 })
 
-// Uses SV48 if possible, otherwise default to the Rocket Chip core default
-class WithSV48IfPossible extends Config((site, here, up) => {
+// Use SV48
+class WithSV48 extends Config((site, here, up) => {
   case TilesLocated(loc) => up(TilesLocated(loc), site) map {
     case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core =
       tp.tileParams.core.copy(pgLevels = 4)))

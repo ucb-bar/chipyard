@@ -53,8 +53,13 @@ class ScratchpadOnlyRocketConfig extends Config(
 class MMIOScratchpadOnlyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port
   new freechips.rocketchip.subsystem.WithDefaultSlavePort ++ // add default external slave port
-  new ScratchpadOnlyRocketConfig
-)
+  new chipyard.config.WithL2TLBs(0) ++
+  new testchipip.soc.WithNoScratchpads ++                      // remove subsystem scratchpads, confusingly named, does not remove the L1D$ scratchpads
+  new freechips.rocketchip.subsystem.WithNBanks(0) ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++          // remove offchip mem port
+  new freechips.rocketchip.rocket.WithScratchpadsOnly ++       // use rocket l1 DCache scratchpad as base phys mem
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
 
 class L1ScratchpadRocketConfig extends Config(
   new chipyard.config.WithRocketICacheScratchpad ++         // use rocket ICache scratchpad
@@ -103,4 +108,10 @@ class ClusteredRocketConfig extends Config(
 
 class FastRTLSimRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new chipyard.RocketConfig)
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SV48RocketConfig extends Config(
+  new freechips.rocketchip.rocket.WithSV48 ++
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)

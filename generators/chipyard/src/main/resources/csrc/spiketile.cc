@@ -185,6 +185,7 @@ context_t *host;
 std::map<int, tile_t*> tiles;
 std::ostream sout(nullptr);
 log_file_t* log_file;
+#define DEFAULT_PRIV_ "MSU"
 
 extern "C" void spike_tile_reset(int hartid)
 {
@@ -295,7 +296,7 @@ extern "C" void spike_tile(int hartid, char* isa,
   }
   if (tiles.find(hartid) == tiles.end()) {
     printf("Constructing spike processor_t\n");
-    isa_parser_t *isa_parser = new isa_parser_t(isa, "MSU");
+    isa_parser_t *isa_parser = new isa_parser_t(isa, DEFAULT_PRIV_);
     std::string* isastr = new std::string(isa);
     chipyard_simif_t* simif = new chipyard_simif_t(icache_ways, icache_sets,
                                                    dcache_ways, dcache_sets,
@@ -303,7 +304,8 @@ extern "C" void spike_tile(int hartid, char* isa,
                                                    icache_sourceids, dcache_sourceids,
                                                    tcm_base, tcm_size,
                                                    isastr->c_str(), pmpregions);
-    processor_t* p = new processor_t(isa_parser,
+    processor_t* p = new processor_t(isa,
+                                     DEFAULT_PRIV_,
                                      &simif->get_cfg(),
                                      simif,
                                      hartid,
@@ -461,7 +463,7 @@ chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
   cfg.initrd_bounds = std::make_pair(0, 0);
   cfg.bootargs = nullptr;
   cfg.isa = isastr;
-  cfg.priv = "MSU";
+  cfg.priv = DEFAULT_PRIV_;
   cfg.misaligned = false;
   cfg.endianness = endianness_little;
   cfg.pmpregions = pmpregions;
