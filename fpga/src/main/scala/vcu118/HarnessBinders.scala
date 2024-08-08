@@ -43,6 +43,7 @@ class WithJTAG extends HarnessBinder({
     port.io.TCK := jtag_io.TCK
     port.io.TMS := jtag_io.TMS
     port.io.TDI := jtag_io.TDI
+    port.io.reset.foreach(_ := th.referenceReset)
     jtag_io.TDO.data := port.io.TDO
     jtag_io.TDO.driven := true.B
     // ignore srst_n

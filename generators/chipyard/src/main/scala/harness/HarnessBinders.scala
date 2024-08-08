@@ -181,6 +181,7 @@ class WithSimJTAGDebug extends HarnessBinder({
     port.io.TCK := jtag_wire.TCK
     port.io.TMS := jtag_wire.TMS
     port.io.TDI := jtag_wire.TDI
+    port.io.reset.foreach(_ := th.harnessBinderReset.asBool)
     val jtag = Module(new SimJTAG(tickDelay=3))
     jtag.connect(jtag_wire, th.harnessBinderClock, th.harnessBinderReset.asBool, ~(th.harnessBinderReset.asBool), dtm_success)
   }
@@ -199,6 +200,7 @@ class WithTiedOffJTAG extends HarnessBinder({
     port.io.TCK := true.B.asClock
     port.io.TMS := true.B
     port.io.TDI := true.B
+    port.io.reset.foreach(_ := true.B)
   }
 })
 
