@@ -27,16 +27,26 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+  start-workflow:
+    name: start-workflow
+    # unable to access env context in job.if thus have to put gh-a context expression directly here.
+    # note that the check is using a boolean true instead of string 'true' since it's directly using
+    # the expression not a variable like if checking against the env context string.
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') != true }}
+    runs-on: ubuntu-22.04
+    steps:
+      - run: true
+
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute This is based off the conditional job execution
   # example here: https://github.com/dorny/paths-filter#examples
   change-filters:
     name: filter-jobs-on-changes
     runs-on: ubuntu-latest
+    needs: start-workflow
     # Queried by downstream jobs to determine if they should run.
     outputs:
       needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
-
     steps:
       - uses: actions/checkout@v4
       - name: Git workaround
