@@ -37,6 +37,20 @@ $(sim_files): | $(build_dir)
 include $(base_dir)/common.mk
 
 #########################################################################################
+# testing
+#########################################################################################
+
+# expects that chipyard has all env.sh variables set
+# requires abs path TARGET_PROJECT_MAKEFRAG and proper name TARGET_PROJECT
+export TARGET_PROJECT=bridges
+export TARGET_PROJECT_MAKEFRAG=$(base_dir)/generators/firesim-stuff/src/main/makefrag/$(TARGET_PROJECT)
+.PHONY: tmp
+tmp:
+	cd $(sim_dir)/../firesim/sim && \
+		source sourceme-manager.sh --skip-ssh-setup \
+		make run-verilator
+
+#########################################################################################
 # general cleanup rules
 #########################################################################################
 .PHONY: clean
