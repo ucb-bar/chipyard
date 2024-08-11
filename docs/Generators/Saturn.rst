@@ -7,13 +7,14 @@ Saturn implements a compact short-vector-length vector microarchitecture suitabl
 More documentation on Saturn will be released in the future.
 A partial listing of supported Saturn configurations is in ``generators/chipyard/src/main/scala/config/SaturnConfigs.scala``.
 
- * Full support for `V` application-profile RVV 1.0
+ * Full support for ``V`` application-profile RVV 1.0
  * Precise traps with virtual memory
  * Indexed/strided/segmented loads and stores
  * Mask operations
  * Register-gather + reductions
- * `Zvfh` support for vector half-precision floating-point (FP16)
- * `Zve64d` support for vector FP32 and FP64
- * Configurable vector length, from `Zvl64b` up (tested to `Zvl4096b`)
+ * ``Zvfh`` support for vector half-precision floating-point (FP16)
+ * ``Zvbb`` support for vector basic bit-manipulation instructions
+ * ``Zve64d`` support for vector FP32 and FP64
+ * Configurable vector length, from ``Zvl64b`` up (tested to ``Zvl4096b``)
  * Configurable datapath width, from 64b up (tested to 512b)
 
