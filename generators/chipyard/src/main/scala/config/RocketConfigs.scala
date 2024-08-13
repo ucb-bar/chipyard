@@ -9,11 +9,11 @@ import freechips.rocketchip.subsystem.{InCluster}
 // --------------
 
 class RocketConfig extends Config(
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++         // single rocket-core
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
 class DualRocketConfig extends Config(
-  new freechips.rocketchip.rocket.WithNBigCores(2) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(2) ++
   new chipyard.config.AbstractConfig)
 
 class TinyRocketConfig extends Config(
@@ -26,17 +26,17 @@ class TinyRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class QuadRocketConfig extends Config(
-  new freechips.rocketchip.rocket.WithNBigCores(4) ++    // quad-core (4 RocketTiles)
+  new freechips.rocketchip.rocket.WithNHugeCores(4) ++    // quad-core (4 RocketTiles)
   new chipyard.config.AbstractConfig)
 
 class Cloned64RocketConfig extends Config(
   new freechips.rocketchip.rocket.WithCloneRocketTiles(63, 0) ++ // copy tile0 63 more times
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++            // tile0 is a BigRocket
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++            // tile0 is a BigRocket
   new chipyard.config.AbstractConfig)
 
 class RV32RocketConfig extends Config(
   new freechips.rocketchip.rocket.WithRV32 ++            // set RocketTiles to be 32-bit
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
 // DOC include start: l1scratchpadrocket
@@ -46,7 +46,7 @@ class ScratchpadOnlyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBanks(0) ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++          // remove offchip mem port
   new freechips.rocketchip.rocket.WithScratchpadsOnly ++       // use rocket l1 DCache scratchpad as base phys mem
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: l1scratchpadrocket
 
@@ -58,18 +58,18 @@ class MMIOScratchpadOnlyRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBanks(0) ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++          // remove offchip mem port
   new freechips.rocketchip.rocket.WithScratchpadsOnly ++       // use rocket l1 DCache scratchpad as base phys mem
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class L1ScratchpadRocketConfig extends Config(
   new chipyard.config.WithRocketICacheScratchpad ++         // use rocket ICache scratchpad
   new chipyard.config.WithRocketDCacheScratchpad ++         // use rocket DCache scratchpad
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class MulticlockRocketConfig extends Config(
   new freechips.rocketchip.rocket.WithAsynchronousCDCs(8, 3) ++ // Add async crossings between RocketTile and uncore
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   // Frequency specifications
   new chipyard.config.WithTileFrequency(1000.0) ++        // Matches the maximum frequency of U540
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore"   , Seq("sbus", "cbus", "implicit", "clock_tap"), Nil),
@@ -87,7 +87,7 @@ class CustomIOChipTopRocketConfig extends Config(
   new chipyard.example.WithBrokenOutUARTIO ++
   new chipyard.example.WithCustomChipTop ++
   new chipyard.example.WithCustomIOCells ++
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++         // single rocket-core
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
 
 class PrefetchingRocketConfig extends Config(
@@ -96,22 +96,22 @@ class PrefetchingRocketConfig extends Config(
   new barf.WithTLDCachePrefetcher(barf.SingleAMPMPrefetcherParams()) ++                // AMPM prefetcher, sits between L1D$ and L2, monitors L1D$ misses to prefetch into L2
   new chipyard.config.WithTilePrefetchers ++                                           // add TL prefetchers between tiles and the sbus
   new freechips.rocketchip.rocket.WithL1DCacheNonblocking(2) ++                        // non-blocking L1D$, L1 prefetching only works with non-blocking L1D$
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++                                  // single rocket-core
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++                                  // single rocket-core
   new chipyard.config.AbstractConfig)
 
 class ClusteredRocketConfig extends Config(
-  new freechips.rocketchip.rocket.WithNBigCores(4, location=InCluster(1)) ++
-  new freechips.rocketchip.rocket.WithNBigCores(4, location=InCluster(0)) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(4, location=InCluster(1)) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(4, location=InCluster(0)) ++
   new freechips.rocketchip.subsystem.WithCluster(1) ++
   new freechips.rocketchip.subsystem.WithCluster(0) ++
   new chipyard.config.AbstractConfig)
 
 class FastRTLSimRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class SV48RocketConfig extends Config(
   new freechips.rocketchip.rocket.WithSV48 ++
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
