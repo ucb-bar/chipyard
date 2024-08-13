@@ -61,11 +61,12 @@ case class SpikeCoreParams(
   val btbEntries = 0
   val bhtEntries = 0
   val traceHasWdata = false
-  val useBitManip = false
-  val useBitManipCrypto = false
   val useCryptoNIST = false
   val useCryptoSM = false
   val useConditionalZero = false
+  val useZba = true
+  val useZbb = true
+  val useZbs = true
 
   override def vLen = 128
   override def eLen = 64
@@ -121,7 +122,7 @@ class SpikeTile(
   val slaveNode = TLIdentityNode()
 
   // Note: Rocket doesn't support zicntr but Spike does (err on the side of having Rocket's ISA)
-  override def isaDTS = "rv64imafdcv_zicsr_zifencei_zihpm_zvl128b_zve64d"
+  override def isaDTS = "rv64imafdcbv_zicsr_zifencei_zihpm_zvl128b_zve64d_zba_zbb_zbs"
 
   // Required entry of CPU device in the device tree for interrupt purpose
   val cpuDevice: SimpleDevice = new SimpleDevice("cpu", Seq("ucb-bar,spike", "riscv")) {
