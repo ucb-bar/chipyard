@@ -61,8 +61,6 @@ case class SpikeCoreParams(
   val btbEntries = 0
   val bhtEntries = 0
   val traceHasWdata = false
-  val useCryptoNIST = false
-  val useCryptoSM = false
   val useConditionalZero = false
   val useZba = true
   val useZbb = true
