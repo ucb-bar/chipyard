@@ -820,7 +820,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
@@ -843,7 +843,7 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - name: Create conda env
