@@ -13,16 +13,11 @@ DISABLE_SIM_PREREQ="BREAK_SIM_PREREQ=1"
 MAPPING_FLAGS=${mapping[$1]}
 
 run_bmark () {
-    make run-bmark-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
+    make run-bmark-tests-fast -j1 -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
 }
 
 run_asm () {
-    make run-asm-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
-}
-
-run_both () {
-    run_bmark $@
-    run_asm $@
+    make run-asm-tests-fast -j1 -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
 }
 
 run_tracegen () {
@@ -35,7 +30,8 @@ run_binary () {
 
 case $1 in
     chipyard-rocket)
-        run_bmark
+        run_bmark LOADMEM=1
+        run_asm LOADMEM=1
         make -C $LOCAL_CHIPYARD_DIR/tests
         # Test run-binary with and without loadmem
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1
@@ -49,36 +45,20 @@ case $1 in
         # Test cospike without checkpoint-restore
         run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv LOADMEM=1
         ;;
-    chipyard-boomv3)
-        run_bmark
+    chipyard-boomv3|chipyard-boomv4|chipyard-shuttle|chipyard-spike)
+        run_asm LOADMEM=1
+        run_bmark LOADMEM=1
         ;;
-    chipyard-boomv4)
-        run_bmark
-        ;;
-    chipyard-shuttle)
-        run_bmark ${mapping[$1]}
-        ;;
-    chipyard-dmiboomv3)
+    chipyard-dmiboomv3|chipyard-dmiboomv4)
         # Test checkpoint-restore
         $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
         run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch
-        ;;
-    chipyard-dmiboomv4)
-        # Test checkpoint-restore
-        $LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000
-        run_binary LOADARCH=$PWD/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch
-        ;;
-    chipyard-spike)
-        run_bmark
         ;;
     chipyard-hetero)
-        run_bmark
+        run_bmark LOADMEM=1
         ;;
     chipyard-prefetchers)
         run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv LOADMEM=1
-        ;;
-    rocketchip)
-        run_bmark
         ;;
     chipyard-gemmini)
         GEMMINI_SOFTWARE_DIR=$LOCAL_SIM_DIR/../../generators/gemmini/software/gemmini-rocc-tests
@@ -100,17 +80,17 @@ case $1 in
 	make -C $LOCAL_CHIPYARD_DIR/tests
 
 	# test streaming-passthrough
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv LOADMEM=1
 
 	# test streaming-fir
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv LOADMEM=1
 
 	# test fft
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv LOADMEM=1
 	;;
     chipyard-nvdla)
 	make -C $LOCAL_CHIPYARD_DIR/tests
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv LOADMEM=1
 	;;
     chipyard-manyperipherals)
 	# SPI Flash read tests
@@ -119,7 +99,7 @@ case $1 in
         ;;
     chipyard-spiflashwrite)
         make -C $LOCAL_CHIPYARD_DIR/tests
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv LOADMEM=1
         [[ "`xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 1337\ 00ff\ aa55\ face | wc -l`" == "6" ]] || false
         ;;
     chipyard-tethered)

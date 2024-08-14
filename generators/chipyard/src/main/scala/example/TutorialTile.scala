@@ -64,12 +64,11 @@ case class MyCoreParams(
   val decodeWidth: Int = 1 // TODO: Check
   val fetchWidth: Int = 1 // TODO: Check
   val retireWidth: Int = 2
-  val useBitManip: Boolean = false
-  val useBitManipCrypto: Boolean = false
-  val useCryptoNIST: Boolean = false
-  val useCryptoSM: Boolean = false
   val traceHasWdata: Boolean = false
   val useConditionalZero = false
+  val useZba: Boolean = false
+  val useZbb: Boolean = false
+  val useZbs: Boolean = false
 }
 
 // DOC include start: CanAttachTile

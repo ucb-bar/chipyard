@@ -6,14 +6,14 @@ import saturn.common.{VectorParams}
 // Rocket-integrated configs
 class V4096Ara2LaneRocketConfig extends Config(
   new ara.WithAraRocketVectorUnit(4096, 2) ++
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
 
 class V8192Ara4LaneRocketConfig extends Config(
   new ara.WithAraRocketVectorUnit(8192, 4) ++
   new chipyard.config.WithSystemBusWidth(128) ++
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
 
