@@ -1,0 +1,162 @@
+{
+  "peripheral" : {
+    "displayName" : "interrupt-controller.At0xc000000",
+    "baseAddress" : "0xc000000",
+    "regfields" : [ {
+      "priority_1" : {
+        "byteOffset" : "0x4",
+        "bitOffset" : 0,
+        "bitWidth" : 2,
+        "name" : "priority_1",
+        "description" : "Acting priority of interrupt source 1",
+        "group" : "priority_1",
+        "groupDesc" : "Acting priority of interrupt source 1",
+        "accessType" : "RW"
+      }
+    }, {
+      "priority_2" : {
+        "byteOffset" : "0x8",
+        "bitOffset" : 0,
+        "bitWidth" : 2,
+        "name" : "priority_2",
+        "description" : "Acting priority of interrupt source 2",
+        "group" : "priority_2",
+        "groupDesc" : "Acting priority of interrupt source 2",
+        "accessType" : "RW"
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x1000",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "accessType" : "R"
+      }
+    }, {
+      "pending_1" : {
+        "byteOffset" : "0x1000",
+        "bitOffset" : 1,
+        "bitWidth" : 1,
+        "name" : "pending_1",
+        "description" : "Set to 1 if interrupt source 1 is pending, regardless of its enable or priority setting.",
+        "group" : "pending",
+        "groupDesc" : "Pending Bit Array. 1 Bit for each interrupt source.",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "pending_2" : {
+        "byteOffset" : "0x1000",
+        "bitOffset" : 2,
+        "bitWidth" : 1,
+        "name" : "pending_2",
+        "description" : "Set to 1 if interrupt source 2 is pending, regardless of its enable or priority setting.",
+        "group" : "pending",
+        "groupDesc" : "Pending Bit Array. 1 Bit for each interrupt source.",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x2000",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "accessType" : "R"
+      }
+    }, {
+      "enables_0" : {
+        "byteOffset" : "0x2000",
+        "bitOffset" : 1,
+        "bitWidth" : 2,
+        "name" : "enables_0",
+        "description" : "Targets 1-2. Set bits to 1 if interrupt should be enabled.",
+        "group" : "enables_0",
+        "groupDesc" : "Enable bits for each interrupt source for target 0. 1 bit for each interrupt source.",
+        "accessType" : "RW"
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x2080",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "accessType" : "R"
+      }
+    }, {
+      "enables_0" : {
+        "byteOffset" : "0x2080",
+        "bitOffset" : 1,
+        "bitWidth" : 2,
+        "name" : "enables_0",
+        "description" : "Targets 1-2. Set bits to 1 if interrupt should be enabled.",
+        "group" : "enables_1",
+        "groupDesc" : "Enable bits for each interrupt source for target 1. 1 bit for each interrupt source.",
+        "accessType" : "RW"
+      }
+    }, {
+      "threshold_0" : {
+        "byteOffset" : "0x200000",
+        "bitOffset" : 0,
+        "bitWidth" : 2,
+        "name" : "threshold_0",
+        "description" : "Interrupt & claim threshold for target 0. Maximum value is 3.",
+        "accessType" : "RW"
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x200000",
+        "bitOffset" : 2,
+        "bitWidth" : 30,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "accessType" : "R"
+      }
+    }, {
+      "claim_complete_0" : {
+        "byteOffset" : "0x200000",
+        "bitOffset" : 32,
+        "bitWidth" : 32,
+        "name" : "claim_complete_0",
+        "description" : "Claim/Complete register for Target 0. Reading this register returns the claimed interrupt number and makes it no longer pending.Writing the interrupt number back completes the interrupt.",
+        "accessType" : "RW",
+        "writeType" : "MODIFY",
+        "readAction" : "MODIFY",
+        "volatile" : true
+      }
+    }, {
+      "threshold_1" : {
+        "byteOffset" : "0x201000",
+        "bitOffset" : 0,
+        "bitWidth" : 2,
+        "name" : "threshold_1",
+        "description" : "Interrupt & claim threshold for target 1. Maximum value is 3.",
+        "accessType" : "RW"
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x201000",
+        "bitOffset" : 2,
+        "bitWidth" : 30,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "accessType" : "R"
+      }
+    }, {
+      "claim_complete_1" : {
+        "byteOffset" : "0x201000",
+        "bitOffset" : 32,
+        "bitWidth" : 32,
+        "name" : "claim_complete_1",
+        "description" : "Claim/Complete register for Target 1. Reading this register returns the claimed interrupt number and makes it no longer pending.Writing the interrupt number back completes the interrupt.",
+        "accessType" : "RW",
+        "writeType" : "MODIFY",
+        "readAction" : "MODIFY",
+        "volatile" : true
+      }
+    } ]
+  }
+}

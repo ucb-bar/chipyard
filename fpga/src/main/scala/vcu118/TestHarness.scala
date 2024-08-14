@@ -94,7 +94,9 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   val vcu118Outer = _outer
 
   val reset = IO(Input(Bool()))
-  _outer.xdc.addPackagePin(reset, "L19")
+  //zhuzl  20240809
+  // _outer.xdc.addPackagePin(reset, "L19")
+  _outer.xdc.addPackagePin(reset, "BT37")
   _outer.xdc.addIOStandard(reset, "LVCMOS12")
 
   val resetIBUF = Module(new IBUF)

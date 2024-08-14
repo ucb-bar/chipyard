@@ -1,0 +1,322 @@
+{
+  "peripheral" : {
+    "displayName" : "spi.At0x64001000",
+    "baseAddress" : "0x64001000",
+    "regfields" : [ {
+      "sckdiv" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 0,
+        "bitWidth" : 12,
+        "name" : "sckdiv",
+        "description" : "Serial clock divisor",
+        "resetValue" : 3,
+        "accessType" : "RW"
+      }
+    }, {
+      "sckmode_pha" : {
+        "byteOffset" : "0x4",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "sckmode_pha",
+        "description" : "Serial clock phase",
+        "resetValue" : 0,
+        "group" : "sckmode",
+        "groupDesc" : "Serial clock mode",
+        "accessType" : "RW"
+      }
+    }, {
+      "sckmode_pol" : {
+        "byteOffset" : "0x4",
+        "bitOffset" : 1,
+        "bitWidth" : 1,
+        "name" : "sckmode_pol",
+        "description" : "Serial clock polarity",
+        "resetValue" : 0,
+        "group" : "sckmode",
+        "accessType" : "RW"
+      }
+    }, {
+      "csid" : {
+        "byteOffset" : "0x10",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "csid",
+        "description" : "Chip select id",
+        "resetValue" : 0,
+        "accessType" : "RW"
+      }
+    }, {
+      "csdef0" : {
+        "byteOffset" : "0x14",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "csdef0",
+        "description" : "Chip select 0 default",
+        "resetValue" : 1,
+        "group" : "csdef",
+        "groupDesc" : "Chip select default",
+        "accessType" : "RW"
+      }
+    }, {
+      "csmode" : {
+        "byteOffset" : "0x18",
+        "bitOffset" : 0,
+        "bitWidth" : 2,
+        "name" : "csmode",
+        "description" : "Chip select mode",
+        "resetValue" : 0,
+        "accessType" : "RW"
+      }
+    }, {
+      "cssck" : {
+        "byteOffset" : "0x28",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "cssck",
+        "description" : "CS to SCK delay",
+        "resetValue" : 1,
+        "accessType" : "RW"
+      }
+    }, {
+      "sckcs" : {
+        "byteOffset" : "0x2a",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "sckcs",
+        "description" : "SCK to CS delay",
+        "resetValue" : 1,
+        "accessType" : "RW"
+      }
+    }, {
+      "intercs" : {
+        "byteOffset" : "0x2c",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "intercs",
+        "description" : "Minimum CS inactive time",
+        "resetValue" : 1,
+        "accessType" : "RW"
+      }
+    }, {
+      "interxfr" : {
+        "byteOffset" : "0x2e",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "interxfr",
+        "description" : "Minimum interframe delay",
+        "resetValue" : 0,
+        "accessType" : "RW"
+      }
+    }, {
+      "proto" : {
+        "byteOffset" : "0x40",
+        "bitOffset" : 0,
+        "bitWidth" : 2,
+        "name" : "proto",
+        "description" : "SPI Protocol",
+        "resetValue" : 0,
+        "group" : "fmt",
+        "groupDesc" : "Serial frame format",
+        "accessType" : "RW"
+      }
+    }, {
+      "endian" : {
+        "byteOffset" : "0x40",
+        "bitOffset" : 2,
+        "bitWidth" : 1,
+        "name" : "endian",
+        "description" : "SPI Endianness",
+        "resetValue" : 0,
+        "group" : "fmt",
+        "accessType" : "RW"
+      }
+    }, {
+      "iodir" : {
+        "byteOffset" : "0x40",
+        "bitOffset" : 3,
+        "bitWidth" : 1,
+        "name" : "iodir",
+        "description" : "SPI I/O Direction",
+        "resetValue" : 0,
+        "group" : "fmt",
+        "accessType" : "RW"
+      }
+    }, {
+      "len" : {
+        "byteOffset" : "0x42",
+        "bitOffset" : 0,
+        "bitWidth" : 4,
+        "name" : "len",
+        "description" : "Number of bits per frame",
+        "resetValue" : 8,
+        "accessType" : "RW"
+      }
+    }, {
+      "data" : {
+        "byteOffset" : "0x48",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "data",
+        "description" : "Transmit data",
+        "group" : "txdata",
+        "groupDesc" : "Transmit data",
+        "accessType" : "W"
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x48",
+        "bitOffset" : 8,
+        "bitWidth" : 23,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "group" : "txdata",
+        "accessType" : "R"
+      }
+    }, {
+      "full" : {
+        "byteOffset" : "0x48",
+        "bitOffset" : 31,
+        "bitWidth" : 1,
+        "name" : "full",
+        "description" : "Transmit FIFO full",
+        "group" : "txdata",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "data" : {
+        "byteOffset" : "0x4c",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "data",
+        "description" : "Receive data",
+        "group" : "rxdata",
+        "groupDesc" : "Receive data",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x4c",
+        "bitOffset" : 8,
+        "bitWidth" : 23,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "group" : "rxdata",
+        "accessType" : "R"
+      }
+    }, {
+      "empty" : {
+        "byteOffset" : "0x4c",
+        "bitOffset" : 31,
+        "bitWidth" : 1,
+        "name" : "empty",
+        "description" : "Receive FIFO empty",
+        "group" : "rxdata",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "txmark" : {
+        "byteOffset" : "0x50",
+        "bitOffset" : 0,
+        "bitWidth" : 4,
+        "name" : "txmark",
+        "description" : "Transmit watermark",
+        "resetValue" : 0,
+        "accessType" : "RW"
+      }
+    }, {
+      "rxmark" : {
+        "byteOffset" : "0x54",
+        "bitOffset" : 0,
+        "bitWidth" : 4,
+        "name" : "rxmark",
+        "description" : "Receive watermark",
+        "resetValue" : 0,
+        "accessType" : "RW"
+      }
+    }, {
+      "txwm_ie" : {
+        "byteOffset" : "0x70",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "txwm_ie",
+        "description" : "Transmit watermark interrupt enable",
+        "resetValue" : 0,
+        "group" : "ie",
+        "groupDesc" : "SPI interrupt enable",
+        "accessType" : "RW"
+      }
+    }, {
+      "rxwm_ie" : {
+        "byteOffset" : "0x70",
+        "bitOffset" : 1,
+        "bitWidth" : 1,
+        "name" : "rxwm_ie",
+        "description" : "Receive watermark interrupt enable",
+        "resetValue" : 0,
+        "group" : "ie",
+        "accessType" : "RW"
+      }
+    }, {
+      "txwm_ip" : {
+        "byteOffset" : "0x74",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "txwm_ip",
+        "description" : "Transmit watermark interrupt pending",
+        "group" : "ip",
+        "groupDesc" : "SPI interrupt pending",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "rxwm_ip" : {
+        "byteOffset" : "0x74",
+        "bitOffset" : 1,
+        "bitWidth" : 1,
+        "name" : "rxwm_ip",
+        "description" : "Receive watermark interrupt pending",
+        "group" : "ip",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "extradel_coarse" : {
+        "byteOffset" : "0x38",
+        "bitOffset" : 0,
+        "bitWidth" : 12,
+        "name" : "extradel_coarse",
+        "description" : "Coarse grain sample delay",
+        "resetValue" : 0,
+        "group" : "extradel",
+        "groupDesc" : "delay from the sck edge",
+        "accessType" : "RW"
+      }
+    }, {
+      "extradel_fine" : {
+        "byteOffset" : "0x38",
+        "bitOffset" : 12,
+        "bitWidth" : 0,
+        "name" : "extradel_fine",
+        "description" : "Fine grain sample delay",
+        "resetValue" : 0,
+        "group" : "extradel",
+        "accessType" : "RW"
+      }
+    }, {
+      "sampledel_sd" : {
+        "byteOffset" : "0x3c",
+        "bitOffset" : 0,
+        "bitWidth" : 5,
+        "name" : "sampledel_sd",
+        "description" : "Number of delay stages from slave to the SPI controller",
+        "resetValue" : 3,
+        "group" : "sampledel",
+        "groupDesc" : "Number of delay stages from slave to SPI controller",
+        "accessType" : "RW"
+      }
+    } ]
+  }
+}

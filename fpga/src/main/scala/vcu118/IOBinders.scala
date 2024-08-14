@@ -28,7 +28,9 @@ class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
   (system: HasPeripherySPI) => {
     // attach resource to 1st SPI
     ResourceBinding {
-      Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
+      //1->25   modify 1M to 25M   zhuzl 20240808
+      // Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
+      Resource(new MMCDevice(system.tlSpiNodes.head.device, 25), "reg").bind(ResourceAddress(0))
     }
 
     InModuleBody {

@@ -72,7 +72,8 @@
 	url = https://github.com/ucb-bar/riscv-sodor.git
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
-	url = https://github.com/chipsalliance/rocket-chip-fpga-shells.git
+	url = https://github.com/forward-zhu/fpga-shells.git
+	branch = tango_fpga
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils

@@ -1,0 +1,55 @@
+{
+  "peripheral" : {
+    "displayName" : "boot-address-reg.At0x4000",
+    "baseAddress" : "0x4000",
+    "regfields" : [ {
+      "unnamedRegField0_0" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 0,
+        "bitWidth" : 8
+      }
+    }, {
+      "unnamedRegField0_8" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 8,
+        "bitWidth" : 8
+      }
+    }, {
+      "unnamedRegField0_16" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 16,
+        "bitWidth" : 8
+      }
+    }, {
+      "unnamedRegField0_24" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 24,
+        "bitWidth" : 8
+      }
+    }, {
+      "unnamedRegField0_32" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 32,
+        "bitWidth" : 8
+      }
+    }, {
+      "unnamedRegField0_40" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 40,
+        "bitWidth" : 8
+      }
+    }, {
+      "unnamedRegField0_48" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 48,
+        "bitWidth" : 8
+      }
+    }, {
+      "unnamedRegField0_56" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 56,
+        "bitWidth" : 8
+      }
+    } ]
+  }
+}

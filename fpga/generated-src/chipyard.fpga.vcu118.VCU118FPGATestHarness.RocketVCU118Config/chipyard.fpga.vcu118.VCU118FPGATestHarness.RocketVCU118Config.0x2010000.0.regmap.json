@@ -1,0 +1,70 @@
+{
+  "peripheral" : {
+    "displayName" : "cache-controller.At0x2010000",
+    "baseAddress" : "0x2010000",
+    "regfields" : [ {
+      "Banks" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "Banks",
+        "description" : "Number of banks in the cache",
+        "resetValue" : 1,
+        "group" : "Config",
+        "groupDesc" : "Information about the Cache Configuration",
+        "accessType" : "R"
+      }
+    }, {
+      "Ways" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 8,
+        "bitWidth" : 8,
+        "name" : "Ways",
+        "description" : "Number of ways per bank",
+        "resetValue" : 8,
+        "group" : "Config",
+        "accessType" : "R"
+      }
+    }, {
+      "lgSets" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 16,
+        "bitWidth" : 8,
+        "name" : "lgSets",
+        "description" : "Base-2 logarithm of the sets per bank",
+        "resetValue" : 10,
+        "group" : "Config",
+        "accessType" : "R"
+      }
+    }, {
+      "lgBlockBytes" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 24,
+        "bitWidth" : 8,
+        "name" : "lgBlockBytes",
+        "description" : "Base-2 logarithm of the bytes per cache block",
+        "resetValue" : 6,
+        "group" : "Config",
+        "accessType" : "R"
+      }
+    }, {
+      "Flush64" : {
+        "byteOffset" : "0x200",
+        "bitOffset" : 0,
+        "bitWidth" : 64,
+        "name" : "Flush64",
+        "description" : "Flush the phsyical address equal to the 64-bit written data from the cache",
+        "accessType" : "W"
+      }
+    }, {
+      "Flush32" : {
+        "byteOffset" : "0x240",
+        "bitOffset" : 0,
+        "bitWidth" : 32,
+        "name" : "Flush32",
+        "description" : "Flush the physical address equal to the 32-bit written data << 4 from the cache",
+        "accessType" : "W"
+      }
+    } ]
+  }
+}

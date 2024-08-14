@@ -1,0 +1,6 @@
+[
+	{
+		"class": "firrtl.stage.RunFirrtlTransformAnnotation",
+		"transform": "barstools.tapeout.transforms.ExtraLowTransforms"
+	}
+]
