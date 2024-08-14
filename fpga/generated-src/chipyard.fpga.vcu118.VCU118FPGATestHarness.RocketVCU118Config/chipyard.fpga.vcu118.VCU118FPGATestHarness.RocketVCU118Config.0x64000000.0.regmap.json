@@ -1,0 +1,181 @@
+{
+  "peripheral" : {
+    "displayName" : "serial.At0x64000000",
+    "baseAddress" : "0x64000000",
+    "regfields" : [ {
+      "data" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "data",
+        "description" : "Transmit data",
+        "group" : "txdata",
+        "groupDesc" : "Transmit data",
+        "accessType" : "W"
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 8,
+        "bitWidth" : 23,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "group" : "txdata",
+        "accessType" : "R"
+      }
+    }, {
+      "full" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 31,
+        "bitWidth" : 1,
+        "name" : "full",
+        "description" : "Transmit FIFO full",
+        "group" : "txdata",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "data" : {
+        "byteOffset" : "0x4",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "data",
+        "description" : "Receive data",
+        "group" : "rxdata",
+        "groupDesc" : "Receive data",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x4",
+        "bitOffset" : 8,
+        "bitWidth" : 23,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "group" : "rxdata",
+        "accessType" : "R"
+      }
+    }, {
+      "empty" : {
+        "byteOffset" : "0x4",
+        "bitOffset" : 31,
+        "bitWidth" : 1,
+        "name" : "empty",
+        "description" : "Receive FIFO empty",
+        "group" : "rxdata",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "txen" : {
+        "byteOffset" : "0x8",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "txen",
+        "description" : "Transmit enable",
+        "resetValue" : 0,
+        "group" : "txctrl",
+        "groupDesc" : "Serial transmit control",
+        "accessType" : "RW"
+      }
+    }, {
+      "nstop" : {
+        "byteOffset" : "0x8",
+        "bitOffset" : 1,
+        "bitWidth" : 1,
+        "name" : "nstop",
+        "description" : "Number of stop bits",
+        "resetValue" : 0,
+        "group" : "txctrl",
+        "accessType" : "RW"
+      }
+    }, {
+      "rxen" : {
+        "byteOffset" : "0xc",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "rxen",
+        "description" : "Receive enable",
+        "resetValue" : 0,
+        "accessType" : "RW"
+      }
+    }, {
+      "txcnt" : {
+        "byteOffset" : "0xa",
+        "bitOffset" : 0,
+        "bitWidth" : 4,
+        "name" : "txcnt",
+        "description" : "Transmit watermark level",
+        "resetValue" : 0,
+        "accessType" : "RW"
+      }
+    }, {
+      "rxcnt" : {
+        "byteOffset" : "0xe",
+        "bitOffset" : 0,
+        "bitWidth" : 4,
+        "name" : "rxcnt",
+        "description" : "Receive watermark level",
+        "resetValue" : 0,
+        "accessType" : "RW"
+      }
+    }, {
+      "txwm_ie" : {
+        "byteOffset" : "0x10",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "txwm_ie",
+        "description" : "Transmit watermark interrupt enable",
+        "resetValue" : 0,
+        "group" : "ie",
+        "groupDesc" : "Serial interrupt enable",
+        "accessType" : "RW"
+      }
+    }, {
+      "rxwm_ie" : {
+        "byteOffset" : "0x10",
+        "bitOffset" : 1,
+        "bitWidth" : 1,
+        "name" : "rxwm_ie",
+        "description" : "Receive watermark interrupt enable",
+        "resetValue" : 0,
+        "group" : "ie",
+        "accessType" : "RW"
+      }
+    }, {
+      "txwm_ip" : {
+        "byteOffset" : "0x14",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "txwm_ip",
+        "description" : "Transmit watermark interrupt pending",
+        "group" : "ip",
+        "groupDesc" : "Serial interrupt pending",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "rxwm_ip" : {
+        "byteOffset" : "0x14",
+        "bitOffset" : 1,
+        "bitWidth" : 1,
+        "name" : "rxwm_ip",
+        "description" : "Receive watermark interrupt pending",
+        "group" : "ip",
+        "accessType" : "R",
+        "volatile" : true
+      }
+    }, {
+      "div" : {
+        "byteOffset" : "0x18",
+        "bitOffset" : 0,
+        "bitWidth" : 16,
+        "name" : "div",
+        "description" : "Baud rate divisor",
+        "resetValue" : 868,
+        "accessType" : "RW"
+      }
+    } ]
+  }
+}

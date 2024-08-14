@@ -1,0 +1,14 @@
+[
+	{
+		"class":"sifive.enterprise.firrtl.MarkDUTAnnotation",
+		"target":"~VCU118FPGATestHarness|ChipTop"
+	},
+	{
+		"class": "sifive.enterprise.firrtl.TestHarnessHierarchyAnnotation",
+		"filename": "/home/test/chipyard-inchi/chipyard/fpga/generated-src/chipyard.fpga.vcu118.VCU118FPGATestHarness.RocketVCU118Config/model_module_hierarchy.json"
+	},
+	{
+		"class": "sifive.enterprise.firrtl.ModuleHierarchyAnnotation",
+		"filename": "/home/test/chipyard-inchi/chipyard/fpga/generated-src/chipyard.fpga.vcu118.VCU118FPGATestHarness.RocketVCU118Config/top_module_hierarchy.json"
+	}
+]

@@ -1,0 +1,13 @@
+{
+  "peripheral" : {
+    "displayName" : "tile-reset-setter.At0x110000",
+    "baseAddress" : "0x110000",
+    "regfields" : [ {
+      "unnamedRegField0_0" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 0,
+        "bitWidth" : 1
+      }
+    } ]
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "peripheral" : {
+    "displayName" : "clint.At0x2000000",
+    "baseAddress" : "0x2000000",
+    "regfields" : [ {
+      "msip_0" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 0,
+        "bitWidth" : 1,
+        "name" : "msip_0",
+        "description" : "MSIP bit for Hart 0",
+        "resetValue" : 0,
+        "group" : "msip",
+        "groupDesc" : "MSIP Bits",
+        "accessType" : "RW"
+      }
+    }, {
+      "reserved" : {
+        "byteOffset" : "0x0",
+        "bitOffset" : 1,
+        "bitWidth" : 31,
+        "name" : "reserved",
+        "resetValue" : 0,
+        "group" : "msip",
+        "accessType" : "R"
+      }
+    }, {
+      "mtimecmp_0_0" : {
+        "byteOffset" : "0x4000",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "mtimecmp_0_0",
+        "group" : "mtimecmp_0",
+        "groupDesc" : "MTIMECMP for hart 0",
+        "accessType" : "RW"
+      }
+    }, {
+      "mtimecmp_0_1" : {
+        "byteOffset" : "0x4000",
+        "bitOffset" : 8,
+        "bitWidth" : 8,
+        "name" : "mtimecmp_0_1",
+        "group" : "mtimecmp_0",
+        "accessType" : "RW"
+      }
+    }, {
+      "mtimecmp_0_2" : {
+        "byteOffset" : "0x4000",
+        "bitOffset" : 16,
+        "bitWidth" : 8,
+        "name" : "mtimecmp_0_2",
+        "group" : "mtimecmp_0",
+        "accessType" : "RW"
+      }
+    }, {
+      "mtimecmp_0_3" : {
+        "byteOffset" : "0x4000",
+        "bitOffset" : 24,
+        "bitWidth" : 8,
+        "name" : "mtimecmp_0_3",
+        "group" : "mtimecmp_0",
+        "accessType" : "RW"
+      }
+    }, {
+      "mtimecmp_0_4" : {
+        "byteOffset" : "0x4000",
+        "bitOffset" : 32,
+        "bitWidth" : 8,
+        "name" : "mtimecmp_0_4",
+        "group" : "mtimecmp_0",
+        "accessType" : "RW"
+      }
+    }, {
+      "mtimecmp_0_5" : {
+        "byteOffset" : "0x4000",
+        "bitOffset" : 40,
+        "bitWidth" : 8,
+        "name" : "mtimecmp_0_5",
+        "group" : "mtimecmp_0",
+        "accessType" : "RW"
+      }
+    }, {
+      "mtimecmp_0_6" : {
+        "byteOffset" : "0x4000",
+        "bitOffset" : 48,
+        "bitWidth" : 8,
+        "name" : "mtimecmp_0_6",
+        "group" : "mtimecmp_0",
+        "accessType" : "RW"
+      }
+    }, {
+      "mtimecmp_0_7" : {
+        "byteOffset" : "0x4000",
+        "bitOffset" : 56,
+        "bitWidth" : 8,
+        "name" : "mtimecmp_0_7",
+        "group" : "mtimecmp_0",
+        "accessType" : "RW"
+      }
+    }, {
+      "mtime_0" : {
+        "byteOffset" : "0xbff8",
+        "bitOffset" : 0,
+        "bitWidth" : 8,
+        "name" : "mtime_0",
+        "resetValue" : 0,
+        "group" : "mtime",
+        "groupDesc" : "Timer Register",
+        "accessType" : "RW",
+        "volatile" : true
+      }
+    }, {
+      "mtime_1" : {
+        "byteOffset" : "0xbff8",
+        "bitOffset" : 8,
+        "bitWidth" : 8,
+        "name" : "mtime_1",
+        "resetValue" : 0,
+        "group" : "mtime",
+        "accessType" : "RW",
+        "volatile" : true
+      }
+    }, {
+      "mtime_2" : {
+        "byteOffset" : "0xbff8",
+        "bitOffset" : 16,
+        "bitWidth" : 8,
+        "name" : "mtime_2",
+        "resetValue" : 0,
+        "group" : "mtime",
+        "accessType" : "RW",
+        "volatile" : true
+      }
+    }, {
+      "mtime_3" : {
+        "byteOffset" : "0xbff8",
+        "bitOffset" : 24,
+        "bitWidth" : 8,
+        "name" : "mtime_3",
+        "resetValue" : 0,
+        "group" : "mtime",
+        "accessType" : "RW",
+        "volatile" : true
+      }
+    }, {
+      "mtime_4" : {
+        "byteOffset" : "0xbff8",
+        "bitOffset" : 32,
+        "bitWidth" : 8,
+        "name" : "mtime_4",
+        "resetValue" : 0,
+        "group" : "mtime",
+        "accessType" : "RW",
+        "volatile" : true
+      }
+    }, {
+      "mtime_5" : {
+        "byteOffset" : "0xbff8",
+        "bitOffset" : 40,
+        "bitWidth" : 8,
+        "name" : "mtime_5",
+        "resetValue" : 0,
+        "group" : "mtime",
+        "accessType" : "RW",
+        "volatile" : true
+      }
+    }, {
+      "mtime_6" : {
+        "byteOffset" : "0xbff8",
+        "bitOffset" : 48,
+        "bitWidth" : 8,
+        "name" : "mtime_6",
+        "resetValue" : 0,
+        "group" : "mtime",
+        "accessType" : "RW",
+        "volatile" : true
+      }
+    }, {
+      "mtime_7" : {
+        "byteOffset" : "0xbff8",
+        "bitOffset" : 56,
+        "bitWidth" : 8,
+        "name" : "mtime_7",
+        "resetValue" : 0,
+        "group" : "mtime",
+        "accessType" : "RW",
+        "volatile" : true
+      }
+    } ]
+  }
+}

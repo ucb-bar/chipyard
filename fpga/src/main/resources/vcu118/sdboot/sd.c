@@ -9,7 +9,9 @@
 #include "kprintf.h"
 
 // Total payload in B
-#define PAYLOAD_SIZE_B (30 << 20) // default: 30MiB
+//modify 30M to 100M   zhuzl    20240808
+#define PAYLOAD_SIZE_B (100 << 20) // default: 100MiB
+// #define PAYLOAD_SIZE_B (30 << 20) // default: 30MiB
 // A sector is 512 bytes, so (1 << 11) * 512B = 1 MiB
 #define SECTOR_SIZE_B 512
 // Payload size in # of sectors
@@ -48,7 +50,8 @@ static uint8_t sd_cmd(uint8_t cmd, uint32_t arg, uint8_t crc)
 	uint8_t r;
 
 	REG32(spi, SPI_REG_CSMODE) = SPI_CSMODE_HOLD;
-	sd_dummy();
+	//zhuzl  20240808
+	// sd_dummy();
 	spi_xfer(cmd);
 	spi_xfer(arg >> 24);
 	spi_xfer(arg >> 16);
@@ -79,7 +82,11 @@ static inline void sd_cmd_end(void)
 static void sd_poweron(void)
 {
 	long i;
-	REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 300000UL);
+	//modify spi clock rate to 25M      zhuzl  20240808
+	// REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 300000UL);
+	REG32(spi, SPI_REG_SCKDIV) = 2;
+	REG32(spi, SPI_REG_SCKMODE) = SPI_SCK_POL | SPI_SCK_PHA;
+
 	REG32(spi, SPI_REG_CSMODE) = SPI_CSMODE_OFF;
 	for (i = 10; i > 0; i--) {
 		sd_dummy();
@@ -121,7 +128,9 @@ static int sd_acmd41(void)
 	dputs("ACMD41");
 	do {
 		sd_cmd55();
-		r = sd_cmd(0x69, 0x40000000, 0x77); /* HCS = 1 */
+		//sd do not enter low power   zhuzl  20240808
+		// r = sd_cmd(0x69, 0x40000000, 0x77); /* HCS = 1 */
+		r = sd_cmd(0x69, 0x50000000, 0x77); /* HCS = 1 */
 	} while (r == 0x01);
 	return (r != 0x00);
 }
@@ -176,11 +185,14 @@ static int copy(void)
 
 	// TODO: Speed up SPI freq. (breaks between these two values)
 	//REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 16666666UL);
-	REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
+	// REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
+	REG32(spi, SPI_REG_SCKDIV) = 2;
 	if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
 		sd_cmd_end();
+		kprintf("LOADING CMD52 ERROE\r\n");
 		return 1;
 	}
+	kprintf("LOADING CMD52 OK\r\n");
 	do {
 		uint16_t crc, crc_exp;
 		long n;
@@ -222,6 +234,16 @@ int main(void)
 
 	kputs("INIT");
 	sd_poweron();
+
+	//loop 200 in order to reset successful    zhuzl   20240808
+		 for(int i = 0; i < 200; i++)
+     {
+        if(0 == sd_cmd0())
+		{
+            break;
+		}
+     }
+
 	if (sd_cmd0() ||
 	    sd_cmd8() ||
 	    sd_acmd41() ||
