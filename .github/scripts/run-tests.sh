@@ -13,11 +13,11 @@ DISABLE_SIM_PREREQ="BREAK_SIM_PREREQ=1"
 MAPPING_FLAGS=${mapping[$1]}
 
 run_bmark () {
-    make run-bmark-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
+    make run-bmark-tests-fast -j1 -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
 }
 
 run_asm () {
-    make run-asm-tests-fast -j$CI_MAKE_NPROC -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
+    make run-asm-tests-fast -j1 -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
 }
 
 run_tracegen () {
