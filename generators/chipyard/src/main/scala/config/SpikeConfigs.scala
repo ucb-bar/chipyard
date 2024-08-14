@@ -10,6 +10,11 @@ class SpikeConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class SpikeZicntrConfig extends Config(
+  new chipyard.WithSpikeZicntr ++
+  new chipyard.WithNSpikeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class dmiSpikeConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
