@@ -7,6 +7,9 @@ Saturn implements a compact short-vector-length vector microarchitecture suitabl
 More documentation on Saturn will be released in the future.
 A partial listing of supported Saturn configurations is in ``generators/chipyard/src/main/scala/config/SaturnConfigs.scala``.
 
+For now, the recommended Saturn configuration is ``GENV256D128ShuttleConfig``, which builds a dual-issue core with 256-bit VLEN, 128-bit wide SIMD datapath, and separate floating-point and integer vector issue units.
+
+
  * Full support for ``V`` application-profile RVV 1.0
  * Precise traps with virtual memory
  * Indexed/strided/segmented loads and stores
