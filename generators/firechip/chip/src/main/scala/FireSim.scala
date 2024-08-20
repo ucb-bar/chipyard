@@ -73,8 +73,8 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
 
 // for all cover statments in an RC-based design, emit an annotation
 class FireSimPropertyLibrary extends property.BasePropertyLibrary {
-  def generateProperty(prop_param: property.BasePropertyParameters)(implicit sourceInfo: chisel3.internal.sourceinfo.SourceInfo): Unit = {
-    if (!(prop_param.cond.isLit) && chisel3.experimental.DataMirror.internal.isSynthesizable(prop_param.cond)) {
+  def generateProperty(prop_param: property.BasePropertyParameters)(implicit sourceInfo: chisel3.experimental.SourceInfo): Unit = {
+    if (!(prop_param.cond.isLit) && chisel3.reflect.DataMirror.internal.isSynthesizable(prop_param.cond)) {
       annotate(new chisel3.experimental.ChiselAnnotation {
         val implicitClock = chisel3.Module.clock
         val implicitReset = chisel3.Module.reset

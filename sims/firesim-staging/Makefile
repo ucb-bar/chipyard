@@ -14,7 +14,7 @@ sim_dir=$(abspath .)
 include $(base_dir)/variables.mk
 
 #########################################################################################
-# generate firrtl + annos needed for firesim
+# generate firrtl + annos needed for firesim (should also produce a *.sfc.fir file)
 #########################################################################################
 .PHONY: default
 default: firrtl
