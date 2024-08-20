@@ -12,6 +12,7 @@ import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.tile.{RocketTile}
 import boom.v3.common.{BoomTile}
+import freechips.rocketchip.util.property
 
 import chipyard._
 import chipyard.harness._
@@ -20,7 +21,7 @@ import chipyard.clocking._
 
 import firesim.lib.bridges.{PeekPokeBridge, RationalClockBridge, ResetPulseBridge, ResetPulseBridgeParameters}
 import firesim.lib.bridgeutils.{RationalClock}
-import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotation}
+import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotation, AutoCounterFirrtlAnnotation}
 
 case object FireSimMultiCycleRegFile extends Field[Boolean](false)
 case object FireSimFAME5 extends Field[Boolean](false)
@@ -70,34 +71,51 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
   }
 }
 
+// for all cover statments in an RC-based design, emit an annotation
+class FireSimPropertyLibrary extends property.BasePropertyLibrary {
+  def generateProperty(prop_param: property.BasePropertyParameters)(implicit sourceInfo: chisel3.internal.sourceinfo.SourceInfo): Unit = {
+    if (!(prop_param.cond.isLit) && chisel3.experimental.DataMirror.internal.isSynthesizable(prop_param.cond)) {
+      annotate(new chisel3.experimental.ChiselAnnotation {
+        val implicitClock = chisel3.Module.clock
+        val implicitReset = chisel3.Module.reset
+        def toFirrtl = AutoCounterFirrtlAnnotation(prop_param.cond.toNamed,
+                                                   implicitClock.toNamed.toTarget,
+                                                   implicitReset.toNamed.toTarget,
+                                                   prop_param.label,
+                                                   prop_param.message,
+                                                   coverGenerated = true)
+      })
+    }
+  }
+}
+
 class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInstantiators {
   require(harnessClockInstantiator.isInstanceOf[FireSimClockBridgeInstantiator])
-  //freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
+  freechips.rocketchip.util.property.cover.setPropLib(new FireSimPropertyLibrary)
 
   // The peek-poke bridge must still be instantiated even though it's
   // functionally unused. This will be removed in a future PR.
   val dummy = WireInit(false.B)
   val peekPokeBridge = PeekPokeBridge(harnessBinderClock, dummy)
 
-  //val resetBridge = Module(new ResetPulseBridge(ResetPulseBridgeParameters()))
-  //// In effect, the bridge counts the length of the reset in terms of this clock.
-  //resetBridge.io.clock := harnessBinderClock
+  val resetBridge = Module(new ResetPulseBridge(ResetPulseBridgeParameters()))
+  // In effect, the bridge counts the length of the reset in terms of this clock.
+  resetBridge.io.clock := harnessBinderClock
 
   def referenceClockFreqMHz = 0.0
   def referenceClock = false.B.asClock // unused
-  def referenceReset = false.B//resetBridge.io.reset
+  def referenceReset = resetBridge.io.reset
   def success = { require(false, "success should not be used in Firesim"); false.B }
 
   override val supportsMultiChip = true
 
   val chiptops = instantiateChipTops()
 
-  //// Ensures FireSim-synthesized assertions and instrumentation is disabled
-  //// while resetBridge.io.reset is asserted.  This ensures assertions do not fire at
-  //// time zero in the event their local reset is delayed (typically because it
-  //// has been pipelined)
-  //midas.targetutils.GlobalResetCondition(resetBridge.io.reset)
-
+  // Ensures FireSim-synthesized assertions and instrumentation is disabled
+  // while resetBridge.io.reset is asserted.  This ensures assertions do not fire at
+  // time zero in the event their local reset is delayed (typically because it
+  // has been pipelined)
+  midas.targetutils.GlobalResetCondition(resetBridge.io.reset)
 
   // FireSim multi-cycle regfile optimization
   // FireSim ModelMultithreading
