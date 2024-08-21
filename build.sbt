@@ -353,19 +353,29 @@ lazy val firesim_lib = (project in firesimDir / "sim/firesim-lib")
   .settings(scalaTestSettings)
 
 // Interfaces for target-specific bridges shared with FireSim.
-// Minimal in scope (should only depend on Chisel/Firrtl2).
-// This is copied to FireSim's midas compiler.
-lazy val firechip_bridge_interfaces = (project in file("generators/firechip/bridge-interfaces"))
+// Minimal in scope (should only depend on Chisel/Firrtl).
+// This is copied to FireSim's GoldenGate compiler.
+lazy val firechip_bridgeinterfaces = (project in file("generators/firechip/bridgeinterfaces"))
   .settings(
     chiselSettings,
     commonSettings,
   )
 
-// FireSim top-level project.
-// Includes, FireSim harness, target-specific bridges, etc.
-// It's tests also depend on firesim_lib's test sources.
-lazy val firechip = (project in file("generators/firechip/core"))
-  .dependsOn(chipyard, firesim_lib % "compile->compile;test->test", firechip_bridge_interfaces)
+// Target-side bridge definitions, CC files, etc used for FireSim.
+// This only compiled with Chipyard.
+lazy val firechip_bridgestubs = (project in file("generators/firechip/bridgestubs"))
+  .dependsOn(chipyard, firesim_lib % "compile->compile;test->test", firechip_bridgeinterfaces)
+  .settings(
+    chiselSettings,
+    commonSettings,
+    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
+    Test / testOptions += Tests.Argument("-oF")
+  )
+  .settings(scalaTestSettings)
+
+// FireSim top-level project that includes the FireSim harness, CC files, etc needed for FireSim.
+lazy val firechip = (project in file("generators/firechip/chip"))
+  .dependsOn(chipyard, firesim_lib % "compile->compile;test->test", firechip_bridgestubs, firechip_bridgeinterfaces)
   .settings(
     chiselSettings,
     commonSettings,
