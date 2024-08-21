@@ -2,6 +2,20 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.12.3] - 2024-8-21
+
+Small QoL updates and fixes.
+
+## Added
+
+- Bump rocket-chip/saturn/shuttle (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1991)
+- Update rerocc to support rerocc MMIO ctrl (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1981)
+- Enable B extension in Rocket/Shuttle/BoomV4 (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2001)
+
+## Fixed
+
+- Vector bugfixes (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2003)
+
 ## [1.12.0] - 2024-8-1
 
 Major update switching to Chisel 6 for RTL/FPGA/VLSI flows. Compress-acc and ReRoCC added as new RTL blocks. Software updated to GCC-13 with Linux Kernel 6.4.
