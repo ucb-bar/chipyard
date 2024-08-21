@@ -180,7 +180,7 @@ jobs:
           ls -alh firesim-symlink/.
           export TEST_DISABLE_VERILATOR=1
           export TEST_DISABLE_VIVADO=1
-          make launch-sbt SBT_COMMAND=";project firechip; testOnly firechip.test.core.bridges.BridgeTests"
+          make launch-sbt SBT_COMMAND=";project firechip_bridgestubs; testOnly firechip.bridgestubs.BridgeTests"
       - name: Run FireChip FireSim target tests
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
@@ -193,7 +193,7 @@ jobs:
           export TEST_MINIMAL_BENCHMARKS=1 # seems like dhrystone is the longest so this doesn't affect runtime much
           export TEST_DISABLE_VERILATOR=1
           export TEST_DISABLE_VIVADO=1
-          make launch-sbt SBT_COMMAND=";project firechip; testOnly firechip.test.core.firesim.CITests"
+          make launch-sbt SBT_COMMAND=";project firechip; testOnly firechip.chip.CITests"
 
   cleanup:
     name: cleanup
