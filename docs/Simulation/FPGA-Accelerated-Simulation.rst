@@ -50,9 +50,9 @@ The simplest method to add this config fragments to your custom Chipyard config 
 After your FireSim environment is setup, you will define your custom build recipe in ``sims/firesim/deploy/config_build_recipes.yaml``. By prepending the FireSim config fragments (separated by ``_``) to your Chipyard configuration, these config fragments will be added to your custom configuration as if they were listed in a custom Chisel config class definition. For example, if you would like to convert the Chipyard ``LargeBoomV3Config`` to a FireSim simulation with a DDR3 memory model, the appropriate FireSim ``TARGET_CONFIG`` would be ``DDR3FRFCFSLLC4MB_WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.LargeBoomV3Config``. Note that the FireSim config fragments are part of the ``firesim.firesim`` scala package and therefore there do not need to be prefixed with the full package name as opposed to the Chipyard config fragments which need to be prefixed with the chipyard package name.
 
 An alternative method to prepending the FireSim config fragments in the FireSim build recipe is to create a new "permanent" FireChip custom configuration, which includes the FireSim config fragments.
-We are using the same target (top) RTL, and only need to specify a new set of connection behaviors for the IOs of that module. Simply create a matching config within ``generators/firechip/core/src/main/scala/firesim/TargetConfigs.scala`` that inherits your config defined in ``chipyard``.
+We are using the same target (top) RTL, and only need to specify a new set of connection behaviors for the IOs of that module. Simply create a matching config within ``generators/firechip/chip/src/main/scala/TargetConfigs.scala`` that inherits your config defined in ``chipyard``.
 
-.. literalinclude:: ../../generators/firechip/core/src/main/scala/firesim/TargetConfigs.scala
+.. literalinclude:: ../../generators/firechip/chip/src/main/scala/TargetConfigs.scala
     :language: scala
     :start-after: DOC include start: firesimconfig
     :end-before: DOC include end: firesimconfig
