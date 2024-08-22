@@ -83,7 +83,7 @@ dir="software"
 branches=("master" "dev")
 search
 
-submodules=("DRAMSim2" "axe" "dsptools" "dsptools-chisel3" "rocket-dsp-utils" "torture" "fixedpoint" "fixedpoint-chisel3" "cde" "midas-targetutils")
+submodules=("DRAMSim2" "axe" "dsptools" "rocket-dsp-utils" "torture" "fixedpoint" "cde" "firrtl2")
 dir="tools"
 branches=("master" "dev" "main")
 search

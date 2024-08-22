@@ -115,12 +115,6 @@
 [submodule "tools/circt"]
 	path = tools/circt
 	url = https://github.com/llvm/circt.git
-[submodule "tools/dsptools-fixedpoint"]
-	path = tools/dsptools-chisel3
-	url = https://github.com/ucb-bar/dsptools.git
-[submodule "tools/fixedpoint-chisel3"]
-	path = tools/fixedpoint-chisel3
-	url = https://github.com/ucb-bar/fixedpoint.git
 [submodule "tools/install-circt"]
 	path = tools/install-circt
 	url = https://github.com/circt/install-circt.git
@@ -139,9 +133,6 @@
 [submodule "tools/fixedpoint"]
 	path = tools/fixedpoint
 	url = https://github.com/ucb-bar/fixedpoint.git
-[submodule "tools/midas-targetutils"]
-	path = tools/midas-targetutils
-	url = https://github.com/firesim/midas-targetutils.git
 [submodule "generators/rerocc"]
 	path = generators/rerocc
 	url = https://github.com/ucb-bar/rerocc.git
@@ -157,3 +148,6 @@
 [submodule "generators/ara"]
 	path = generators/ara
 	url = https://github.com/ucb-bar/ara-wrapper.git
+[submodule "tools/firrtl2"]
+	path = tools/firrtl2
+	url = https://github.com/ucb-bar/firrtl2.git

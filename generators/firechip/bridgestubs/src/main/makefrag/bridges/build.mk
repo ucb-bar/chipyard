@@ -21,8 +21,9 @@ $(FIRRTL_FILE) $(ANNO_FILE) &: firesim_target_symlink_hook
 			CONFIG=$(TARGET_CONFIG) \
 			CONFIG_PACKAGE=$(TARGET_CONFIG_PACKAGE) \
 			GENERATOR_PACKAGE=chipyard \
+			EXTRA_CHISEL_OPTIONS=--emit-legacy-sfc \
 			TB=unused \
 			TOP=unused
 	# $(long_name) must be same as Chipyard
-	ln -sf $(CHIPYARD_STAGING_DIR)/generated-src/$(long_name)/$(long_name).fir $(FIRRTL_FILE)
+	ln -sf $(CHIPYARD_STAGING_DIR)/generated-src/$(long_name)/$(long_name).sfc.fir $(FIRRTL_FILE)
 	ln -sf $(CHIPYARD_STAGING_DIR)/generated-src/$(long_name)/$(long_name).anno.json $(ANNO_FILE)

@@ -88,9 +88,9 @@ CHECK_SUBMODULES_COMMAND = echo "Checking all submodules in generators/ are init
 SCALA_EXT = scala
 VLOG_EXT = sv v
 FIRESIM_DIR = $(if $(FIRESIM_STANDALONE),sims/firesim-staging/firesim-symlink,sims/firesim)
-FIRESIM_SOURCE_DIRS = $(addprefix $(FIRESIM_DIR)/,sim/firesim-lib sim/midas/targetutils) $(addprefix generators/firechip/,core bridge-interfaces)
+FIRESIM_SOURCE_DIRS = $(addprefix $(FIRESIM_DIR)/,sim/firesim-lib sim/midas/targetutils) $(addprefix generators/firechip/,core bridge-interfaces) tools/firrtl2
 CHIPYARD_SOURCE_DIRS = \
-	$(filter-out $(base_dir)/generators/firechip,$(wildcard $(addprefix $(base_dir)/,generators/* fpga/fpga-shells fpga/src tools/stage tools/stage-chisel3))) \
+	$(filter-out $(base_dir)/generators/firechip,$(wildcard $(addprefix $(base_dir)/,generators/* fpga/fpga-shells fpga/src tools/stage))) \
 	$(addprefix $(base_dir)/,$(FIRESIM_SOURCE_DIRS))
 CHIPYARD_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(SCALA_EXT))
 CHIPYARD_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DIRS),$(VLOG_EXT))
