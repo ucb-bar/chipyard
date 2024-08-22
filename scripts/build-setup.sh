@@ -271,7 +271,8 @@ if run_step "6"; then
             set -e # Subshells un-set "set -e" so it must be re enabled
             source sourceme-manager.sh --skip-ssh-setup
             pushd sim
-            make firesim-main-classpath
+            # avoid directly building classpath s.t. target-injected files can be recompiled
+            make sbt SBT_COMMAND="compile"
             popd
         )
         exit_if_last_command_failed

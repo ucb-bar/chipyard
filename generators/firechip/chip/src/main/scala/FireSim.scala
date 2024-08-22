@@ -1,26 +1,27 @@
-//See LICENSE for license details.
+// See LICENSE for license details.
 
-package firesim.firesim
+package firechip.chip
 
 import scala.collection.mutable.{LinkedHashMap}
 
 import chisel3._
-import chisel3.experimental.{IO, annotate}
+import chisel3.experimental.{annotate}
 
 import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem._
-import org.chipsalliance.cde.config.{Field, Config, Parameters}
-import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, InModuleBody, ValName}
-import freechips.rocketchip.util.{ResetCatchAndSync, RecordMap}
+import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.tile.{RocketTile}
 import boom.v3.common.{BoomTile}
+import freechips.rocketchip.util.property
 
-import midas.widgets.{Bridge, PeekPokeBridge, RationalClockBridge, RationalClock, ResetPulseBridge, ResetPulseBridgeParameters}
-import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotation}
 import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
 import chipyard.clocking._
+
+import firesim.lib.bridges.{PeekPokeBridge, RationalClockBridge, ResetPulseBridge, ResetPulseBridgeParameters}
+import firesim.lib.bridgeutils.{RationalClock}
+import midas.targetutils.{MemModelAnnotation, EnableModelMultiThreadingAnnotation, AutoCounterFirrtlAnnotation}
 
 case object FireSimMultiCycleRegFile extends Field[Boolean](false)
 case object FireSimFAME5 extends Field[Boolean](false)
@@ -70,9 +71,27 @@ class FireSimClockBridgeInstantiator extends HarnessClockInstantiator {
   }
 }
 
+// for all cover statments in an RC-based design, emit an annotation
+class FireSimPropertyLibrary extends property.BasePropertyLibrary {
+  def generateProperty(prop_param: property.BasePropertyParameters)(implicit sourceInfo: chisel3.internal.sourceinfo.SourceInfo): Unit = {
+    if (!(prop_param.cond.isLit) && chisel3.experimental.DataMirror.internal.isSynthesizable(prop_param.cond)) {
+      annotate(new chisel3.experimental.ChiselAnnotation {
+        val implicitClock = chisel3.Module.clock
+        val implicitReset = chisel3.Module.reset
+        def toFirrtl = AutoCounterFirrtlAnnotation(prop_param.cond.toNamed,
+                                                   implicitClock.toNamed.toTarget,
+                                                   implicitReset.toNamed.toTarget,
+                                                   prop_param.label,
+                                                   prop_param.message,
+                                                   coverGenerated = true)
+      })
+    }
+  }
+}
+
 class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInstantiators {
   require(harnessClockInstantiator.isInstanceOf[FireSimClockBridgeInstantiator])
-  freechips.rocketchip.util.property.cover.setPropLib(new midas.passes.FireSimPropertyLibrary())
+  freechips.rocketchip.util.property.cover.setPropLib(new FireSimPropertyLibrary)
 
   // The peek-poke bridge must still be instantiated even though it's
   // functionally unused. This will be removed in a future PR.
@@ -97,7 +116,6 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInsta
   // time zero in the event their local reset is delayed (typically because it
   // has been pipelined)
   midas.targetutils.GlobalResetCondition(resetBridge.io.reset)
-
 
   // FireSim multi-cycle regfile optimization
   // FireSim ModelMultithreading

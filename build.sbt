@@ -64,13 +64,6 @@ lazy val commonSettings = Seq(
 
 val rocketChipDir = file("generators/rocket-chip")
 
-lazy val firesimAsLibrary = sys.env.get("FIRESIM_STANDALONE") == None
-lazy val firesimDir = if (firesimAsLibrary) {
-  file("sims/firesim/sim/")
-} else {
-  file("../../sim")
-}
-
 /**
   * It has been a struggle for us to override settings in subprojects.
   * An example would be adding a dependency to rocketchip on midas's targetutils library,
@@ -111,6 +104,12 @@ lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++
   )
 )
 
+lazy val scalaTestSettings =  Seq(
+  libraryDependencies ++= Seq(
+    "org.scalatest" %% "scalatest" % "3.2.+" % "test"
+  )
+)
+
 
 // Subproject definitions begin
 
@@ -119,19 +118,12 @@ lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++
 lazy val hardfloat = freshProject("hardfloat", file("generators/hardfloat/hardfloat"))
   .settings(chiselSettings)
   .settings(commonSettings)
-  .dependsOn(if (chisel6) midasStandaloneTargetUtils else midasTargetUtils)
-  .settings(
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test"
-    )
-  )
+  .dependsOn(if (chisel6) midas_standalone_target_utils else midas_target_utils)
+  .settings(scalaTestSettings)
 
 lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(commonSettings)
-  .settings(
-    libraryDependencies ++= Seq(
-    )
-  )
+  .settings(scalaTestSettings)
 
 lazy val diplomacy = freshProject("diplomacy", file("generators/diplomacy/diplomacy"))
   .dependsOn(cde)
@@ -143,11 +135,11 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .dependsOn(hardfloat, rocketMacros, diplomacy, cde)
   .settings(commonSettings)
   .settings(chiselSettings)
+  .settings(scalaTestSettings)
   .settings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "mainargs" % "0.5.0",
       "org.json4s" %% "json4s-jackson" % "4.0.5",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test",
       "org.scala-graph" %% "graph-core" % "1.13.5"
     )
   )
@@ -155,15 +147,6 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
 
 // -- Chipyard-managed External Projects --
-
-// Contains annotations & firrtl passes you may wish to use in rocket-chip without
-// introducing a circular dependency between RC and MIDAS
-lazy val midasTargetUtils = (project in file ("sims/firesim/sim/midas/targetutils"))
-  .settings(commonSettings)
-  .settings(chiselSettings)
-lazy val midasStandaloneTargetUtils = (project in file("tools/midas-targetutils"))
-  .settings(commonSettings)
-  .settings(chiselSettings)
 
 lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, rocketchip_blocks)
@@ -298,9 +281,9 @@ lazy val dsptools = freshProject("dsptools", file(dsptoolsDir))
   .settings(
     chiselSettings,
     commonSettings,
+    scalaTestSettings,
     libraryDependencies ++= Seq(
       "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
-      "org.scalatest" %% "scalatest" % "3.2.+" % "test",
       "org.typelevel" %% "spire" % "0.18.0",
       "org.scalanlp" %% "breeze" % "2.1.0",
       "junit" % "junit" % "4.13" % "test",
@@ -328,27 +311,6 @@ lazy val rocketchip_inclusive_cache = (project in file("generators/rocket-chip-i
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
 
-// Library components of FireSim
-lazy val midas      = (project in file ("sims/firesim/sim/midas"))
-  .dependsOn(rocketchip, midasTargetUtils)
-  .settings(libraryDependencies ++= Seq(
-     "org.scalatestplus" %% "scalacheck-1-14" % "3.1.3.0" % "test"))
-  .settings(commonSettings)
-  .settings(chiselSettings)
-
-lazy val firesimLib = (project in file("sims/firesim/sim/firesim-lib"))
-  .dependsOn(midas, icenet, testchipip, rocketchip_blocks)
-  .settings(commonSettings)
-  .settings(chiselSettings)
-
-lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
-  .settings(
-    chiselSettings,
-    commonSettings,
-    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
-    Test / testOptions += Tests.Argument("-oF")
-  )
 lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
   .dependsOn(rocketchip, rocketchip_blocks)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -357,3 +319,67 @@ lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
 lazy val chipyard_fpga = (project in file("./fpga"))
   .dependsOn(chipyard, fpga_shells)
   .settings(commonSettings)
+
+// Components of FireSim
+
+lazy val firesimAsLibrary = sys.env.get("FIRESIM_STANDALONE") == None
+lazy val firesimDir = if(firesimAsLibrary) {
+  file("sims/firesim")
+} else {
+  file("sims/firesim-staging/firesim-symlink")
+}
+
+// TODO: AJG: Fix
+// Contains annotations & firrtl passes you may wish to use in rocket-chip without
+// introducing a circular dependency between RC and MIDAS
+// this should be minimally dependent on firesim
+lazy val midas_target_utils = (project in firesimDir / "sim/midas/targetutils")
+  .settings(commonSettings)
+  .settings(chiselSettings)
+
+// compiles with chisel6 (only the APIs)
+lazy val midas_standalone_target_utils = (project in file("tools/midas-targetutils"))
+  .settings(commonSettings)
+  .settings(chiselSettings)
+// TODO: AJG: ^ Fix
+
+// Provides API for bridges to be created in the target.
+// Includes target-side of FireSim-provided bridges and their interfaces that are shared
+// between FireSim and the target. Minimal in scope (should only depend on Chisel/Firrtl2)
+lazy val firesim_lib = (project in firesimDir / "sim/firesim-lib")
+  .dependsOn(midas_target_utils)
+  .settings(commonSettings)
+  .settings(chiselSettings)
+  .settings(scalaTestSettings)
+
+// Interfaces for target-specific bridges shared with FireSim.
+// Minimal in scope (should only depend on Chisel/Firrtl).
+// This is copied to FireSim's GoldenGate compiler.
+lazy val firechip_bridgeinterfaces = (project in file("generators/firechip/bridgeinterfaces"))
+  .settings(
+    chiselSettings,
+    commonSettings,
+  )
+
+// Target-side bridge definitions, CC files, etc used for FireSim.
+// This only compiled with Chipyard.
+lazy val firechip_bridgestubs = (project in file("generators/firechip/bridgestubs"))
+  .dependsOn(chipyard, firesim_lib % "compile->compile;test->test", firechip_bridgeinterfaces)
+  .settings(
+    chiselSettings,
+    commonSettings,
+    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
+    Test / testOptions += Tests.Argument("-oF")
+  )
+  .settings(scalaTestSettings)
+
+// FireSim top-level project that includes the FireSim harness, CC files, etc needed for FireSim.
+lazy val firechip = (project in file("generators/firechip/chip"))
+  .dependsOn(chipyard, firesim_lib % "compile->compile;test->test", firechip_bridgestubs, firechip_bridgeinterfaces)
+  .settings(
+    chiselSettings,
+    commonSettings,
+    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
+    Test / testOptions += Tests.Argument("-oF")
+  )
+  .settings(scalaTestSettings)
