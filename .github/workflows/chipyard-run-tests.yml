@@ -35,7 +35,7 @@ jobs:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') != true }}
     runs-on: ubuntu-22.04
     steps:
-      - run: true
+      - run: false
 
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute This is based off the conditional job execution

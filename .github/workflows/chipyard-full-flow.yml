@@ -18,7 +18,6 @@ env:
   # temporary directories should be located in /scratch (since it's larger)
   REMOTE_WORK_DIR: /scratch/buildbot/cy-ci-shared/cy-workdir-${{ github.sha }}
   JAVA_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-javatmpdir-${{ github.sha }}
-  GIT_SSH_COMMAND: "ssh -v"
 
 jobs:
   cancel-prior-workflows:
@@ -38,7 +37,7 @@ jobs:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') != true }}
     runs-on: ubuntu-22.04
     steps:
-      - run: true
+      - run: false
 
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute This is based off the conditional job execution
@@ -175,9 +174,6 @@ jobs:
           source sourceme-manager.sh --skip-ssh-setup
           popd
           cd sims/firesim-staging
-          ls -alh
-          ls -alh firesim-symlink
-          ls -alh firesim-symlink/.
           export TEST_DISABLE_VERILATOR=1
           export TEST_DISABLE_VIVADO=1
           make launch-sbt SBT_COMMAND=";project firechip_bridgestubs; testOnly firechip.bridgestubs.BridgeTests"

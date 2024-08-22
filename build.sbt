@@ -352,12 +352,7 @@ lazy val firrtl2_bridge = freshProject("firrtl2_bridge", file("./tools/firrtl2/b
   .settings(commonSettings)
   .settings(chiselSettings)
 
-lazy val firesimAsLibrary = sys.env.get("FIRESIM_STANDALONE") == None
-lazy val firesimDir = if(firesimAsLibrary) {
-  file("sims/firesim")
-} else {
-  file("sims/firesim-staging/firesim-symlink")
-}
+lazy val firesimDir = file("sims/firesim")
 
 // Contains annotations & firrtl passes you may wish to use in rocket-chip without
 // introducing a circular dependency between RC and MIDAS.
