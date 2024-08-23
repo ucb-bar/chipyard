@@ -45,6 +45,9 @@ class CIEnvironment(TypedDict):
     # Github token with more permissions to access repositories across the FireSim org.
     PERSONAL_ACCESS_TOKEN: str
 
+    # Path to Chipyard's HWDB file (if it exists)
+    CHIPYARD_HWDB_PATH: str
+
 
 GITHUB_ACTIONS_ENV_VAR_NAME = 'GITHUB_ACTIONS'
 RUN_LOCAL = os.environ.get(GITHUB_ACTIONS_ENV_VAR_NAME, 'false') == 'false'
@@ -70,6 +73,7 @@ ci_env: CIEnvironment = {
 
     'REMOTE_WORK_DIR': get_ci_value('REMOTE_WORK_DIR', local_cy_dir if RUN_LOCAL else ""),
     'PERSONAL_ACCESS_TOKEN': get_ci_value('PERSONAL_ACCESS_TOKEN'),
+    'CHIPYARD_HWDB_PATH': get_ci_value('PERSONAL_ACCESS_TOKEN'),
 }
 
 manager_fsim_dir = ci_env['REMOTE_WORK_DIR'] + "/sims/firesim"

@@ -17,7 +17,8 @@ env:
   PERSONAL_ACCESS_TOKEN: ${{ secrets.BARTENDER_PERSONAL_ACCESS_TOKEN }}
 
   # temporary directories should be located in /scratch (since it's larger)
-  REMOTE_WORK_DIR: /scratch/buildbot/cy-shared/cy-${{ github.sha }}-${{ github.workflow }}
+  REMOTE_WORK_DIR: /scratch/buildbot/cy-ci-shared/cy-${{ github.sha }}-${{ github.workflow }}
+  JAVA_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-javatmpdir-${{ github.sha }}-${{ github.workflow }}
 
   # misc
   TERM: xterm-256-color
@@ -123,10 +124,15 @@ jobs:
         run: |
           mkdir -p $(dirname ${{ env.REMOTE_WORK_DIR }})
           git clone ${{ github.workspace }} ${{ env.REMOTE_WORK_DIR }}
+      - name: Setup Java temp. directory
+        run: |
+          mkdir -p ${{ env.JAVA_TMP_DIR }}
       - name: Setup repo (for xilinx_alveo_u250 platform)
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
+          export MAKEFLAGS="-j32"
           ./build-setup.sh --verbose
+          cd sims/firesim
           source sourceme-manager.sh --skip-ssh-setup
           firesim managerinit --platform xilinx_alveo_u250
 
@@ -160,6 +166,8 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'ci:local-fpga-buildbitstream-deploy')
     needs: [setup-persistent-repo]
     runs-on: as4
+    env:
+      CHIPYARD_HWDB_PATH: sims/firesim-staging/sample_config_hwdb.yaml
     steps:
       - uses: actions/checkout@v4
       - name: Run buildbitstream command and update sample local bitstreams
@@ -167,7 +175,7 @@ jobs:
       - uses: peter-evans/create-pull-request@v6
         with:
           base: ${{ github.head_ref }}
-          add-paths: "sims/firesim-staging/sample_config_hwdb.yaml"
+          add-paths: ${{ env.CHIPYARD_HWDB_PATH }}
           commit-message: "Update local bitstream(s) [ci skip]"
           body: "Update local bitstream(s) for PR #${{ github.event.pull_request.number }}"
           branch-suffix: random

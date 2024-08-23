@@ -1,74 +1,57 @@
-import math
-import requests
-import json
+from github import Github
+import time
 
-import fabric_cfg
 from ci_variables import ci_env
 
-from typing import Dict, List, Any
+# taken from https://stackoverflow.com/questions/63427607/python-upload-files-directly-to-github-using-pygithub
+# IMPORTANT: only works for binary files! (i.e. tar.gz files)
+def upload_binary_file(local_file_path, gh_file_path):
+    print(f":DEBUG: Attempting to upload {local_file_path} to {gh_file_path}")
 
-# Github URL related constants
-gh_repo_api_url      = f"{ci_env['GITHUB_API_URL']}/repos/{ci_env['GITHUB_REPOSITORY']}"
-gh_issues_api_url    = f"{gh_repo_api_url}/issues"
-gha_api_url          = f"{gh_repo_api_url}/actions"
-gha_runners_api_url  = f"{gha_api_url}/runners"
-gha_runs_api_url     = f"{gha_api_url}/runs"
-gha_workflow_api_url = f"{gha_runs_api_url}/{ci_env['GITHUB_RUN_ID']}"
+    g = Github(ci_env['PERSONAL_ACCESS_TOKEN'])
 
-def get_header(gh_token: str) -> Dict[str, str]:
-    return {
-        "Authorization": f"token {gh_token.strip()}",
-        "Accept": "application/vnd.github+json",
-        "User-Agent": "bar-tender",
-    }
+    repo = g.get_repo(f'{GH_ORG}/{GH_REPO}')
+    all_files = []
+    contents = repo.get_contents("")
+    while contents:
+        file_content = contents.pop(0)
+        if file_content.type == "dir":
+            contents.extend(repo.get_contents(file_content.path))
+        else:
+            file = file_content
+            all_files.append(str(file).replace('ContentFile(path="','').replace('")',''))
 
-def get_runners(gh_token: str) -> List[Dict[str, Any]]:
-    r = requests.get(gha_runners_api_url, headers=get_header(gh_token))
-    if r.status_code != 200:
-        raise Exception(f"Unable to retrieve count of GitHub Actions Runners\nFull Response Below:\n{r}")
-    res_dict = r.json()
-    runner_count = res_dict["total_count"]
+    with open(local_file_path, 'rb') as file:
+        content = file.read()
 
-    runners: List[Dict[str, Any]] = []
-    for page_idx in range(math.ceil(runner_count / 30)):
-        r = requests.get(gha_runners_api_url, params={"per_page" : 30, "page" : page_idx + 1}, headers=get_header(gh_token))
-        if r.status_code != 200:
-            raise Exception(f"Unable to retrieve (sub)list of GitHub Actions Runners\nFull Response Below\n{r}")
-        res_dict = r.json()
-        runners = runners + res_dict["runners"]
+    tries = 10
+    delay = 15
+    msg = f"Committing files from {ci_env['GITHUB_SHA']}"
+    upload_branch = 'main'
+    r = None
 
-    return runners
+    # Upload to github
+    git_file = gh_file_path
+    if git_file in all_files:
+        contents = repo.get_contents(git_file)
+        for n in range(tries):
+            try:
+                r = repo.update_file(contents.path, msg, content, contents.sha, branch=upload_branch)
+                break
+            except Exception as e:
+                print(f"Got exception: {e}")
+                time.sleep(delay)
+        assert r is not None, f"Unable to poll 'update_file' API {tries} times"
+        print(f"Updated: {git_file}")
+    else:
+        for n in range(tries):
+            try:
+                r = repo.create_file(git_file, msg, content, branch=upload_branch)
+                break
+            except Exception as e:
+                print(f"Got exception: {e}")
+                time.sleep(delay)
+        assert r is not None, f"Unable to poll 'create_file' API {tries} times"
+        print(f"Created: {git_file}")
 
-def delete_runner(gh_token: str, runner: Dict[str, Any]) -> bool:
-    r = requests.delete(f"""{gha_runners_api_url}/{runner["id"]}""", headers=get_header(gh_token))
-    if r.status_code != 204:
-        print(f"""Unable to delete runner {runner["name"]} with id: {runner["id"]}\nFull Response Below\n{r}""")
-        return False
-    return True
-
-def deregister_offline_runners(gh_token: str) -> None:
-    runners = get_runners(gh_token)
-    for runner in runners:
-        if runner["status"] == "offline":
-            delete_runner(gh_token, runner)
-
-def deregister_runners(gh_token: str, runner_name: str) -> None:
-    runners = get_runners(gh_token)
-    for runner in runners:
-        if runner_name in runner["name"]:
-            delete_runner(gh_token, runner)
-
-# obtain issue number separately since workflow-monitor shouldn't query the GH-A runner area
-# since it's separate from it
-def get_issue_number() -> int:
-    with open(ci_env['GITHUB_EVENT_PATH']) as f:
-        event_payload = json.load(f)
-        gh_issue_id = event_payload["number"]
-        return gh_issue_id
-    raise Exception(f"Unable to return an issue number using {ci_env['GITHUB_EVENT_PATH']}")
-
-def issue_post(gh_token: str, issue_num: int, body: str) -> None:
-    res = requests.post(f"{gh_issues_api_url}/{issue_num}/comments",
-            json={"body": body}, headers=get_header(gh_token))
-    if res.status_code != 201:
-        raise Exception(f"HTTP POST error: {res} {res.json()}\nUnable to post GitHub PR comment.")
+    return r['commit'].sha
