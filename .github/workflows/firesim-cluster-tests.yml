@@ -106,7 +106,7 @@ jobs:
 
   setup-persistent-repo:
     name: setup-persistent-repo
-    runs-on: local-fpga
+    runs-on: as4
     needs: filter-jobs-on-changes
     if: needs.filter-jobs-on-changes.outputs.run-ci == 'true'
     steps:
@@ -133,7 +133,7 @@ jobs:
   run-metasims-xilinx_alveo_u250:
     name: run-metasims-xilinx_alveo_u250
     needs: [setup-persistent-repo]
-    runs-on: local-fpga
+    runs-on: as4
     steps:
       - uses: actions/checkout@v4
       - name: Run metasims (VCS + Verilator)
@@ -143,7 +143,7 @@ jobs:
     name: run-basic-linux-poweroffs-xilinx_alveo_u250
     if: contains(github.event.pull_request.labels.*.name, 'ci:fpga-deploy')
     needs: [setup-persistent-repo]
-    runs-on: local-fpga
+    runs-on: as4
     steps:
       # This forces a fresh clone of the repo during the `checkout` step
       # to resolve stale submodule URLs. See https://github.com/ucb-bar/chipyard/pull/1156.
@@ -159,7 +159,7 @@ jobs:
     name: build-default-bitstreams
     if: contains(github.event.pull_request.labels.*.name, 'ci:local-fpga-buildbitstream-deploy')
     needs: [setup-persistent-repo]
-    runs-on: local-fpga
+    runs-on: as4
     steps:
       - uses: actions/checkout@v4
       - name: Run buildbitstream command and update sample local bitstreams
@@ -180,7 +180,7 @@ jobs:
       run-basic-linux-poweroffs-xilinx_alveo_u250,
       build-default-bitstreams]
     # uses a separate runner to cleanup (irrespective, of other jobs cancelled, running, etc)
-    runs-on: local-fpga-cleanup
+    runs-on: as4
     if: ${{ always() }}
     steps:
       - name: Delete repo copy

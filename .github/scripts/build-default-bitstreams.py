@@ -16,6 +16,11 @@ URL_PREFIX = f"https://raw.githubusercontent.com/{GH_ORG}/{GH_REPO}"
 
 shared_build_dir = "/scratch/buildbot/FIRESIM_BUILD_DIR"
 
+from_chipyard_firesim_build_recipes = "sim/firesim-staging/sample_config_build_recipes.yaml"
+from_chipyard_firesim_hwdb = "sim/firesim-staging/sample_config_hwdb.yaml"
+
+sample_hwdb_filename = f"{manager_fsim_dir}/deploy/sample-backup-configs/sample_config_hwdb.yaml"
+
 # taken from https://stackoverflow.com/questions/63427607/python-upload-files-directly-to-github-using-pygithub
 # IMPORTANT: only works for binary files! (i.e. tar.gz files)
 def upload_binary_file(local_file_path, gh_file_path):
@@ -91,8 +96,8 @@ def run_local_buildbitstreams():
                 build_yaml_lines = open(build_yaml).read().split("\n")
                 with open(copy_build_yaml, "w") as byf:
                     for line in build_yaml_lines:
-                        if "- firesim" in line:
-                            # comment out AWS specific lines
+                        if "- midas" in line:
+                            # comment out midasexample lines
                             byf.write("# " + line + '\n')
                         elif 'default_build_dir:' in line:
                             byf.write(line.replace('null', shared_build_dir) + '\n')
@@ -174,8 +179,6 @@ def run_local_buildbitstreams():
 
                 return links
 
-            relative_hwdb_path = "deploy/sample-backup-configs/sample_config_hwdb.yaml"
-            sample_hwdb_filename = f"{manager_fsim_dir}/{relative_hwdb_path}"
 
             def replace_in_hwdb(hwdb_entry_name: str, link: str) -> None:
                 # replace the sample hwdb's bit line only
@@ -219,10 +222,10 @@ def run_local_buildbitstreams():
             # priority == roughly the more powerful and available
             # ipaddr, buildtool:version, use unique build dir, unique build dir path, priority (0 is highest)(unused by code but used to track which machine has most resources)
             hosts = [
-                (          "as4",  "vivado:2022.1", False, "", 0),
+                (    "localhost",  "vivado:2022.1", False, "", 0),
                 ("buildbot1@as4",  "vivado:2022.1",  True, "/scratch/buildbot1/FIRESIM_BUILD_DIR", 0),
                 ("buildbot2@as4",  "vivado:2022.1",  True, "/scratch/buildbot2/FIRESIM_BUILD_DIR", 0),
-                (    "localhost",   "vitis:2022.1", False, "", 0),
+                (          "a17",   "vitis:2022.1", False, "", 0),
                 ("buildbot1@a17",   "vitis:2022.1",  True, "/scratch/buildbot1/FIRESIM_BUILD_DIR", 0),
                 ("buildbot2@a17",   "vitis:2021.1",  True, "/scratch/buildbot2/FIRESIM_BUILD_DIR", 0),
                 ("buildbot3@a17",   "vitis:2021.1",  True, "/scratch/buildbot3/FIRESIM_BUILD_DIR", 0),
@@ -277,23 +280,23 @@ def run_local_buildbitstreams():
 
             # hwdb_entry_name, platform_name, buildtool:version
             batch_hwdbs_in = [
-                # hwdb's to verify FPGA builds
-                ("vitis_firesim_rocket_singlecore_no_nic", "vitis", "vitis:2022.1"),
+                ## hwdb's to verify FPGA builds
+                #("vitis_firesim_rocket_singlecore_no_nic", "vitis", "vitis:2022.1"),
                 ("nitefury_firesim_rocket_singlecore_no_nic", "rhsresearch_nitefury_ii", "vitis:2022.1"),
-                ("alveo_u200_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u200", "vitis:2021.1"),
-                ("alveo_u250_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
-                ("alveo_u280_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u280", "vitis:2021.1"),
-                # TODO: disable due to not having a license
-                #("xilinx_vcu118_firesim_rocket_singlecore_4GB_no_nic", "xilinx_vcu118", "vivado:2023.1"),
+                #("alveo_u200_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u200", "vitis:2021.1"),
+                #("alveo_u250_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
+                #("alveo_u280_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u280", "vitis:2021.1"),
+                ## TODO: disable due to not having a license
+                ##("xilinx_vcu118_firesim_rocket_singlecore_4GB_no_nic", "xilinx_vcu118", "vivado:2023.1"),
 
-                # extra hwdb's to run CI with
-                ("alveo_u250_firesim_rocket_quadcore_no_nic", "xilinx_alveo_u250", "vivado:2022.1"),
-                ("alveo_u250_firesim_boom_singlecore_no_nic", "xilinx_alveo_u250", "vivado:2022.1"),
-                ("alveo_u250_firesim_rocket_singlecore_nic", "xilinx_alveo_u250", "vivado:2022.1"),
+                ## extra hwdb's to run CI with
+                #("alveo_u250_firesim_rocket_quadcore_no_nic", "xilinx_alveo_u250", "vivado:2022.1"),
+                #("alveo_u250_firesim_boom_singlecore_no_nic", "xilinx_alveo_u250", "vivado:2022.1"),
+                #("alveo_u250_firesim_rocket_singlecore_nic", "xilinx_alveo_u250", "vivado:2022.1"),
 
-                # TODO: disable gemmini builds until target runs under chisel6
-                ## extra hwdb's
-                #("alveo_u250_firesim_gemmini_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
+                ## TODO: disable gemmini builds until target runs under chisel6
+                ### extra hwdb's
+                ##("alveo_u250_firesim_gemmini_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
             ]
 
             do_builds(batch_hwdbs_in)
@@ -302,7 +305,7 @@ def run_local_buildbitstreams():
             run(f"cat {sample_hwdb_filename}")
 
             # copy back to workspace area so you can PR it
-            run(f"cp -f {sample_hwdb_filename} {ci_env['GITHUB_WORKSPACE']}/{relative_hwdb_path}")
+            run(f"cp -f {sample_hwdb_filename} {local_cy_dir}/{from_chipyard_firesim_hwdb}")
 
 if __name__ == "__main__":
     execute(run_local_buildbitstreams, hosts=["localhost"])
