@@ -174,9 +174,6 @@ jobs:
           source sourceme-manager.sh --skip-ssh-setup
           popd
           cd sims/firesim-staging
-          ls -alh
-          ls -alh firesim-symlink
-          ls -alh firesim-symlink/.
           export TEST_DISABLE_VERILATOR=1
           export TEST_DISABLE_VIVADO=1
           make launch-sbt SBT_COMMAND=";project firechip_bridgestubs; testOnly firechip.bridgestubs.BridgeTests"
