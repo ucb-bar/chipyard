@@ -18,7 +18,7 @@ shared_build_dir = "/scratch/buildbot/FIRESIM_BUILD_DIR"
 from_chipyard_firesim_build_recipes = "sims/firesim-staging/sample_config_build_recipes.yaml"
 from_chipyard_firesim_hwdb = ci_env['CHIPYARD_HWDB_PATH']
 
-sample_hwdb_filename = f"{manager_fsim_dir}/deploy/sample-backup-configs/sample_config_hwdb.yaml"
+sample_hwdb_filename = f"{remote_fsim_dir}/deploy/sample-backup-configs/sample_config_hwdb.yaml"
 
 def run_local_buildbitstreams():
     """Runs local buildbitstreams"""
@@ -29,14 +29,14 @@ def run_local_buildbitstreams():
 
     # repo should already be checked out
 
-    with prefix(f"cd {manager_fsim_dir}"):
+    with prefix(f"cd {remote_fsim_dir}"):
 
         with prefix('source sourceme-manager.sh --skip-ssh-setup'):
 
             # return a copy of config_build.yaml w/ hwdb entry(s) uncommented + new build dir
             def modify_config_build(hwdb_entries_to_gen: List[str]) -> str:
-                build_yaml = f"{manager_fsim_dir}/deploy/config_build.yaml"
-                copy_build_yaml = f"{manager_fsim_dir}/deploy/config_build_{hash(tuple(hwdb_entries_to_gen))}.yaml"
+                build_yaml = f"{remote_fsim_dir}/deploy/config_build.yaml"
+                copy_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{hash(tuple(hwdb_entries_to_gen))}.yaml"
 
                 # comment out old lines
                 build_yaml_lines = open(build_yaml).read().split("\n")
@@ -65,7 +65,7 @@ def run_local_buildbitstreams():
                 return copy_build_yaml
 
             def add_host_list(build_yaml: str, hostlist: List[Tuple[str, bool, str]]) -> str:
-                copy_build_yaml = f"{manager_fsim_dir}/deploy/config_build_{hash(tuple(hostlist))}.yaml"
+                copy_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{hash(tuple(hostlist))}.yaml"
                 build_yaml_lines = open(build_yaml).read().split("\n")
                 with open(copy_build_yaml, "w") as byf:
                     for line in build_yaml_lines:
@@ -92,7 +92,7 @@ def run_local_buildbitstreams():
                 rc = 0
                 with settings(warn_only=True):
                     # pty=False needed to avoid issues with screen -ls stalling in fabric
-                    build_result = run(f"timeout 10h firesim buildbitstream -b {build_yaml} --forceterminate", pty=False)
+                    build_result = run(f"timeout 10h firesim buildbitstream -b {build_yaml} -r {remote_cy_dir}/{from_chipyard_firesim_build_recipes} --forceterminate", pty=False)
                     rc = build_result.return_code
 
                 if rc != 0:
@@ -101,7 +101,7 @@ def run_local_buildbitstreams():
                     run(f"""LAST_LOG=$(ls | tail -n1) && if [ -f "$LAST_LOG" ]; then tail -n{log_lines} $LAST_LOG; fi""")
                     raise Exception(f"Buildbitstream failed with code: {rc}")
 
-                hwdb_entry_dir = f"{manager_fsim_dir}/deploy/built-hwdb-entries"
+                hwdb_entry_dir = f"{remote_fsim_dir}/deploy/built-hwdb-entries"
                 links = []
 
                 for hwdb_entry_name, platform in zip(hwdb_entries, platforms):
@@ -251,7 +251,7 @@ def run_local_buildbitstreams():
             run(f"cat {sample_hwdb_filename}")
 
             # copy back to workspace area so you can PR it
-            run(f"cp -f {sample_hwdb_filename} {local_cy_dir}/{from_chipyard_firesim_hwdb}")
+            run(f"cp -f {sample_hwdb_filename} {ci_env['GITHUB_WORKSPACE']}/{from_chipyard_firesim_hwdb}")
 
 if __name__ == "__main__":
     execute(run_local_buildbitstreams, hosts=["localhost"])
