@@ -6,6 +6,7 @@ from fabric.api import prefix, run, settings, execute # type: ignore
 import fabric_cfg
 from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
 from github_common import upload_binary_file
+from utils import print_last_firesim_log
 
 from typing import List, Tuple
 
@@ -96,10 +97,9 @@ def run_local_buildbitstreams():
                     rc = build_result.return_code
 
                 if rc != 0:
-                    log_lines = 200
-                    print(f"Buildbitstream failed. Printing {log_lines} of last log file:")
-                    run(f"""LAST_LOG=$(ls | tail -n1) && if [ -f "$LAST_LOG" ]; then tail -n{log_lines} $LAST_LOG; fi""")
-                    raise Exception(f"Buildbitstream failed with code: {rc}")
+                    print(f"Buildbitstream failed.")
+                    print_last_firesim_log(200)
+                    raise Exception(f"Failed with code: {rc}")
 
                 hwdb_entry_dir = f"{remote_fsim_dir}/deploy/built-hwdb-entries"
                 links = []

@@ -17,7 +17,7 @@ def get_ci_value(env_var: str, default_value: str = "") -> str:
         return os.environ[env_var]
 
 # Create a env. dict that is populated from the environment or from defaults.
-ci_env: CIEnvironment = {
+ci_env = {
     # If not running under a CI pipeline defaults are provided that
     # will suffice to run scripts that do not use GHA API calls.
     # To manually provide environment variable settings, export GITHUB_ACTIONS=true, and provide

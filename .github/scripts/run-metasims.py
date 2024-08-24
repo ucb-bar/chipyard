@@ -5,6 +5,7 @@ from fabric.api import prefix, run, settings, execute # type: ignore
 
 import fabric_cfg
 from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
+from utils import print_last_firesim_log, print_last_firesim_workload
 
 def run_parallel_metasim():
     """ Runs parallel baremetal metasimulations """
@@ -30,7 +31,7 @@ def run_parallel_metasim():
                 """
                 log_tail_length = 300
 
-                def run_firesim_cmd(typ, extra_args):
+                def run_firesim_cmd(typ, extra_args = ""):
                     timeout_prefix = f"timeout {timeout} "
                     firesim_opts = f"-c {workload} -a {remote_cy_dir}/sims/firesim-staging/sample_config_hwdb.yaml -r {remote_cy_dir}/sims/firesim-staging/sample_config_build_recipes.yaml"
                     return run_warn_only(f"{timeout_prefix} firesim {firesim_opts} {extra_args} {typ}", pty=False)
