@@ -4,7 +4,7 @@ from pathlib import Path
 from fabric.api import prefix, run, settings, execute # type: ignore
 
 import fabric_cfg
-from ci_variables import ci_env
+from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
 from github_common import upload_binary_file
 
 from typing import List, Tuple

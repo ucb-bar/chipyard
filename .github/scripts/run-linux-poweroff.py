@@ -3,7 +3,7 @@
 from fabric.api import prefix, run, settings, execute # type: ignore
 
 import fabric_cfg
-from ci_variables import ci_env
+from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
 from utils import search_match_in_last_workloads_output_file, create_args, FpgaPlatform
 
 args = create_args()
@@ -30,45 +30,34 @@ def run_linux_poweroff():
                 print(f"Starting workload run {workload}.")
                 log_tail_length = 300
 
-                def run_line(cmd):
-                    rc = 0
-                    with settings(warn_only=True):
-                        # pty=False needed to avoid issues with screen -ls stalling in fabric
-                        rc = run(cmd, pty=False).return_code
-                    return rc
-
-                def print_last_n_log():
-                    print(f"Printing last {log_tail_length} lines of log.")
-                    run(f"""cd {remote_fsim_dir}/deploy/log && LAST_LOG=$(ls | tail -n1) && if [ -f "$LAST_LOG" ]; then tail -n{log_lines} $LAST_LOG; fi""")
-
                 def run_firesim_cmd(typ, extra_args):
+                    timeout_prefix = f"timeout {timeout} "
                     firesim_opts = f"-c {workload_path}/{config_runtime} -a {remote_cy_dir}/sims/firesim-staging/sample_config_hwdb.yaml -r {remote_cy_dir}/sims/firesim-staging/sample_config_build_recipes.yaml"
-                    return run_line(f"{timeout_prefix} firesim {firesim_opts} {extra_args} {typ}", pty=False)
+                    return run_warn_only(f"{timeout_prefix} firesim {firesim_opts} {extra_args} {typ}", pty=False)
 
                 rc = run_firesim_cmd("launchrunfarm")
                 if rc != 0:
-                    print_last_n_log()
+                    print_last_firesim_log(log_tail_length)
 
                 rc = run_firesim_cmd("infrasetup")
                 if rc != 0:
-                    print_last_n_log()
+                    print_last_firesim_log(log_tail_length)
 
                 rc = run_firesim_cmd("runworkload")
                 if rc != 0:
-                    print_last_n_log()
+                    print_last_firesim_log(log_tail_length)
 
                 # This is a janky solution to the fact the manager does not
                 # return a non-zero exit code or some sort of result summary.
                 # The expectation here is that the PR author will manually
                 # check these output files for correctness until it can be
                 # done programmatically..
-                print(f"Printing last {log_tail_length} lines of all output files. See results-workload for more info.")
-                run(f"""cd {remote_fsim_dir}/deploy/results-workload/ && LAST_DIR=$(ls | tail -n1) && if [ -d "$LAST_DIR" ]; then tail -n{log_tail_length} $LAST_DIR/*/*; fi""")
+                print_last_firesim_workload(log_tail_length)
 
                 # need to confirm that instance is off
                 print("Terminating runfarm. Assuming this will pass.")
                 run_firesim_cmd("terminaterunfarm", "-q")
-                print_last_n_log()
+                print_last_firesim_log(log_tail_length)
 
                 # using rc of runworkload
                 if rc != 0:
