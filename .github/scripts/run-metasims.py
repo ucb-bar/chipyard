@@ -72,7 +72,7 @@ def run_parallel_metasim():
 
                     # need to confirm that instance is off
                     print("Terminating runfarm. Assuming this will pass.")
-                    run_firesim_cmd("runworkload", "-q")
+                    run_firesim_cmd("terminaterunfarm", "-q")
                     print_last_n_log()
 
                     # using rc of runworkload

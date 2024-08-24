@@ -29,24 +29,48 @@ def run_linux_poweroff():
             def run_w_timeout(workload_path, config_runtime, workload, timeout, num_passes):
                 print(f"Starting workload run {workload}.")
                 log_tail_length = 300
-                rc = 0
-                with settings(warn_only=True):
-                    # avoid logging excessive amounts to prevent GH-A masking secrets (which slows down log output)
-                    # pty=False needed to avoid issues with screen -ls stalling in fabric
-                    rc = run(f"timeout {timeout} {workload_path}/run-workload.sh {workload_path}/{config_runtime} &> {workload}.log", pty=False).return_code
-                    print(f" Printing last {log_tail_length} lines of log. See {workload}.log for full info.")
-                    run(f"tail -n {log_tail_length} {workload}.log")
 
-                    # This is a janky solution to the fact the manager does not
-                    # return a non-zero exit code or some sort of result summary.
-                    # The expectation here is that the PR author will manually
-                    # check these output files for correctness until it can be
-                    # done programmatically..
-                    print(f"Printing last {log_tail_length} lines of all output files. See results-workload for more info.")
-                    run(f"""cd deploy/results-workload/ && LAST_DIR=$(ls | tail -n1) && if [ -d "$LAST_DIR" ]; then tail -n{log_tail_length} $LAST_DIR/*/*; fi""")
+                def run_line(cmd):
+                    rc = 0
+                    with settings(warn_only=True):
+                        # pty=False needed to avoid issues with screen -ls stalling in fabric
+                        rc = run(cmd, pty=False).return_code
+                    return rc
 
-                    run(f"firesim terminaterunfarm -q -c {workload_path}/{config_runtime}")
+                def print_last_n_log():
+                    print(f"Printing last {log_tail_length} lines of log.")
+                    run(f"""cd {remote_fsim_dir}/deploy/log && LAST_LOG=$(ls | tail -n1) && if [ -f "$LAST_LOG" ]; then tail -n{log_lines} $LAST_LOG; fi""")
 
+                def run_firesim_cmd(typ, extra_args):
+                    firesim_opts = f"-c {workload_path}/{config_runtime} -a {remote_cy_dir}/sims/firesim-staging/sample_config_hwdb.yaml -r {remote_cy_dir}/sims/firesim-staging/sample_config_build_recipes.yaml"
+                    return run_line(f"{timeout_prefix} firesim {firesim_opts} {extra_args} {typ}", pty=False)
+
+                rc = run_firesim_cmd("launchrunfarm")
+                if rc != 0:
+                    print_last_n_log()
+
+                rc = run_firesim_cmd("infrasetup")
+                if rc != 0:
+                    print_last_n_log()
+
+                rc = run_firesim_cmd("runworkload")
+                if rc != 0:
+                    print_last_n_log()
+
+                # This is a janky solution to the fact the manager does not
+                # return a non-zero exit code or some sort of result summary.
+                # The expectation here is that the PR author will manually
+                # check these output files for correctness until it can be
+                # done programmatically..
+                print(f"Printing last {log_tail_length} lines of all output files. See results-workload for more info.")
+                run(f"""cd {remote_fsim_dir}/deploy/results-workload/ && LAST_DIR=$(ls | tail -n1) && if [ -d "$LAST_DIR" ]; then tail -n{log_tail_length} $LAST_DIR/*/*; fi""")
+
+                # need to confirm that instance is off
+                print("Terminating runfarm. Assuming this will pass.")
+                run_firesim_cmd("terminaterunfarm", "-q")
+                print_last_n_log()
+
+                # using rc of runworkload
                 if rc != 0:
                     raise Exception(f"Workload {workload} failed with code: {rc}")
                 else:
@@ -67,9 +91,9 @@ def run_linux_poweroff():
 
                     print(f"Workload run {workload} successful.")
 
-            run_w_timeout(f"{ci_env['GITHUB_WORKSPACE']}/deploy/workloads/ci/{args.platform}", "config_runtime_rocket_singlecore.yaml", "linux-poweroff-singlenode-rocketsinglecore", "30m", 1)
-            run_w_timeout(f"{ci_env['GITHUB_WORKSPACE']}/deploy/workloads/ci/{args.platform}", "config_runtime_rocket_quadcore.yaml", "linux-poweroff-singlenode-rocketquadcore", "30m", 1)
-            run_w_timeout(f"{ci_env['GITHUB_WORKSPACE']}/deploy/workloads/ci/{args.platform}", "config_runtime_boom_singlecore.yaml", "linux-poweroff-singlenode-boomsinglecore", "30m", 1)
+            run_w_timeout(f"{remote_cy_dir}/deploy/workloads/ci/{args.platform}", "config_runtime_rocket_singlecore.yaml", "linux-poweroff-singlenode-rocketsinglecore", "30m", 1)
+            run_w_timeout(f"{remote_cy_dir}/deploy/workloads/ci/{args.platform}", "config_runtime_rocket_quadcore.yaml", "linux-poweroff-singlenode-rocketquadcore", "30m", 1)
+            run_w_timeout(f"{remote_cy_dir}/deploy/workloads/ci/{args.platform}", "config_runtime_boom_singlecore.yaml", "linux-poweroff-singlenode-boomsinglecore", "30m", 1)
 
 if __name__ == "__main__":
     execute(run_linux_poweroff, hosts=["localhost"])
