@@ -115,10 +115,8 @@ jobs:
       # to resolve stale submodule URLs. See https://github.com/ucb-bar/chipyard/pull/1156.
       - name: Delete old checkout
         run: |
-            ls -alh .
             rm -rf ${{ github.workspace }}/* || true
             rm -rf ${{ github.workspace }}/.* || true
-            ls -alh .
       - uses: actions/checkout@v4
       - name: Setup repo copy
         run: |
@@ -141,9 +139,11 @@ jobs:
     needs: [setup-persistent-repo]
     runs-on: as4
     steps:
-      - uses: actions/checkout@v4
       - name: Run metasims (VCS + Verilator)
-        run: .github/scripts/run-metasims.py
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          source env.sh
+          .github/scripts/run-metasims.py
 
   run-basic-linux-poweroffs-xilinx_alveo_u250:
     name: run-basic-linux-poweroffs-xilinx_alveo_u250
@@ -151,15 +151,11 @@ jobs:
     needs: [setup-persistent-repo]
     runs-on: as4
     steps:
-      # This forces a fresh clone of the repo during the `checkout` step
-      # to resolve stale submodule URLs. See https://github.com/ucb-bar/chipyard/pull/1156.
-      - name: Delete old checkout
-        run: |
-          rm -rf ${{ github.workspace }}/* || true
-          rm -rf ${{ github.workspace }}/.* || true
-      - uses: actions/checkout@v4
       - name: Run non-networked single-node Linux poweroff tests (single-core Rocket/BOOM, multi-core Rocket) w/ Xilinx Alveo U250
-        run: .github/scripts/run-linux-poweroff.py --platform xilinx_alveo_u250
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          source env.sh
+          .github/scripts/run-linux-poweroff.py --platform xilinx_alveo_u250
 
   build-default-bitstreams:
     name: build-default-bitstreams
@@ -170,8 +166,12 @@ jobs:
       CHIPYARD_HWDB_PATH: sims/firesim-staging/sample_config_hwdb.yaml
     steps:
       - uses: actions/checkout@v4
+      # requires checkout above
       - name: Run buildbitstream command and update sample local bitstreams
-        run: .github/scripts/build-default-bitstreams.py
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          source env.sh
+          .github/scripts/build-default-bitstreams.py
       - uses: peter-evans/create-pull-request@v6
         with:
           base: ${{ github.head_ref }}

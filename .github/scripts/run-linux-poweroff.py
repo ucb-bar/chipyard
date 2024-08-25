@@ -4,7 +4,7 @@ from fabric.api import prefix, run, settings, execute # type: ignore
 
 import fabric_cfg
 from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
-from utils import search_match_in_last_workloads_output_file, create_args, FpgaPlatform, print_last_firesim_log, print_last_firesim_workload
+from utils import search_match_in_last_workloads_output_file, create_args, FpgaPlatform, print_last_firesim_log, print_last_firesim_workload, run_warn_only
 
 args = create_args()
 if args.platform != FpgaPlatform.xilinx_alveo_u250:
