@@ -1,4 +1,4 @@
-from github import Github # type: ignore
+from github import Github
 import time
 
 from ci_variables import ci_env
