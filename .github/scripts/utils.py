@@ -39,11 +39,11 @@ def setup_shell_env_vars():
 
     return ("export " + " ".join(export_shell_env_vars)) if export_shell_env_vars else "true"
 
-def run_warn_only(cmd):
+def run_warn_only(*args, **kwargs):
     rc = 0
     with settings(warn_only=True):
         # pty=False needed to avoid issues with screen -ls stalling in fabric
-        rc = run(cmd, pty=False).return_code
+        rc = run(*args, **kwargs).return_code
     return rc
 
 def print_last_firesim_log(log_lines = 300):
