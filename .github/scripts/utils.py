@@ -48,7 +48,7 @@ def run_warn_only(*args, **kwargs):
 
 def print_last_firesim_log(log_lines = 300):
     print(f"Printing last {log_lines} lines of most recent log.")
-    run(f"""cd {remote_fsim_dir}/deploy/log && LAST_LOG=$(ls | tail -n1) && if [ -f "$LAST_LOG" ]; then tail -n{log_lines} $LAST_LOG; fi""")
+    run(f"""cd {remote_fsim_dir}/deploy/logs && LAST_LOG=$(ls | tail -n1) && if [ -f "$LAST_LOG" ]; then tail -n{log_lines} $LAST_LOG; fi""")
 
 def print_last_firesim_workload(log_lines = 300):
     workload_path = f"{remote_fsim_dir}/deploy/results-workload"
