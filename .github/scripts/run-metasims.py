@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from fabric.api import prefix, run, settings, execute # type: ignore
+from fabric.api import prefix, run, execute # type: ignore
 
 import fabric_cfg
 from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir

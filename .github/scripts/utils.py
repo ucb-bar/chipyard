@@ -1,4 +1,4 @@
-from fabric.api import run # type: ignore
+from fabric.api import run, settings # type: ignore
 from enum import Enum
 import argparse
 import os
