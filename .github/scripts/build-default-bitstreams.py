@@ -4,7 +4,7 @@ from pathlib import Path
 from fabric.api import prefix, run, settings, execute # type: ignore
 
 import fabric_cfg
-from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
+from ci_variables import ci_env, remote_fsim_dir
 from github_common import upload_binary_file, GH_ORG, GH_REPO
 from utils import print_last_firesim_log
 
@@ -16,75 +16,128 @@ shared_build_dir = "/scratch/buildbot/FIRESIM_BUILD_DIR"
 
 from_chipyard_firesim_build_recipes = "sims/firesim-staging/sample_config_build_recipes.yaml"
 from_chipyard_firesim_hwdb = ci_env['CHIPYARD_HWDB_PATH']
-chipyard_firesim_hwdb = f"{ci_env['GITHUB_WORKSPACE']}/{from_chipyard_firesim_hwdb}"
+workspace_firesim_build_recipes = f"{ci_env['GITHUB_WORKSPACE']}/{from_chipyard_firesim_build_recipes}"
+workspace_firesim_hwdb = f"{ci_env['GITHUB_WORKSPACE']}/{from_chipyard_firesim_hwdb}"
+assert Path(workspace_firesim_build_recipes).exists()
+assert Path(workspace_firesim_hwdb).exists()
 
-sample_hwdb_filename = f"{remote_fsim_dir}/deploy/sample-backup-configs/sample_config_hwdb.yaml"
+# host assumptions:
+#   - firesim's machine-launch-script requirements are already installed (i.e. sudo scripts on all machines)
+#   - XILINX_VITIS, XILINX_XRT, XILINX_VIVADO are setup (in environtment - LD_LIBRARY_PATH/PATH/etc)
+# priority == roughly the more powerful and available
+# ipaddr, buildtool:version, use unique build dir, unique build dir path, priority (0 is highest)(unused by code but used to track which machine has most resources)
+build_hosts = [
+    (    "localhost",  "vivado:2022.1", False, "", 0),
+    ("buildbot1@as4",  "vivado:2022.1",  True, "/scratch/buildbot1/FIRESIM_BUILD_DIR", 0),
+    ("buildbot2@as4",  "vivado:2022.1",  True, "/scratch/buildbot2/FIRESIM_BUILD_DIR", 0),
+    (          "a17",   "vitis:2022.1", False, "", 0),
+    ("buildbot1@a17",   "vitis:2022.1",  True, "/scratch/buildbot1/FIRESIM_BUILD_DIR", 0),
+    ("buildbot2@a17",   "vitis:2021.1",  True, "/scratch/buildbot2/FIRESIM_BUILD_DIR", 0),
+    ("buildbot3@a17",   "vitis:2021.1",  True, "/scratch/buildbot3/FIRESIM_BUILD_DIR", 0),
+    ("buildbot4@a17",   "vitis:2021.1",  True, "/scratch/buildbot4/FIRESIM_BUILD_DIR", 0),
+    (     "firesim1",   "vitis:2021.1", False, "", 1),
+    (        "jktgz",  "vivado:2023.1", False, "", 2),
+    (       "jktqos",  "vivado:2023.1", False, "", 2),
+]
+
+# add builds to run into a config_build.yaml
+def modify_config_build(in_config_build_yaml, out_config_build_yaml, hwdb_entries_to_gen: List[str]) -> None:
+    global shared_build_dir
+
+    # comment out old lines
+    build_yaml_lines = open(in_config_build_yaml).read().split("\n")
+    with open(out_config_build_yaml, "w") as byf:
+        for line in build_yaml_lines:
+            if "- midas" in line:
+                # comment out midasexample lines
+                byf.write("# " + line + '\n')
+            elif 'default_build_dir:' in line:
+                byf.write(line.replace('null', shared_build_dir) + '\n')
+            else:
+                byf.write(line + '\n')
+
+    # add new builds to run
+    build_yaml_lines = open(out_config_build_yaml).read().split("\n")
+    with open(out_config_build_yaml, "w") as byf:
+        for line in build_yaml_lines:
+            if "builds_to_run:" in line and not "#" in line:
+                byf.write(line + '\n')
+                start_space_idx = line.index('b')
+                for hwdb_to_gen in hwdb_entries_to_gen:
+                        byf.write((' ' * (start_space_idx + 4)) + f"- {hwdb_to_gen}" + '\n')
+            else:
+                byf.write(line + '\n')
+
+# add hosts for builds to run into a config_build.yaml
+def add_host_list(in_build_yaml: str, out_build_yaml: str, hostlist: List[Tuple[str, bool, str]]) -> None:
+    build_yaml_lines = open(in_build_yaml).read().split("\n")
+    with open(out_build_yaml, "w") as byf:
+        for line in build_yaml_lines:
+            if "build_farm_hosts:" in line and not "#" in line:
+                byf.write(line + '\n')
+                start_space_idx = line.index('b')
+                for host, use_unique, unique_build_dir in hostlist:
+                    if use_unique:
+                        byf.write((' ' * (start_space_idx + 4)) + f"- {host}:" + '\n')
+                        byf.write((' ' * (start_space_idx + 8)) + f"override_build_dir: {unique_build_dir}" + '\n')
+                    else:
+                        byf.write((' ' * (start_space_idx + 4)) + f"- {host}" + '\n')
+            elif '- localhost' in line and not '#' in line:
+                byf.write("# " + line + '\n')
+            else:
+                byf.write(line + '\n')
+
+# replace hwdb entry in config_hwdb.yaml with a link
+def replace_in_hwdb(hwdb_file: str, hwdb_entry_name: str, link: str) -> None:
+    # replace the sample hwdb's bit line only
+    sample_hwdb_lines = open(hwdb_file).read().split('\n')
+
+    with open(hwdb_file, "w") as sample_hwdb_file:
+        match_bit = False
+        for line in sample_hwdb_lines:
+            if hwdb_entry_name in line.strip().split(' ')[0].replace(':', ''):
+                # hwdb entry matches key name
+                match_bit = True
+                sample_hwdb_file.write(line + '\n')
+            elif match_bit == True:
+                if ("bitstream_tar:" in line.strip().split(' ')[0]):
+                    # only replace this bit
+                    match_bit = False
+
+                    new_bit_line = f"    bitstream_tar: {link}"
+                    print(f"Replacing {line.strip()} with {new_bit_line}")
+
+                    # print out the bit line
+                    sample_hwdb_file.write(new_bit_line + '\n')
+                else:
+                    raise Exception("::ERROR:: Something went wrong")
+            else:
+                # if no match print other lines
+                sample_hwdb_file.write(line + '\n')
+
+        if match_bit == True:
+            raise Exception(f"::ERROR:: Unable to replace URL for {hwdb_entry_name} in {hwdb_file}")
+
+    # strip newlines from end of file
+    with open(hwdb_file, "r+") as sample_hwdb_file:
+        content = sample_hwdb_file.read()
+        content = content.rstrip('\n')
+        sample_hwdb_file.seek(0)
+
+        sample_hwdb_file.write(content)
+        sample_hwdb_file.truncate()
 
 def run_local_buildbitstreams():
     """Runs local buildbitstreams"""
 
-    # assumptions:
-    #   - machine-launch-script requirements are already installed
-    #   - XILINX_VITIS, XILINX_XRT, XILINX_VIVADO are setup (in env / LD_LIBRARY_PATH / path / etc)
-
-    # repo should already be checked out
+    global workspace_firesim_hwdb
 
     with prefix(f"cd {remote_fsim_dir}"):
-
         with prefix('source sourceme-manager.sh --skip-ssh-setup'):
 
-            # return a copy of config_build.yaml w/ hwdb entry(s) uncommented + new build dir
-            def modify_config_build(hwdb_entries_to_gen: List[str]) -> str:
-                build_yaml = f"{remote_fsim_dir}/deploy/config_build.yaml"
-                copy_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{hash(tuple(hwdb_entries_to_gen))}.yaml"
-
-                # comment out old lines
-                build_yaml_lines = open(build_yaml).read().split("\n")
-                with open(copy_build_yaml, "w") as byf:
-                    for line in build_yaml_lines:
-                        if "- midas" in line:
-                            # comment out midasexample lines
-                            byf.write("# " + line + '\n')
-                        elif 'default_build_dir:' in line:
-                            byf.write(line.replace('null', shared_build_dir) + '\n')
-                        else:
-                            byf.write(line + '\n')
-
-                # add new builds to run
-                build_yaml_lines = open(copy_build_yaml).read().split("\n")
-                with open(copy_build_yaml, "w") as byf:
-                    for line in build_yaml_lines:
-                        if "builds_to_run:" in line and not "#" in line:
-                            byf.write(line + '\n')
-                            start_space_idx = line.index('b')
-                            for hwdb_to_gen in hwdb_entries_to_gen:
-                                    byf.write((' ' * (start_space_idx + 4)) + f"- {hwdb_to_gen}" + '\n')
-                        else:
-                            byf.write(line + '\n')
-
-                return copy_build_yaml
-
-            def add_host_list(build_yaml: str, hostlist: List[Tuple[str, bool, str]]) -> str:
-                copy_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{hash(tuple(hostlist))}.yaml"
-                build_yaml_lines = open(build_yaml).read().split("\n")
-                with open(copy_build_yaml, "w") as byf:
-                    for line in build_yaml_lines:
-                        if "build_farm_hosts:" in line and not "#" in line:
-                            byf.write(line + '\n')
-                            start_space_idx = line.index('b')
-                            for host, use_unique, unique_build_dir in hostlist:
-                                if use_unique:
-                                    byf.write((' ' * (start_space_idx + 4)) + f"- {host}:" + '\n')
-                                    byf.write((' ' * (start_space_idx + 8)) + f"override_build_dir: {unique_build_dir}" + '\n')
-                                else:
-                                    byf.write((' ' * (start_space_idx + 4)) + f"- {host}" + '\n')
-                        elif '- localhost' in line and not '#' in line:
-                            byf.write("# " + line + '\n')
-                        else:
-                            byf.write(line + '\n')
-                return copy_build_yaml
-
             def build_upload(build_yaml: str, hwdb_entries: List[str], platforms: List[str]) -> List[str]:
+                global URL_PREFIX
+                global workspace_firesim_build_recipes
 
                 print(f"Printing {build_yaml}...")
                 run(f"cat {build_yaml}")
@@ -92,7 +145,7 @@ def run_local_buildbitstreams():
                 rc = 0
                 with settings(warn_only=True):
                     # pty=False needed to avoid issues with screen -ls stalling in fabric
-                    build_result = run(f"timeout 10h firesim buildbitstream -b {build_yaml} -r {remote_cy_dir}/{from_chipyard_firesim_build_recipes} --forceterminate", pty=False)
+                    build_result = run(f"timeout 10h firesim buildbitstream -b {build_yaml} -r {workspace_firesim_build_recipes} --forceterminate", pty=False)
                     rc = build_result.return_code
 
                 if rc != 0:
@@ -125,74 +178,19 @@ def run_local_buildbitstreams():
                 return links
 
 
-            def replace_in_hwdb(hwdb_file: str, hwdb_entry_name: str, link: str) -> None:
-                # replace the sample hwdb's bit line only
-                sample_hwdb_lines = open(hwdb_file).read().split('\n')
-
-                with open(hwdb_file, "w") as sample_hwdb_file:
-                    match_bit = False
-                    for line in sample_hwdb_lines:
-                        if hwdb_entry_name in line.strip().split(' ')[0].replace(':', ''):
-                            # hwdb entry matches key name
-                            match_bit = True
-                            sample_hwdb_file.write(line + '\n')
-                        elif match_bit == True:
-                            if ("bitstream_tar:" in line.strip().split(' ')[0]):
-                                # only replace this bit
-                                match_bit = False
-
-                                new_bit_line = f"    bitstream_tar: {link}"
-                                print(f"Replacing {line.strip()} with {new_bit_line}")
-
-                                # print out the bit line
-                                sample_hwdb_file.write(new_bit_line + '\n')
-                            else:
-                                raise Exception("::ERROR:: Something went wrong")
-                        else:
-                            # if no match print other lines
-                            sample_hwdb_file.write(line + '\n')
-
-                    if match_bit == True:
-                        raise Exception(f"::ERROR:: Unable to replace URL for {hwdb_entry_name} in {hwdb_file}")
-
-                # strip newlines from end of file
-                with open(hwdb_file, "r+") as sample_hwdb_file:
-                    content = sample_hwdb_file.read()
-                    content = content.rstrip('\n')
-                    sample_hwdb_file.seek(0)
-
-                    sample_hwdb_file.write(content)
-                    sample_hwdb_file.truncate()
-
-            # priority == roughly the more powerful and available
-            # ipaddr, buildtool:version, use unique build dir, unique build dir path, priority (0 is highest)(unused by code but used to track which machine has most resources)
-            hosts = [
-                (    "localhost",  "vivado:2022.1", False, "", 0),
-                ("buildbot1@as4",  "vivado:2022.1",  True, "/scratch/buildbot1/FIRESIM_BUILD_DIR", 0),
-                ("buildbot2@as4",  "vivado:2022.1",  True, "/scratch/buildbot2/FIRESIM_BUILD_DIR", 0),
-                (          "a17",   "vitis:2022.1", False, "", 0),
-                ("buildbot1@a17",   "vitis:2022.1",  True, "/scratch/buildbot1/FIRESIM_BUILD_DIR", 0),
-                ("buildbot2@a17",   "vitis:2021.1",  True, "/scratch/buildbot2/FIRESIM_BUILD_DIR", 0),
-                ("buildbot3@a17",   "vitis:2021.1",  True, "/scratch/buildbot3/FIRESIM_BUILD_DIR", 0),
-                ("buildbot4@a17",   "vitis:2021.1",  True, "/scratch/buildbot4/FIRESIM_BUILD_DIR", 0),
-                (     "firesim1",   "vitis:2021.1", False, "", 1),
-                (        "jktgz",  "vivado:2023.1", False, "", 2),
-                (       "jktqos",  "vivado:2023.1", False, "", 2),
-            ]
-
             def do_builds(batch_hwdbs, hwdb_file_to_replace):
-                assert len(hosts) >= len(batch_hwdbs), f"Need at least {len(batch_hwdbs)} hosts to run builds"
+                assert len(build_hosts) >= len(batch_hwdbs), f"Need at least {len(batch_hwdbs)} build_hosts to run builds"
 
-                # map hwdb tuple to hosts
+                # map hwdb tuple to build_hosts
                 hwdb_2_host = {}
                 for hwdb, platform, buildtool_version in batch_hwdbs:
-                    for host_name, host_buildtool_version, host_use_unique, host_unique_build_dir, host_prio in hosts:
+                    for host_name, host_buildtool_version, host_use_unique, host_unique_build_dir, host_prio in build_hosts:
                         if host_buildtool_version == buildtool_version:
                             if not host_name in [h[0] for h in hwdb_2_host.values()]:
                                 hwdb_2_host[hwdb] = (host_name, host_use_unique, host_unique_build_dir)
                                 break
 
-                assert len(hwdb_2_host) == len(batch_hwdbs), "Unable to map hosts to hwdb build"
+                assert len(hwdb_2_host) == len(batch_hwdbs), "Unable to map build_hosts to hwdb build"
 
                 hwdbs_ordered = [hwdb[0] for hwdb in batch_hwdbs]
                 platforms_ordered = [hwdb[1] for hwdb in batch_hwdbs]
@@ -201,15 +199,23 @@ def run_local_buildbitstreams():
                 print("Mappings")
                 print(f"HWDBS: {hwdbs_ordered}")
                 print(f"Platforms: {platforms_ordered}")
-                print(f"Hosts: {hosts_ordered}")
+                print(f"build_hosts: {hosts_ordered}")
 
-                copy_build_yaml = modify_config_build(hwdbs_ordered)
-                copy_build_yaml_2 = add_host_list(copy_build_yaml, hosts_ordered)
-                links = build_upload(copy_build_yaml_2, hwdbs_ordered, platforms_ordered)
+                og_build_yaml = f"{remote_fsim_dir}/deploy/config_build.yaml"
+                intermediate_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{hash(tuple(hwdbs_ordered)) % 2**sys.hash_info.width}.yaml"
+                final_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{hash(tuple(hosts_ordered)) % 2**sys.hash_info.width}.yaml"
+
+                modify_config_build(og_build_yaml, intermediate_build_yaml, hwdbs_ordered)
+                add_host_list(intermediate_build_yaml, final_build_yaml, hosts_ordered)
+                links = build_upload(final_build_yaml, hwdbs_ordered, platforms_ordered)
                 for hwdb, link in zip(hwdbs_ordered, links):
                     replace_in_hwdb(hwdb_file_to_replace, hwdb, link)
 
+                print(f"Printing {hwdb_file_to_replace}...")
+                run(f"cat {hwdb_file_to_replace}")
+
                 # wipe old data
+                print("Cleaning old build directories")
                 for host_name, host_use_unique, host_unique_build_dir in hosts_ordered:
                     if host_use_unique:
                         run(f"ssh {host_name} rm -rf {host_unique_build_dir}")
@@ -221,7 +227,7 @@ def run_local_buildbitstreams():
 
             # order of following list roughly corresponds to build host to use.
             # i.e. if 1st hwdb in list wants a host with V0 of tools, it will get the 1st host with V0 of tools
-            # in the hosts list
+            # in the build_hosts list
 
             # hwdb_entry_name, platform_name, buildtool:version
             batch_hwdbs_in = [
@@ -245,10 +251,7 @@ def run_local_buildbitstreams():
             ]
 
             # replace hwdb entries in workspace area
-            do_builds(batch_hwdbs_in, chipyard_firesim_hwdb)
-
-            print(f"Printing {chipyard_firesim_hwdb}...")
-            run(f"cat {chipyard_firesim_hwdb}")
+            do_builds(batch_hwdbs_in, workspace_firesim_hwdb)
 
 if __name__ == "__main__":
     execute(run_local_buildbitstreams, hosts=["localhost"])
