@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from fabric.api import prefix, run, settings, execute # type: ignore
+import sys
 
 import fabric_cfg
 from ci_variables import ci_env, remote_fsim_dir
