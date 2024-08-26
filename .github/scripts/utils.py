@@ -51,6 +51,6 @@ def print_last_firesim_log(log_lines = 300):
     run(f"""cd {remote_fsim_dir}/deploy/log && LAST_LOG=$(ls | tail -n1) && if [ -f "$LAST_LOG" ]; then tail -n{log_lines} $LAST_LOG; fi""")
 
 def print_last_firesim_workload(log_lines = 300):
-    workload_path = f"{remote_firesim_dir}/deploy/results-workload"
+    workload_path = f"{remote_fsim_dir}/deploy/results-workload"
     print(f"Printing last {log_lines} lines of all output files. See {workload_path} for more info.")
     run(f"""cd {workload_path} && LAST_DIR=$(ls | tail -n1) && if [ -d "$LAST_DIR" ]; then tail -n{log_lines} $LAST_DIR/*/*; fi""")
