@@ -16,6 +16,7 @@ shared_build_dir = "/scratch/buildbot/FIRESIM_BUILD_DIR"
 
 from_chipyard_firesim_build_recipes = "sims/firesim-staging/sample_config_build_recipes.yaml"
 from_chipyard_firesim_hwdb = ci_env['CHIPYARD_HWDB_PATH']
+chipyard_firesim_hwdb = f"{ci_env['GITHUB_WORKSPACE']}/{from_chipyard_firesim_hwdb}"
 
 sample_hwdb_filename = f"{remote_fsim_dir}/deploy/sample-backup-configs/sample_config_hwdb.yaml"
 
@@ -124,11 +125,11 @@ def run_local_buildbitstreams():
                 return links
 
 
-            def replace_in_hwdb(hwdb_entry_name: str, link: str) -> None:
+            def replace_in_hwdb(hwdb_file: str, hwdb_entry_name: str, link: str) -> None:
                 # replace the sample hwdb's bit line only
-                sample_hwdb_lines = open(sample_hwdb_filename).read().split('\n')
+                sample_hwdb_lines = open(hwdb_file).read().split('\n')
 
-                with open(sample_hwdb_filename, "w") as sample_hwdb_file:
+                with open(hwdb_file, "w") as sample_hwdb_file:
                     match_bit = False
                     for line in sample_hwdb_lines:
                         if hwdb_entry_name in line.strip().split(' ')[0].replace(':', ''):
@@ -152,10 +153,10 @@ def run_local_buildbitstreams():
                             sample_hwdb_file.write(line + '\n')
 
                     if match_bit == True:
-                        raise Exception(f"::ERROR:: Unable to replace URL for {hwdb_entry_name} in {sample_hwdb_filename}")
+                        raise Exception(f"::ERROR:: Unable to replace URL for {hwdb_entry_name} in {hwdb_file}")
 
                 # strip newlines from end of file
-                with open(sample_hwdb_filename, "r+") as sample_hwdb_file:
+                with open(hwdb_file, "r+") as sample_hwdb_file:
                     content = sample_hwdb_file.read()
                     content = content.rstrip('\n')
                     sample_hwdb_file.seek(0)
@@ -179,7 +180,7 @@ def run_local_buildbitstreams():
                 (       "jktqos",  "vivado:2023.1", False, "", 2),
             ]
 
-            def do_builds(batch_hwdbs):
+            def do_builds(batch_hwdbs, hwdb_file_to_replace):
                 assert len(hosts) >= len(batch_hwdbs), f"Need at least {len(batch_hwdbs)} hosts to run builds"
 
                 # map hwdb tuple to hosts
@@ -206,7 +207,7 @@ def run_local_buildbitstreams():
                 copy_build_yaml_2 = add_host_list(copy_build_yaml, hosts_ordered)
                 links = build_upload(copy_build_yaml_2, hwdbs_ordered, platforms_ordered)
                 for hwdb, link in zip(hwdbs_ordered, links):
-                    replace_in_hwdb(hwdb, link)
+                    replace_in_hwdb(hwdb_file_to_replace, hwdb, link)
 
                 # wipe old data
                 for host_name, host_use_unique, host_unique_build_dir in hosts_ordered:
@@ -243,13 +244,11 @@ def run_local_buildbitstreams():
                 ##("alveo_u250_firesim_gemmini_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
             ]
 
-            do_builds(batch_hwdbs_in)
+            # replace hwdb entries in workspace area
+            do_builds(batch_hwdbs_in, chipyard_firesim_hwdb)
 
-            print(f"Printing {sample_hwdb_filename}...")
-            run(f"cat {sample_hwdb_filename}")
-
-            # copy back to workspace area so you can PR it
-            run(f"cp -f {sample_hwdb_filename} {ci_env['GITHUB_WORKSPACE']}/{from_chipyard_firesim_hwdb}")
+            print(f"Printing {chipyard_firesim_hwdb}...")
+            run(f"cat {chipyard_firesim_hwdb}")
 
 if __name__ == "__main__":
     execute(run_local_buildbitstreams, hosts=["localhost"])
