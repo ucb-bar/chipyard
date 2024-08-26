@@ -50,7 +50,7 @@ ci_env = {
     # Github token with more permissions to access repositories across the FireSim org.
     'PERSONAL_ACCESS_TOKEN': get_ci_value('PERSONAL_ACCESS_TOKEN'),
     # Path to Chipyard's HWDB file (if it exists)
-    'CHIPYARD_HWDB_PATH': get_ci_value('PERSONAL_ACCESS_TOKEN'),
+    'CHIPYARD_HWDB_PATH': get_ci_value('CHIPYARD_HWDB_PATH'),
 }
 
 # for most uses these should be used (over using GITHUB_WORKSPACE)
