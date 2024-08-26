@@ -3,6 +3,9 @@ import time
 
 from ci_variables import ci_env
 
+GH_REPO = 'firesim-public-bitstreams'
+GH_ORG = 'firesim'
+
 # taken from https://stackoverflow.com/questions/63427607/python-upload-files-directly-to-github-using-pygithub
 # IMPORTANT: only works for binary files! (i.e. tar.gz files)
 def upload_binary_file(local_file_path, gh_file_path):

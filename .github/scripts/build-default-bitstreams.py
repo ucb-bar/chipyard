@@ -5,13 +5,11 @@ from fabric.api import prefix, run, settings, execute # type: ignore
 
 import fabric_cfg
 from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
-from github_common import upload_binary_file
+from github_common import upload_binary_file, GH_ORG, GH_REPO
 from utils import print_last_firesim_log
 
 from typing import List, Tuple
 
-GH_REPO = 'firesim-public-bitstreams'
-GH_ORG = 'firesim'
 URL_PREFIX = f"https://raw.githubusercontent.com/{GH_ORG}/{GH_REPO}"
 
 shared_build_dir = "/scratch/buildbot/FIRESIM_BUILD_DIR"
