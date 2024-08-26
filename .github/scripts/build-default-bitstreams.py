@@ -5,7 +5,7 @@ from fabric.api import prefix, run, settings, execute # type: ignore
 import sys
 
 import fabric_cfg
-from ci_variables import ci_env, remote_fsim_dir
+from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
 from github_common import upload_binary_file, GH_ORG, GH_REPO
 from utils import print_last_firesim_log
 
@@ -17,9 +17,10 @@ shared_build_dir = "/scratch/buildbot/FIRESIM_BUILD_DIR"
 
 from_chipyard_firesim_build_recipes = "sims/firesim-staging/sample_config_build_recipes.yaml"
 from_chipyard_firesim_hwdb = ci_env['CHIPYARD_HWDB_PATH']
-workspace_firesim_build_recipes = f"{ci_env['GITHUB_WORKSPACE']}/{from_chipyard_firesim_build_recipes}"
+# this must point to build recipe in clone setup for firesim s.t. the makefrag it points to itself points to the working clone
+setup_clone_firesim_build_recipes = f"{remote_cy_dir}/{from_chipyard_firesim_build_recipes}"
 workspace_firesim_hwdb = f"{ci_env['GITHUB_WORKSPACE']}/{from_chipyard_firesim_hwdb}"
-assert Path(workspace_firesim_build_recipes).exists()
+assert Path(setup_clone_firesim_build_recipes).exists()
 assert Path(workspace_firesim_hwdb).exists()
 
 # host assumptions:
@@ -40,6 +41,9 @@ build_hosts = [
     (        "jktgz",  "vivado:2023.1", False, "", 2),
     (       "jktqos",  "vivado:2023.1", False, "", 2),
 ]
+
+def positive_hash(any) -> int:
+    return hash(any) % 2**sys.hash_info.width
 
 # add builds to run into a config_build.yaml
 def modify_config_build(in_config_build_yaml, out_config_build_yaml, hwdb_entries_to_gen: List[str]) -> None:
@@ -138,7 +142,7 @@ def run_local_buildbitstreams():
 
             def build_upload(build_yaml: str, hwdb_entries: List[str], platforms: List[str]) -> List[str]:
                 global URL_PREFIX
-                global workspace_firesim_build_recipes
+                global setup_clone_firesim_build_recipes
 
                 print(f"Printing {build_yaml}...")
                 run(f"cat {build_yaml}")
@@ -146,7 +150,7 @@ def run_local_buildbitstreams():
                 rc = 0
                 with settings(warn_only=True):
                     # pty=False needed to avoid issues with screen -ls stalling in fabric
-                    build_result = run(f"timeout 10h firesim buildbitstream -b {build_yaml} -r {workspace_firesim_build_recipes} --forceterminate", pty=False)
+                    build_result = run(f"timeout 10h firesim buildbitstream -b {build_yaml} -r {setup_clone_firesim_build_recipes} --forceterminate", pty=False)
                     rc = build_result.return_code
 
                 if rc != 0:
@@ -203,8 +207,8 @@ def run_local_buildbitstreams():
                 print(f"build_hosts: {hosts_ordered}")
 
                 og_build_yaml = f"{remote_fsim_dir}/deploy/config_build.yaml"
-                intermediate_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{hash(tuple(hwdbs_ordered)) % 2**sys.hash_info.width}.yaml"
-                final_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{hash(tuple(hosts_ordered)) % 2**sys.hash_info.width}.yaml"
+                intermediate_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{positive_hash(tuple(hwdbs_ordered))}.yaml"
+                final_build_yaml = f"{remote_fsim_dir}/deploy/config_build_{positive_hash(tuple(hosts_ordered))}.yaml"
 
                 modify_config_build(og_build_yaml, intermediate_build_yaml, hwdbs_ordered)
                 add_host_list(intermediate_build_yaml, final_build_yaml, hosts_ordered)
