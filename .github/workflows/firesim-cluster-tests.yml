@@ -148,7 +148,7 @@ jobs:
   run-basic-linux-poweroffs-xilinx_alveo_u250:
     name: run-basic-linux-poweroffs-xilinx_alveo_u250
     if: contains(github.event.pull_request.labels.*.name, 'ci:fpga-deploy')
-    needs: [setup-persistent-repo]
+    needs: [setup-persistent-repo, run-metasims-xilinx_alveo_u250] # must not run in parallel
     runs-on: as4
     steps:
       - name: Run non-networked single-node Linux poweroff tests (single-core Rocket/BOOM, multi-core Rocket) w/ Xilinx Alveo U250
@@ -160,7 +160,7 @@ jobs:
   build-default-bitstreams:
     name: build-default-bitstreams
     if: contains(github.event.pull_request.labels.*.name, 'ci:local-fpga-buildbitstream-deploy')
-    needs: [setup-persistent-repo]
+    needs: [setup-persistent-repo, run-metasims-xilinx_alveo_u250 ] # must not run in parallel
     runs-on: as4
     env:
       CHIPYARD_HWDB_PATH: sims/firesim-staging/sample_config_hwdb.yaml
