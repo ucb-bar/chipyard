@@ -116,6 +116,5 @@ dependencies:
     - types-requests
     - azure-identity
     - fsspec
-    - pygithub
     - pip:
         - fab-classic>=1.19.2

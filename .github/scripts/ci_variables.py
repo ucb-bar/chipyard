@@ -26,7 +26,7 @@ ci_env = {
     # This is used as a unique tag for all instances launched in a workflow
     'GITHUB_RUN_ID': get_ci_value('GITHUB_RUN_ID'),
     # Self explanatory
-    'GITHUB_SHA': get_ci_value('GITHUB_RUN_ID'),
+    'GITHUB_SHA': get_ci_value('GITHUB_SHA'),
     # Multiple clones of the Chipyard repository exists on a CI machine. We expect state
     # to persist between jobs in a workflow and faciliate that by having jobs run
     # out of a centralized clone (REMOTE_WORK_DIR)-- not the default clones setup by
@@ -51,6 +51,9 @@ ci_env = {
     'PERSONAL_ACCESS_TOKEN': get_ci_value('PERSONAL_ACCESS_TOKEN'),
     # Path to Chipyard's HWDB file (if it exists)
     'CHIPYARD_HWDB_PATH': get_ci_value('CHIPYARD_HWDB_PATH'),
+    # Org/repo name of repository to store build bitstreams
+    'GH_ORG': get_ci_value('GH_ORG'),
+    'GH_REPO': get_ci_value('GH_REPO'),
 }
 
 # for most uses these should be used (over using GITHUB_WORKSPACE)
