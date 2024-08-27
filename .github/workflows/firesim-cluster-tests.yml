@@ -53,7 +53,6 @@ jobs:
           repository: ${{ env.GH_ORG }}/${{ env.GH_REPO }}
           ssh-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
           path: ${{ env.GH_REPO }}
-          token: ''
           fetch-depth: 1
       - run: |
           cd ${{ github.workspace }}/${{ env.GH_REPO }}
