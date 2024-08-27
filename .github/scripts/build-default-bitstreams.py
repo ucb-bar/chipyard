@@ -242,23 +242,23 @@ def run_local_buildbitstreams():
                 #("vitis_firesim_rocket_singlecore_no_nic", "vitis", "vitis:2022.1"),
 
                 ("nitefury_firesim_rocket_singlecore_no_nic", "rhsresearch_nitefury_ii", "vitis:2022.1"),
-                ("alveo_u200_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u200", "vitis:2021.1"),
-                ("alveo_u250_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
-                ("alveo_u280_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u280", "vitis:2021.1"),
+                #("alveo_u200_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u200", "vitis:2021.1"),
+                #("alveo_u250_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
+                #("alveo_u280_firesim_rocket_singlecore_no_nic", "xilinx_alveo_u280", "vitis:2021.1"),
 
-                # TODO: disable due to not having a license
-                #("xilinx_vcu118_firesim_rocket_singlecore_4GB_no_nic", "xilinx_vcu118", "vivado:2023.1"),
+                ## TODO: disable due to not having a license
+                ##("xilinx_vcu118_firesim_rocket_singlecore_4GB_no_nic", "xilinx_vcu118", "vivado:2023.1"),
 
-                # extra hwdb's to run CI with
-                ("alveo_u250_firesim_rocket_quadcore_no_nic", "xilinx_alveo_u250", "vivado:2022.1"),
+                ## extra hwdb's to run CI with
+                #("alveo_u250_firesim_rocket_quadcore_no_nic", "xilinx_alveo_u250", "vivado:2022.1"),
 
-                # TODO: disable due to *.tar.gz being too large to upload using REST API
-                #("alveo_u250_firesim_boom_singlecore_no_nic", "xilinx_alveo_u250", "vivado:2022.1"),
+                ## TODO: disable due to *.tar.gz being too large to upload using REST API
+                ##("alveo_u250_firesim_boom_singlecore_no_nic", "xilinx_alveo_u250", "vivado:2022.1"),
 
-                ("alveo_u250_firesim_rocket_singlecore_nic", "xilinx_alveo_u250", "vivado:2022.1"),
+                #("alveo_u250_firesim_rocket_singlecore_nic", "xilinx_alveo_u250", "vivado:2022.1"),
 
-                # extra hwdb's
-                ("alveo_u250_firesim_gemmini_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
+                ## extra hwdb's
+                #("alveo_u250_firesim_gemmini_rocket_singlecore_no_nic", "xilinx_alveo_u250", "vitis:2021.1"),
             ]
 
             # replace hwdb entries in workspace area
