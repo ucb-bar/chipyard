@@ -53,9 +53,11 @@ jobs:
       - name: Create temporary clone of repo to store built bitstreams into
         run: |
           ssh-add -l
-          #git clone git@github.com:${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }}
-          git clone https://github.com/${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }}
-
+          git clone git@github.com:${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }} --depth 1
+      - name: Delete temporary clone of bitstream repo
+        if: ${{ always() }}
+        run: rm -rf ${{ env.BITSTREAM_TMP_DIR }}
+          #git clone https://github.com/${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }} --depth 1
 
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute. This is based off the conditional job execution
