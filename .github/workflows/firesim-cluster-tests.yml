@@ -42,6 +42,9 @@ jobs:
     # the expression not a variable like if checking against the env context string.
     if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') != true }}
     runs-on: as4
+    env:
+      GH_ORG: firesim
+      GH_REPO: firesim-public-bitstreams
     steps:
       - run: true
       - uses: webfactory/ssh-agent@v0.9.0
