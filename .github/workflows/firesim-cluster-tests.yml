@@ -50,7 +50,8 @@ jobs:
       - name: Create temporary clone of repo to store built bitstreams into
         run: |
           ssh-add -l
-          git clone git@github.com:${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }}
+          #git clone git@github.com:${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }}
+          git clone https://github.com/${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }}
 
 
   # Set up a set of boolean conditions to control which branches of the CI
