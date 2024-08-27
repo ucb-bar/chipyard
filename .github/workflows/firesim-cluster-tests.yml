@@ -47,9 +47,6 @@ jobs:
       GH_REPO: firesim-public-bitstreams
     steps:
       - run: true
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key:
       - name: Create temporary clone of repo to store built bitstreams into
         uses: actions/checkout@v4
         with:
