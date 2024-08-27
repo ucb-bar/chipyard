@@ -19,6 +19,7 @@ env:
   # temporary directories should be located in /scratch (since it's larger)
   REMOTE_WORK_DIR: /scratch/buildbot/cy-ci-shared/cy-${{ github.sha }}-${{ github.workflow }}
   JAVA_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-javatmpdir-${{ github.sha }}-${{ github.workflow }}
+  BITSTREAM_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-bitstreamdir-${{ github.sha }}-${{ github.workflow }}
 
   # misc
   TERM: xterm-256-color
@@ -164,14 +165,30 @@ jobs:
     runs-on: as4
     env:
       CHIPYARD_HWDB_PATH: sims/firesim-staging/sample_config_hwdb.yaml
+      GH_ORG: firesim
+      GH_REPO: firesim-public-bitstreams
     steps:
       - uses: actions/checkout@v4
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
+      - name: Create temporary clone of repo to store built bitstreams into
+        run: git clone git@github.com:${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }}
       # requires checkout above
-      - name: Run buildbitstream command and update sample local bitstreams
+      - name: Run buildbitstream command and update sample local bitstreams in bitstream repository
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
           source env.sh
           .github/scripts/build-default-bitstreams.py
+      - name: Push bitstreams built/copied in bitstream repo
+        run: |
+          cd ${{ env.BITSTREAM_TMP_DIR }}
+          git log
+          git diff origin/main
+          git push origin main
+      - name: Delete temporary clone of bitstream repo
+        if: ${{ always() }}
+        run: rm -rf ${{ env.BITSTREAM_TMP_DIR }}
       - uses: peter-evans/create-pull-request@v6
         with:
           base: ${{ github.head_ref }}
@@ -192,4 +209,6 @@ jobs:
     if: ${{ always() }}
     steps:
       - name: Delete repo copy
-        run: rm -rf ${{ env.REMOTE_WORK_DIR }}
+        run: |
+          rm -rf ${{ env.REMOTE_WORK_DIR }}
+          rm -rf ${{ env.JAVA_TMP_DIR }}

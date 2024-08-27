@@ -6,12 +6,12 @@ import sys
 
 import fabric_cfg
 from ci_variables import ci_env, remote_fsim_dir, remote_cy_dir
-from github_common import upload_binary_file, GH_ORG, GH_REPO
+from github_common import move_and_commit_gh_file
 from utils import print_last_firesim_log
 
 from typing import List, Tuple
 
-URL_PREFIX = f"https://raw.githubusercontent.com/{GH_ORG}/{GH_REPO}"
+URL_PREFIX = f"https://raw.githubusercontent.com/{ci_env['GH_ORG']}/{ci_env['GH_REPO']}"
 
 shared_build_dir = "/scratch/buildbot/FIRESIM_BUILD_DIR"
 
@@ -174,7 +174,7 @@ def run_local_buildbitstreams():
                                 file_path = Path(line.strip().split(' ')[1].replace('file://', '')) # 2nd element (i.e. the path) (no URI)
                                 file_name = f"{platform}/{hwdb_entry_name}.tar.gz"
                                 run(f"shasum -a 256 {file_path}")
-                                sha = upload_binary_file(file_path, file_name)
+                                sha = move_and_commit_gh_file(file_path, file_name, ci_env['BITSTREAM_TMP_DIR'], f"Committing files from {ci_env['GITHUB_SHA']}")
                                 link = f"{URL_PREFIX}/{sha}/{file_name}"
                                 print(f"Uploaded bitstream_tar for {hwdb_entry_name} to {link}")
                                 links.append(link)
