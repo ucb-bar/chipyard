@@ -58,6 +58,11 @@ jobs:
           cd ${{ github.workspace }}/${{ env.GH_REPO }}
           git log
           git status
+          echo "is this working" >> README.md
+          git status
+          git commit -am "Dummy modification to README.md" --author="bar-tender <bar-tender@users.noreply.github.com>"
+          git log
+          git push origin main
 
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute. This is based off the conditional job execution
