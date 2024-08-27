@@ -51,8 +51,6 @@ ci_env = {
     'PERSONAL_ACCESS_TOKEN': get_ci_value('PERSONAL_ACCESS_TOKEN'),
     # Path to Chipyard's HWDB file (if it exists)
     'CHIPYARD_HWDB_PATH': get_ci_value('CHIPYARD_HWDB_PATH'),
-    # Path to repository to store build bitstreams
-    'BITSTREAM_TMP_DIR': get_ci_value('BITSTREAM_TMP_DIR'),
     # Org/repo name of repository to store build bitstreams
     'GH_ORG': get_ci_value('GH_ORG'),
     'GH_REPO': get_ci_value('GH_REPO'),

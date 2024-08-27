@@ -174,7 +174,7 @@ def run_local_buildbitstreams():
                                 file_path = Path(line.strip().split(' ')[1].replace('file://', '')) # 2nd element (i.e. the path) (no URI)
                                 file_name = f"{platform}/{hwdb_entry_name}.tar.gz"
                                 run(f"shasum -a 256 {file_path}")
-                                sha = move_and_commit_gh_file(file_path, file_name, ci_env['BITSTREAM_TMP_DIR'], f"Committing files from {ci_env['GITHUB_SHA']}")
+                                sha = move_and_commit_gh_file(file_path, file_name, f"{ci_env['GITHUB_WORKSPACE']}/{ci_env['GH_REPO']}", f"Committing files from {ci_env['GITHUB_SHA']}")
                                 link = f"{URL_PREFIX}/{sha}/{file_name}"
                                 print(f"Uploaded bitstream_tar for {hwdb_entry_name} to {link}")
                                 links.append(link)

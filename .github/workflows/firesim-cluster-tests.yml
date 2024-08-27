@@ -19,7 +19,6 @@ env:
   # temporary directories should be located in /scratch (since it's larger)
   REMOTE_WORK_DIR: /scratch/buildbot/cy-ci-shared/cy-${{ github.sha }}-${{ github.workflow }}
   JAVA_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-javatmpdir-${{ github.sha }}-${{ github.workflow }}
-  BITSTREAM_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-bitstreamdir-${{ github.sha }}-${{ github.workflow }}
 
   # misc
   TERM: xterm-256-color
@@ -41,28 +40,9 @@ jobs:
     # note that the check is using a boolean true instead of string 'true' since it's directly using
     # the expression not a variable like if checking against the env context string.
     if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') != true }}
-    runs-on: as4
-    env:
-      GH_ORG: firesim
-      GH_REPO: firesim-public-bitstreams
+    runs-on: ubuntu-22.04
     steps:
       - run: true
-      - name: Create temporary clone of repo to store built bitstreams into
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.GH_ORG }}/${{ env.GH_REPO }}
-          ssh-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
-          path: ${{ env.GH_REPO }}
-          fetch-depth: 1
-      - run: |
-          cd ${{ github.workspace }}/${{ env.GH_REPO }}
-          git log
-          git status
-          echo "is this working" >> README.md
-          git status
-          git commit -am "Dummy modification to README.md" --author="bar-tender <bar-tender@users.noreply.github.com>"
-          git log
-          git push origin main
 
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute. This is based off the conditional job execution
@@ -189,11 +169,13 @@ jobs:
       GH_REPO: firesim-public-bitstreams
     steps:
       - uses: actions/checkout@v4
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
       - name: Create temporary clone of repo to store built bitstreams into
-        run: git clone git@github.com:${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GH_ORG }}/${{ env.GH_REPO }}
+          ssh-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
+          path: ${{ env.GH_REPO }}
+          fetch-depth: 1
       # requires checkout above
       - name: Run buildbitstream command and update sample local bitstreams in bitstream repository
         run: |
@@ -202,13 +184,10 @@ jobs:
           .github/scripts/build-default-bitstreams.py
       - name: Push bitstreams built/copied in bitstream repo
         run: |
-          cd ${{ env.BITSTREAM_TMP_DIR }}
+          cd ${{ github.workspace }}/${{ env.GH_REPO }}
           git log
           git diff origin/main
           git push origin main
-      - name: Delete temporary clone of bitstream repo
-        if: ${{ always() }}
-        run: rm -rf ${{ env.BITSTREAM_TMP_DIR }}
       - uses: peter-evans/create-pull-request@v6
         with:
           base: ${{ github.head_ref }}
