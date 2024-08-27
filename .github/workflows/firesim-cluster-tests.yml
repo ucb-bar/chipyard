@@ -164,14 +164,29 @@ jobs:
     runs-on: as4
     env:
       CHIPYARD_HWDB_PATH: sims/firesim-staging/sample_config_hwdb.yaml
+      GH_ORG: firesim
+      GH_REPO: firesim-public-bitstreams
     steps:
       - uses: actions/checkout@v4
+      - name: Create temporary clone of repo to store built bitstreams into
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GH_ORG }}/${{ env.GH_REPO }}
+          ssh-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
+          path: ${{ env.GH_REPO }}
+          fetch-depth: 1
       # requires checkout above
-      - name: Run buildbitstream command and update sample local bitstreams
+      - name: Run buildbitstream command and update sample local bitstreams in bitstream repository
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
           source env.sh
           .github/scripts/build-default-bitstreams.py
+      - name: Push bitstreams built/copied in bitstream repo
+        run: |
+          cd ${{ github.workspace }}/${{ env.GH_REPO }}
+          git log
+          git diff origin/main
+          git push origin main
       - uses: peter-evans/create-pull-request@v6
         with:
           base: ${{ github.head_ref }}
@@ -192,4 +207,6 @@ jobs:
     if: ${{ always() }}
     steps:
       - name: Delete repo copy
-        run: rm -rf ${{ env.REMOTE_WORK_DIR }}
+        run: |
+          rm -rf ${{ env.REMOTE_WORK_DIR }}
+          rm -rf ${{ env.JAVA_TMP_DIR }}
