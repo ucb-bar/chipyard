@@ -69,6 +69,9 @@ jobs:
               - '**/*.md'
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
+              - '.github/PULL_REQUEST_TEMPLATE.md'
+              - '.github/dependabot.yml'
+              - '.mergify.yml'
 
   create-conda-env-as4:
     name: create-conda-env-as4

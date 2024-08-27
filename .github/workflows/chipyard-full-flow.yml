@@ -71,6 +71,9 @@ jobs:
               - '**/*.md'
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
+              - '.github/PULL_REQUEST_TEMPLATE.md'
+              - '.github/dependabot.yml'
+              - '.mergify.yml'
 
   full-flow:
     name: full-flow
