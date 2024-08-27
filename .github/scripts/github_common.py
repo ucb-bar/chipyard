@@ -9,6 +9,6 @@ def move_and_commit_gh_file(local_abs_file_path, gh_rel_file_path, repo_path, co
     with prefix(f"cd {repo_path}"):
         run(f"mv {local_abs_file_path} ./{gh_rel_file_path}")
         run(f"git add -u")
-        run(f"""git commit -m "{commit_msg}" --author="bar-tender <bar-tender@users.noreply.github.com>"""")
+        run(f"""git commit -m "{commit_msg}" --author="bar-tender <bar-tender@users.noreply.github.com>" """)
         # return the sha of the commit you added
         return run("git rev-parse HEAD")
