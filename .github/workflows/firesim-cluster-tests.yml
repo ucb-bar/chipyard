@@ -49,15 +49,19 @@ jobs:
       - run: true
       - uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
+          ssh-private-key:
       - name: Create temporary clone of repo to store built bitstreams into
-        run: |
-          ssh-add -l
-          git clone git@github.com:${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }} --depth 1
-      - name: Delete temporary clone of bitstream repo
-        if: ${{ always() }}
-        run: rm -rf ${{ env.BITSTREAM_TMP_DIR }}
-          #git clone https://github.com/${{ env.GH_ORG }}/${{ env.GH_REPO }}.git ${{ env.BITSTREAM_TMP_DIR }} --depth 1
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GH_ORG }}/${{ env.GH_REPO }}
+          ssh-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
+          path: ${{ env.GH_REPO }}
+          token: ''
+          fetch-depth: 1
+      - run: |
+          cd ${{ github.workspace }}/${{ env.GH_REPO }}
+          git log
+          git status
 
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute. This is based off the conditional job execution
