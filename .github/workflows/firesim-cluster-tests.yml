@@ -140,11 +140,10 @@ jobs:
     runs-on: as4
     steps:
       - name: Run metasims (VCS + Verilator)
-        run: true
-        #run: |
-        #  cd ${{ env.REMOTE_WORK_DIR }}
-        #  source env.sh
-        #  .github/scripts/run-metasims.py
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          source env.sh
+          .github/scripts/run-metasims.py
 
   run-basic-linux-poweroffs-xilinx_alveo_u250:
     name: run-basic-linux-poweroffs-xilinx_alveo_u250

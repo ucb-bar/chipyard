@@ -38,7 +38,7 @@ Finally, source the following environment at the root of the FireSim directory:
 .. Note:: Every time you want to use FireSim with a fresh shell, you must source ``sourceme-manager.sh``
 
 At this point you're ready to use FireSim with Chipyard.
-If you're not already familiar with FireSim, please return to the :fsim_doc:`FireSim Docs <Getting-Started-Guides/AWS-EC2-F1-Getting-Started/Initial-Setup/Setting-up-your-Manager-Instance.html#completing-setup-using-the-manager>`, and proceed with the rest of the tutorial.
+If you're not already familiar with FireSim, please return to the `FireSim documentation <https://docs.fires.im/en/latest/>` and visit one of the guides/tutorials.
 
 Running your Design in FireSim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

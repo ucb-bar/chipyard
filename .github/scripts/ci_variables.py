@@ -14,7 +14,7 @@ def get_ci_value(env_var: str, default_value: str = "") -> str:
     if RUN_LOCAL:
         return default_value
     else:
-        return os.environ[env_var]
+        return os.environ.get(env_var, default_value)
 
 # Create a env. dict that is populated from the environment or from defaults.
 ci_env = {

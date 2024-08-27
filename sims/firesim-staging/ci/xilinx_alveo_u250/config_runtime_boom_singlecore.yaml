@@ -4,7 +4,7 @@ run_farm:
         default_platform: XilinxAlveoU250InstanceDeployManager
         default_simulation_dir: /scratch/buildbot/RUN_DIR
         run_farm_hosts_to_use:
-            - localhost: one_fpga_spec
+            - a17: one_fpga_spec
 
 metasimulation:
   metasimulation_enabled: false
