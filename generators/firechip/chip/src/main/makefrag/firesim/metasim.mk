@@ -126,14 +126,6 @@ $(OUTPUT_DIR)/%.fsdb: $(OUTPUT_DIR)/% $(EMUL)-debug
 
 # TraceGen rules
 
-AXE_DIR=$(chipyard_dir)/tools/axe/src
-AXE=$(AXE_DIR)/axe
-
-ifdef FIRESIM_STANDALONE
-$(AXE): $(wildcard $(AXE_DIR)/*.[ch]) $(AXE_DIR)/make.sh
-	cd $(AXE_DIR) && ./make.sh
-endif
-
 $(OUTPUT_DIR)/tracegen.out: $($(EMUL))
 	mkdir -p $(OUTPUT_DIR) && \
 	cd $(dir $($(EMUL))) && \

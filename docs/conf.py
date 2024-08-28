@@ -276,3 +276,61 @@ autosectionlabel_prefix_document = True
 extlinks = {
     'fsim_doc' : ('https://docs.fires.im/en/' + rtd_version + '/%s', 'fsim_doc %s')
 }
+
+# -- handle re-directs for pages that move
+# taken from https://tech.signavio.com/2017/managing-sphinx-redirects
+
+redirect_files = [ ]
+
+def copy_legacy_redirects(app, docname): # Sphinx expects two arguments
+    if app.builder.name == 'html':
+        for html_src_path in redirect_files:
+            target_path = app.outdir + '/' + html_src_path
+            src_path = app.srcdir + '/' + html_src_path
+
+            if os.path.isfile(src_path):
+                shutil.copyfile(src_path, target_path)
+
+def gh_file_ref_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    """
+    Produces a github.com reference to a blob or tree at path {text}.
+
+    Example:
+
+    :gh-file-ref:`my/path`
+
+    Produces a hyperlink with the text "my/path" that refers the url:
+    https://www.github.com/ucb-bar/chipyard/blob/<version>/my/path.
+
+    Where version is the same as would be substituted by using |version| in
+    html text, and is resolved in conf.py.
+
+    This is based off custom role sphinx plugins like
+    https://github.com/tdi/sphinxcontrib-manpage. I've inlined this here for
+    now, but we could just as well make it a module and register it under
+    `extensions` in conf.py
+    """
+
+    import docutils
+    import requests
+
+    # Note GitHub permits referring to a tree as a 'blob' in these URLs without returning a 404.
+    # So I've unconditionally chosen to use blob.
+    url = f"https://www.github.com/ucb-bar/chipyard/blob/{version}/{text}"
+
+    print(f"Testing GitHub URL {url} exists...")
+    status_code = requests.get(url).status_code
+    if status_code != 200:
+        message = f"[Line {lineno}] :{name}:`{text}` produces URL {url} returning status code {status_code}. " \
+                  "Ensure your path is correct and all commits that may have moved or renamed files have been pushed to github.com."
+        print(message)
+        sys.exit(1)
+
+    docutils.parsers.rst.roles.set_classes(options)
+    node = docutils.nodes.reference(rawtext, text, refuri=url, **options)
+    return [node], []
+
+def setup(app):
+    # Add roles to simplify github reference generation
+    app.add_role('gh-file-ref', gh_file_ref_role)
+    app.connect('build-finished', copy_legacy_redirects)

@@ -147,6 +147,9 @@ function exit_if_last_command_failed
     fi
 }
 
+# add helper variable pointing to current chipyard top-level dir
+replace_content env.sh cy-dir-helper "CY_DIR=${CYDIR}"
+
 # setup and install conda environment
 if run_step "1"; then
     begin_step "1" "Conda environment setup"
