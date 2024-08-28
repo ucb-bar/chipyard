@@ -270,9 +270,9 @@ class WithDriveChipIdPin extends HarnessBinder({
 })
 
 class WithSimUARTToUARTTSI extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: UARTPort, chipId: Int) => {
-    UARTAdapter.connect(Seq(port.io),
-      baudrate=port.io.c.initBaudRate,
+  case (th: HasHarnessInstantiators, port: UARTTSIPort, chipId: Int) => {
+    UARTAdapter.connect(Seq(port.io.uart),
+      baudrate=port.io.uart.c.initBaudRate,
       clockFrequency=th.getHarnessBinderClockFreqHz.toInt,
       forcePty=true)
   }
