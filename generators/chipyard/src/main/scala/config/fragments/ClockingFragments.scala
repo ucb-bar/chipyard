@@ -110,7 +110,7 @@ class WithControlBusFrequency(freqMHz: Double) extends Config((site, here, up) =
 class WithOffchipBusFrequency(freqMHz: Double) extends Config((site, here, up) => {
   case OffchipBusKey => up(OffchipBusKey, site).copy(dtsFrequency = Some(BigInt((freqMHz * 1e6).toLong)))
 })
-class WithUniformBusFrequency(freqMHz: Double) extends Config(
+class WithUniformBusFrequencies(freqMHz: Double) extends Config(
   new WithPeripheryBusFrequency(freqMHz) ++
   new WithSystemBusFrequency(freqMHz) ++
   new WithFrontBusFrequency(freqMHz) ++

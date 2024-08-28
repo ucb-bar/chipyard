@@ -42,7 +42,7 @@ class WithVC707Tweaks extends Config (
   // clocking
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.config.WithUniformBusFrequency(50.0) ++
+  new chipyard.config.WithUniformBusFrequencies(50.0) ++
 
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new WithFPGAFrequency(50) ++ // default 50MHz freq

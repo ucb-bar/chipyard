@@ -15,7 +15,7 @@ class AbstractTraceGenConfig extends Config(
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore", Seq("sbus"), Nil)) ++
   new chipyard.config.WithTracegenSystem ++
   new chipyard.config.WithNoSubsystemClockIO ++
-  new chipyard.config.WithUniformBusFrequency(1000.0) ++
+  new chipyard.config.WithUniformBusFrequencies(1000.0) ++
   new freechips.rocketchip.subsystem.WithCoherentBusTopology ++
   new freechips.rocketchip.groundtest.GroundTestBaseConfig)
 

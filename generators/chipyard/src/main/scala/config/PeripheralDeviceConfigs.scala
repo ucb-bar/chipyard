@@ -88,6 +88,6 @@ class ManyPeripheralsRocketConfig extends Config(
 class UARTTSIRocketConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++
   new testchipip.tsi.WithUARTTSIClient ++
-  new chipyard.config.WithUniformBusFrequency(2) ++
+  new chipyard.config.WithUniformBusFrequencies(2) ++
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
