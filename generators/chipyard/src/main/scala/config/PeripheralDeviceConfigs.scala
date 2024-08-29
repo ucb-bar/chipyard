@@ -50,15 +50,6 @@ class MMIORocketConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
-class LBWIFRocketConfig extends Config(
-  new chipyard.config.WithOffchipBusFrequency(500) ++
-  new testchipip.soc.WithOffchipBusClient(MBUS) ++
-  new testchipip.soc.WithOffchipBus ++
-  new testchipip.serdes.WithSerialTLMem(isMainMemory=true) ++ // set lbwif memory base to DRAM_BASE, use as main memory
-  new freechips.rocketchip.subsystem.WithNoMemPort ++         // remove AXI4 backing memory
-  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
-  new chipyard.config.AbstractConfig)
-
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tl
@@ -97,8 +88,6 @@ class ManyPeripheralsRocketConfig extends Config(
 class UARTTSIRocketConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++
   new testchipip.tsi.WithUARTTSIClient ++
-  new chipyard.config.WithMemoryBusFrequency(10) ++
-  new chipyard.config.WithFrontBusFrequency(10) ++
-  new chipyard.config.WithPeripheryBusFrequency(10) ++
+  new chipyard.config.WithUniformBusFrequencies(2) ++
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)

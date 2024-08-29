@@ -24,11 +24,7 @@ class WithArtyTweaks extends Config(
 
   new chipyard.harness.WithHarnessBinderClockFreqMHz(32) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
-  new chipyard.config.WithSystemBusFrequency(32) ++
-  new chipyard.config.WithFrontBusFrequency(32) ++
-  new chipyard.config.WithControlBusFrequency(32) ++
-  new chipyard.config.WithPeripheryBusFrequency(32) ++
-  new chipyard.config.WithControlBusFrequency(32) ++
+  new chipyard.config.WithUniformBusFrequencies(32) ++
   new testchipip.serdes.WithNoSerialTL ++
   new testchipip.soc.WithNoScratchpads
 )

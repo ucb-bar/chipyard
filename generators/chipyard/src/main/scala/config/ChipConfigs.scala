@@ -102,12 +102,7 @@ class ChipBringupHostConfig extends Config(
   // Set up clocks of the bringup system
   //=============================
   new chipyard.clocking.WithPassthroughClockGenerator ++ // pass all the clocks through, since this isn't a chip
-  new chipyard.config.WithFrontBusFrequency(75.0) ++     // run all buses of this system at 75 MHz
-  new chipyard.config.WithMemoryBusFrequency(75.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(75.0) ++
-  new chipyard.config.WithSystemBusFrequency(75.0) ++
-  new chipyard.config.WithControlBusFrequency(75.0) ++
-  new chipyard.config.WithOffchipBusFrequency(75.0) ++
+  new chipyard.config.WithUniformBusFrequencies(75.0) ++   // run all buses of this system at 75 MHz
 
   // Base is the no-cores config
   new chipyard.NoCoresConfig)
