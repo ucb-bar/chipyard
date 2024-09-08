@@ -34,7 +34,7 @@ set(CMAKE_SIZE          "${TOOLCHAIN_PREFIX}size")
 
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY     "${CMAKE_BINARY_DIR}/..")
-set(CMAKE_EXECUTABLE_SUFFIX         ".riscv")
+set(CMAKE_EXECUTABLE_SUFFIX            ".riscv")
 
 
 #################################
@@ -42,7 +42,7 @@ set(CMAKE_EXECUTABLE_SUFFIX         ".riscv")
 #################################
 
 # CPU architecture
-set(ARCH                "rv64imafdc")
+set(ARCH                "rv64imafd")
 set(ABI                 "lp64d")
 set(CMODEL              "medany")
 set(ARCH_FLAGS          -march=${ARCH} -mabi=${ABI} -mcmodel=${CMODEL})
@@ -89,5 +89,15 @@ add_executable(mt-hello mt-hello.c)
 add_executable(symmetric symmetric.c)
 
 
-# spiflash.img: spiflash.py
-#     python3 $<
+# Add custom command to generate spiflash.img from spiflash.py
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/spiflash.img
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/spiflash.py
+    DEPENDS ${CMAKE_SOURCE_DIR}/spiflash.py
+    COMMENT "Generating spiflash.img"
+)
+
+# Add a target for spiflash.img
+add_custom_target(spiflash_img ALL
+    DEPENDS ${CMAKE_BINARY_DIR}/spiflash.img
+)
