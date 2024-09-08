@@ -48,7 +48,7 @@ class RadianceBaseConfig(argsBinFilename: String = "args.bin") extends Config(
   new AbstractConfig)
 
 class RadianceFP16ClusterConfig extends Config(
-  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 32, tileSize = 8, dataType = RadianceGemminiDataType.FP16) ++
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 64, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
   new radiance.subsystem.WithRadianceCores(8, location = InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 8) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
@@ -58,8 +58,8 @@ class RadianceFP16ClusterConfig extends Config(
 
 class RadianceClusterConfig extends Config(
   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
-  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8, dataType = RadianceGemminiDataType.FP32) ++
-  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8, dataType = RadianceGemminiDataType.FP32) ++
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
   new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), useVxCache = false) ++
   // new radiance.subsystem.WithRadianceFrameBuffer(x"ff018000", 16, 0x8000, x"ff011000", "fb0") ++
   // 
