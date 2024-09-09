@@ -28,12 +28,16 @@ run_binary () {
     make run-binary-fast -C $LOCAL_SIM_DIR $DISABLE_SIM_PREREQ $MAPPING_FLAGS $@
 }
 
+build_tests() {
+    cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
+    cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+}
+
 case $1 in
     chipyard-rocket)
         run_bmark LOADMEM=1
         run_asm LOADMEM=1
-        cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-        cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+        build_tests
 
         # Test run-binary with and without loadmem
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1
@@ -79,9 +83,7 @@ case $1 in
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/compress-acc/software-zstd/compress/009987_cl0_ws12.riscv LOADMEM=1
         ;;
     chipyard-manymmioaccels)
-	cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-    cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
-
+        build_tests
 
 	# test streaming-passthrough
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv LOADMEM=1
@@ -91,42 +93,36 @@ case $1 in
 
 	# test fft
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/fft.riscv LOADMEM=1
-	;;
+        ;;
     chipyard-nvdla)
-	    cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-        cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+        build_tests
 
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv LOADMEM=1
-	;;
+        ;;
     chipyard-manyperipherals)
-	# SPI Flash read tests
-        cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-        cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+        # SPI Flash read tests
+        build_tests
 
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv
         ;;
     chipyard-spiflashwrite)
-        cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-        cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+        build_tests
 
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv LOADMEM=1
         [[ "`xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img  | grep 1337\ 00ff\ aa55\ face | wc -l`" == "6" ]] || false
         ;;
     chipyard-tethered)
-        cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-        cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+        build_tests
 
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1 EXTRA_SIM_FLAGS="+cflush_addr=0x2010200"
         ;;
     chipyard-symmetric)
-        cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-        cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+        build_tests
 
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/symmetric.riscv LOADMEM=1
         ;;
     chipyard-llcchiplet)
-        cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-        cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+        build_tests
 
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1
         ;;
