@@ -92,7 +92,7 @@ add_executable(symmetric symmetric.c)
 # Add custom command to generate spiflash.img from spiflash.py
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/spiflash.img
-    COMMAND python3 ${CMAKE_SOURCE_DIR}/spiflash.py --outfile ${CMAKE_BINARY_DIR}/spiflash.img
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/spiflash.py --outfile ${CMAKE_SOURCE_DIR}/spiflash.img
     DEPENDS ${CMAKE_SOURCE_DIR}/spiflash.py
     COMMENT "Generating spiflash.img"
 )
