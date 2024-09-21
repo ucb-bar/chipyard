@@ -135,6 +135,7 @@ cd "$RDIR"
     git submodule update --init generators/vexiiriscv
     git -C generators/vexiiriscv submodule update --init VexiiRiscv
     git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/SpinalHDL
+    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/rvls
 
     # Minimal non-recursive clone to initialize sbt dependencies
     git submodule update --init sims/firesim
