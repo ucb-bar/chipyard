@@ -13,7 +13,7 @@ $(SIM_CONF): $(sim_common_files) check-binary
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
 	# plusarg_reader is bugged, TODO perhaps raise the issue again in chipyard #1388 and #1442
-	for x in $$(cat $(MODEL_MODS_FILELIST) | grep -v cpp | sort -u) $(GEN_COLLATERAL_DIR)/plusarg_reader.v $(GEN_COLLATERAL_DIR)/GenericDeserializer.sv $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
+	for x in $$(cat $(MODEL_MODS_FILELIST) | grep -v cpp | sort -u) $(GEN_COLLATERAL_DIR)/plusarg_reader.v $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
