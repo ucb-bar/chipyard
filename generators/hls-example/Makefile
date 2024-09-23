@@ -2,17 +2,15 @@ base_dir=$(abspath .)
 hls_gendir=$(base_dir)/proj_gcd_example/solution1/syn/verilog
 vsrc_dir=$(base_dir)/src/main/resources/vsrc
 
-.PHONY: default $(RUN_HLS) clean
+.PHONY: default run-hls clean
 
 HLS_CMD = vitis_hls 
 TCL_SCRIPT = run_hls.tcl
-RUN_HLS = vitis_hls.log
 ACCEL_C = accel/HLSAccel.cpp
-ACCEL_H = accel/HLSAccel.hpp
 
-default: $(RUN_HLS)
+default: run-hls
 
-$(RUN_HLS): $(ACCEL_C) $(ACCEL_H) $(TCL_SCRIPT)
+run-hls: $(ACCEL_C) $(TCL_SCRIPT)
 	$(HLS_CMD) $(TCL_SCRIPT)
 	mkdir -p $(vsrc_dir)
 	cp -r $(hls_gendir)/. $(vsrc_dir)

@@ -1,19 +1,28 @@
-#include "HLSAccel.hpp"
+#ifndef _GCD_EX_H_
+#define _GCD_EX_H_
+
+#include <ap_int.h>
+
+#define DATA_WIDTH 32
+
+typedef ap_uint<DATA_WIDTH> io_t;
 
 io_t HLSAccelBlackBox(io_t x, io_t y) {
-	io_t tmp;
-	io_t gcd;
+    io_t tmp;
+    io_t gcd;
 
-	tmp = y;
+    tmp = y;
     gcd = x;
 
-	while(tmp != 0) {
-		if (gcd > tmp) { 
+    while(tmp != 0) {
+        if (gcd > tmp) { 
             gcd = gcd - tmp;
         } else { 
             tmp = tmp - gcd;
         }
-	}
+    }
 
-	return gcd;
+    return gcd;
 }
+
+#endif
