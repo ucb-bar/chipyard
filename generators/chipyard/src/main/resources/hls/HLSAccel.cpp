@@ -7,7 +7,7 @@
 
 typedef ap_uint<DATA_WIDTH> io_t;
 
-io_t HLSAccelBlackBox(io_t x, io_t y) {
+io_t HLSGCDAccelBlackBox(io_t x, io_t y) {
     io_t tmp;
     io_t gcd;
 

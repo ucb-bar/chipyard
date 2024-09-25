@@ -28,6 +28,11 @@ class GCDAXI4BlackBoxRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: GCDAXI4BlackBoxRocketConfig
 
+class GCDHLSRocketConfig extends Config(
+  new chipyard.example.WithHLSGCD ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
   new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero
@@ -63,10 +68,5 @@ class ManyMMIOAcceleratorRocketConfig extends Config(
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
   new chipyard.example.WithStreamingPassthrough ++          // use top with tilelink-controlled streaming passthrough
   new chipyard.example.WithStreamingFIR ++                  // use top with tilelink-controlled streaming FIR
-  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class HLSAcceleratorRocketConfig extends Config(
-  new hlsaccel.WithHLSAccel ++
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
