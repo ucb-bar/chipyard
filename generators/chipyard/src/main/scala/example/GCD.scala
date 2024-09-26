@@ -301,10 +301,6 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
         }
         gcd
       } else if (params.useHLS) {
-        // val gcd = LazyModule( 
-        //   if (params.useHLS) new HLSGCDAccel(params, pbus.beatBytes)(p) 
-        //   else new GCDTL(params, pbus.beatBytes)(p)
-        // )
         val gcd = LazyModule(new HLSGCDAccel(params, pbus.beatBytes)(p))
         gcd.clockNode := pbus.fixedClockNode
         pbus.coupleTo(portName) { gcd.node := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
@@ -328,12 +324,11 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
 // DOC include end: GCD lazy trait
 
 // DOC include start: GCD config fragment
-class WithGCD(useAXI4: Boolean = false, useBlackBox: Boolean = false) extends Config((site, here, up) => {
-  case GCDKey => Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox))
+class WithGCD(useAXI4: Boolean = false, useBlackBox: Boolean = false, useHLS: Boolean = false) extends Config((site, here, up) => {
+  case GCDKey => {
+    // useHLS cannot be used with useAXI4 and useBlackBox
+    assert(!useHLS || (useHLS && !useAXI4 && !useBlackBox)) 
+    Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox, useHLS = useHLS))
+  }
 })
 // DOC include end: GCD config fragment
-
-// useHLS cannot be used with useAXI4 and useBlackBox
-class WithHLSGCD extends Config((site, here, up) => {
-  case GCDKey => Some(GCDParams(useAXI4 = false, useBlackBox = false, useHLS = true))
-})

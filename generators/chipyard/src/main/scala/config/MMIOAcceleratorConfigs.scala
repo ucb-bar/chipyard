@@ -29,7 +29,7 @@ class GCDAXI4BlackBoxRocketConfig extends Config(
 // DOC include end: GCDAXI4BlackBoxRocketConfig
 
 class GCDHLSRocketConfig extends Config(
-  new chipyard.example.WithHLSGCD ++
+  new chipyard.example.WithGCD(useAXI4=false, useBlackBox=false, useHLS=true) ++
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
