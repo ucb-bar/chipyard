@@ -25,7 +25,7 @@ Our project consists of 3 HLS files:
 
 This example implements an iterative GCD algorithm, which is manually connected to 
 a TileLink register node in the ``HLSGCDAccel`` class in 
-:gh-file-ref:`generators/chipyard/src/main/scala/GCD.scala`.
+:gh-file-ref:`generators/chipyard/src/main/scala/example/GCD.scala`.
 HLS also supports adding AXI nodes to accelerators using compiler directives and 
 the HLS stream library. See the Vitis HLS user guide for AXI implementation information.
 
