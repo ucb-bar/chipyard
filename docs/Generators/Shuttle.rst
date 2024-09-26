@@ -6,3 +6,5 @@ Shuttle is a Rocket-based superscalar in-order RISC-V core, supporting the base 
 The superscalar microarchitecture presents the most advantages for 1) floating-point kernels and 2) RoCC accelerator kernels, as scalar control code can execute concurrently with floating point or RoCC instructions, maintaining high utilization of those units.
 
 Shuttle is tape-out proven, and has similar physical design complexity as Rocket.
+
+``ShuttleConfig`` provides a base configuration of a single-core Shuttle-based SoC.
