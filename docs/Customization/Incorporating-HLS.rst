@@ -59,9 +59,7 @@ To delete the generated files, run:
 Creating the Verilog black box
 ---------------------------------------
 
-.. Note:: This section discusses automatically running HLS within a Verilog black box.
-Please consult :ref:`incorporating-verilog-blocks` for background information 
-on writing a Verilog black box. 
+.. Note:: This section discusses automatically running HLS within a Verilog black box. Please consult :ref:`incorporating-verilog-blocks` for background information on writing a Verilog black box. 
 
 We use Scala to run ``make``, which runs HLS and copies the files into :gh-file-ref:`generators/chipyard/src/main/resources/vsrc`.
 Then, we add the path to each file. This code will execute during Chisel elaboration, conveniently handling 
