@@ -10,7 +10,7 @@ import org.chipsalliance.diplomacy.nodes._
 import org.chipsalliance.diplomacy.aop._
 import org.chipsalliance.diplomacy.lazymodule._
 import org.chipsalliance.diplomacy.bundlebridge._
-import freechips.rocketchip.diplomacy.{Resource, ResourceBinding, ResourceAddress}
+import freechips.rocketchip.diplomacy.{Resource, ResourceBinding, ResourceAddress, RegionType}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
@@ -484,16 +484,31 @@ class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
       val p = GetSystemParameters(system)
       val chipyardSystem = system.asInstanceOf[ChipyardSystem]
       val tiles = chipyardSystem.totalTiles.values
+      val viewpointBus = system.asInstanceOf[HasConfigurableTLNetworkTopology].viewpointBus
+      val mems = viewpointBus.unifyManagers.filter { m =>
+        val regionTypes = Seq(RegionType.CACHED, RegionType.TRACKED, RegionType.UNCACHED, RegionType.IDEMPOTENT)
+        val ignoreAddresses = Seq(
+          0x10000 // bootrom is handled specially
+        )
+        regionTypes.contains(m.regionType) && !ignoreAddresses.contains(m.address.map(_.base).min)
+      }.map { m =>
+        val base = m.address.map(_.base).min
+        val size = m.address.map(_.max).max - base + 1
+        (base, size)
+      }
+      val useSimDTM = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
       val cfg = SpikeCosimConfig(
         isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
         priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
         maxpglevels = tiles.headOption.map(_.tileParams.core.pgLevels).getOrElse(0),
-        mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
-        mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
         pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
         nharts = tiles.size,
         bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
-        has_dtm = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
+        has_dtm = useSimDTM,
+        mems = mems,
+        // Connect using the legacy API for firesim only
+        mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
+        mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
       )
       TracePort(() => trace, cfg)
     }
