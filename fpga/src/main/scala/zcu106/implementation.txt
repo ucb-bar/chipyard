@@ -1,0 +1,15 @@
+01/06/2023:
+    -going through and copying things that I had done before on my 581 server
+        + Copied a lot of the vcu118 implemnetation:
+            fpga-shells/src/main/scala/xilinx/xilinxzcu106mig
+            fpga-shells/src/main/scala/ip/zcu106
+            fpga-shells/src/main/scala/shell/xilinx/ZCU106ShellNew
+            src/main/resources/zcu106
+            fpga-shells/xilinx/zcu106
+        + And any files I was missing in fpga/src/main/scala/zcu106
+    -Need to go through these files with a fine toothed comb now, everything compiles with the VCU118 stuff
+        + Going through ZCU106ShellNew first, since that is the base layer from the SiFive UltraScaleShell
+            Comparing ZCU106 and VCU118 Pin mappings to translate
+
+
+MIG = Memory interface generator
