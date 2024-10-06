@@ -2,23 +2,23 @@ package chipyard.fpga.zcu106
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.{IO}
 
 import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
 import org.chipsalliance.cde.config.{Parameters}
-import freechips.rocketchip.tilelink.{TLClientNode}
-
+import freechips.rocketchip.tilelink._
+import freechips.rocketchip.diplomacy.{IdRange, TransferSizes}
+import freechips.rocketchip.subsystem.{SystemBusKey}
+import freechips.rocketchip.prci._
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 import sifive.fpgashells.shell._
-import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
+import sifive.fpgashells.clocks._
 
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTPortIO}
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
 import chipyard._
-import chipyard.iobinders.{HasIOBinders}
-import chipyard.harness.{ApplyHarnessBinders}
+import chipyard.harness._
 
 class ZCU106FPGATestHarness(override implicit val p: Parameters) extends ZCU106ShellBasicOverlays {
 
@@ -38,7 +38,6 @@ class ZCU106FPGATestHarness(override implicit val p: Parameters) extends ZCU106S
   val sys_clock2 = Overlay(ClockInputOverlayKey, new SysClock2ZCU106ShellPlacer(this, ClockInputShellInput()))
   val ddr2       = Overlay(DDROverlayKey, new DDR2ZCU106ShellPlacer(this, DDRShellInput()))
 
-  val topDesign = LazyModule(p(BuildTop)(dp)).suggestName("chiptop")
 
  // DOC include start: ClockOverlay
   // place all clocks in the shell
@@ -52,8 +51,9 @@ class ZCU106FPGATestHarness(override implicit val p: Parameters) extends ZCU106S
   harnessSysPLL := sysClkNode
 
   // create and connect to the dutClock
-  println(s"ZCU106 FPGA Base Clock Freq: ${dp(DefaultClockFrequencyKey)} MHz")
-  val dutClock = ClockSinkNode(freqMHz = dp(DefaultClockFrequencyKey))
+  val dutFreqMHz = (dp(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toInt
+  val dutClock = ClockSinkNode(freqMHz = dutFreqMHz)
+  println(s"ZCU106 FPGA Base Clock Freq: ${dutFreqMHz} MHz")
   val dutWrangler = LazyModule(new ResetWrangler)
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
@@ -80,29 +80,28 @@ class ZCU106FPGATestHarness(override implicit val p: Parameters) extends ZCU106S
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
 
   // connect 1 mem. channel to the FPGA DDR
-  val inParams = topDesign match { case td: ChipTop =>
-    td.lazySystem match { case lsys: CanHaveMasterTLMemPort =>
-      lsys.memTLNode.edges.in(0)
-    }
-  }
-  val ddrClient = TLClientNode(Seq(inParams.master))
-  ddrNode := ddrClient
+  val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
+    name = "chip_ddr",
+    sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
+  )))))
+  ddrNode := TLWidthWidget(dp(ExtTLMem).get.master.beatBytes) := ddrClient
 
-  val ledOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
-  val all_leds = ledOverlays.map(_.overlayOutput.led)
-  val status_leds = all_leds.take(3)
-  val reset_led  = all_leds(4)
-  val other_leds = all_leds.drop(4)
-
+  // val ledOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
+  // val all_leds = ledOverlays.map(_.overlayOutput.led)
+  // val status_leds = all_leds.take(3)
+  // val reset_led  = all_leds(4)
+  // val other_leds = all_leds.drop(4)
+  /*** JTAG ***/
+  val jtagPlacedOverlay = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput())
   // module implementation
   override lazy val module = new ZCU106FPGATestHarnessImp(this)
 }
 
-class ZCU106FPGATestHarnessImp(_outer: ZCU106FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessSignalReferences {
-
+class ZCU106FPGATestHarnessImp(_outer: ZCU106FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
+  override def provideImplicitClockToLazyChildren = true
   val zcu106Outer = _outer
 
-  val reset = IO(Input(Bool()))
+  val reset = IO(Input(Bool())).suggestName("reset")
   _outer.xdc.addPackagePin(reset, "G13")
   _outer.xdc.addIOStandard(reset, "LVCMOS18")
 
@@ -126,49 +125,42 @@ class ZCU106FPGATestHarnessImp(_outer: ZCU106FPGATestHarness) extends LazyRawMod
   hReset := _outer.dutClock.in.head._1.reset
 
 
-  val buildtopClock = _outer.dutClock.in.head._1.clock
-  val buildtopReset = WireInit(hReset)
-  val dutReset = hReset.asAsyncReset
-  val success = false.B
 
   val sys_clk_mhz = _outer.sysClkNode.out.head._1.clock
   val clk_50mhz = _outer.dutClock.in.head._1.clock
   val clk_300mhz = _outer.sysClkNode.out.head._2.clock //What is this?
 
   // Blink the status LEDs for sanity
-  withClockAndReset(sys_clk_mhz, _outer.pllReset) {
-    val period = (BigInt(100) << 20) / _outer.status_leds.size
-    val counter = RegInit(0.U(log2Ceil(period).W))
-    val on = RegInit(0.U(log2Ceil(_outer.status_leds.size).W))
-    _outer.status_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
-    counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
-    when (counter === 0.U) {
-      on := Mux(on === (_outer.status_leds.size-1).U, 0.U, on + 1.U)
-    }
-  }
+  // withClockAndReset(sys_clk_mhz, _outer.pllReset) {
+  //   val period = (BigInt(100) << 20) / _outer.status_leds.size
+  //   val counter = RegInit(0.U(log2Ceil(period).W))
+  //   val on = RegInit(0.U(log2Ceil(_outer.status_leds.size).W))
+  //   _outer.status_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
+  //   counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
+  //   when (counter === 0.U) {
+  //     on := Mux(on === (_outer.status_leds.size-1).U, 0.U, on + 1.U)
+  //   }
+  // }
 
-  withClockAndReset(clk_50mhz, _outer.pllReset) {
-    val period = (BigInt(100) << 20) / (_outer.other_leds.size - 1)
-    val counter = RegInit(0.U(log2Ceil(period).W))
-    val on = RegInit(0.U(log2Ceil(_outer.other_leds.size).W))
-    _outer.other_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
-    counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
-    when (counter === 0.U) {
-      on := Mux(on === (_outer.other_leds.size-1).U, 0.U, on + 1.U)
-    }
-  }
+  // withClockAndReset(clk_50mhz, _outer.pllReset) {
+  //   val period = (BigInt(100) << 20) / (_outer.other_leds.size - 1)
+  //   val counter = RegInit(0.U(log2Ceil(period).W))
+  //   val on = RegInit(0.U(log2Ceil(_outer.other_leds.size).W))
+  //   _outer.other_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
+  //   counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
+  //   when (counter === 0.U) {
+  //     on := Mux(on === (_outer.other_leds.size-1).U, 0.U, on + 1.U)
+  //   }
+  // }
 
-  _outer.reset_led := _outer.pllReset
+  // _outer.reset_led := _outer.pllReset
+  def referenceClockFreqMHz = _outer.dutFreqMHz
+  def referenceClock = _outer.dutClock.in.head._1.clock
+  def referenceReset = hReset
+  def success = { require(false, "Unused"); false.B }
 
-  childClock := buildtopClock
-  childReset := buildtopReset
+  childClock := referenceClock
+  childReset := referenceReset
 
-  // harness binders are non-lazy
-  _outer.topDesign match { case d: HasIOBinders =>
-    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
-  }
-
-  // check the top-level reference clock is equal to the default
-  // non-exhaustive since you need all ChipTop clocks to equal the default
-  require(getRefClockFreq == p(DefaultClockFrequencyKey))
+  instantiateChipTops()
 }
