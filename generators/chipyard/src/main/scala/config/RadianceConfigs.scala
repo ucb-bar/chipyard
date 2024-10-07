@@ -25,6 +25,7 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 // aliases for virgo
 class VirgoConfig extends RadianceClusterConfig
 class VirgoFP16Config extends RadianceFP16ClusterConfig
+class Virgo4CFP16Config extends Radiance4CFP16ClusterConfig
 class VirgoSynConfig extends RadianceClusterSynConfig
 class VirgoFP16SynConfig extends RadianceFP16ClusterSynConfig
 
@@ -45,6 +46,15 @@ class RadianceBaseConfig extends Config(
 class RadianceFP16ClusterConfig extends Config(
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 64, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
   new radiance.subsystem.WithRadianceCores(8, location = InCluster(0), useVxCache = false) ++
+  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 8) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
+  new radiance.subsystem.WithRadianceCluster(0) ++
+  new RadianceBaseConfig)
+
+class Radiance4CFP16ClusterConfig extends Config(
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 64, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
+  new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), useVxCache = false) ++
   new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 8) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
