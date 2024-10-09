@@ -366,8 +366,6 @@ module Vsplit(
   assign fire2PipeReg = pipeRegReady & mUopIn_valid;	// @[Vsplit.scala:503:64, :579:37, :580:41]
   wire         _muopOutValid_T = io_vLSUXcpt_exception_vld | io_vLSUXcpt_update_vl;	// @[Vsplit.scala:590:37]
   wire         muopOutValid = exuReady & validReg & ~_muopOutValid_T;	// @[Vsplit.scala:153:45, :575:34, :590:37, :600:{45,48}]
-  reg          io_excpInfo_exception_vld_REG;	// @[Vsplit.scala:611:70]
-  reg          io_excpInfo_illegalInst_REG;	// @[Vsplit.scala:612:41]
   wire         vGatherEi16 = io_in_decodeIn_bits_vCtrl_perm & io_in_decodeIn_bits_vCtrl_funct6 == 6'hE & io_in_decodeIn_bits_vCtrl_funct3 == 3'h0;	// @[Vsplit.scala:197:{48,64,79}, :576:47]
   wire [6:0]   _mUopMergeAttrIn_bits_regCount_T_1 = {3'h0, nfield} << _GEN_2;	// @[Vsplit.scala:205:36, :299:30, :346:79, :576:47]
   wire         _io_scoreBoardSetIO_setMultiEn_T = fire2PipeReg & io_in_decodeIn_bits_vCtrl_ldestVal;	// @[Vsplit.scala:442:59, :580:41]
@@ -397,8 +395,6 @@ module Vsplit(
     else	// @[Vsplit.scala:209:37]
       io_scoreBoardSetIO_setNum_REG <= 4'h0;	// @[Vsplit.scala:209:22, :444:45]
     io_scoreBoardSetIO_setAddr_REG <= mUopMergeAttrIn_bits_ldest;	// @[Vsplit.scala:332:57, :445:45]
-    io_excpInfo_exception_vld_REG <= io_in_decodeIn_bits_vCtrl_illegal & instDecodeIn;	// @[Vsplit.scala:148:45, :611:{70,85}]
-    io_excpInfo_illegalInst_REG <= io_in_decodeIn_bits_vCtrl_illegal;	// @[Vsplit.scala:612:41]
     if (reset) begin
       idx <= 8'h0;	// @[Vsplit.scala:141:32, :491:53]
       currentState <= 1'h0;	// @[Vsplit.scala:139:28, :145:31]
@@ -713,8 +709,6 @@ module Vsplit(
         mergeAttrReg_regCount = _RANDOM_41[6:3];	// @[Vsplit.scala:577:34]
         mergeAttrReg_regBackWidth = _RANDOM_41[9:7];	// @[Vsplit.scala:577:34]
         mergeAttrReg_regWriteMuopIdx = _RANDOM_41[13:10];	// @[Vsplit.scala:577:34]
-        io_excpInfo_exception_vld_REG = _RANDOM_41[14];	// @[Vsplit.scala:577:34, :611:70]
-        io_excpInfo_illegalInst_REG = _RANDOM_41[15];	// @[Vsplit.scala:577:34, :612:41]
       `endif // RANDOMIZE_REG_INIT
     end // initial
     `ifdef FIRRTL_AFTER_INITIAL
@@ -792,7 +786,7 @@ module Vsplit(
   assign io_scoreBoardReadIO_readAddr3 = mUopMergeAttrIn_bits_ldest;	// @[Vsplit.scala:332:57]
   assign io_scoreBoardReadIO_readNum1 = emulVs1[2:0];	// @[Vsplit.scala:210:22, :388:38]
   assign io_scoreBoardReadIO_readNum2 = emulVs2[2:0];	// @[Vsplit.scala:211:22, :389:38]
-  assign io_excpInfo_exception_vld = io_vLSUXcpt_exception_vld | io_excpInfo_exception_vld_REG;	// @[Vsplit.scala:611:{60,70}]
+  assign io_excpInfo_exception_vld = io_vLSUXcpt_exception_vld | io_in_decodeIn_bits_vCtrl_illegal & instDecodeIn;	// @[Vsplit.scala:148:45, :611:{60,77}]
   assign io_excpInfo_update_vl = io_vLSUXcpt_update_vl;
   assign io_excpInfo_update_data = io_vLSUXcpt_update_data;
   assign io_excpInfo_xcpt_cause_ma_ld = io_vLSUXcpt_xcpt_cause_ma_ld;
@@ -804,7 +798,7 @@ module Vsplit(
   assign io_excpInfo_xcpt_cause_ae_ld = io_vLSUXcpt_xcpt_cause_ae_ld;
   assign io_excpInfo_xcpt_cause_ae_st = io_vLSUXcpt_xcpt_cause_ae_st;
   assign io_excpInfo_xcpt_addr = io_vLSUXcpt_xcpt_addr;
-  assign io_excpInfo_illegalInst = io_excpInfo_illegalInst_REG;	// @[Vsplit.scala:612:41]
+  assign io_excpInfo_illegalInst = io_in_decodeIn_bits_vCtrl_illegal;
   assign io_excpInfo_update_float = mUopMergeAttrIn_bits_floatRegWriteEn;	// @[Vsplit.scala:331:57]
   assign io_excpInfo_reg_idx = io_in_decodeIn_bits_vCtrl_ldest;
 endmodule

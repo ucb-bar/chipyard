@@ -828,7 +828,7 @@
         "useBPWatch":false,
         "mcontextWidth":0,
         "scontextWidth":0,
-        "nPMPs":8,
+        "nPMPs":16,
         "nPerfCounters":0,
         "haveBasicCounters":true,
         "haveCFlush":false,

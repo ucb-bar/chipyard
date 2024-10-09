@@ -78,7 +78,7 @@ module VpuMessageQueue(
   output [39:0] io_out_bits_s_v_pc
 );
 
-  Queue_83 q (	// @[RocketCore.scala:1609:19]
+  Queue_83 q (	// @[RocketCore.scala:1606:19]
     .clock              (clock),
     .reset              (reset),
     .io_enq_valid       (io_in_valid),

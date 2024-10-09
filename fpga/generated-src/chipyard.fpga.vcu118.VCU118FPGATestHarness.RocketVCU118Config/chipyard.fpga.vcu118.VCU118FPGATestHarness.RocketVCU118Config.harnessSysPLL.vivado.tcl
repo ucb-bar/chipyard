@@ -15,7 +15,7 @@ set_property -dict [list \
  CONFIG.CLK_IN1_BOARD_INTERFACE {Custom} \
  CONFIG.PRIM_SOURCE {No_buffer} \
  CONFIG.NUM_OUT_CLKS {1} \
- CONFIG.PRIM_IN_FREQ {250.0} \
+ CONFIG.PRIM_IN_FREQ {80.0} \
  CONFIG.CLKIN1_JITTER_PS {50.0} \
  CONFIG.CLKOUT1_USED {true} \
  CONFIG.CLKOUT2_USED {false} \
@@ -41,7 +41,7 @@ if {$phase < -5.0 || $phase > 5.0} {
   exit 1
 }
 set div2 [get_property CONFIG.MMCM_CLKOUT0_DIVIDE_F [get_ips harnessSysPLL]]
-set freq [expr { 250.0 * $mult / $div1 / $div2 }]
+set freq [expr { 80.0 * $mult / $div1 / $div2 }]
 if {$freq < 99.0 || $freq > 101.0} {
   puts "Achieved frequency $freq MHz is outside tolerated range 99.0-101.0"
   exit 1

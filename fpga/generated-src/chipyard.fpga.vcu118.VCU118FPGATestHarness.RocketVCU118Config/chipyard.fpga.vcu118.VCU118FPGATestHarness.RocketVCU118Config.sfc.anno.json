@@ -831,7 +831,7 @@
         "useBPWatch":false,
         "mcontextWidth":0,
         "scontextWidth":0,
-        "nPMPs":8,
+        "nPMPs":16,
         "nPerfCounters":0,
         "haveBasicCounters":true,
         "haveCFlush":false,
@@ -3160,11 +3160,11 @@
   },
   {
     "class":"sifive.enterprise.firrtl.TestHarnessHierarchyAnnotation",
-    "filename":"/home/test/chipyard-inchi/chipyard/fpga/generated-src/chipyard.fpga.vcu118.VCU118FPGATestHarness.RocketVCU118Config/model_module_hierarchy.json"
+    "filename":"/home/zhuzl/chipyard-tango/chipyard/fpga/generated-src/chipyard.fpga.vcu118.VCU118FPGATestHarness.RocketVCU118Config/model_module_hierarchy.json"
   },
   {
     "class":"sifive.enterprise.firrtl.ModuleHierarchyAnnotation",
-    "filename":"/home/test/chipyard-inchi/chipyard/fpga/generated-src/chipyard.fpga.vcu118.VCU118FPGATestHarness.RocketVCU118Config/top_module_hierarchy.json"
+    "filename":"/home/zhuzl/chipyard-tango/chipyard/fpga/generated-src/chipyard.fpga.vcu118.VCU118FPGATestHarness.RocketVCU118Config/top_module_hierarchy.json"
   },
   {
     "class":"logger.LogLevelAnnotation",

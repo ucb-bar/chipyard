@@ -78,7 +78,8 @@ module InsructionQueue(
                 io_enqueueInfo_bits_v_fp_rs1,
   input         io_dequeueInfo_ready,
                 io_flush,
-  output        io_dequeueInfo_valid,
+  output        io_enqueueInfo_ready,
+                io_dequeueInfo_valid,
   output [31:0] io_dequeueInfo_bits_v_inst,
   output [63:0] io_dequeueInfo_bits_v_rs1,
                 io_dequeueInfo_bits_v_rs2,
@@ -86,7 +87,7 @@ module InsructionQueue(
   output [3:0]  io_cnt
 );
 
-  Queue_84 queue (	// @[RocketCore.scala:1632:20]
+  Queue_84 queue (	// @[RocketCore.scala:1629:20]
     .clock                (clock),
     .reset                (reset),
     .io_enq_valid         (io_enqueueInfo_valid),
@@ -96,6 +97,7 @@ module InsructionQueue(
     .io_enq_bits_v_fp_rs1 (io_enqueueInfo_bits_v_fp_rs1),
     .io_deq_ready         (io_dequeueInfo_ready),
     .io_flush             (io_flush),
+    .io_enq_ready         (io_enqueueInfo_ready),
     .io_deq_valid         (io_dequeueInfo_valid),
     .io_deq_bits_v_inst   (io_dequeueInfo_bits_v_inst),
     .io_deq_bits_v_rs1    (io_dequeueInfo_bits_v_rs1),

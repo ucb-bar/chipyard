@@ -165,6 +165,7 @@ module UvmVerification(
                   io_uvm_out_commit_currPc,
   output [31:0]   io_uvm_out_commit_insn,
   output [1:0]    io_uvm_out_sim_halt,
+  output          io_uvm_out_trap_valid,
   output [1983:0] io_uvm_out_reg_gpr,
   output [2047:0] io_uvm_out_reg_fpr,
   output [4095:0] io_uvm_out_reg_vpr,
@@ -281,7 +282,7 @@ module UvmVerification(
       else	// @[Reg.scala:35:20, :36:{18,22}]
         commit_insn_r <= io_uvm_out_commit_insn_r[31:0];	// @[Reg.scala:35:20]
       io_uvm_out_commit_start_r <= io_uvm_in_wb_reg_valid & io_uvm_out_commit_prevPc_r == 64'h80000000 | io_uvm_out_commit_start_r;	// @[Reg.scala:35:20, :36:{18,22}, UvmVerification.scala:239:{96,123}]
-      io_uvm_out_commit_valid_r <= io_uvm_in_wb_reg_valid & ~io_uvm_in_wb_ctrl_vector | io_uvm_in_vpu_commit_vld;	// @[Reg.scala:35:20, UvmVerification.scala:240:{65,67,94}]
+      io_uvm_out_commit_valid_r <= io_uvm_in_wb_reg_valid & ~io_uvm_in_wb_ctrl_vector | io_uvm_in_vpu_commit_vld & ~io_uvm_in_flush;	// @[Reg.scala:35:20, UvmVerification.scala:240:{65,67,94,123,126}]
       if (io_uvm_in_vpu_commit_vld & _q_io_out_valid) begin	// @[Decoupled.scala:51:35, UvmVerification.scala:223:17]
         io_uvm_out_commit_prevPc_r <= _q_io_out_bits_prePc;	// @[Reg.scala:35:20, UvmVerification.scala:223:17]
         io_uvm_out_commit_currPc_r <= _q_io_out_bits_currPc;	// @[Reg.scala:35:20, UvmVerification.scala:223:17]
@@ -458,6 +459,7 @@ module UvmVerification(
   assign io_uvm_out_commit_currPc = trap_RET | trap_valid ? eret_addr : sfence ? _GEN_0 : io_uvm_out_commit_currPc_r;	// @[Reg.scala:35:20, UvmVerification.scala:244:{34,67,102,141}]
   assign io_uvm_out_commit_insn = trap_valid ? commit_insn_r : io_uvm_out_commit_insn_r[31:0];	// @[Reg.scala:35:20, UvmVerification.scala:247:32]
   assign io_uvm_out_sim_halt = io_uvm_out_sim_halt_REG;	// @[UvmVerification.scala:258:33]
+  assign io_uvm_out_trap_valid = trap_valid;	// @[Reg.scala:35:20]
   assign io_uvm_out_reg_gpr = io_uvm_in_ver_read;
   assign io_uvm_out_reg_fpr = io_uvm_in_fpu_ver_read;
   assign io_uvm_out_reg_vpr = {io_uvm_in_vpu_rfdata_31, io_uvm_in_vpu_rfdata_30, io_uvm_in_vpu_rfdata_29, io_uvm_in_vpu_rfdata_28, io_uvm_in_vpu_rfdata_27, io_uvm_in_vpu_rfdata_26, io_uvm_in_vpu_rfdata_25, io_uvm_in_vpu_rfdata_24, io_uvm_in_vpu_rfdata_23, io_uvm_in_vpu_rfdata_22, io_uvm_in_vpu_rfdata_21, io_uvm_in_vpu_rfdata_20, io_uvm_in_vpu_rfdata_19, io_uvm_in_vpu_rfdata_18, io_uvm_in_vpu_rfdata_17, io_uvm_in_vpu_rfdata_16, io_uvm_in_vpu_rfdata_15, io_uvm_in_vpu_rfdata_14, io_uvm_in_vpu_rfdata_13, io_uvm_in_vpu_rfdata_12, io_uvm_in_vpu_rfdata_11, io_uvm_in_vpu_rfdata_10, io_uvm_in_vpu_rfdata_9, io_uvm_in_vpu_rfdata_8, io_uvm_in_vpu_rfdata_7, io_uvm_in_vpu_rfdata_6, io_uvm_in_vpu_rfdata_5, io_uvm_in_vpu_rfdata_4, io_uvm_in_vpu_rfdata_3, io_uvm_in_vpu_rfdata_2, io_uvm_in_vpu_rfdata_1, io_uvm_in_vpu_rfdata_0};	// @[Cat.scala:33:92]

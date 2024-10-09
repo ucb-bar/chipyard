@@ -282,7 +282,7 @@ module VCU118FPGATestHarness(
     .b (_a2b_4_b)
   );
   IBUF resetIBUF (	// @[TestHarness.scala:102:25]
-    .I (reset),
+    .I (~reset),	// @[TestHarness.scala:103:21]
     .O (_resetIBUF_O)
   );
   PowerOnResetFPGAOnly fpga_power_on (	// @[Xilinx.scala:104:21]

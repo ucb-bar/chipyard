@@ -280,6 +280,62 @@ module RocketTile(
   wire          _core_io_ptw_pmp_7_cfg_r;	// @[RocketTile.scala:131:20]
   wire [29:0]   _core_io_ptw_pmp_7_addr;	// @[RocketTile.scala:131:20]
   wire [31:0]   _core_io_ptw_pmp_7_mask;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_8_cfg_l;	// @[RocketTile.scala:131:20]
+  wire [1:0]    _core_io_ptw_pmp_8_cfg_a;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_8_cfg_x;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_8_cfg_w;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_8_cfg_r;	// @[RocketTile.scala:131:20]
+  wire [29:0]   _core_io_ptw_pmp_8_addr;	// @[RocketTile.scala:131:20]
+  wire [31:0]   _core_io_ptw_pmp_8_mask;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_9_cfg_l;	// @[RocketTile.scala:131:20]
+  wire [1:0]    _core_io_ptw_pmp_9_cfg_a;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_9_cfg_x;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_9_cfg_w;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_9_cfg_r;	// @[RocketTile.scala:131:20]
+  wire [29:0]   _core_io_ptw_pmp_9_addr;	// @[RocketTile.scala:131:20]
+  wire [31:0]   _core_io_ptw_pmp_9_mask;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_10_cfg_l;	// @[RocketTile.scala:131:20]
+  wire [1:0]    _core_io_ptw_pmp_10_cfg_a;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_10_cfg_x;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_10_cfg_w;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_10_cfg_r;	// @[RocketTile.scala:131:20]
+  wire [29:0]   _core_io_ptw_pmp_10_addr;	// @[RocketTile.scala:131:20]
+  wire [31:0]   _core_io_ptw_pmp_10_mask;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_11_cfg_l;	// @[RocketTile.scala:131:20]
+  wire [1:0]    _core_io_ptw_pmp_11_cfg_a;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_11_cfg_x;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_11_cfg_w;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_11_cfg_r;	// @[RocketTile.scala:131:20]
+  wire [29:0]   _core_io_ptw_pmp_11_addr;	// @[RocketTile.scala:131:20]
+  wire [31:0]   _core_io_ptw_pmp_11_mask;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_12_cfg_l;	// @[RocketTile.scala:131:20]
+  wire [1:0]    _core_io_ptw_pmp_12_cfg_a;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_12_cfg_x;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_12_cfg_w;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_12_cfg_r;	// @[RocketTile.scala:131:20]
+  wire [29:0]   _core_io_ptw_pmp_12_addr;	// @[RocketTile.scala:131:20]
+  wire [31:0]   _core_io_ptw_pmp_12_mask;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_13_cfg_l;	// @[RocketTile.scala:131:20]
+  wire [1:0]    _core_io_ptw_pmp_13_cfg_a;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_13_cfg_x;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_13_cfg_w;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_13_cfg_r;	// @[RocketTile.scala:131:20]
+  wire [29:0]   _core_io_ptw_pmp_13_addr;	// @[RocketTile.scala:131:20]
+  wire [31:0]   _core_io_ptw_pmp_13_mask;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_14_cfg_l;	// @[RocketTile.scala:131:20]
+  wire [1:0]    _core_io_ptw_pmp_14_cfg_a;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_14_cfg_x;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_14_cfg_w;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_14_cfg_r;	// @[RocketTile.scala:131:20]
+  wire [29:0]   _core_io_ptw_pmp_14_addr;	// @[RocketTile.scala:131:20]
+  wire [31:0]   _core_io_ptw_pmp_14_mask;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_15_cfg_l;	// @[RocketTile.scala:131:20]
+  wire [1:0]    _core_io_ptw_pmp_15_cfg_a;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_15_cfg_x;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_15_cfg_w;	// @[RocketTile.scala:131:20]
+  wire          _core_io_ptw_pmp_15_cfg_r;	// @[RocketTile.scala:131:20]
+  wire [29:0]   _core_io_ptw_pmp_15_addr;	// @[RocketTile.scala:131:20]
+  wire [31:0]   _core_io_ptw_pmp_15_mask;	// @[RocketTile.scala:131:20]
   wire [63:0]   _core_io_ptw_customCSRs_csrs_0_value;	// @[RocketTile.scala:131:20]
   wire [31:0]   _core_io_fpu_inst;	// @[RocketTile.scala:131:20]
   wire [63:0]   _core_io_fpu_fromint_data;	// @[RocketTile.scala:131:20]
@@ -493,6 +549,62 @@ module RocketTile(
   wire          _ptw_io_requestor_0_pmp_7_cfg_r;	// @[PTW.scala:793:19]
   wire [29:0]   _ptw_io_requestor_0_pmp_7_addr;	// @[PTW.scala:793:19]
   wire [31:0]   _ptw_io_requestor_0_pmp_7_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_8_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_0_pmp_8_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_8_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_8_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_8_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_0_pmp_8_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_0_pmp_8_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_9_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_0_pmp_9_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_9_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_9_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_9_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_0_pmp_9_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_0_pmp_9_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_10_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_0_pmp_10_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_10_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_10_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_10_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_0_pmp_10_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_0_pmp_10_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_11_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_0_pmp_11_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_11_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_11_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_11_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_0_pmp_11_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_0_pmp_11_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_12_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_0_pmp_12_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_12_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_12_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_12_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_0_pmp_12_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_0_pmp_12_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_13_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_0_pmp_13_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_13_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_13_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_13_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_0_pmp_13_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_0_pmp_13_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_14_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_0_pmp_14_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_14_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_14_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_14_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_0_pmp_14_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_0_pmp_14_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_15_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_0_pmp_15_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_15_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_15_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_0_pmp_15_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_0_pmp_15_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_0_pmp_15_mask;	// @[PTW.scala:793:19]
   wire          _ptw_io_requestor_1_req_ready;	// @[PTW.scala:793:19]
   wire          _ptw_io_requestor_1_resp_valid;	// @[PTW.scala:793:19]
   wire          _ptw_io_requestor_1_resp_bits_ae_ptw;	// @[PTW.scala:793:19]
@@ -572,6 +684,62 @@ module RocketTile(
   wire          _ptw_io_requestor_1_pmp_7_cfg_r;	// @[PTW.scala:793:19]
   wire [29:0]   _ptw_io_requestor_1_pmp_7_addr;	// @[PTW.scala:793:19]
   wire [31:0]   _ptw_io_requestor_1_pmp_7_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_8_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_1_pmp_8_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_8_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_8_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_8_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_1_pmp_8_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_1_pmp_8_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_9_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_1_pmp_9_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_9_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_9_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_9_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_1_pmp_9_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_1_pmp_9_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_10_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_1_pmp_10_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_10_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_10_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_10_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_1_pmp_10_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_1_pmp_10_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_11_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_1_pmp_11_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_11_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_11_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_11_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_1_pmp_11_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_1_pmp_11_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_12_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_1_pmp_12_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_12_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_12_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_12_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_1_pmp_12_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_1_pmp_12_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_13_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_1_pmp_13_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_13_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_13_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_13_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_1_pmp_13_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_1_pmp_13_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_14_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_1_pmp_14_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_14_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_14_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_14_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_1_pmp_14_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_1_pmp_14_mask;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_15_cfg_l;	// @[PTW.scala:793:19]
+  wire [1:0]    _ptw_io_requestor_1_pmp_15_cfg_a;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_15_cfg_x;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_15_cfg_w;	// @[PTW.scala:793:19]
+  wire          _ptw_io_requestor_1_pmp_15_cfg_r;	// @[PTW.scala:793:19]
+  wire [29:0]   _ptw_io_requestor_1_pmp_15_addr;	// @[PTW.scala:793:19]
+  wire [31:0]   _ptw_io_requestor_1_pmp_15_mask;	// @[PTW.scala:793:19]
   wire [63:0]   _ptw_io_requestor_1_customCSRs_csrs_0_value;	// @[PTW.scala:793:19]
   wire          _ptw_io_mem_req_valid;	// @[PTW.scala:793:19]
   wire [39:0]   _ptw_io_mem_req_bits_addr;	// @[PTW.scala:793:19]
@@ -1006,6 +1174,62 @@ module RocketTile(
     .io_ptw_pmp_7_cfg_r                     (_ptw_io_requestor_0_pmp_7_cfg_r),	// @[PTW.scala:793:19]
     .io_ptw_pmp_7_addr                      (_ptw_io_requestor_0_pmp_7_addr),	// @[PTW.scala:793:19]
     .io_ptw_pmp_7_mask                      (_ptw_io_requestor_0_pmp_7_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_l                     (_ptw_io_requestor_0_pmp_8_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_a                     (_ptw_io_requestor_0_pmp_8_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_x                     (_ptw_io_requestor_0_pmp_8_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_w                     (_ptw_io_requestor_0_pmp_8_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_r                     (_ptw_io_requestor_0_pmp_8_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_addr                      (_ptw_io_requestor_0_pmp_8_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_mask                      (_ptw_io_requestor_0_pmp_8_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_l                     (_ptw_io_requestor_0_pmp_9_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_a                     (_ptw_io_requestor_0_pmp_9_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_x                     (_ptw_io_requestor_0_pmp_9_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_w                     (_ptw_io_requestor_0_pmp_9_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_r                     (_ptw_io_requestor_0_pmp_9_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_addr                      (_ptw_io_requestor_0_pmp_9_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_mask                      (_ptw_io_requestor_0_pmp_9_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_l                    (_ptw_io_requestor_0_pmp_10_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_a                    (_ptw_io_requestor_0_pmp_10_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_x                    (_ptw_io_requestor_0_pmp_10_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_w                    (_ptw_io_requestor_0_pmp_10_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_r                    (_ptw_io_requestor_0_pmp_10_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_addr                     (_ptw_io_requestor_0_pmp_10_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_mask                     (_ptw_io_requestor_0_pmp_10_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_l                    (_ptw_io_requestor_0_pmp_11_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_a                    (_ptw_io_requestor_0_pmp_11_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_x                    (_ptw_io_requestor_0_pmp_11_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_w                    (_ptw_io_requestor_0_pmp_11_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_r                    (_ptw_io_requestor_0_pmp_11_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_addr                     (_ptw_io_requestor_0_pmp_11_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_mask                     (_ptw_io_requestor_0_pmp_11_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_l                    (_ptw_io_requestor_0_pmp_12_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_a                    (_ptw_io_requestor_0_pmp_12_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_x                    (_ptw_io_requestor_0_pmp_12_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_w                    (_ptw_io_requestor_0_pmp_12_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_r                    (_ptw_io_requestor_0_pmp_12_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_addr                     (_ptw_io_requestor_0_pmp_12_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_mask                     (_ptw_io_requestor_0_pmp_12_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_l                    (_ptw_io_requestor_0_pmp_13_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_a                    (_ptw_io_requestor_0_pmp_13_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_x                    (_ptw_io_requestor_0_pmp_13_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_w                    (_ptw_io_requestor_0_pmp_13_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_r                    (_ptw_io_requestor_0_pmp_13_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_addr                     (_ptw_io_requestor_0_pmp_13_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_mask                     (_ptw_io_requestor_0_pmp_13_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_l                    (_ptw_io_requestor_0_pmp_14_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_a                    (_ptw_io_requestor_0_pmp_14_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_x                    (_ptw_io_requestor_0_pmp_14_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_w                    (_ptw_io_requestor_0_pmp_14_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_r                    (_ptw_io_requestor_0_pmp_14_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_addr                     (_ptw_io_requestor_0_pmp_14_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_mask                     (_ptw_io_requestor_0_pmp_14_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_l                    (_ptw_io_requestor_0_pmp_15_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_a                    (_ptw_io_requestor_0_pmp_15_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_x                    (_ptw_io_requestor_0_pmp_15_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_w                    (_ptw_io_requestor_0_pmp_15_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_r                    (_ptw_io_requestor_0_pmp_15_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_addr                     (_ptw_io_requestor_0_pmp_15_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_mask                     (_ptw_io_requestor_0_pmp_15_mask),	// @[PTW.scala:793:19]
     .auto_out_a_valid                       (_dcache_auto_out_a_valid),
     .auto_out_a_bits_opcode                 (_dcache_auto_out_a_bits_opcode),
     .auto_out_a_bits_param                  (_dcache_auto_out_a_bits_param),
@@ -1185,6 +1409,62 @@ module RocketTile(
     .io_ptw_pmp_7_cfg_r                        (_ptw_io_requestor_1_pmp_7_cfg_r),	// @[PTW.scala:793:19]
     .io_ptw_pmp_7_addr                         (_ptw_io_requestor_1_pmp_7_addr),	// @[PTW.scala:793:19]
     .io_ptw_pmp_7_mask                         (_ptw_io_requestor_1_pmp_7_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_l                        (_ptw_io_requestor_1_pmp_8_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_a                        (_ptw_io_requestor_1_pmp_8_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_x                        (_ptw_io_requestor_1_pmp_8_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_w                        (_ptw_io_requestor_1_pmp_8_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_cfg_r                        (_ptw_io_requestor_1_pmp_8_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_addr                         (_ptw_io_requestor_1_pmp_8_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_8_mask                         (_ptw_io_requestor_1_pmp_8_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_l                        (_ptw_io_requestor_1_pmp_9_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_a                        (_ptw_io_requestor_1_pmp_9_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_x                        (_ptw_io_requestor_1_pmp_9_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_w                        (_ptw_io_requestor_1_pmp_9_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_cfg_r                        (_ptw_io_requestor_1_pmp_9_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_addr                         (_ptw_io_requestor_1_pmp_9_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_9_mask                         (_ptw_io_requestor_1_pmp_9_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_l                       (_ptw_io_requestor_1_pmp_10_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_a                       (_ptw_io_requestor_1_pmp_10_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_x                       (_ptw_io_requestor_1_pmp_10_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_w                       (_ptw_io_requestor_1_pmp_10_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_cfg_r                       (_ptw_io_requestor_1_pmp_10_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_addr                        (_ptw_io_requestor_1_pmp_10_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_10_mask                        (_ptw_io_requestor_1_pmp_10_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_l                       (_ptw_io_requestor_1_pmp_11_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_a                       (_ptw_io_requestor_1_pmp_11_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_x                       (_ptw_io_requestor_1_pmp_11_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_w                       (_ptw_io_requestor_1_pmp_11_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_cfg_r                       (_ptw_io_requestor_1_pmp_11_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_addr                        (_ptw_io_requestor_1_pmp_11_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_11_mask                        (_ptw_io_requestor_1_pmp_11_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_l                       (_ptw_io_requestor_1_pmp_12_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_a                       (_ptw_io_requestor_1_pmp_12_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_x                       (_ptw_io_requestor_1_pmp_12_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_w                       (_ptw_io_requestor_1_pmp_12_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_cfg_r                       (_ptw_io_requestor_1_pmp_12_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_addr                        (_ptw_io_requestor_1_pmp_12_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_12_mask                        (_ptw_io_requestor_1_pmp_12_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_l                       (_ptw_io_requestor_1_pmp_13_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_a                       (_ptw_io_requestor_1_pmp_13_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_x                       (_ptw_io_requestor_1_pmp_13_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_w                       (_ptw_io_requestor_1_pmp_13_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_cfg_r                       (_ptw_io_requestor_1_pmp_13_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_addr                        (_ptw_io_requestor_1_pmp_13_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_13_mask                        (_ptw_io_requestor_1_pmp_13_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_l                       (_ptw_io_requestor_1_pmp_14_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_a                       (_ptw_io_requestor_1_pmp_14_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_x                       (_ptw_io_requestor_1_pmp_14_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_w                       (_ptw_io_requestor_1_pmp_14_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_cfg_r                       (_ptw_io_requestor_1_pmp_14_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_addr                        (_ptw_io_requestor_1_pmp_14_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_14_mask                        (_ptw_io_requestor_1_pmp_14_mask),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_l                       (_ptw_io_requestor_1_pmp_15_cfg_l),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_a                       (_ptw_io_requestor_1_pmp_15_cfg_a),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_x                       (_ptw_io_requestor_1_pmp_15_cfg_x),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_w                       (_ptw_io_requestor_1_pmp_15_cfg_w),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_cfg_r                       (_ptw_io_requestor_1_pmp_15_cfg_r),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_addr                        (_ptw_io_requestor_1_pmp_15_addr),	// @[PTW.scala:793:19]
+    .io_ptw_pmp_15_mask                        (_ptw_io_requestor_1_pmp_15_mask),	// @[PTW.scala:793:19]
     .io_ptw_customCSRs_csrs_0_value            (_ptw_io_requestor_1_customCSRs_csrs_0_value),	// @[PTW.scala:793:19]
     .auto_icache_master_out_a_valid            (_frontend_auto_icache_master_out_a_valid),
     .auto_icache_master_out_a_bits_address     (_frontend_auto_icache_master_out_a_bits_address),
@@ -1451,6 +1731,62 @@ module RocketTile(
     .io_dpath_pmp_7_cfg_r                   (_core_io_ptw_pmp_7_cfg_r),	// @[RocketTile.scala:131:20]
     .io_dpath_pmp_7_addr                    (_core_io_ptw_pmp_7_addr),	// @[RocketTile.scala:131:20]
     .io_dpath_pmp_7_mask                    (_core_io_ptw_pmp_7_mask),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_8_cfg_l                   (_core_io_ptw_pmp_8_cfg_l),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_8_cfg_a                   (_core_io_ptw_pmp_8_cfg_a),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_8_cfg_x                   (_core_io_ptw_pmp_8_cfg_x),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_8_cfg_w                   (_core_io_ptw_pmp_8_cfg_w),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_8_cfg_r                   (_core_io_ptw_pmp_8_cfg_r),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_8_addr                    (_core_io_ptw_pmp_8_addr),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_8_mask                    (_core_io_ptw_pmp_8_mask),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_9_cfg_l                   (_core_io_ptw_pmp_9_cfg_l),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_9_cfg_a                   (_core_io_ptw_pmp_9_cfg_a),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_9_cfg_x                   (_core_io_ptw_pmp_9_cfg_x),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_9_cfg_w                   (_core_io_ptw_pmp_9_cfg_w),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_9_cfg_r                   (_core_io_ptw_pmp_9_cfg_r),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_9_addr                    (_core_io_ptw_pmp_9_addr),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_9_mask                    (_core_io_ptw_pmp_9_mask),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_10_cfg_l                  (_core_io_ptw_pmp_10_cfg_l),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_10_cfg_a                  (_core_io_ptw_pmp_10_cfg_a),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_10_cfg_x                  (_core_io_ptw_pmp_10_cfg_x),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_10_cfg_w                  (_core_io_ptw_pmp_10_cfg_w),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_10_cfg_r                  (_core_io_ptw_pmp_10_cfg_r),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_10_addr                   (_core_io_ptw_pmp_10_addr),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_10_mask                   (_core_io_ptw_pmp_10_mask),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_11_cfg_l                  (_core_io_ptw_pmp_11_cfg_l),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_11_cfg_a                  (_core_io_ptw_pmp_11_cfg_a),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_11_cfg_x                  (_core_io_ptw_pmp_11_cfg_x),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_11_cfg_w                  (_core_io_ptw_pmp_11_cfg_w),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_11_cfg_r                  (_core_io_ptw_pmp_11_cfg_r),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_11_addr                   (_core_io_ptw_pmp_11_addr),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_11_mask                   (_core_io_ptw_pmp_11_mask),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_12_cfg_l                  (_core_io_ptw_pmp_12_cfg_l),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_12_cfg_a                  (_core_io_ptw_pmp_12_cfg_a),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_12_cfg_x                  (_core_io_ptw_pmp_12_cfg_x),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_12_cfg_w                  (_core_io_ptw_pmp_12_cfg_w),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_12_cfg_r                  (_core_io_ptw_pmp_12_cfg_r),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_12_addr                   (_core_io_ptw_pmp_12_addr),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_12_mask                   (_core_io_ptw_pmp_12_mask),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_13_cfg_l                  (_core_io_ptw_pmp_13_cfg_l),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_13_cfg_a                  (_core_io_ptw_pmp_13_cfg_a),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_13_cfg_x                  (_core_io_ptw_pmp_13_cfg_x),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_13_cfg_w                  (_core_io_ptw_pmp_13_cfg_w),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_13_cfg_r                  (_core_io_ptw_pmp_13_cfg_r),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_13_addr                   (_core_io_ptw_pmp_13_addr),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_13_mask                   (_core_io_ptw_pmp_13_mask),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_14_cfg_l                  (_core_io_ptw_pmp_14_cfg_l),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_14_cfg_a                  (_core_io_ptw_pmp_14_cfg_a),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_14_cfg_x                  (_core_io_ptw_pmp_14_cfg_x),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_14_cfg_w                  (_core_io_ptw_pmp_14_cfg_w),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_14_cfg_r                  (_core_io_ptw_pmp_14_cfg_r),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_14_addr                   (_core_io_ptw_pmp_14_addr),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_14_mask                   (_core_io_ptw_pmp_14_mask),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_15_cfg_l                  (_core_io_ptw_pmp_15_cfg_l),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_15_cfg_a                  (_core_io_ptw_pmp_15_cfg_a),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_15_cfg_x                  (_core_io_ptw_pmp_15_cfg_x),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_15_cfg_w                  (_core_io_ptw_pmp_15_cfg_w),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_15_cfg_r                  (_core_io_ptw_pmp_15_cfg_r),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_15_addr                   (_core_io_ptw_pmp_15_addr),	// @[RocketTile.scala:131:20]
+    .io_dpath_pmp_15_mask                   (_core_io_ptw_pmp_15_mask),	// @[RocketTile.scala:131:20]
     .io_dpath_customCSRs_csrs_0_value       (_core_io_ptw_customCSRs_csrs_0_value),	// @[RocketTile.scala:131:20]
     .io_requestor_0_req_ready               (_ptw_io_requestor_0_req_ready),
     .io_requestor_0_resp_valid              (_ptw_io_requestor_0_resp_valid),
@@ -1532,6 +1868,62 @@ module RocketTile(
     .io_requestor_0_pmp_7_cfg_r             (_ptw_io_requestor_0_pmp_7_cfg_r),
     .io_requestor_0_pmp_7_addr              (_ptw_io_requestor_0_pmp_7_addr),
     .io_requestor_0_pmp_7_mask              (_ptw_io_requestor_0_pmp_7_mask),
+    .io_requestor_0_pmp_8_cfg_l             (_ptw_io_requestor_0_pmp_8_cfg_l),
+    .io_requestor_0_pmp_8_cfg_a             (_ptw_io_requestor_0_pmp_8_cfg_a),
+    .io_requestor_0_pmp_8_cfg_x             (_ptw_io_requestor_0_pmp_8_cfg_x),
+    .io_requestor_0_pmp_8_cfg_w             (_ptw_io_requestor_0_pmp_8_cfg_w),
+    .io_requestor_0_pmp_8_cfg_r             (_ptw_io_requestor_0_pmp_8_cfg_r),
+    .io_requestor_0_pmp_8_addr              (_ptw_io_requestor_0_pmp_8_addr),
+    .io_requestor_0_pmp_8_mask              (_ptw_io_requestor_0_pmp_8_mask),
+    .io_requestor_0_pmp_9_cfg_l             (_ptw_io_requestor_0_pmp_9_cfg_l),
+    .io_requestor_0_pmp_9_cfg_a             (_ptw_io_requestor_0_pmp_9_cfg_a),
+    .io_requestor_0_pmp_9_cfg_x             (_ptw_io_requestor_0_pmp_9_cfg_x),
+    .io_requestor_0_pmp_9_cfg_w             (_ptw_io_requestor_0_pmp_9_cfg_w),
+    .io_requestor_0_pmp_9_cfg_r             (_ptw_io_requestor_0_pmp_9_cfg_r),
+    .io_requestor_0_pmp_9_addr              (_ptw_io_requestor_0_pmp_9_addr),
+    .io_requestor_0_pmp_9_mask              (_ptw_io_requestor_0_pmp_9_mask),
+    .io_requestor_0_pmp_10_cfg_l            (_ptw_io_requestor_0_pmp_10_cfg_l),
+    .io_requestor_0_pmp_10_cfg_a            (_ptw_io_requestor_0_pmp_10_cfg_a),
+    .io_requestor_0_pmp_10_cfg_x            (_ptw_io_requestor_0_pmp_10_cfg_x),
+    .io_requestor_0_pmp_10_cfg_w            (_ptw_io_requestor_0_pmp_10_cfg_w),
+    .io_requestor_0_pmp_10_cfg_r            (_ptw_io_requestor_0_pmp_10_cfg_r),
+    .io_requestor_0_pmp_10_addr             (_ptw_io_requestor_0_pmp_10_addr),
+    .io_requestor_0_pmp_10_mask             (_ptw_io_requestor_0_pmp_10_mask),
+    .io_requestor_0_pmp_11_cfg_l            (_ptw_io_requestor_0_pmp_11_cfg_l),
+    .io_requestor_0_pmp_11_cfg_a            (_ptw_io_requestor_0_pmp_11_cfg_a),
+    .io_requestor_0_pmp_11_cfg_x            (_ptw_io_requestor_0_pmp_11_cfg_x),
+    .io_requestor_0_pmp_11_cfg_w            (_ptw_io_requestor_0_pmp_11_cfg_w),
+    .io_requestor_0_pmp_11_cfg_r            (_ptw_io_requestor_0_pmp_11_cfg_r),
+    .io_requestor_0_pmp_11_addr             (_ptw_io_requestor_0_pmp_11_addr),
+    .io_requestor_0_pmp_11_mask             (_ptw_io_requestor_0_pmp_11_mask),
+    .io_requestor_0_pmp_12_cfg_l            (_ptw_io_requestor_0_pmp_12_cfg_l),
+    .io_requestor_0_pmp_12_cfg_a            (_ptw_io_requestor_0_pmp_12_cfg_a),
+    .io_requestor_0_pmp_12_cfg_x            (_ptw_io_requestor_0_pmp_12_cfg_x),
+    .io_requestor_0_pmp_12_cfg_w            (_ptw_io_requestor_0_pmp_12_cfg_w),
+    .io_requestor_0_pmp_12_cfg_r            (_ptw_io_requestor_0_pmp_12_cfg_r),
+    .io_requestor_0_pmp_12_addr             (_ptw_io_requestor_0_pmp_12_addr),
+    .io_requestor_0_pmp_12_mask             (_ptw_io_requestor_0_pmp_12_mask),
+    .io_requestor_0_pmp_13_cfg_l            (_ptw_io_requestor_0_pmp_13_cfg_l),
+    .io_requestor_0_pmp_13_cfg_a            (_ptw_io_requestor_0_pmp_13_cfg_a),
+    .io_requestor_0_pmp_13_cfg_x            (_ptw_io_requestor_0_pmp_13_cfg_x),
+    .io_requestor_0_pmp_13_cfg_w            (_ptw_io_requestor_0_pmp_13_cfg_w),
+    .io_requestor_0_pmp_13_cfg_r            (_ptw_io_requestor_0_pmp_13_cfg_r),
+    .io_requestor_0_pmp_13_addr             (_ptw_io_requestor_0_pmp_13_addr),
+    .io_requestor_0_pmp_13_mask             (_ptw_io_requestor_0_pmp_13_mask),
+    .io_requestor_0_pmp_14_cfg_l            (_ptw_io_requestor_0_pmp_14_cfg_l),
+    .io_requestor_0_pmp_14_cfg_a            (_ptw_io_requestor_0_pmp_14_cfg_a),
+    .io_requestor_0_pmp_14_cfg_x            (_ptw_io_requestor_0_pmp_14_cfg_x),
+    .io_requestor_0_pmp_14_cfg_w            (_ptw_io_requestor_0_pmp_14_cfg_w),
+    .io_requestor_0_pmp_14_cfg_r            (_ptw_io_requestor_0_pmp_14_cfg_r),
+    .io_requestor_0_pmp_14_addr             (_ptw_io_requestor_0_pmp_14_addr),
+    .io_requestor_0_pmp_14_mask             (_ptw_io_requestor_0_pmp_14_mask),
+    .io_requestor_0_pmp_15_cfg_l            (_ptw_io_requestor_0_pmp_15_cfg_l),
+    .io_requestor_0_pmp_15_cfg_a            (_ptw_io_requestor_0_pmp_15_cfg_a),
+    .io_requestor_0_pmp_15_cfg_x            (_ptw_io_requestor_0_pmp_15_cfg_x),
+    .io_requestor_0_pmp_15_cfg_w            (_ptw_io_requestor_0_pmp_15_cfg_w),
+    .io_requestor_0_pmp_15_cfg_r            (_ptw_io_requestor_0_pmp_15_cfg_r),
+    .io_requestor_0_pmp_15_addr             (_ptw_io_requestor_0_pmp_15_addr),
+    .io_requestor_0_pmp_15_mask             (_ptw_io_requestor_0_pmp_15_mask),
     .io_requestor_1_req_ready               (_ptw_io_requestor_1_req_ready),
     .io_requestor_1_resp_valid              (_ptw_io_requestor_1_resp_valid),
     .io_requestor_1_resp_bits_ae_ptw        (_ptw_io_requestor_1_resp_bits_ae_ptw),
@@ -1611,6 +2003,62 @@ module RocketTile(
     .io_requestor_1_pmp_7_cfg_r             (_ptw_io_requestor_1_pmp_7_cfg_r),
     .io_requestor_1_pmp_7_addr              (_ptw_io_requestor_1_pmp_7_addr),
     .io_requestor_1_pmp_7_mask              (_ptw_io_requestor_1_pmp_7_mask),
+    .io_requestor_1_pmp_8_cfg_l             (_ptw_io_requestor_1_pmp_8_cfg_l),
+    .io_requestor_1_pmp_8_cfg_a             (_ptw_io_requestor_1_pmp_8_cfg_a),
+    .io_requestor_1_pmp_8_cfg_x             (_ptw_io_requestor_1_pmp_8_cfg_x),
+    .io_requestor_1_pmp_8_cfg_w             (_ptw_io_requestor_1_pmp_8_cfg_w),
+    .io_requestor_1_pmp_8_cfg_r             (_ptw_io_requestor_1_pmp_8_cfg_r),
+    .io_requestor_1_pmp_8_addr              (_ptw_io_requestor_1_pmp_8_addr),
+    .io_requestor_1_pmp_8_mask              (_ptw_io_requestor_1_pmp_8_mask),
+    .io_requestor_1_pmp_9_cfg_l             (_ptw_io_requestor_1_pmp_9_cfg_l),
+    .io_requestor_1_pmp_9_cfg_a             (_ptw_io_requestor_1_pmp_9_cfg_a),
+    .io_requestor_1_pmp_9_cfg_x             (_ptw_io_requestor_1_pmp_9_cfg_x),
+    .io_requestor_1_pmp_9_cfg_w             (_ptw_io_requestor_1_pmp_9_cfg_w),
+    .io_requestor_1_pmp_9_cfg_r             (_ptw_io_requestor_1_pmp_9_cfg_r),
+    .io_requestor_1_pmp_9_addr              (_ptw_io_requestor_1_pmp_9_addr),
+    .io_requestor_1_pmp_9_mask              (_ptw_io_requestor_1_pmp_9_mask),
+    .io_requestor_1_pmp_10_cfg_l            (_ptw_io_requestor_1_pmp_10_cfg_l),
+    .io_requestor_1_pmp_10_cfg_a            (_ptw_io_requestor_1_pmp_10_cfg_a),
+    .io_requestor_1_pmp_10_cfg_x            (_ptw_io_requestor_1_pmp_10_cfg_x),
+    .io_requestor_1_pmp_10_cfg_w            (_ptw_io_requestor_1_pmp_10_cfg_w),
+    .io_requestor_1_pmp_10_cfg_r            (_ptw_io_requestor_1_pmp_10_cfg_r),
+    .io_requestor_1_pmp_10_addr             (_ptw_io_requestor_1_pmp_10_addr),
+    .io_requestor_1_pmp_10_mask             (_ptw_io_requestor_1_pmp_10_mask),
+    .io_requestor_1_pmp_11_cfg_l            (_ptw_io_requestor_1_pmp_11_cfg_l),
+    .io_requestor_1_pmp_11_cfg_a            (_ptw_io_requestor_1_pmp_11_cfg_a),
+    .io_requestor_1_pmp_11_cfg_x            (_ptw_io_requestor_1_pmp_11_cfg_x),
+    .io_requestor_1_pmp_11_cfg_w            (_ptw_io_requestor_1_pmp_11_cfg_w),
+    .io_requestor_1_pmp_11_cfg_r            (_ptw_io_requestor_1_pmp_11_cfg_r),
+    .io_requestor_1_pmp_11_addr             (_ptw_io_requestor_1_pmp_11_addr),
+    .io_requestor_1_pmp_11_mask             (_ptw_io_requestor_1_pmp_11_mask),
+    .io_requestor_1_pmp_12_cfg_l            (_ptw_io_requestor_1_pmp_12_cfg_l),
+    .io_requestor_1_pmp_12_cfg_a            (_ptw_io_requestor_1_pmp_12_cfg_a),
+    .io_requestor_1_pmp_12_cfg_x            (_ptw_io_requestor_1_pmp_12_cfg_x),
+    .io_requestor_1_pmp_12_cfg_w            (_ptw_io_requestor_1_pmp_12_cfg_w),
+    .io_requestor_1_pmp_12_cfg_r            (_ptw_io_requestor_1_pmp_12_cfg_r),
+    .io_requestor_1_pmp_12_addr             (_ptw_io_requestor_1_pmp_12_addr),
+    .io_requestor_1_pmp_12_mask             (_ptw_io_requestor_1_pmp_12_mask),
+    .io_requestor_1_pmp_13_cfg_l            (_ptw_io_requestor_1_pmp_13_cfg_l),
+    .io_requestor_1_pmp_13_cfg_a            (_ptw_io_requestor_1_pmp_13_cfg_a),
+    .io_requestor_1_pmp_13_cfg_x            (_ptw_io_requestor_1_pmp_13_cfg_x),
+    .io_requestor_1_pmp_13_cfg_w            (_ptw_io_requestor_1_pmp_13_cfg_w),
+    .io_requestor_1_pmp_13_cfg_r            (_ptw_io_requestor_1_pmp_13_cfg_r),
+    .io_requestor_1_pmp_13_addr             (_ptw_io_requestor_1_pmp_13_addr),
+    .io_requestor_1_pmp_13_mask             (_ptw_io_requestor_1_pmp_13_mask),
+    .io_requestor_1_pmp_14_cfg_l            (_ptw_io_requestor_1_pmp_14_cfg_l),
+    .io_requestor_1_pmp_14_cfg_a            (_ptw_io_requestor_1_pmp_14_cfg_a),
+    .io_requestor_1_pmp_14_cfg_x            (_ptw_io_requestor_1_pmp_14_cfg_x),
+    .io_requestor_1_pmp_14_cfg_w            (_ptw_io_requestor_1_pmp_14_cfg_w),
+    .io_requestor_1_pmp_14_cfg_r            (_ptw_io_requestor_1_pmp_14_cfg_r),
+    .io_requestor_1_pmp_14_addr             (_ptw_io_requestor_1_pmp_14_addr),
+    .io_requestor_1_pmp_14_mask             (_ptw_io_requestor_1_pmp_14_mask),
+    .io_requestor_1_pmp_15_cfg_l            (_ptw_io_requestor_1_pmp_15_cfg_l),
+    .io_requestor_1_pmp_15_cfg_a            (_ptw_io_requestor_1_pmp_15_cfg_a),
+    .io_requestor_1_pmp_15_cfg_x            (_ptw_io_requestor_1_pmp_15_cfg_x),
+    .io_requestor_1_pmp_15_cfg_w            (_ptw_io_requestor_1_pmp_15_cfg_w),
+    .io_requestor_1_pmp_15_cfg_r            (_ptw_io_requestor_1_pmp_15_cfg_r),
+    .io_requestor_1_pmp_15_addr             (_ptw_io_requestor_1_pmp_15_addr),
+    .io_requestor_1_pmp_15_mask             (_ptw_io_requestor_1_pmp_15_mask),
     .io_requestor_1_customCSRs_csrs_0_value (_ptw_io_requestor_1_customCSRs_csrs_0_value),
     .io_mem_req_valid                       (_ptw_io_mem_req_valid),
     .io_mem_req_bits_addr                   (_ptw_io_mem_req_bits_addr),
@@ -1862,6 +2310,62 @@ module RocketTile(
     .io_ptw_pmp_7_cfg_r                         (_core_io_ptw_pmp_7_cfg_r),
     .io_ptw_pmp_7_addr                          (_core_io_ptw_pmp_7_addr),
     .io_ptw_pmp_7_mask                          (_core_io_ptw_pmp_7_mask),
+    .io_ptw_pmp_8_cfg_l                         (_core_io_ptw_pmp_8_cfg_l),
+    .io_ptw_pmp_8_cfg_a                         (_core_io_ptw_pmp_8_cfg_a),
+    .io_ptw_pmp_8_cfg_x                         (_core_io_ptw_pmp_8_cfg_x),
+    .io_ptw_pmp_8_cfg_w                         (_core_io_ptw_pmp_8_cfg_w),
+    .io_ptw_pmp_8_cfg_r                         (_core_io_ptw_pmp_8_cfg_r),
+    .io_ptw_pmp_8_addr                          (_core_io_ptw_pmp_8_addr),
+    .io_ptw_pmp_8_mask                          (_core_io_ptw_pmp_8_mask),
+    .io_ptw_pmp_9_cfg_l                         (_core_io_ptw_pmp_9_cfg_l),
+    .io_ptw_pmp_9_cfg_a                         (_core_io_ptw_pmp_9_cfg_a),
+    .io_ptw_pmp_9_cfg_x                         (_core_io_ptw_pmp_9_cfg_x),
+    .io_ptw_pmp_9_cfg_w                         (_core_io_ptw_pmp_9_cfg_w),
+    .io_ptw_pmp_9_cfg_r                         (_core_io_ptw_pmp_9_cfg_r),
+    .io_ptw_pmp_9_addr                          (_core_io_ptw_pmp_9_addr),
+    .io_ptw_pmp_9_mask                          (_core_io_ptw_pmp_9_mask),
+    .io_ptw_pmp_10_cfg_l                        (_core_io_ptw_pmp_10_cfg_l),
+    .io_ptw_pmp_10_cfg_a                        (_core_io_ptw_pmp_10_cfg_a),
+    .io_ptw_pmp_10_cfg_x                        (_core_io_ptw_pmp_10_cfg_x),
+    .io_ptw_pmp_10_cfg_w                        (_core_io_ptw_pmp_10_cfg_w),
+    .io_ptw_pmp_10_cfg_r                        (_core_io_ptw_pmp_10_cfg_r),
+    .io_ptw_pmp_10_addr                         (_core_io_ptw_pmp_10_addr),
+    .io_ptw_pmp_10_mask                         (_core_io_ptw_pmp_10_mask),
+    .io_ptw_pmp_11_cfg_l                        (_core_io_ptw_pmp_11_cfg_l),
+    .io_ptw_pmp_11_cfg_a                        (_core_io_ptw_pmp_11_cfg_a),
+    .io_ptw_pmp_11_cfg_x                        (_core_io_ptw_pmp_11_cfg_x),
+    .io_ptw_pmp_11_cfg_w                        (_core_io_ptw_pmp_11_cfg_w),
+    .io_ptw_pmp_11_cfg_r                        (_core_io_ptw_pmp_11_cfg_r),
+    .io_ptw_pmp_11_addr                         (_core_io_ptw_pmp_11_addr),
+    .io_ptw_pmp_11_mask                         (_core_io_ptw_pmp_11_mask),
+    .io_ptw_pmp_12_cfg_l                        (_core_io_ptw_pmp_12_cfg_l),
+    .io_ptw_pmp_12_cfg_a                        (_core_io_ptw_pmp_12_cfg_a),
+    .io_ptw_pmp_12_cfg_x                        (_core_io_ptw_pmp_12_cfg_x),
+    .io_ptw_pmp_12_cfg_w                        (_core_io_ptw_pmp_12_cfg_w),
+    .io_ptw_pmp_12_cfg_r                        (_core_io_ptw_pmp_12_cfg_r),
+    .io_ptw_pmp_12_addr                         (_core_io_ptw_pmp_12_addr),
+    .io_ptw_pmp_12_mask                         (_core_io_ptw_pmp_12_mask),
+    .io_ptw_pmp_13_cfg_l                        (_core_io_ptw_pmp_13_cfg_l),
+    .io_ptw_pmp_13_cfg_a                        (_core_io_ptw_pmp_13_cfg_a),
+    .io_ptw_pmp_13_cfg_x                        (_core_io_ptw_pmp_13_cfg_x),
+    .io_ptw_pmp_13_cfg_w                        (_core_io_ptw_pmp_13_cfg_w),
+    .io_ptw_pmp_13_cfg_r                        (_core_io_ptw_pmp_13_cfg_r),
+    .io_ptw_pmp_13_addr                         (_core_io_ptw_pmp_13_addr),
+    .io_ptw_pmp_13_mask                         (_core_io_ptw_pmp_13_mask),
+    .io_ptw_pmp_14_cfg_l                        (_core_io_ptw_pmp_14_cfg_l),
+    .io_ptw_pmp_14_cfg_a                        (_core_io_ptw_pmp_14_cfg_a),
+    .io_ptw_pmp_14_cfg_x                        (_core_io_ptw_pmp_14_cfg_x),
+    .io_ptw_pmp_14_cfg_w                        (_core_io_ptw_pmp_14_cfg_w),
+    .io_ptw_pmp_14_cfg_r                        (_core_io_ptw_pmp_14_cfg_r),
+    .io_ptw_pmp_14_addr                         (_core_io_ptw_pmp_14_addr),
+    .io_ptw_pmp_14_mask                         (_core_io_ptw_pmp_14_mask),
+    .io_ptw_pmp_15_cfg_l                        (_core_io_ptw_pmp_15_cfg_l),
+    .io_ptw_pmp_15_cfg_a                        (_core_io_ptw_pmp_15_cfg_a),
+    .io_ptw_pmp_15_cfg_x                        (_core_io_ptw_pmp_15_cfg_x),
+    .io_ptw_pmp_15_cfg_w                        (_core_io_ptw_pmp_15_cfg_w),
+    .io_ptw_pmp_15_cfg_r                        (_core_io_ptw_pmp_15_cfg_r),
+    .io_ptw_pmp_15_addr                         (_core_io_ptw_pmp_15_addr),
+    .io_ptw_pmp_15_mask                         (_core_io_ptw_pmp_15_mask),
     .io_ptw_customCSRs_csrs_0_value             (_core_io_ptw_customCSRs_csrs_0_value),
     .io_fpu_inst                                (_core_io_fpu_inst),
     .io_fpu_fromint_data                        (_core_io_fpu_fromint_data),

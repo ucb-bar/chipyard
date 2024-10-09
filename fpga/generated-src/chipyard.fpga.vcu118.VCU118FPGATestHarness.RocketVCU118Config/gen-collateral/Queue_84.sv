@@ -78,7 +78,8 @@ module Queue_84(
                 io_enq_bits_v_fp_rs1,
   input         io_deq_ready,
                 io_flush,
-  output        io_deq_valid,
+  output        io_enq_ready,
+                io_deq_valid,
   output [31:0] io_deq_bits_v_inst,
   output [63:0] io_deq_bits_v_rs1,
                 io_deq_bits_v_rs2,
@@ -86,15 +87,14 @@ module Queue_84(
   output [3:0]  io_count
 );
 
-  wire         _io_enq_ready_T;	// @[Decoupled.scala:303:19]
   wire [223:0] _ram_ext_R0_data;	// @[Decoupled.scala:273:95]
   reg  [3:0]   enq_ptr_value;	// @[Counter.scala:61:40]
   reg  [3:0]   deq_ptr_value;	// @[Counter.scala:61:40]
   reg          maybe_full;	// @[Decoupled.scala:276:27]
   wire         ptr_match = enq_ptr_value == deq_ptr_value;	// @[Counter.scala:61:40, Decoupled.scala:277:33]
   wire         empty = ptr_match & ~maybe_full;	// @[Decoupled.scala:276:27, :277:33, :278:{25,28}]
-  wire         do_enq = _io_enq_ready_T & io_enq_valid;	// @[Decoupled.scala:51:35, :303:19]
-  assign _io_enq_ready_T = ~(ptr_match & maybe_full);	// @[Decoupled.scala:276:27, :277:33, :279:24, :303:19]
+  wire         full = ptr_match & maybe_full;	// @[Decoupled.scala:276:27, :277:33, :279:24]
+  wire         do_enq = ~full & io_enq_valid;	// @[Decoupled.scala:51:35, :279:24, :303:19]
   wire [3:0]   ptr_diff = enq_ptr_value - deq_ptr_value;	// @[Counter.scala:61:40, Decoupled.scala:326:32]
   wire         do_deq = io_deq_ready & ~empty;	// @[Decoupled.scala:51:35, :278:25, :302:19]
   always @(posedge clock) begin
@@ -155,6 +155,7 @@ module Queue_84(
     .W0_data ({io_enq_bits_v_fp_rs1, io_enq_bits_v_rs2, io_enq_bits_v_rs1, io_enq_bits_v_inst}),	// @[Decoupled.scala:273:95]
     .R0_data (_ram_ext_R0_data)
   );
+  assign io_enq_ready = ~full;	// @[Decoupled.scala:279:24, :303:19]
   assign io_deq_valid = ~empty;	// @[Decoupled.scala:278:25, :302:19]
   assign io_deq_bits_v_inst = _ram_ext_R0_data[31:0];	// @[Decoupled.scala:273:95]
   assign io_deq_bits_v_rs1 = _ram_ext_R0_data[95:32];	// @[Decoupled.scala:273:95]

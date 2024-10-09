@@ -1,5 +1,5 @@
 # ------------------------- Base Clocks --------------------
-create_clock -name sys_clock -period 4.0 [get_ports {sys_clock_p}]
+create_clock -name sys_clock -period 12.5 [get_ports {sys_clock_p}]
 set_input_jitter sys_clock 0.5
 # ------------------------- Clock Groups -------------------
 set_clock_groups -asynchronous \

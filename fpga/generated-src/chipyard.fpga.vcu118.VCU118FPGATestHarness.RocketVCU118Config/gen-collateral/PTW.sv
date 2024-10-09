@@ -152,6 +152,62 @@ module PTW(
                 io_dpath_pmp_7_cfg_r,
   input  [29:0] io_dpath_pmp_7_addr,
   input  [31:0] io_dpath_pmp_7_mask,
+  input         io_dpath_pmp_8_cfg_l,
+  input  [1:0]  io_dpath_pmp_8_cfg_a,
+  input         io_dpath_pmp_8_cfg_x,
+                io_dpath_pmp_8_cfg_w,
+                io_dpath_pmp_8_cfg_r,
+  input  [29:0] io_dpath_pmp_8_addr,
+  input  [31:0] io_dpath_pmp_8_mask,
+  input         io_dpath_pmp_9_cfg_l,
+  input  [1:0]  io_dpath_pmp_9_cfg_a,
+  input         io_dpath_pmp_9_cfg_x,
+                io_dpath_pmp_9_cfg_w,
+                io_dpath_pmp_9_cfg_r,
+  input  [29:0] io_dpath_pmp_9_addr,
+  input  [31:0] io_dpath_pmp_9_mask,
+  input         io_dpath_pmp_10_cfg_l,
+  input  [1:0]  io_dpath_pmp_10_cfg_a,
+  input         io_dpath_pmp_10_cfg_x,
+                io_dpath_pmp_10_cfg_w,
+                io_dpath_pmp_10_cfg_r,
+  input  [29:0] io_dpath_pmp_10_addr,
+  input  [31:0] io_dpath_pmp_10_mask,
+  input         io_dpath_pmp_11_cfg_l,
+  input  [1:0]  io_dpath_pmp_11_cfg_a,
+  input         io_dpath_pmp_11_cfg_x,
+                io_dpath_pmp_11_cfg_w,
+                io_dpath_pmp_11_cfg_r,
+  input  [29:0] io_dpath_pmp_11_addr,
+  input  [31:0] io_dpath_pmp_11_mask,
+  input         io_dpath_pmp_12_cfg_l,
+  input  [1:0]  io_dpath_pmp_12_cfg_a,
+  input         io_dpath_pmp_12_cfg_x,
+                io_dpath_pmp_12_cfg_w,
+                io_dpath_pmp_12_cfg_r,
+  input  [29:0] io_dpath_pmp_12_addr,
+  input  [31:0] io_dpath_pmp_12_mask,
+  input         io_dpath_pmp_13_cfg_l,
+  input  [1:0]  io_dpath_pmp_13_cfg_a,
+  input         io_dpath_pmp_13_cfg_x,
+                io_dpath_pmp_13_cfg_w,
+                io_dpath_pmp_13_cfg_r,
+  input  [29:0] io_dpath_pmp_13_addr,
+  input  [31:0] io_dpath_pmp_13_mask,
+  input         io_dpath_pmp_14_cfg_l,
+  input  [1:0]  io_dpath_pmp_14_cfg_a,
+  input         io_dpath_pmp_14_cfg_x,
+                io_dpath_pmp_14_cfg_w,
+                io_dpath_pmp_14_cfg_r,
+  input  [29:0] io_dpath_pmp_14_addr,
+  input  [31:0] io_dpath_pmp_14_mask,
+  input         io_dpath_pmp_15_cfg_l,
+  input  [1:0]  io_dpath_pmp_15_cfg_a,
+  input         io_dpath_pmp_15_cfg_x,
+                io_dpath_pmp_15_cfg_w,
+                io_dpath_pmp_15_cfg_r,
+  input  [29:0] io_dpath_pmp_15_addr,
+  input  [31:0] io_dpath_pmp_15_mask,
   input  [63:0] io_dpath_customCSRs_csrs_0_value,
   output        io_requestor_0_req_ready,
                 io_requestor_0_resp_valid,
@@ -233,6 +289,62 @@ module PTW(
                 io_requestor_0_pmp_7_cfg_r,
   output [29:0] io_requestor_0_pmp_7_addr,
   output [31:0] io_requestor_0_pmp_7_mask,
+  output        io_requestor_0_pmp_8_cfg_l,
+  output [1:0]  io_requestor_0_pmp_8_cfg_a,
+  output        io_requestor_0_pmp_8_cfg_x,
+                io_requestor_0_pmp_8_cfg_w,
+                io_requestor_0_pmp_8_cfg_r,
+  output [29:0] io_requestor_0_pmp_8_addr,
+  output [31:0] io_requestor_0_pmp_8_mask,
+  output        io_requestor_0_pmp_9_cfg_l,
+  output [1:0]  io_requestor_0_pmp_9_cfg_a,
+  output        io_requestor_0_pmp_9_cfg_x,
+                io_requestor_0_pmp_9_cfg_w,
+                io_requestor_0_pmp_9_cfg_r,
+  output [29:0] io_requestor_0_pmp_9_addr,
+  output [31:0] io_requestor_0_pmp_9_mask,
+  output        io_requestor_0_pmp_10_cfg_l,
+  output [1:0]  io_requestor_0_pmp_10_cfg_a,
+  output        io_requestor_0_pmp_10_cfg_x,
+                io_requestor_0_pmp_10_cfg_w,
+                io_requestor_0_pmp_10_cfg_r,
+  output [29:0] io_requestor_0_pmp_10_addr,
+  output [31:0] io_requestor_0_pmp_10_mask,
+  output        io_requestor_0_pmp_11_cfg_l,
+  output [1:0]  io_requestor_0_pmp_11_cfg_a,
+  output        io_requestor_0_pmp_11_cfg_x,
+                io_requestor_0_pmp_11_cfg_w,
+                io_requestor_0_pmp_11_cfg_r,
+  output [29:0] io_requestor_0_pmp_11_addr,
+  output [31:0] io_requestor_0_pmp_11_mask,
+  output        io_requestor_0_pmp_12_cfg_l,
+  output [1:0]  io_requestor_0_pmp_12_cfg_a,
+  output        io_requestor_0_pmp_12_cfg_x,
+                io_requestor_0_pmp_12_cfg_w,
+                io_requestor_0_pmp_12_cfg_r,
+  output [29:0] io_requestor_0_pmp_12_addr,
+  output [31:0] io_requestor_0_pmp_12_mask,
+  output        io_requestor_0_pmp_13_cfg_l,
+  output [1:0]  io_requestor_0_pmp_13_cfg_a,
+  output        io_requestor_0_pmp_13_cfg_x,
+                io_requestor_0_pmp_13_cfg_w,
+                io_requestor_0_pmp_13_cfg_r,
+  output [29:0] io_requestor_0_pmp_13_addr,
+  output [31:0] io_requestor_0_pmp_13_mask,
+  output        io_requestor_0_pmp_14_cfg_l,
+  output [1:0]  io_requestor_0_pmp_14_cfg_a,
+  output        io_requestor_0_pmp_14_cfg_x,
+                io_requestor_0_pmp_14_cfg_w,
+                io_requestor_0_pmp_14_cfg_r,
+  output [29:0] io_requestor_0_pmp_14_addr,
+  output [31:0] io_requestor_0_pmp_14_mask,
+  output        io_requestor_0_pmp_15_cfg_l,
+  output [1:0]  io_requestor_0_pmp_15_cfg_a,
+  output        io_requestor_0_pmp_15_cfg_x,
+                io_requestor_0_pmp_15_cfg_w,
+                io_requestor_0_pmp_15_cfg_r,
+  output [29:0] io_requestor_0_pmp_15_addr,
+  output [31:0] io_requestor_0_pmp_15_mask,
   output        io_requestor_1_req_ready,
                 io_requestor_1_resp_valid,
                 io_requestor_1_resp_bits_ae_ptw,
@@ -312,6 +424,62 @@ module PTW(
                 io_requestor_1_pmp_7_cfg_r,
   output [29:0] io_requestor_1_pmp_7_addr,
   output [31:0] io_requestor_1_pmp_7_mask,
+  output        io_requestor_1_pmp_8_cfg_l,
+  output [1:0]  io_requestor_1_pmp_8_cfg_a,
+  output        io_requestor_1_pmp_8_cfg_x,
+                io_requestor_1_pmp_8_cfg_w,
+                io_requestor_1_pmp_8_cfg_r,
+  output [29:0] io_requestor_1_pmp_8_addr,
+  output [31:0] io_requestor_1_pmp_8_mask,
+  output        io_requestor_1_pmp_9_cfg_l,
+  output [1:0]  io_requestor_1_pmp_9_cfg_a,
+  output        io_requestor_1_pmp_9_cfg_x,
+                io_requestor_1_pmp_9_cfg_w,
+                io_requestor_1_pmp_9_cfg_r,
+  output [29:0] io_requestor_1_pmp_9_addr,
+  output [31:0] io_requestor_1_pmp_9_mask,
+  output        io_requestor_1_pmp_10_cfg_l,
+  output [1:0]  io_requestor_1_pmp_10_cfg_a,
+  output        io_requestor_1_pmp_10_cfg_x,
+                io_requestor_1_pmp_10_cfg_w,
+                io_requestor_1_pmp_10_cfg_r,
+  output [29:0] io_requestor_1_pmp_10_addr,
+  output [31:0] io_requestor_1_pmp_10_mask,
+  output        io_requestor_1_pmp_11_cfg_l,
+  output [1:0]  io_requestor_1_pmp_11_cfg_a,
+  output        io_requestor_1_pmp_11_cfg_x,
+                io_requestor_1_pmp_11_cfg_w,
+                io_requestor_1_pmp_11_cfg_r,
+  output [29:0] io_requestor_1_pmp_11_addr,
+  output [31:0] io_requestor_1_pmp_11_mask,
+  output        io_requestor_1_pmp_12_cfg_l,
+  output [1:0]  io_requestor_1_pmp_12_cfg_a,
+  output        io_requestor_1_pmp_12_cfg_x,
+                io_requestor_1_pmp_12_cfg_w,
+                io_requestor_1_pmp_12_cfg_r,
+  output [29:0] io_requestor_1_pmp_12_addr,
+  output [31:0] io_requestor_1_pmp_12_mask,
+  output        io_requestor_1_pmp_13_cfg_l,
+  output [1:0]  io_requestor_1_pmp_13_cfg_a,
+  output        io_requestor_1_pmp_13_cfg_x,
+                io_requestor_1_pmp_13_cfg_w,
+                io_requestor_1_pmp_13_cfg_r,
+  output [29:0] io_requestor_1_pmp_13_addr,
+  output [31:0] io_requestor_1_pmp_13_mask,
+  output        io_requestor_1_pmp_14_cfg_l,
+  output [1:0]  io_requestor_1_pmp_14_cfg_a,
+  output        io_requestor_1_pmp_14_cfg_x,
+                io_requestor_1_pmp_14_cfg_w,
+                io_requestor_1_pmp_14_cfg_r,
+  output [29:0] io_requestor_1_pmp_14_addr,
+  output [31:0] io_requestor_1_pmp_14_mask,
+  output        io_requestor_1_pmp_15_cfg_l,
+  output [1:0]  io_requestor_1_pmp_15_cfg_a,
+  output        io_requestor_1_pmp_15_cfg_x,
+                io_requestor_1_pmp_15_cfg_w,
+                io_requestor_1_pmp_15_cfg_r,
+  output [29:0] io_requestor_1_pmp_15_addr,
+  output [31:0] io_requestor_1_pmp_15_mask,
   output [63:0] io_requestor_1_customCSRs_csrs_0_value,
   output        io_mem_req_valid,
   output [39:0] io_mem_req_bits_addr,
@@ -455,42 +623,71 @@ module PTW(
   wire [55:0]     _GEN_7 = {24'h0, io_dpath_pmp_6_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
   wire [31:0]     pmpHomogeneous_pgMask_6 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
   wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_36 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_6};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire [55:0]     _GEN_8 = {24'h0, io_dpath_pmp_7_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
   wire [31:0]     pmpHomogeneous_pgMask_7 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
   wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_42 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_7};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
-  wire            homogeneous =
+  wire [55:0]     _GEN_9 = {24'h0, io_dpath_pmp_8_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
+  wire [31:0]     pmpHomogeneous_pgMask_8 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
+  wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_48 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_8};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire [55:0]     _GEN_10 = {24'h0, io_dpath_pmp_9_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
+  wire [31:0]     pmpHomogeneous_pgMask_9 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
+  wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_54 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_9};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire [55:0]     _GEN_11 = {24'h0, io_dpath_pmp_10_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
+  wire [31:0]     pmpHomogeneous_pgMask_10 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
+  wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_60 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_10};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire [55:0]     _GEN_12 = {24'h0, io_dpath_pmp_11_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
+  wire [31:0]     pmpHomogeneous_pgMask_11 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
+  wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_66 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_11};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire [55:0]     _GEN_13 = {24'h0, io_dpath_pmp_12_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
+  wire [31:0]     pmpHomogeneous_pgMask_12 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
+  wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_72 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_12};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire [55:0]     _GEN_14 = {24'h0, io_dpath_pmp_13_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
+  wire [31:0]     pmpHomogeneous_pgMask_13 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
+  wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_78 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_13};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire [55:0]     _GEN_15 = {24'h0, io_dpath_pmp_14_addr, 2'h0};	// @[PMP.scala:107:32, PTW.scala:313:93]
+  wire [31:0]     pmpHomogeneous_pgMask_14 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
+  wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_84 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_14};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire [31:0]     pmpHomogeneous_pgMask_15 = _GEN_0 ? 32'hFFFFF000 : _leaf_T_5 ? 32'hFFE00000 : 32'hC0000000;	// @[package.scala:33:{76,86}]
+  wire [55:0]     _pmpHomogeneous_endsBeforeUpper_T_90 = _pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask_15};	// @[PMP.scala:110:30, PTW.scala:313:93, :546:88, package.scala:33:76]
+  wire            _GEN_16 =
     (_GEN_0 ? r_pte_ppn == 44'h3 | r_pte_ppn == 44'h4 | r_pte_ppn[43:4] == 40'h1 | {r_pte_ppn[43:5] ^ 39'h8, r_pte_ppn[3:0]} == 43'h0 | r_pte_ppn[43:4] == 40'h200 | r_pte_ppn == 44'h2010 | r_pte_ppn[43:14] == 30'h3 | r_pte_ppn[43:1] == 43'h32000 | r_pte_ppn[43:19] == 25'h1 : _leaf_T_5 ? r_pte_ppn[43:14] == 30'h3 | r_pte_ppn[43:19] == 25'h1 : r_pte_ppn[43:19] == 25'h1) & (io_dpath_pmp_0_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_0_mask[11] : _leaf_T_5 ? io_dpath_pmp_0_mask[20] : io_dpath_pmp_0_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_0_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_0_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_0_addr[29:28]}))) : ~(io_dpath_pmp_0_cfg_a[0]) | _pmpHomogeneous_T >= _GEN_1 | (_pmpHomogeneous_T & {24'h0, pmpHomogeneous_pgMask}) < {24'h0, {io_dpath_pmp_0_addr, 2'h0} & pmpHomogeneous_pgMask}) & (io_dpath_pmp_1_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_1_mask[11] : _leaf_T_5 ? io_dpath_pmp_1_mask[20] : io_dpath_pmp_1_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_1_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_1_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_1_addr[29:28]}))) : ~(io_dpath_pmp_1_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_6 < {24'h0, {io_dpath_pmp_0_addr, 2'h0} & pmpHomogeneous_pgMask_1} | _pmpHomogeneous_T >= _GEN_2 | _pmpHomogeneous_T >= _GEN_1 & _pmpHomogeneous_endsBeforeUpper_T_6 < {24'h0, {io_dpath_pmp_1_addr, 2'h0} & pmpHomogeneous_pgMask_1})
     & (io_dpath_pmp_2_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_2_mask[11] : _leaf_T_5 ? io_dpath_pmp_2_mask[20] : io_dpath_pmp_2_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_2_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_2_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_2_addr[29:28]}))) : ~(io_dpath_pmp_2_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_12 < {24'h0, {io_dpath_pmp_1_addr, 2'h0} & pmpHomogeneous_pgMask_2} | _pmpHomogeneous_T >= _GEN_3 | _pmpHomogeneous_T >= _GEN_2 & _pmpHomogeneous_endsBeforeUpper_T_12 < {24'h0, {io_dpath_pmp_2_addr, 2'h0} & pmpHomogeneous_pgMask_2}) & (io_dpath_pmp_3_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_3_mask[11] : _leaf_T_5 ? io_dpath_pmp_3_mask[20] : io_dpath_pmp_3_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_3_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_3_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_3_addr[29:28]}))) : ~(io_dpath_pmp_3_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_18 < {24'h0, {io_dpath_pmp_2_addr, 2'h0} & pmpHomogeneous_pgMask_3} | _pmpHomogeneous_T >= _GEN_4 | _pmpHomogeneous_T >= _GEN_3 & _pmpHomogeneous_endsBeforeUpper_T_18 < {24'h0, {io_dpath_pmp_3_addr, 2'h0} & pmpHomogeneous_pgMask_3}) & (io_dpath_pmp_4_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_4_mask[11] : _leaf_T_5 ? io_dpath_pmp_4_mask[20] : io_dpath_pmp_4_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_4_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_4_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_4_addr[29:28]}))) : ~(io_dpath_pmp_4_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_24 < {24'h0, {io_dpath_pmp_3_addr, 2'h0} & pmpHomogeneous_pgMask_4} | _pmpHomogeneous_T >= _GEN_5 | _pmpHomogeneous_T >= _GEN_4 & _pmpHomogeneous_endsBeforeUpper_T_24 < {24'h0, {io_dpath_pmp_4_addr, 2'h0} & pmpHomogeneous_pgMask_4})
-    & (io_dpath_pmp_5_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_5_mask[11] : _leaf_T_5 ? io_dpath_pmp_5_mask[20] : io_dpath_pmp_5_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_5_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_5_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_5_addr[29:28]}))) : ~(io_dpath_pmp_5_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_30 < {24'h0, {io_dpath_pmp_4_addr, 2'h0} & pmpHomogeneous_pgMask_5} | _pmpHomogeneous_T >= _GEN_6 | _pmpHomogeneous_T >= _GEN_5 & _pmpHomogeneous_endsBeforeUpper_T_30 < {24'h0, {io_dpath_pmp_5_addr, 2'h0} & pmpHomogeneous_pgMask_5}) & (io_dpath_pmp_6_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_6_mask[11] : _leaf_T_5 ? io_dpath_pmp_6_mask[20] : io_dpath_pmp_6_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_6_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_6_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_6_addr[29:28]}))) : ~(io_dpath_pmp_6_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_36 < {24'h0, {io_dpath_pmp_5_addr, 2'h0} & pmpHomogeneous_pgMask_6} | _pmpHomogeneous_T >= _GEN_7 | _pmpHomogeneous_T >= _GEN_6 & _pmpHomogeneous_endsBeforeUpper_T_36 < {24'h0, {io_dpath_pmp_6_addr, 2'h0} & pmpHomogeneous_pgMask_6}) & (io_dpath_pmp_7_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_7_mask[11] : _leaf_T_5 ? io_dpath_pmp_7_mask[20] : io_dpath_pmp_7_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_7_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_7_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_7_addr[29:28]}))) : ~(io_dpath_pmp_7_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_42 < {24'h0, {io_dpath_pmp_6_addr, 2'h0} & pmpHomogeneous_pgMask_7} | _pmpHomogeneous_T >= {24'h0, io_dpath_pmp_7_addr, 2'h0} | _pmpHomogeneous_T >= _GEN_7 & _pmpHomogeneous_endsBeforeUpper_T_42 < {24'h0, {io_dpath_pmp_7_addr, 2'h0} & pmpHomogeneous_pgMask_7});	// @[PMP.scala:45:20, :46:26, :60:36, :97:93, :98:{21,53,78}, :106:32, :107:32, :110:{30,40,58}, :111:{40,53}, :113:62, :118:{8,45,58}, PTW.scala:275:18, :313:93, :546:88, :551:36, Parameters.scala:137:{31,45,65}, TLBPermissions.scala:101:65, package.scala:33:{76,86}]
+    & (io_dpath_pmp_5_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_5_mask[11] : _leaf_T_5 ? io_dpath_pmp_5_mask[20] : io_dpath_pmp_5_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_5_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_5_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_5_addr[29:28]}))) : ~(io_dpath_pmp_5_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_30 < {24'h0, {io_dpath_pmp_4_addr, 2'h0} & pmpHomogeneous_pgMask_5} | _pmpHomogeneous_T >= _GEN_6 | _pmpHomogeneous_T >= _GEN_5 & _pmpHomogeneous_endsBeforeUpper_T_30 < {24'h0, {io_dpath_pmp_5_addr, 2'h0} & pmpHomogeneous_pgMask_5}) & (io_dpath_pmp_6_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_6_mask[11] : _leaf_T_5 ? io_dpath_pmp_6_mask[20] : io_dpath_pmp_6_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_6_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_6_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_6_addr[29:28]}))) : ~(io_dpath_pmp_6_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_36 < {24'h0, {io_dpath_pmp_5_addr, 2'h0} & pmpHomogeneous_pgMask_6} | _pmpHomogeneous_T >= _GEN_7 | _pmpHomogeneous_T >= _GEN_6 & _pmpHomogeneous_endsBeforeUpper_T_36 < {24'h0, {io_dpath_pmp_6_addr, 2'h0} & pmpHomogeneous_pgMask_6});	// @[PMP.scala:45:20, :46:26, :60:36, :97:93, :98:{21,53,78}, :106:32, :107:32, :110:{30,40,58}, :111:{40,53}, :113:62, :118:{8,45,58}, PTW.scala:275:18, :313:93, :546:88, :551:36, Parameters.scala:137:{31,45,65}, TLBPermissions.scala:101:65, package.scala:33:{76,86}]
+  wire            _GEN_17 =
+    (io_dpath_pmp_7_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_7_mask[11] : _leaf_T_5 ? io_dpath_pmp_7_mask[20] : io_dpath_pmp_7_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_7_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_7_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_7_addr[29:28]}))) : ~(io_dpath_pmp_7_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_42 < {24'h0, {io_dpath_pmp_6_addr, 2'h0} & pmpHomogeneous_pgMask_7} | _pmpHomogeneous_T >= _GEN_8 | _pmpHomogeneous_T >= _GEN_7 & _pmpHomogeneous_endsBeforeUpper_T_42 < {24'h0, {io_dpath_pmp_7_addr, 2'h0} & pmpHomogeneous_pgMask_7}) & (io_dpath_pmp_8_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_8_mask[11] : _leaf_T_5 ? io_dpath_pmp_8_mask[20] : io_dpath_pmp_8_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_8_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_8_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_8_addr[29:28]}))) : ~(io_dpath_pmp_8_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_48 < {24'h0, {io_dpath_pmp_7_addr, 2'h0} & pmpHomogeneous_pgMask_8} | _pmpHomogeneous_T >= _GEN_9 | _pmpHomogeneous_T >= _GEN_8 & _pmpHomogeneous_endsBeforeUpper_T_48 < {24'h0, {io_dpath_pmp_8_addr, 2'h0} & pmpHomogeneous_pgMask_8}) & (io_dpath_pmp_9_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_9_mask[11] : _leaf_T_5 ? io_dpath_pmp_9_mask[20] : io_dpath_pmp_9_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_9_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_9_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_9_addr[29:28]}))) : ~(io_dpath_pmp_9_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_54 < {24'h0, {io_dpath_pmp_8_addr, 2'h0} & pmpHomogeneous_pgMask_9} | _pmpHomogeneous_T >= _GEN_10 | _pmpHomogeneous_T >= _GEN_9 & _pmpHomogeneous_endsBeforeUpper_T_54 < {24'h0, {io_dpath_pmp_9_addr, 2'h0} & pmpHomogeneous_pgMask_9})
+    & (io_dpath_pmp_10_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_10_mask[11] : _leaf_T_5 ? io_dpath_pmp_10_mask[20] : io_dpath_pmp_10_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_10_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_10_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_10_addr[29:28]}))) : ~(io_dpath_pmp_10_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_60 < {24'h0, {io_dpath_pmp_9_addr, 2'h0} & pmpHomogeneous_pgMask_10} | _pmpHomogeneous_T >= _GEN_11 | _pmpHomogeneous_T >= _GEN_10 & _pmpHomogeneous_endsBeforeUpper_T_60 < {24'h0, {io_dpath_pmp_10_addr, 2'h0} & pmpHomogeneous_pgMask_10}) & (io_dpath_pmp_11_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_11_mask[11] : _leaf_T_5 ? io_dpath_pmp_11_mask[20] : io_dpath_pmp_11_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_11_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_11_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_11_addr[29:28]}))) : ~(io_dpath_pmp_11_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_66 < {24'h0, {io_dpath_pmp_10_addr, 2'h0} & pmpHomogeneous_pgMask_11} | _pmpHomogeneous_T >= _GEN_12 | _pmpHomogeneous_T >= _GEN_11 & _pmpHomogeneous_endsBeforeUpper_T_66 < {24'h0, {io_dpath_pmp_11_addr, 2'h0} & pmpHomogeneous_pgMask_11}) & (io_dpath_pmp_12_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_12_mask[11] : _leaf_T_5 ? io_dpath_pmp_12_mask[20] : io_dpath_pmp_12_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_12_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_12_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_12_addr[29:28]}))) : ~(io_dpath_pmp_12_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_72 < {24'h0, {io_dpath_pmp_11_addr, 2'h0} & pmpHomogeneous_pgMask_12} | _pmpHomogeneous_T >= _GEN_13 | _pmpHomogeneous_T >= _GEN_12 & _pmpHomogeneous_endsBeforeUpper_T_72 < {24'h0, {io_dpath_pmp_12_addr, 2'h0} & pmpHomogeneous_pgMask_12})
+    & (io_dpath_pmp_13_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_13_mask[11] : _leaf_T_5 ? io_dpath_pmp_13_mask[20] : io_dpath_pmp_13_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_13_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_13_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_13_addr[29:28]}))) : ~(io_dpath_pmp_13_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_78 < {24'h0, {io_dpath_pmp_12_addr, 2'h0} & pmpHomogeneous_pgMask_13} | _pmpHomogeneous_T >= _GEN_14 | _pmpHomogeneous_T >= _GEN_13 & _pmpHomogeneous_endsBeforeUpper_T_78 < {24'h0, {io_dpath_pmp_13_addr, 2'h0} & pmpHomogeneous_pgMask_13}) & (io_dpath_pmp_14_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_14_mask[11] : _leaf_T_5 ? io_dpath_pmp_14_mask[20] : io_dpath_pmp_14_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_14_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_14_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_14_addr[29:28]}))) : ~(io_dpath_pmp_14_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_84 < {24'h0, {io_dpath_pmp_13_addr, 2'h0} & pmpHomogeneous_pgMask_14} | _pmpHomogeneous_T >= _GEN_15 | _pmpHomogeneous_T >= _GEN_14 & _pmpHomogeneous_endsBeforeUpper_T_84 < {24'h0, {io_dpath_pmp_14_addr, 2'h0} & pmpHomogeneous_pgMask_14}) & (io_dpath_pmp_15_cfg_a[1] ? (_GEN_0 ? io_dpath_pmp_15_mask[11] : _leaf_T_5 ? io_dpath_pmp_15_mask[20] : io_dpath_pmp_15_mask[29]) | (_GEN_0 ? (|(r_pte_ppn ^ {24'h0, io_dpath_pmp_15_addr[29:10]})) : _leaf_T_5 ? (|(r_pte_ppn[43:9] ^ {24'h0, io_dpath_pmp_15_addr[29:19]})) : (|(r_pte_ppn[43:18] ^ {24'h0, io_dpath_pmp_15_addr[29:28]}))) : ~(io_dpath_pmp_15_cfg_a[0]) | _pmpHomogeneous_endsBeforeUpper_T_90 < {24'h0, {io_dpath_pmp_14_addr, 2'h0} & pmpHomogeneous_pgMask_15} | _pmpHomogeneous_T >= {24'h0, io_dpath_pmp_15_addr, 2'h0} | _pmpHomogeneous_T >= _GEN_15 & _pmpHomogeneous_endsBeforeUpper_T_90 < {24'h0, {io_dpath_pmp_15_addr, 2'h0} & pmpHomogeneous_pgMask_15});	// @[PMP.scala:45:20, :46:26, :60:36, :97:93, :98:{21,53,78}, :106:32, :107:32, :110:{30,40,58}, :111:{40,53}, :113:62, :118:{8,45,58}, PTW.scala:275:18, :313:93, :546:88, :551:36, package.scala:33:{76,86}]
+  wire            homogeneous = _GEN_16 & _GEN_17;	// @[PTW.scala:551:36]
   wire            _T_141 = _arb_io_out_ready_T_2 & _arb_io_out_valid;	// @[Decoupled.scala:51:35, PTW.scala:236:19, :240:43]
-  wire            _GEN_8 = _T_140 & _T_141;	// @[Decoupled.scala:51:35, PTW.scala:240:30, :587:30]
-  wire [7:0][2:0] _GEN_9 = {{3'h0}, {state}, {state}, {io_mem_s2_xcpt_ae_ld ? 3'h0 : 3'h5}, {state}, {3'h4}, {pte_cache_hit ? state : io_mem_req_ready ? 3'h2 : 3'h1}, {_T_141 ? {2'h0, _arb_io_out_bits_valid} : state}};	// @[Decoupled.scala:51:35, Mux.scala:47:70, PTW.scala:233:22, :236:19, :240:30, :379:24, :384:15, :389:24, :581:31, :585:18, :587:30, :595:{20,26}, :621:35, :627:34, :631:{20,26}, :636:18, :639:18, :641:35, :643:20, :648:18]
+  wire            _GEN_18 = _T_140 & _T_141;	// @[Decoupled.scala:51:35, PTW.scala:240:30, :587:30]
+  wire [7:0][2:0] _GEN_19 = {{3'h0}, {state}, {state}, {io_mem_s2_xcpt_ae_ld ? 3'h0 : 3'h5}, {state}, {3'h4}, {pte_cache_hit ? state : io_mem_req_ready ? 3'h2 : 3'h1}, {_T_141 ? {2'h0, _arb_io_out_bits_valid} : state}};	// @[Decoupled.scala:51:35, Mux.scala:47:70, PTW.scala:233:22, :236:19, :240:30, :379:24, :384:15, :389:24, :581:31, :585:18, :587:30, :595:{20,26}, :621:35, :627:34, :631:{20,26}, :636:18, :639:18, :641:35, :643:20, :648:18]
   wire [1:0]      _merged_pte_superpage_mask_T = stage2_final ? max_count : 2'h2;	// @[PTW.scala:284:25, :290:25, :662:45]
   wire            _r_pte_T_5 = _T_160 & pte_cache_hit;	// @[PTW.scala:379:24, :389:24, :672:50]
   wire            _r_pte_T_8 = ~traverse & r_req_vstage1 & stage2;	// @[PTW.scala:270:18, :283:19, :316:48, :676:{29,56}]
-  wire            _GEN_10 = do_switch | ~mem_resp_valid;	// @[PTW.scala:293:31, :583:30, :674:8, :689:25, :692:21]
+  wire            _GEN_20 = do_switch | ~mem_resp_valid;	// @[PTW.scala:293:31, :583:30, :674:8, :689:25, :692:21]
   wire            gf = stage2 & ~stage2_final & ~(aux_pte_pte_v & (mem_resp_data[1] | mem_resp_data[3] & ~(mem_resp_data[2])) & mem_resp_data[6] & mem_resp_data[1] & mem_resp_data[4]);	// @[PTW.scala:139:42, :141:{38,44}, :143:33, :283:19, :284:25, :294:30, :305:37, :306:26, :308:36, :311:{106,114}, :369:107, :696:{40,43}]
   wire            ae = aux_pte_pte_v & invalid_paddr;	// @[PTW.scala:306:26, :308:36, :311:{106,114}, :313:14, :697:22]
   wire            pf = aux_pte_pte_v & (|(mem_resp_data[63:54]));	// @[PTW.scala:294:30, :305:37, :306:26, :308:36, :311:{106,114}, :698:{22,49}]
   wire            success = aux_pte_pte_v & ~ae & ~pf & ~gf;	// @[PTW.scala:306:26, :308:36, :311:{106,114}, :696:40, :697:22, :698:22, :699:{30,37,41,44}]
   wire            _T_176 = do_both_stages & ~stage2_final & success;	// @[PTW.scala:284:25, :289:38, :369:107, :699:41, :701:45]
   assign do_switch = mem_resp_valid & (traverse ? do_both_stages & ~stage2 : _T_176 & ~stage2);	// @[PTW.scala:283:19, :289:38, :293:31, :307:38, :316:48, :583:30, :585:18, :689:25, :692:21, :693:{28,40}, :701:{45,57}, :702:23, :706:24]
-  wire            _GEN_11 = traverse | _T_176;	// @[PTW.scala:316:48, :410:26, :692:21, :701:{45,57}, :711:19]
-  wire [2:0]      _GEN_12 = hits[7:5] | hits[3:1];	// @[OneHot.scala:30:18, :31:18, :32:28, PTW.scala:378:43]
-  wire            _T_45 = _GEN_12[2] | _GEN_12[0];	// @[OneHot.scala:30:18, :31:18, :32:28]
+  wire            _GEN_21 = traverse | _T_176;	// @[PTW.scala:316:48, :410:26, :692:21, :701:{45,57}, :711:19]
+  wire [2:0]      _GEN_22 = hits[7:5] | hits[3:1];	// @[OneHot.scala:30:18, :31:18, :32:28, PTW.scala:378:43]
+  wire            _T_45 = _GEN_22[2] | _GEN_22[0];	// @[OneHot.scala:30:18, :31:18, :32:28]
   wire [1:0]      _count_T_2 = count + 2'h1;	// @[PTW.scala:259:18, :311:21, :628:24]
   wire            _T_83 = mem_resp_valid & traverse;	// @[PTW.scala:293:31, :316:48, :381:26]
   wire            _T_38 = _T_83 & can_hit & ~(|hits) & ~invalidated;	// @[PTW.scala:251:24, :370:35, :378:43, :379:20, :381:{26,55,65,68}]
-  wire [6:0]      _GEN_13 = ~(valid[6:0]);	// @[PTW.scala:364:24, :382:57]
-  wire [2:0]      r = (&valid) ? {state_reg[6], state_reg[6] ? {state_reg[5], state_reg[5] ? state_reg[4] : state_reg[3]} : {state_reg[2], state_reg[2] ? state_reg[1] : state_reg[0]}} : _GEN_13[0] ? 3'h0 : _GEN_13[1] ? 3'h1 : _GEN_13[2] ? 3'h2 : _GEN_13[3] ? 3'h3 : _GEN_13[4] ? 3'h4 : _GEN_13[5] ? 3'h5 : {2'h3, ~(_GEN_13[6])};	// @[Cat.scala:33:92, Mux.scala:47:70, OneHot.scala:47:45, PTW.scala:233:22, :364:24, :382:{18,25,57}, :384:15, Replacement.scala:168:70, :243:38, :245:38, :250:16, package.scala:33:86, :155:13]
-  wire [31:0]     _GEN_14 = {r_pte_ppn[19:0], pte_addr_vpn_idx, 3'h0};	// @[PTW.scala:233:22, :275:18, :329:23, :384:15, package.scala:33:76]
+  wire [6:0]      _GEN_23 = ~(valid[6:0]);	// @[PTW.scala:364:24, :382:57]
+  wire [2:0]      r = (&valid) ? {state_reg[6], state_reg[6] ? {state_reg[5], state_reg[5] ? state_reg[4] : state_reg[3]} : {state_reg[2], state_reg[2] ? state_reg[1] : state_reg[0]}} : _GEN_23[0] ? 3'h0 : _GEN_23[1] ? 3'h1 : _GEN_23[2] ? 3'h2 : _GEN_23[3] ? 3'h3 : _GEN_23[4] ? 3'h4 : _GEN_23[5] ? 3'h5 : {2'h3, ~(_GEN_23[6])};	// @[Cat.scala:33:92, Mux.scala:47:70, OneHot.scala:47:45, PTW.scala:233:22, :364:24, :382:{18,25,57}, :384:15, Replacement.scala:168:70, :243:38, :245:38, :250:16, package.scala:33:86, :155:13]
+  wire [31:0]     _GEN_24 = {r_pte_ppn[19:0], pte_addr_vpn_idx, 3'h0};	// @[PTW.scala:233:22, :275:18, :329:23, :384:15, package.scala:33:76]
   wire            _T_89 = _T_83 & do_both_stages & ~stage2 & ~stage2_final & ~invalidated;	// @[PTW.scala:251:24, :283:19, :284:25, :289:38, :307:38, :369:107, :381:{26,65,68}]
-  wire [6:0]      _GEN_15 = ~(valid_1[6:0]);	// @[PTW.scala:364:24, :382:57]
-  wire [2:0]      r_1 = (&valid_1) ? {state_reg_1[6], state_reg_1[6] ? {state_reg_1[5], state_reg_1[5] ? state_reg_1[4] : state_reg_1[3]} : {state_reg_1[2], state_reg_1[2] ? state_reg_1[1] : state_reg_1[0]}} : _GEN_15[0] ? 3'h0 : _GEN_15[1] ? 3'h1 : _GEN_15[2] ? 3'h2 : _GEN_15[3] ? 3'h3 : _GEN_15[4] ? 3'h4 : _GEN_15[5] ? 3'h5 : {2'h3, ~(_GEN_15[6])};	// @[Cat.scala:33:92, Mux.scala:47:70, OneHot.scala:47:45, PTW.scala:233:22, :364:24, :382:{18,25,57}, :384:15, Replacement.scala:168:70, :243:38, :245:38, :250:16, package.scala:33:86, :155:13]
+  wire [6:0]      _GEN_25 = ~(valid_1[6:0]);	// @[PTW.scala:364:24, :382:57]
+  wire [2:0]      r_1 = (&valid_1) ? {state_reg_1[6], state_reg_1[6] ? {state_reg_1[5], state_reg_1[5] ? state_reg_1[4] : state_reg_1[3]} : {state_reg_1[2], state_reg_1[2] ? state_reg_1[1] : state_reg_1[0]}} : _GEN_25[0] ? 3'h0 : _GEN_25[1] ? 3'h1 : _GEN_25[2] ? 3'h2 : _GEN_25[3] ? 3'h3 : _GEN_25[4] ? 3'h4 : _GEN_25[5] ? 3'h5 : {2'h3, ~(_GEN_25[6])};	// @[Cat.scala:33:92, Mux.scala:47:70, OneHot.scala:47:45, PTW.scala:233:22, :364:24, :382:{18,25,57}, :384:15, Replacement.scala:168:70, :243:38, :245:38, :250:16, package.scala:33:86, :155:13]
   wire            _T_150 = state == 3'h2;	// @[PTW.scala:233:22, :384:15, :585:18]
   wire            _T_151 = state == 3'h4;	// @[Mux.scala:47:70, PTW.scala:233:22, :585:18]
-  wire            _GEN_16 = _T_160 | _T_150;	// @[PTW.scala:260:24, :389:24, :585:18]
-  wire            _GEN_17 = _T_140 | _GEN_16;	// @[PTW.scala:240:30, :242:27, :260:24, :585:18]
-  wire            _GEN_18 = _T_150 | _T_151 | ~((&state) & ~homogeneous);	// @[PTW.scala:233:22, :259:18, :551:36, :585:18, :650:{13,27}, :651:15]
+  wire            _GEN_26 = _T_160 | _T_150;	// @[PTW.scala:260:24, :389:24, :585:18]
+  wire            _GEN_27 = _T_140 | _GEN_26;	// @[PTW.scala:240:30, :242:27, :260:24, :585:18]
+  wire            _GEN_28 = _T_150 | _T_151 | ~((&state) & ~homogeneous);	// @[PTW.scala:233:22, :259:18, :551:36, :585:18, :650:{13,27}, :651:15]
   always @(posedge clock) begin
     if (reset) begin
       state <= 3'h0;	// @[PTW.scala:233:22]
@@ -502,7 +699,7 @@ module PTW(
     else begin
       state <= _state_barrier_io_y;	// @[PTW.scala:233:22, package.scala:259:25]
       if (pte_cache_hit & _T_160)	// @[PTW.scala:379:24, :389:{15,24}]
-        state_reg <= {~(|(hits[7:4])), (|(hits[7:4])) ? {~(|(_GEN_12[2:1])), (|(_GEN_12[2:1])) ? ~_T_45 : state_reg[4], (|(_GEN_12[2:1])) ? state_reg[3] : ~_T_45} : state_reg[5:3], (|(hits[7:4])) ? state_reg[2:0] : {~(|(_GEN_12[2:1])), (|(_GEN_12[2:1])) ? ~_T_45 : state_reg[1], (|(_GEN_12[2:1])) ? state_reg[0] : ~_T_45}};	// @[Cat.scala:33:92, OneHot.scala:30:18, :32:{14,28}, PTW.scala:378:43, Replacement.scala:168:70, :196:33, :198:38, :203:16, :206:16, :218:7, package.scala:155:13]
+        state_reg <= {~(|(hits[7:4])), (|(hits[7:4])) ? {~(|(_GEN_22[2:1])), (|(_GEN_22[2:1])) ? ~_T_45 : state_reg[4], (|(_GEN_22[2:1])) ? state_reg[3] : ~_T_45} : state_reg[5:3], (|(hits[7:4])) ? state_reg[2:0] : {~(|(_GEN_22[2:1])), (|(_GEN_22[2:1])) ? ~_T_45 : state_reg[1], (|(_GEN_22[2:1])) ? state_reg[0] : ~_T_45}};	// @[Cat.scala:33:92, OneHot.scala:30:18, :32:{14,28}, PTW.scala:378:43, Replacement.scala:168:70, :196:33, :198:38, :203:16, :206:16, :218:7, package.scala:155:13]
       else if (_T_38)	// @[PTW.scala:381:65]
         state_reg <= {~(r[2]), r[2] ? {~(r[1]), r[1] ? ~(r[0]) : state_reg[4], r[1] ? state_reg[3] : ~(r[0])} : state_reg[5:3], r[2] ? state_reg[2:0] : {~(r[1]), r[1] ? ~(r[0]) : state_reg[1], r[1] ? state_reg[0] : ~(r[0])}};	// @[Cat.scala:33:92, PTW.scala:382:18, Replacement.scala:168:70, :196:{33,43}, :198:38, :203:16, :206:16, :218:7, :245:38, package.scala:155:13]
       if (io_dpath_sfence_valid & ~io_dpath_sfence_bits_rs1)	// @[PTW.scala:390:{33,37}]
@@ -516,8 +713,8 @@ module PTW(
       else	// @[PTW.scala:390:33]
         valid_1 <= {8{_T_89}} & 8'h1 << r_1 | valid_1;	// @[OneHot.scala:57:35, PTW.scala:364:24, :381:{65,82}, :382:18, :383:13]
     end
-    resp_valid_0 <= mem_resp_valid & ~_GEN_11 & ~r_req_dest | ~_GEN_17 & (_T_151 ? io_mem_s2_xcpt_ae_ld & ~r_req_dest : (&state) & ~r_req_dest);	// @[PTW.scala:233:22, :242:27, :272:23, :293:31, :410:26, :585:18, :641:35, :644:32, :649:30, :683:30, :689:25, :692:21, :701:57, :711:19]
-    resp_valid_1 <= mem_resp_valid & ~_GEN_11 & r_req_dest | ~_GEN_17 & (_T_151 ? io_mem_s2_xcpt_ae_ld & r_req_dest : (&state) & r_req_dest);	// @[PTW.scala:233:22, :242:27, :272:23, :293:31, :410:26, :585:18, :641:35, :644:32, :649:30, :683:30, :689:25, :692:21, :701:57, :711:19]
+    resp_valid_0 <= mem_resp_valid & ~_GEN_21 & ~r_req_dest | ~_GEN_27 & (_T_151 ? io_mem_s2_xcpt_ae_ld & ~r_req_dest : (&state) & ~r_req_dest);	// @[PTW.scala:233:22, :242:27, :272:23, :293:31, :410:26, :585:18, :641:35, :644:32, :649:30, :683:30, :689:25, :692:21, :701:57, :711:19]
+    resp_valid_1 <= mem_resp_valid & ~_GEN_21 & r_req_dest | ~_GEN_27 & (_T_151 ? io_mem_s2_xcpt_ae_ld & r_req_dest : (&state) & r_req_dest);	// @[PTW.scala:233:22, :242:27, :272:23, :293:31, :410:26, :585:18, :641:35, :644:32, :649:30, :683:30, :689:25, :692:21, :701:57, :711:19]
     invalidated <= io_dpath_sfence_valid | invalidated & (|state);	// @[PTW.scala:233:22, :244:24, :251:24, :523:{40,56}]
     if (do_switch) begin	// @[PTW.scala:583:30, :689:25, :692:21]
       count <= 2'h0;	// @[PTW.scala:259:18]
@@ -550,7 +747,7 @@ module PTW(
             if (pte_cache_hit)	// @[PTW.scala:379:24]
               count <= _count_T_2;	// @[PTW.scala:259:18, :628:24]
           end
-          else if (_GEN_18) begin	// @[PTW.scala:259:18, :585:18]
+          else if (_GEN_28) begin	// @[PTW.scala:259:18, :585:18]
           end
           else	// @[PTW.scala:259:18, :585:18]
             count <= 2'h2;	// @[PTW.scala:259:18]
@@ -566,7 +763,7 @@ module PTW(
         if (pte_cache_hit)	// @[PTW.scala:379:24]
           count <= _count_T_2;	// @[PTW.scala:259:18, :628:24]
       end
-      else if (_GEN_18) begin	// @[PTW.scala:259:18, :585:18]
+      else if (_GEN_28) begin	// @[PTW.scala:259:18, :585:18]
       end
       else	// @[PTW.scala:259:18, :585:18]
         count <= 2'h2;	// @[PTW.scala:259:18]
@@ -581,14 +778,14 @@ module PTW(
     if (_T_140)	// @[PTW.scala:240:30]
       resp_ae_ptw <= ~_T_141 & resp_ae_ptw;	// @[Decoupled.scala:51:35, PTW.scala:260:24, :587:30, :603:21]
     else	// @[PTW.scala:240:30]
-      resp_ae_ptw <= ~_GEN_16 & _T_151 & io_mem_s2_xcpt_ae_ld | resp_ae_ptw;	// @[PTW.scala:260:24, :585:18]
-    if (~mem_resp_valid | _GEN_11) begin	// @[PTW.scala:293:31, :410:26, :585:18, :674:8, :689:25, :692:21, :701:57, :711:19]
-      resp_ae_final <= ~_GEN_8 & resp_ae_final;	// @[PTW.scala:261:26, :585:18, :587:30, :604:23]
-      resp_pf <= ~_GEN_8 & resp_pf;	// @[PTW.scala:261:26, :262:20, :585:18, :587:30, :604:23, :605:17]
-      resp_gf <= ~_GEN_8 & resp_gf;	// @[PTW.scala:261:26, :263:20, :585:18, :587:30, :604:23, :606:17]
-      resp_hr <= _GEN_8 | resp_hr;	// @[PTW.scala:264:20, :585:18, :587:30, :607:17]
-      resp_hw <= _GEN_8 | resp_hw;	// @[PTW.scala:265:20, :585:18, :587:30, :608:17]
-      resp_hx <= _GEN_8 | resp_hx;	// @[PTW.scala:266:20, :585:18, :587:30, :609:17]
+      resp_ae_ptw <= ~_GEN_26 & _T_151 & io_mem_s2_xcpt_ae_ld | resp_ae_ptw;	// @[PTW.scala:260:24, :585:18]
+    if (~mem_resp_valid | _GEN_21) begin	// @[PTW.scala:293:31, :410:26, :585:18, :674:8, :689:25, :692:21, :701:57, :711:19]
+      resp_ae_final <= ~_GEN_18 & resp_ae_final;	// @[PTW.scala:261:26, :585:18, :587:30, :604:23]
+      resp_pf <= ~_GEN_18 & resp_pf;	// @[PTW.scala:261:26, :262:20, :585:18, :587:30, :604:23, :605:17]
+      resp_gf <= ~_GEN_18 & resp_gf;	// @[PTW.scala:261:26, :263:20, :585:18, :587:30, :604:23, :606:17]
+      resp_hr <= _GEN_18 | resp_hr;	// @[PTW.scala:264:20, :585:18, :587:30, :607:17]
+      resp_hw <= _GEN_18 | resp_hw;	// @[PTW.scala:265:20, :585:18, :587:30, :608:17]
+      resp_hx <= _GEN_18 | resp_hx;	// @[PTW.scala:266:20, :585:18, :587:30, :609:17]
     end
     else begin	// @[PTW.scala:585:18, :689:25, :692:21]
       resp_ae_final <= ae;	// @[PTW.scala:261:26, :697:22]
@@ -598,7 +795,7 @@ module PTW(
       resp_hw <= ~stage2 | ~pf & ~gf & aux_pte_pte_v & (mem_resp_data[1] | mem_resp_data[3] & ~(mem_resp_data[2])) & mem_resp_data[6] & mem_resp_data[2] & mem_resp_data[7] & mem_resp_data[4];	// @[PTW.scala:139:42, :141:{38,44}, :265:20, :283:19, :294:30, :305:37, :306:26, :307:38, :308:36, :311:{106,114}, :696:40, :698:22, :699:{37,44}, :727:{28,43}]
       resp_hx <= ~stage2 | ~pf & ~gf & aux_pte_pte_v & (mem_resp_data[1] | mem_resp_data[3] & ~(mem_resp_data[2])) & mem_resp_data[6] & mem_resp_data[3] & mem_resp_data[4];	// @[PTW.scala:139:42, :141:{38,44}, :266:20, :283:19, :294:30, :305:37, :306:26, :307:38, :308:36, :311:{106,114}, :696:40, :698:22, :699:{37,44}, :728:{28,43}]
     end
-    if (_GEN_8) begin	// @[PTW.scala:587:30]
+    if (_GEN_18) begin	// @[PTW.scala:587:30]
       r_req_addr <= _arb_io_out_bits_bits_addr;	// @[PTW.scala:236:19, :270:18]
       r_req_need_gpa <= _arb_io_out_bits_bits_need_gpa;	// @[PTW.scala:236:19, :270:18]
       r_req_vstage1 <= _arb_io_out_bits_bits_vstage1;	// @[PTW.scala:236:19, :270:18]
@@ -615,40 +812,40 @@ module PTW(
     r_pte_w <= _r_pte_barrier_io_y_w;	// @[PTW.scala:275:18, package.scala:259:25]
     r_pte_r <= _r_pte_barrier_io_y_r;	// @[PTW.scala:275:18, package.scala:259:25]
     r_pte_v <= _r_pte_barrier_io_y_v;	// @[PTW.scala:275:18, package.scala:259:25]
-    stage2 <= do_switch | (~mem_resp_valid | traverse | ~(_T_176 & stage2)) & (_GEN_8 ? _arb_io_out_bits_bits_stage2 : stage2);	// @[PTW.scala:236:19, :283:19, :293:31, :316:48, :583:30, :585:18, :587:30, :596:22, :674:8, :689:25, :692:21, :701:{45,57}, :702:23, :703:18, :737:20, :745:12]
-    stage2_final <= mem_resp_valid & ~traverse & _T_176 & ~stage2 | (_GEN_8 ? _arb_io_out_bits_bits_stage2 & ~_arb_io_out_bits_bits_vstage1 : stage2_final);	// @[PTW.scala:236:19, :283:19, :284:25, :293:31, :316:48, :585:18, :587:30, :597:{22,53,56}, :689:25, :692:21, :701:{45,57}, :702:23, :706:24]
+    stage2 <= do_switch | (~mem_resp_valid | traverse | ~(_T_176 & stage2)) & (_GEN_18 ? _arb_io_out_bits_bits_stage2 : stage2);	// @[PTW.scala:236:19, :283:19, :293:31, :316:48, :583:30, :585:18, :587:30, :596:22, :674:8, :689:25, :692:21, :701:{45,57}, :702:23, :703:18, :737:20, :745:12]
+    stage2_final <= mem_resp_valid & ~traverse & _T_176 & ~stage2 | (_GEN_18 ? _arb_io_out_bits_bits_stage2 & ~_arb_io_out_bits_bits_vstage1 : stage2_final);	// @[PTW.scala:236:19, :283:19, :284:25, :293:31, :316:48, :585:18, :587:30, :597:{22,53,56}, :689:25, :692:21, :701:{45,57}, :702:23, :706:24]
     mem_resp_valid <= io_mem_resp_valid;	// @[PTW.scala:293:31]
     mem_resp_data <= io_mem_resp_bits_data;	// @[PTW.scala:294:30]
     if (_T_38 & r == 3'h0) begin	// @[PTW.scala:233:22, :365:19, :381:{65,82}, :382:18, :384:15]
-      tags_0 <= _GEN_14;	// @[PTW.scala:365:19, :384:15]
+      tags_0 <= _GEN_24;	// @[PTW.scala:365:19, :384:15]
       data_0 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
     if (_T_38 & r == 3'h1) begin	// @[PTW.scala:365:19, :381:{65,82}, :382:18, :384:15]
-      tags_1 <= _GEN_14;	// @[PTW.scala:365:19, :384:15]
+      tags_1 <= _GEN_24;	// @[PTW.scala:365:19, :384:15]
       data_1 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
     if (_T_38 & r == 3'h2) begin	// @[PTW.scala:365:19, :381:{65,82}, :382:18, :384:15]
-      tags_2 <= _GEN_14;	// @[PTW.scala:365:19, :384:15]
+      tags_2 <= _GEN_24;	// @[PTW.scala:365:19, :384:15]
       data_2 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
     if (_T_38 & r == 3'h3) begin	// @[PTW.scala:365:19, :381:{65,82}, :382:18, :384:15]
-      tags_3 <= _GEN_14;	// @[PTW.scala:365:19, :384:15]
+      tags_3 <= _GEN_24;	// @[PTW.scala:365:19, :384:15]
       data_3 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
     if (_T_38 & r == 3'h4) begin	// @[Mux.scala:47:70, PTW.scala:365:19, :381:{65,82}, :382:18, :384:15]
-      tags_4 <= _GEN_14;	// @[PTW.scala:365:19, :384:15]
+      tags_4 <= _GEN_24;	// @[PTW.scala:365:19, :384:15]
       data_4 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
     if (_T_38 & r == 3'h5) begin	// @[Mux.scala:47:70, PTW.scala:365:19, :381:{65,82}, :382:18, :384:15]
-      tags_5 <= _GEN_14;	// @[PTW.scala:365:19, :384:15]
+      tags_5 <= _GEN_24;	// @[PTW.scala:365:19, :384:15]
       data_5 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
     if (_T_38 & r == 3'h6) begin	// @[Mux.scala:47:70, PTW.scala:365:19, :381:{65,82}, :382:18, :384:15]
-      tags_6 <= _GEN_14;	// @[PTW.scala:365:19, :384:15]
+      tags_6 <= _GEN_24;	// @[PTW.scala:365:19, :384:15]
       data_6 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
     if (_T_38 & (&r)) begin	// @[PTW.scala:365:19, :381:{65,82}, :382:18, :384:15]
-      tags_7 <= _GEN_14;	// @[PTW.scala:365:19, :384:15]
+      tags_7 <= _GEN_24;	// @[PTW.scala:365:19, :384:15]
       data_7 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
     if (_T_89 & r_1 == 3'h0) begin	// @[PTW.scala:233:22, :365:19, :381:{65,82}, :382:18, :384:15]
@@ -683,11 +880,11 @@ module PTW(
       tags_1_7 <= 32'h0;	// @[PMP.scala:137:40, PTW.scala:365:19]
       data_1_7 <= _T_15[19:0];	// @[PTW.scala:307:19, :367:19, :385:15]
     end
-    l2_refill <= mem_resp_valid & ~_GEN_11 & success & _T_237 & ~r_req_need_gpa & (~r_req_vstage1 & ~r_req_stage2 | do_both_stages & aux_count == 2'h2 & aux_pte_pte_v & (mem_resp_data[1] | mem_resp_data[3] & ~(mem_resp_data[2])) & mem_resp_data[6] & mem_resp_data[2] & mem_resp_data[7] & mem_resp_data[4] & (mem_resp_data[1] | mem_resp_data[3] & ~(mem_resp_data[2])) & mem_resp_data[3]);	// @[PTW.scala:139:42, :141:{38,44}, :270:18, :278:22, :289:38, :293:31, :294:30, :305:37, :306:26, :308:36, :311:{106,114}, :370:65, :410:26, :568:{32,60}, :689:25, :692:21, :699:41, :701:57, :711:{19,61}, :712:{27,44}, :713:59, package.scala:33:86]
+    l2_refill <= mem_resp_valid & ~_GEN_21 & success & _T_237 & ~r_req_need_gpa & (~r_req_vstage1 & ~r_req_stage2 | do_both_stages & aux_count == 2'h2 & aux_pte_pte_v & (mem_resp_data[1] | mem_resp_data[3] & ~(mem_resp_data[2])) & mem_resp_data[6] & mem_resp_data[2] & mem_resp_data[7] & mem_resp_data[4] & (mem_resp_data[1] | mem_resp_data[3] & ~(mem_resp_data[2])) & mem_resp_data[3]);	// @[PTW.scala:139:42, :141:{38,44}, :270:18, :278:22, :289:38, :293:31, :294:30, :305:37, :306:26, :308:36, :311:{106,114}, :370:65, :410:26, :568:{32,60}, :689:25, :692:21, :699:41, :701:57, :711:{19,61}, :712:{27,44}, :713:59, package.scala:33:86]
   end // always @(posedge)
   `ifndef SYNTHESIS
     always @(posedge clock) begin	// @[PTW.scala:613:15]
-      if (_GEN_8 & ~reset & ~(~_arb_io_out_bits_bits_need_gpa | _arb_io_out_bits_bits_stage2)) begin	// @[PTW.scala:236:19, :587:30, :613:{15,16,47}]
+      if (_GEN_18 & ~reset & ~(~_arb_io_out_bits_bits_need_gpa | _arb_io_out_bits_bits_stage2)) begin	// @[PTW.scala:236:19, :587:30, :613:{15,16,47}]
         if (`ASSERT_VERBOSE_COND_)	// @[PTW.scala:613:15]
           $error("Assertion failed\n    at PTW.scala:613 assert(!arb.io.out.bits.bits.need_gpa || arb.io.out.bits.bits.stage2)\n");	// @[PTW.scala:613:15]
         if (`STOP_COND_)	// @[PTW.scala:613:15]
@@ -897,19 +1094,19 @@ module PTW(
     .io_chosen                  (_arb_io_chosen)
   );
   OptimizationBarrier_42 state_barrier (	// @[package.scala:259:25]
-    .io_x (io_mem_s2_nack ? 3'h1 : mem_resp_valid ? {2'h0, _GEN_11} : _GEN_9[state]),	// @[PTW.scala:233:22, :240:30, :293:31, :384:15, :389:24, :410:26, :581:31, :585:18, :587:30, :621:35, :636:18, :641:35, :648:18, :683:30, :689:25, :691:16, :692:21, :701:57, :711:19, :716:122, :732:25, :734:16]
+    .io_x (io_mem_s2_nack ? 3'h1 : mem_resp_valid ? {2'h0, _GEN_21} : _GEN_19[state]),	// @[PTW.scala:233:22, :240:30, :293:31, :384:15, :389:24, :410:26, :581:31, :585:18, :587:30, :621:35, :636:18, :641:35, :648:18, :683:30, :689:25, :691:16, :692:21, :701:57, :711:19, :716:122, :732:25, :734:16]
     .io_y (_state_barrier_io_y)
   );
   OptimizationBarrier_43 r_pte_barrier (	// @[package.scala:259:25]
     .io_x_ppn (_r_pte_T_5 ? {24'h0, (hits[0] ? data_0 : 20'h0) | (hits[1] ? data_1 : 20'h0) | (hits[2] ? data_2 : 20'h0) | (hits[3] ? data_3 : 20'h0) | (hits[4] ? data_4 : 20'h0) | (hits[5] ? data_5 : 20'h0) | (hits[6] ? data_6 : 20'h0) | (hits[7] ? data_7 : 20'h0)} : do_switch ? {r_hgatp_ppn[43:2], 2'h0} : mem_resp_valid ? (_r_pte_T_8 ? {17'h0, _GEN_0 ? _T_15 : _leaf_T_5 ? {_T_15[26:9], aux_pte_ppn[8:0]} : {_T_15[26:18], aux_pte_ppn[17:0]}} & ((&_merged_pte_superpage_mask_T) | _merged_pte_superpage_mask_T == 2'h2 ? 44'hFFFFFFFFFFF : _merged_pte_superpage_mask_T == 2'h1 ? 44'hFFFFFFFFE00 : 44'hFFFFFFC0000) : {17'h0, _T_15}) : (&state) & ~homogeneous & count != 2'h2 ? (count[0] ? {r_pte_ppn[43:9], r_req_addr[8:0]} : {r_pte_ppn[43:18], r_req_addr[17:0]}) : _arb_io_out_ready_T_2 & _arb_io_out_valid ? (_arb_io_out_bits_bits_stage2 | _arb_io_out_bits_bits_vstage1 ? 44'h0 : io_dpath_ptbr_ppn) : r_pte_ppn),	// @[Cat.scala:33:92, Decoupled.scala:51:35, Mux.scala:27:73, :29:36, PTW.scala:233:22, :236:19, :240:43, :259:18, :270:18, :275:18, :276:20, :280:20, :291:16, :293:31, :307:{13,19}, :311:21, :313:93, :355:{49,79}, :367:19, :378:43, :551:36, :583:30, :662:45, :663:{64,125}, :665:24, :672:{8,50}, :674:8, :676:{8,28,56}, :678:{8,15,43,56,65}, :680:{8,29}, :689:25, :692:21, :769:13, :778:30, package.scala:32:47, :33:{76,86}]
-    .io_x_d   (~_r_pte_T_5 & (_GEN_10 ? r_pte_d : _r_pte_T_8 ? aux_pte_d : mem_resp_data[7])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
-    .io_x_a   (~_r_pte_T_5 & (_GEN_10 ? r_pte_a : _r_pte_T_8 ? aux_pte_a : mem_resp_data[6])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
-    .io_x_g   (~_r_pte_T_5 & (_GEN_10 ? r_pte_g : _r_pte_T_8 ? aux_pte_g : mem_resp_data[5])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
-    .io_x_u   (~_r_pte_T_5 & (_GEN_10 ? r_pte_u : _r_pte_T_8 ? aux_pte_u : mem_resp_data[4])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
-    .io_x_x   (~_r_pte_T_5 & (_GEN_10 ? r_pte_x : _r_pte_T_8 ? aux_pte_x : mem_resp_data[3])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
-    .io_x_w   (~_r_pte_T_5 & (_GEN_10 ? r_pte_w : _r_pte_T_8 ? aux_pte_w : mem_resp_data[2])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
-    .io_x_r   (~_r_pte_T_5 & (_GEN_10 ? r_pte_r : _r_pte_T_8 ? aux_pte_r : mem_resp_data[1])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
-    .io_x_v   (~_r_pte_T_5 & (_GEN_10 ? r_pte_v : _r_pte_T_8 ? aux_pte_v : aux_pte_pte_v)),	// @[PTW.scala:275:18, :280:20, :306:26, :308:36, :311:{106,114}, :672:{8,50}, :674:8, :676:{28,56}]
+    .io_x_d   (~_r_pte_T_5 & (_GEN_20 ? r_pte_d : _r_pte_T_8 ? aux_pte_d : mem_resp_data[7])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
+    .io_x_a   (~_r_pte_T_5 & (_GEN_20 ? r_pte_a : _r_pte_T_8 ? aux_pte_a : mem_resp_data[6])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
+    .io_x_g   (~_r_pte_T_5 & (_GEN_20 ? r_pte_g : _r_pte_T_8 ? aux_pte_g : mem_resp_data[5])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
+    .io_x_u   (~_r_pte_T_5 & (_GEN_20 ? r_pte_u : _r_pte_T_8 ? aux_pte_u : mem_resp_data[4])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
+    .io_x_x   (~_r_pte_T_5 & (_GEN_20 ? r_pte_x : _r_pte_T_8 ? aux_pte_x : mem_resp_data[3])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
+    .io_x_w   (~_r_pte_T_5 & (_GEN_20 ? r_pte_w : _r_pte_T_8 ? aux_pte_w : mem_resp_data[2])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
+    .io_x_r   (~_r_pte_T_5 & (_GEN_20 ? r_pte_r : _r_pte_T_8 ? aux_pte_r : mem_resp_data[1])),	// @[PTW.scala:275:18, :280:20, :294:30, :305:37, :672:{8,50}, :674:8, :676:{28,56}]
+    .io_x_v   (~_r_pte_T_5 & (_GEN_20 ? r_pte_v : _r_pte_T_8 ? aux_pte_v : aux_pte_pte_v)),	// @[PTW.scala:275:18, :280:20, :306:26, :308:36, :311:{106,114}, :672:{8,50}, :674:8, :676:{28,56}]
     .io_y_ppn (_r_pte_barrier_io_y_ppn),
     .io_y_d   (_r_pte_barrier_io_y_d),
     .io_y_a   (_r_pte_barrier_io_y_a),
@@ -999,6 +1196,62 @@ module PTW(
   assign io_requestor_0_pmp_7_cfg_r = io_dpath_pmp_7_cfg_r;
   assign io_requestor_0_pmp_7_addr = io_dpath_pmp_7_addr;
   assign io_requestor_0_pmp_7_mask = io_dpath_pmp_7_mask;
+  assign io_requestor_0_pmp_8_cfg_l = io_dpath_pmp_8_cfg_l;
+  assign io_requestor_0_pmp_8_cfg_a = io_dpath_pmp_8_cfg_a;
+  assign io_requestor_0_pmp_8_cfg_x = io_dpath_pmp_8_cfg_x;
+  assign io_requestor_0_pmp_8_cfg_w = io_dpath_pmp_8_cfg_w;
+  assign io_requestor_0_pmp_8_cfg_r = io_dpath_pmp_8_cfg_r;
+  assign io_requestor_0_pmp_8_addr = io_dpath_pmp_8_addr;
+  assign io_requestor_0_pmp_8_mask = io_dpath_pmp_8_mask;
+  assign io_requestor_0_pmp_9_cfg_l = io_dpath_pmp_9_cfg_l;
+  assign io_requestor_0_pmp_9_cfg_a = io_dpath_pmp_9_cfg_a;
+  assign io_requestor_0_pmp_9_cfg_x = io_dpath_pmp_9_cfg_x;
+  assign io_requestor_0_pmp_9_cfg_w = io_dpath_pmp_9_cfg_w;
+  assign io_requestor_0_pmp_9_cfg_r = io_dpath_pmp_9_cfg_r;
+  assign io_requestor_0_pmp_9_addr = io_dpath_pmp_9_addr;
+  assign io_requestor_0_pmp_9_mask = io_dpath_pmp_9_mask;
+  assign io_requestor_0_pmp_10_cfg_l = io_dpath_pmp_10_cfg_l;
+  assign io_requestor_0_pmp_10_cfg_a = io_dpath_pmp_10_cfg_a;
+  assign io_requestor_0_pmp_10_cfg_x = io_dpath_pmp_10_cfg_x;
+  assign io_requestor_0_pmp_10_cfg_w = io_dpath_pmp_10_cfg_w;
+  assign io_requestor_0_pmp_10_cfg_r = io_dpath_pmp_10_cfg_r;
+  assign io_requestor_0_pmp_10_addr = io_dpath_pmp_10_addr;
+  assign io_requestor_0_pmp_10_mask = io_dpath_pmp_10_mask;
+  assign io_requestor_0_pmp_11_cfg_l = io_dpath_pmp_11_cfg_l;
+  assign io_requestor_0_pmp_11_cfg_a = io_dpath_pmp_11_cfg_a;
+  assign io_requestor_0_pmp_11_cfg_x = io_dpath_pmp_11_cfg_x;
+  assign io_requestor_0_pmp_11_cfg_w = io_dpath_pmp_11_cfg_w;
+  assign io_requestor_0_pmp_11_cfg_r = io_dpath_pmp_11_cfg_r;
+  assign io_requestor_0_pmp_11_addr = io_dpath_pmp_11_addr;
+  assign io_requestor_0_pmp_11_mask = io_dpath_pmp_11_mask;
+  assign io_requestor_0_pmp_12_cfg_l = io_dpath_pmp_12_cfg_l;
+  assign io_requestor_0_pmp_12_cfg_a = io_dpath_pmp_12_cfg_a;
+  assign io_requestor_0_pmp_12_cfg_x = io_dpath_pmp_12_cfg_x;
+  assign io_requestor_0_pmp_12_cfg_w = io_dpath_pmp_12_cfg_w;
+  assign io_requestor_0_pmp_12_cfg_r = io_dpath_pmp_12_cfg_r;
+  assign io_requestor_0_pmp_12_addr = io_dpath_pmp_12_addr;
+  assign io_requestor_0_pmp_12_mask = io_dpath_pmp_12_mask;
+  assign io_requestor_0_pmp_13_cfg_l = io_dpath_pmp_13_cfg_l;
+  assign io_requestor_0_pmp_13_cfg_a = io_dpath_pmp_13_cfg_a;
+  assign io_requestor_0_pmp_13_cfg_x = io_dpath_pmp_13_cfg_x;
+  assign io_requestor_0_pmp_13_cfg_w = io_dpath_pmp_13_cfg_w;
+  assign io_requestor_0_pmp_13_cfg_r = io_dpath_pmp_13_cfg_r;
+  assign io_requestor_0_pmp_13_addr = io_dpath_pmp_13_addr;
+  assign io_requestor_0_pmp_13_mask = io_dpath_pmp_13_mask;
+  assign io_requestor_0_pmp_14_cfg_l = io_dpath_pmp_14_cfg_l;
+  assign io_requestor_0_pmp_14_cfg_a = io_dpath_pmp_14_cfg_a;
+  assign io_requestor_0_pmp_14_cfg_x = io_dpath_pmp_14_cfg_x;
+  assign io_requestor_0_pmp_14_cfg_w = io_dpath_pmp_14_cfg_w;
+  assign io_requestor_0_pmp_14_cfg_r = io_dpath_pmp_14_cfg_r;
+  assign io_requestor_0_pmp_14_addr = io_dpath_pmp_14_addr;
+  assign io_requestor_0_pmp_14_mask = io_dpath_pmp_14_mask;
+  assign io_requestor_0_pmp_15_cfg_l = io_dpath_pmp_15_cfg_l;
+  assign io_requestor_0_pmp_15_cfg_a = io_dpath_pmp_15_cfg_a;
+  assign io_requestor_0_pmp_15_cfg_x = io_dpath_pmp_15_cfg_x;
+  assign io_requestor_0_pmp_15_cfg_w = io_dpath_pmp_15_cfg_w;
+  assign io_requestor_0_pmp_15_cfg_r = io_dpath_pmp_15_cfg_r;
+  assign io_requestor_0_pmp_15_addr = io_dpath_pmp_15_addr;
+  assign io_requestor_0_pmp_15_mask = io_dpath_pmp_15_mask;
   assign io_requestor_1_resp_valid = resp_valid_1;	// @[PTW.scala:242:27]
   assign io_requestor_1_resp_bits_ae_ptw = resp_ae_ptw;	// @[PTW.scala:260:24]
   assign io_requestor_1_resp_bits_ae_final = resp_ae_final;	// @[PTW.scala:261:26]
@@ -1077,6 +1330,62 @@ module PTW(
   assign io_requestor_1_pmp_7_cfg_r = io_dpath_pmp_7_cfg_r;
   assign io_requestor_1_pmp_7_addr = io_dpath_pmp_7_addr;
   assign io_requestor_1_pmp_7_mask = io_dpath_pmp_7_mask;
+  assign io_requestor_1_pmp_8_cfg_l = io_dpath_pmp_8_cfg_l;
+  assign io_requestor_1_pmp_8_cfg_a = io_dpath_pmp_8_cfg_a;
+  assign io_requestor_1_pmp_8_cfg_x = io_dpath_pmp_8_cfg_x;
+  assign io_requestor_1_pmp_8_cfg_w = io_dpath_pmp_8_cfg_w;
+  assign io_requestor_1_pmp_8_cfg_r = io_dpath_pmp_8_cfg_r;
+  assign io_requestor_1_pmp_8_addr = io_dpath_pmp_8_addr;
+  assign io_requestor_1_pmp_8_mask = io_dpath_pmp_8_mask;
+  assign io_requestor_1_pmp_9_cfg_l = io_dpath_pmp_9_cfg_l;
+  assign io_requestor_1_pmp_9_cfg_a = io_dpath_pmp_9_cfg_a;
+  assign io_requestor_1_pmp_9_cfg_x = io_dpath_pmp_9_cfg_x;
+  assign io_requestor_1_pmp_9_cfg_w = io_dpath_pmp_9_cfg_w;
+  assign io_requestor_1_pmp_9_cfg_r = io_dpath_pmp_9_cfg_r;
+  assign io_requestor_1_pmp_9_addr = io_dpath_pmp_9_addr;
+  assign io_requestor_1_pmp_9_mask = io_dpath_pmp_9_mask;
+  assign io_requestor_1_pmp_10_cfg_l = io_dpath_pmp_10_cfg_l;
+  assign io_requestor_1_pmp_10_cfg_a = io_dpath_pmp_10_cfg_a;
+  assign io_requestor_1_pmp_10_cfg_x = io_dpath_pmp_10_cfg_x;
+  assign io_requestor_1_pmp_10_cfg_w = io_dpath_pmp_10_cfg_w;
+  assign io_requestor_1_pmp_10_cfg_r = io_dpath_pmp_10_cfg_r;
+  assign io_requestor_1_pmp_10_addr = io_dpath_pmp_10_addr;
+  assign io_requestor_1_pmp_10_mask = io_dpath_pmp_10_mask;
+  assign io_requestor_1_pmp_11_cfg_l = io_dpath_pmp_11_cfg_l;
+  assign io_requestor_1_pmp_11_cfg_a = io_dpath_pmp_11_cfg_a;
+  assign io_requestor_1_pmp_11_cfg_x = io_dpath_pmp_11_cfg_x;
+  assign io_requestor_1_pmp_11_cfg_w = io_dpath_pmp_11_cfg_w;
+  assign io_requestor_1_pmp_11_cfg_r = io_dpath_pmp_11_cfg_r;
+  assign io_requestor_1_pmp_11_addr = io_dpath_pmp_11_addr;
+  assign io_requestor_1_pmp_11_mask = io_dpath_pmp_11_mask;
+  assign io_requestor_1_pmp_12_cfg_l = io_dpath_pmp_12_cfg_l;
+  assign io_requestor_1_pmp_12_cfg_a = io_dpath_pmp_12_cfg_a;
+  assign io_requestor_1_pmp_12_cfg_x = io_dpath_pmp_12_cfg_x;
+  assign io_requestor_1_pmp_12_cfg_w = io_dpath_pmp_12_cfg_w;
+  assign io_requestor_1_pmp_12_cfg_r = io_dpath_pmp_12_cfg_r;
+  assign io_requestor_1_pmp_12_addr = io_dpath_pmp_12_addr;
+  assign io_requestor_1_pmp_12_mask = io_dpath_pmp_12_mask;
+  assign io_requestor_1_pmp_13_cfg_l = io_dpath_pmp_13_cfg_l;
+  assign io_requestor_1_pmp_13_cfg_a = io_dpath_pmp_13_cfg_a;
+  assign io_requestor_1_pmp_13_cfg_x = io_dpath_pmp_13_cfg_x;
+  assign io_requestor_1_pmp_13_cfg_w = io_dpath_pmp_13_cfg_w;
+  assign io_requestor_1_pmp_13_cfg_r = io_dpath_pmp_13_cfg_r;
+  assign io_requestor_1_pmp_13_addr = io_dpath_pmp_13_addr;
+  assign io_requestor_1_pmp_13_mask = io_dpath_pmp_13_mask;
+  assign io_requestor_1_pmp_14_cfg_l = io_dpath_pmp_14_cfg_l;
+  assign io_requestor_1_pmp_14_cfg_a = io_dpath_pmp_14_cfg_a;
+  assign io_requestor_1_pmp_14_cfg_x = io_dpath_pmp_14_cfg_x;
+  assign io_requestor_1_pmp_14_cfg_w = io_dpath_pmp_14_cfg_w;
+  assign io_requestor_1_pmp_14_cfg_r = io_dpath_pmp_14_cfg_r;
+  assign io_requestor_1_pmp_14_addr = io_dpath_pmp_14_addr;
+  assign io_requestor_1_pmp_14_mask = io_dpath_pmp_14_mask;
+  assign io_requestor_1_pmp_15_cfg_l = io_dpath_pmp_15_cfg_l;
+  assign io_requestor_1_pmp_15_cfg_a = io_dpath_pmp_15_cfg_a;
+  assign io_requestor_1_pmp_15_cfg_x = io_dpath_pmp_15_cfg_x;
+  assign io_requestor_1_pmp_15_cfg_w = io_dpath_pmp_15_cfg_w;
+  assign io_requestor_1_pmp_15_cfg_r = io_dpath_pmp_15_cfg_r;
+  assign io_requestor_1_pmp_15_addr = io_dpath_pmp_15_addr;
+  assign io_requestor_1_pmp_15_mask = io_dpath_pmp_15_mask;
   assign io_requestor_1_customCSRs_csrs_0_value = io_dpath_customCSRs_csrs_0_value;
   assign io_mem_req_valid = _T_160 | state == 3'h3;	// @[PTW.scala:233:22, :384:15, :389:24, :525:{39,48}]
   assign io_mem_req_bits_addr = {8'h0, r_pte_ppn[19:0], pte_addr_vpn_idx, 3'h0};	// @[PTW.scala:233:22, :275:18, :329:23, :530:24, package.scala:33:76]

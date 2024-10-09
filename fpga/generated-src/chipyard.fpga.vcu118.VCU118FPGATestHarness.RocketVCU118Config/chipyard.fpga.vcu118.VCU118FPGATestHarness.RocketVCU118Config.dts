@@ -35,7 +35,7 @@
 			reg = <0x0>;
 			riscv,isa = "rv64imafdcvzicsr_zifencei_zihpm_xrocket";
 			riscv,pmpgranularity = <4>;
-			riscv,pmpregions = <8>;
+			riscv,pmpregions = <16>;
 			status = "okay";
 			timebase-frequency = <1000000>;
 			tlb-split;

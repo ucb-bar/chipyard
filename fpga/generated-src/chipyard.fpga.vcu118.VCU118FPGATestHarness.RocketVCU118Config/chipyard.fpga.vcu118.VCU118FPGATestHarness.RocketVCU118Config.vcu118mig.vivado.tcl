@@ -30,23 +30,23 @@
       CONFIG.C0.DDR4_AxiSelection                 {true} \
       CONFIG.C0.DDR4_BurstLength                  {8} \
       CONFIG.C0.DDR4_BurstType                    {Sequential} \
-      CONFIG.C0.DDR4_CLKFBOUT_MULT                {8} \
-      CONFIG.C0.DDR4_CLKOUT0_DIVIDE               {5} \
+      CONFIG.C0.DDR4_CLKFBOUT_MULT                {15} \
+      CONFIG.C0.DDR4_CLKOUT0_DIVIDE               {6} \
       CONFIG.C0.DDR4_Capacity                     {512} \
       CONFIG.C0.DDR4_CasLatency                   {11} \
-      CONFIG.C0.DDR4_CasWriteLatency              {9} \
+      CONFIG.C0.DDR4_CasWriteLatency              {11} \
       CONFIG.C0.DDR4_ChipSelect                   {true} \
       CONFIG.C0.DDR4_Clamshell                    {false} \
       CONFIG.C0.DDR4_CustomParts                  {no_file_loaded} \
-      CONFIG.C0.DDR4_DIVCLK_DIVIDE                {2} \
+      CONFIG.C0.DDR4_DIVCLK_DIVIDE                {1} \
       CONFIG.C0.DDR4_DataMask                     {DM_NO_DBI} \
       CONFIG.C0.DDR4_DataWidth                    {64} \
       CONFIG.C0.DDR4_Ecc                          {false} \
       CONFIG.C0.DDR4_MCS_ECC                      {false} \
       CONFIG.C0.DDR4_Mem_Add_Map                  {ROW_COLUMN_BANK} \
       CONFIG.C0.DDR4_MemoryName                   {MainMemory} \
-      CONFIG.C0.DDR4_MemoryPart                   {MT40A1G16WBU-083E} \
-      CONFIG.C0.DDR4_MemoryType                   {Components} \
+      CONFIG.C0.DDR4_MemoryPart                   {MTA8ATF1G64HZ-2G3} \
+      CONFIG.C0.DDR4_MemoryType                   {SODIMMs} \
       CONFIG.C0.DDR4_MemoryVoltage                {1.2V} \
       CONFIG.C0.DDR4_OnDieTermination             {RZQ/6} \
       CONFIG.C0.DDR4_Ordering                     {Normal} \
