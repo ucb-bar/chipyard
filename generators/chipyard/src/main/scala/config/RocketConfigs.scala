@@ -7,6 +7,11 @@ import freechips.rocketchip.subsystem.{InCluster}
 // --------------
 // Rocket Configs
 // --------------
+class SingleClockRocketConfig extends Config(
+  new chipyard.harness.WithSyncResetFromHarness ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(500) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)
 
 class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core

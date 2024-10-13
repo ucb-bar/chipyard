@@ -107,6 +107,7 @@ trait HasHarnessInstantiators {
     println(s"Harness binder clock is $harnessBinderClockFreq")
     harnessBinderClock := harnessBinderClk
     harnessBinderReset := ResetCatchAndSync(harnessBinderClk, referenceReset.asBool)
+// harnessBinderReset := referenceReset.asBool
 
     harnessClockInstantiator.instantiateHarnessClocks(referenceClock, referenceClockFreqMHz)
 

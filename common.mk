@@ -172,7 +172,7 @@ SFC_MFC_TARGETS = \
 	$(GEN_COLLATERAL_DIR) \
 	$(FIRTOOL_LOG_FILE)
 
-MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
+MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=none
 
 # DOC include start: FirrtlCompiler
 $(MFC_LOWERING_OPTIONS):
@@ -192,6 +192,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 		--warn-on-unprocessed-annotations \
 		--disable-annotation-classless \
 		--disable-annotation-unknown \
+		--disable-all-randomization \
 		--mlir-timing \
 		--lowering-options=$(shell cat $(MFC_LOWERING_OPTIONS)) \
 		--repl-seq-mem \

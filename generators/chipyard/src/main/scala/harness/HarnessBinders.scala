@@ -326,3 +326,8 @@ class WithResetFromHarness extends HarnessBinder({
   }
 })
 
+class WithSyncResetFromHarness extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: ResetPort, chipId: Int) => {
+    port.io := ResetCatchAndSync(th.referenceClock, th.referenceReset.asBool)
+  }
+})

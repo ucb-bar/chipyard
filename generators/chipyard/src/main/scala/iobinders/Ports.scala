@@ -97,7 +97,7 @@ case class ClockPort       (val getIO: () => Clock, val freqMHz: Double)
 case class ClockTapPort    (val getIO: () => Clock)
     extends Port[Clock]
 
-case class ResetPort       (val getIO: () => AsyncReset)
+case class ResetPort       (val getIO: () => Reset)
     extends Port[Reset]
 
 case class DebugResetPort  (val getIO: () => Reset)

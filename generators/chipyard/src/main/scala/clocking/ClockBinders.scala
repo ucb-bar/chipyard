@@ -8,6 +8,7 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
 import chipyard.iocell._
+import freechips.rocketchip.util.ResetCatchAndSync
 
 // This uses the FakePLL, which uses a ClockAtFreq Verilog blackbox to generate
 // the requested clocks. This also adds TileLink ClockDivider and ClockSelector
@@ -84,7 +85,7 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
     system.chiptopClockGroupsNode := clockGroupAggNode := clockGroupsSourceNode
 
     InModuleBody {
-      val reset_io = IO(Input(AsyncReset()))
+      val reset_io = IO(Input(Reset()))
       require(clockGroupAggNode.out.size == 1)
       val (bundle, edge) = clockGroupAggNode.out(0)
 
@@ -94,7 +95,7 @@ class WithPassthroughClockGenerator extends OverrideLazyIOBinder({
         val freq = m.take.get.freqMHz
         val clock_io = IO(Input(Clock())).suggestName(s"clock_${m.name.get}")
         b.clock := clock_io
-        b.reset := reset_io
+        b.reset := ResetCatchAndSync(clock_io, reset_io.asBool)
         ClockPort(() => clock_io, freq)
       }.toSeq
       ((clock_ios :+ ResetPort(() => reset_io)), Nil)
