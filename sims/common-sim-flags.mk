@@ -35,7 +35,8 @@ SIM_PREPROC_DEFINES = \
 	+define+PRINTF_COND=$(TB).printf_cond \
 	+define+STOP_COND=!$(TB).reset \
 	+define+MODEL=$(MODEL) \
-	+define+RANDOMIZE_MEM_INIT \
-	+define+RANDOMIZE_REG_INIT \
-	+define+RANDOMIZE_GARBAGE_ASSIGN \
-	+define+RANDOMIZE_INVALID_ASSIGN
+	+define+RANDOM=0
+# +define+RANDOMIZE_MEM_INIT \
+# +define+RANDOMIZE_REG_INIT \
+# +define+RANDOMIZE_GARBAGE_ASSIGN \
+# +define+RANDOMIZE_INVALID_ASSIGN
