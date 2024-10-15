@@ -48,6 +48,7 @@ class TutorialGemminiReRoCCConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new chipyard.config.AbstractConfig)
 
 class MempressRocketConfig extends Config(
