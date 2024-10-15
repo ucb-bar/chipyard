@@ -154,3 +154,6 @@
 [submodule "generators/vexiiriscv"]
 	path = generators/vexiiriscv
 	url = https://github.com/ucb-bar/vexiiriscv-tile.git
+[submodule "generators/aurora"]
+	path = generators/aurora
+	url = git@github.com:ucb-bar/AuRORA.git
