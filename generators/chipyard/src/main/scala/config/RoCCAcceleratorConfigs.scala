@@ -32,6 +32,24 @@ class LeanGemminiPrintfRocketConfig extends Config(
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
+// for micro tutorial
+class TutorialGemminiRocketConfig extends Config(
+  new gemmini.TutorialGemminiConfig ++                                 
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.config.AbstractConfig)
+
+// ReRoCC Integration
+class TutorialGemminiReRoCCConfig extends Config(
+  new rerocc.WithReRoCC ++
+  new gemmini.TutorialGemminiConfig ++                              // rerocc tile1 is gemmini
+  new gemmini.TutorialGemminiConfig ++                              // rerocc tile0 is gemmini                               
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.config.AbstractConfig)
+
 class MempressRocketConfig extends Config(
   new mempress.WithMemPress ++                                    // use Mempress (memory traffic generation) accelerator
   new chipyard.config.WithExtMemIdBits(7) ++                      // use 7 bits for tl like request id
