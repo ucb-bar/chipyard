@@ -6,7 +6,7 @@ import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.resources.BigIntHexContext
 import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.Config
-import radiance.subsystem.RadianceGemminiDataType
+import radiance.subsystem.{CoreSerialized, RadianceGemminiDataType}
 
 class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt = 0x10100) extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x))
@@ -25,9 +25,10 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 // aliases for virgo
 class VirgoConfig extends RadianceClusterConfig
 class VirgoFP16Config extends RadianceFP16ClusterConfig
-class Virgo4CFP16Config extends Radiance4CFP16ClusterConfig
+class VirgoHopperConfig extends Radiance4CFP16ClusterConfig
 class VirgoSynConfig extends RadianceClusterSynConfig
 class VirgoFP16SynConfig extends RadianceFP16ClusterSynConfig
+class VirgoHopperSynConfig extends Radiance4CFP16ClusterSynConfig
 
 class RadianceBaseConfig extends Config(
   // NOTE: when changing these, remember to change NUM_CORES/THREADS/WARPS in
@@ -54,8 +55,8 @@ class RadianceFP16ClusterConfig extends Config(
 
 class Radiance4CFP16ClusterConfig extends Config(
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 64, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
-  new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), useVxCache = false) ++
-  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 8) ++
+  new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), tensorCoreFP16 = true, useVxCache = false) ++
+  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 16, serializeUnaligned = CoreSerialized) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
   new radiance.subsystem.WithRadianceCluster(0) ++
@@ -111,6 +112,10 @@ class RadianceClusterSynConfig extends Config(
 class RadianceFP16ClusterSynConfig extends Config(
   new radiance.subsystem.WithRadianceSimParams(false) ++
   new RadianceFP16ClusterConfig)
+
+class Radiance4CFP16ClusterSynConfig extends Config(
+  new radiance.subsystem.WithRadianceSimParams(false) ++
+    new Radiance4CFP16ClusterConfig)
 
 class RadianceBigLittleClusterSynConfig extends Config(
   new radiance.subsystem.WithRadianceSimParams(false) ++
