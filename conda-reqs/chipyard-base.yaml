@@ -27,6 +27,7 @@ dependencies:
     - pip
     - make
     - git
+    - ninja # needed in case we need to built circt from scratch
 
     - sbt
     - openjdk=20

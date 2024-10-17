@@ -13,7 +13,7 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: 78cf9419f485d1cefbd31d40282cb5dd00a460f786b7b9fbeaca6114bcee5928
+    linux-64: 0bc3aade36386bbd396c7dba9bd29ac6b7b354b835077bbb559f8f23a3582cd3
   channels:
   - url: ucb-bar
     used_env_vars: []
@@ -431,7 +431,7 @@ package:
   category: main
   optional: false
 - name: awscli
-  version: 2.18.7
+  version: 2.18.8
   manager: conda
   platform: linux-64
   dependencies:
@@ -448,10 +448,10 @@ package:
     ruamel.yaml: '>=0.15.0,<=0.17.21'
     ruamel.yaml.clib: '>=0.2.0,<=0.2.8'
     urllib3: '>=1.25.4,<1.27'
-  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-2.18.7-py310hff52083_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-2.18.8-py310hff52083_0.conda
   hash:
-    md5: ee9df3e3a9926c8e9775d3514379890f
-    sha256: dadafcfbd5a48aa8d09db95de4aff58e29b139eda4572a4d11f1c0312191fb33
+    md5: 1dace4cacdfef85924ed4567effdec71
+    sha256: 44652bd68d47755a1f9ca74130a189a624a4c61d55caa0cba79657fb99b8b887
   category: main
   optional: false
 - name: awscrt
@@ -680,18 +680,18 @@ package:
   category: main
   optional: false
 - name: botocore
-  version: 1.35.41
+  version: 1.35.42
   manager: conda
   platform: linux-64
   dependencies:
     jmespath: '>=0.7.1,<2.0.0'
-    python: '>=3.8'
+    python: '>=3.10'
     python-dateutil: '>=2.1,<3.0.0'
-    urllib3: '>=1.25.4,<1.27'
-  url: https://conda.anaconda.org/conda-forge/noarch/botocore-1.35.41-pyge38_1234567_0.conda
+    urllib3: '>=1.25.4,!=2.2.0,<3'
+  url: https://conda.anaconda.org/conda-forge/noarch/botocore-1.35.42-pyge310_1234567_0.conda
   hash:
-    md5: 52d72cf55f1af248bd66ffee0c44dd2b
-    sha256: dd5fbe6e904184bb99838e8ed4033d5416b17dcf4f6628b23a6a7918e951885a
+    md5: 25d6354a48d3851574d2103e5878837a
+    sha256: dd511e481e068c0bf70ef732f35a42dc33b222cab8c56f04ab6fcd4987d70cad
   category: main
   optional: false
 - name: botocore-stubs
@@ -3738,6 +3738,19 @@ package:
   hash:
     md5: 4994669899eb2e84ab855edcb71efc58
     sha256: f753c9a2be8ad02077f027f4e03d9531b305c5297d3708c410cf95b99195b335
+  category: main
+  optional: false
+- name: ninja
+  version: 1.12.1
+  manager: conda
+  platform: linux-64
+  dependencies:
+    libgcc-ng: '>=12'
+    libstdcxx-ng: '>=12'
+  url: https://conda.anaconda.org/conda-forge/linux-64/ninja-1.12.1-h297d8ca_0.conda
+  hash:
+    md5: 3aa1c7e292afeff25a0091ddd7c69b72
+    sha256: 40f7b76b07067935f8a5886aab0164067b7aa71eb5ad20b7278618c0c2c98e06
   category: main
   optional: false
 - name: numpy
