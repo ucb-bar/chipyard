@@ -13,7 +13,7 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: 507a84a03de88e6484cf38a1b8619f757a8eb3060451473eba76d0cf01892982
+    linux-64: 4ee21c3ad37cf09c1ca28d0d67ffcfed91dff83989be48cfa6118ddc3b69ec4a
   channels:
   - url: ucb-bar
     used_env_vars: []
@@ -1649,6 +1649,19 @@ package:
   hash:
     md5: 70caf8bb6cf39a0b6b7efc885f51c0fe
     sha256: 6a1d5d8634c1a07913f1c525db6455918cbc589d745fac46d9d6e30340c8731a
+  category: main
+  optional: false
+- name: ninja
+  version: 1.12.1
+  manager: conda
+  platform: linux-64
+  dependencies:
+    libgcc-ng: '>=12'
+    libstdcxx-ng: '>=12'
+  url: https://conda.anaconda.org/conda-forge/linux-64/ninja-1.12.1-h297d8ca_0.conda
+  hash:
+    md5: 3aa1c7e292afeff25a0091ddd7c69b72
+    sha256: 40f7b76b07067935f8a5886aab0164067b7aa71eb5ad20b7278618c0c2c98e06
   category: main
   optional: false
 - name: oniguruma
