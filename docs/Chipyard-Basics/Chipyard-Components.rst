@@ -20,6 +20,10 @@ Processor Cores
   An out-of-order RISC-V core.
   See :ref:`Generators/BOOM:Berkeley Out-of-Order Machine (BOOM)` for more information.
 
+**Shuttle Core**
+  A superscalar in-order RISC-V core.
+  See :ref:`Generators/Shuttle:Shuttle RISC-V Core` for more information
+
 **CVA6 Core**
   An in-order RISC-V core written in System Verilog. Previously called Ariane.
   See :ref:`Generators/CVA6:CVA6 Core` for more information.
@@ -27,6 +31,11 @@ Processor Cores
 **Ibex Core**
   An in-order 32 bit RISC-V core written in System Verilog.
   See :ref:`Generators/Ibex:Ibex Core` for more information.
+
+**VexiiRiscv Core**
+  A dual-issue in-order 64 bit RISC-V core implemented in SpinalHDL
+  See :ref:`Generators/VexiiRiscv:VexiiRiscv Core` for more information.
+
 
 Accelerators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

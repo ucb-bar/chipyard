@@ -160,6 +160,10 @@ case $1 in
         # Ibex cannot run the riscv-tests binaries for some reason
         # run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv32ui-p-simple
         ;;
+    chipyard-vexiiriscv)
+        run_asm LOADMEM=1
+        run_bmark LOADMEM=1
+        ;;
     chipyard-sodor)
         run_asm
         ;;

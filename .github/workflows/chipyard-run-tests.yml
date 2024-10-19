@@ -558,6 +558,29 @@ jobs:
           group-key: "group-cores"
           project-key: "chipyard-ibex"
 
+  chipyard-vexiiriscv-run-tests:
+    name: chipyard-vexiiriscv-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: as4
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-vexiiriscv"
+
   chipyard-sodor-run-tests:
     name: chipyard-sodor-run-tests
     needs: prepare-chipyard-cores
@@ -1188,6 +1211,7 @@ jobs:
             chipyard-shuttle-run-tests,
             chipyard-cva6-run-tests,
             chipyard-ibex-run-tests,
+            chipyard-vexiiriscv-run-tests,
             chipyard-sodor-run-tests,
             chipyard-dmiboomv3-run-tests,
             chipyard-dmiboomv4-run-tests,

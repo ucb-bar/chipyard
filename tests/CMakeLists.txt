@@ -4,7 +4,7 @@
 # usage: 
 #   Edit "VARIABLES"-section to suit project requirements.
 #   Build instructions:
-#     cmake . -S ./ -B ./build/ -D CMAKE_BUILD_TYPE=Debug
+#     cmake -S ./ -B ./build/ -D CMAKE_BUILD_TYPE=Debug
 #     cmake --build ./build/ --target all
 #   Cleaning:
 #     cmake --build ./build/ --target clean
@@ -87,6 +87,44 @@ add_executable(gcd gcd.c)
 add_executable(hello hello.c)
 add_executable(mt-hello mt-hello.c)
 add_executable(symmetric symmetric.c)
+
+#################################
+# Disassembly
+#################################
+
+# Add a target to generate all disassemblies
+add_custom_target(dump ALL)
+
+# Function to add disassembly target for an executable
+function(add_dump_target target_name)
+    add_custom_target(${target_name}-dump
+        BYPRODUCTS ${CMAKE_SOURCE_DIR}/${target_name}.dump
+        COMMAND ${CMAKE_OBJDUMP} -D $<TARGET_FILE:${target_name}> > ${CMAKE_SOURCE_DIR}/${target_name}.dump
+        DEPENDS ${target_name}
+        COMMENT "Generating disassembly for ${target_name}"
+    )
+    add_dependencies(${target_name}-dump ${target_name})
+    add_dependencies(dump ${target_name}-dump)
+endfunction()
+
+add_dump_target(pwm)
+add_dump_target(blkdev)
+add_dump_target(accum)
+add_dump_target(charcount)
+add_dump_target(cpp-hello)
+add_dump_target(nic-loopback)
+add_dump_target(big-blkdev)
+add_dump_target(pingd)
+add_dump_target(streaming-passthrough)
+add_dump_target(streaming-fir)
+add_dump_target(nvdla)
+add_dump_target(spiflashread)
+add_dump_target(spiflashwrite)
+add_dump_target(fft)
+add_dump_target(gcd)
+add_dump_target(hello)
+add_dump_target(mt-hello)
+add_dump_target(symmetric)
 
 
 # Add custom command to generate spiflash.img from spiflash.py
