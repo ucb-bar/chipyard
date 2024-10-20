@@ -34,7 +34,7 @@ class LeanGemminiPrintfRocketConfig extends Config(
 
 // for micro tutorial
 class TutorialGemminiRocketConfig extends Config(
-  new gemmini.TutorialGemminiConfig ++                                 
+  new gemmini.LeanGemminiConfig ++                                 
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
@@ -43,9 +43,11 @@ class TutorialGemminiRocketConfig extends Config(
 // ReRoCC Integration
 class TutorialGemminiReRoCCConfig extends Config(
   new rerocc.WithReRoCC ++
-  new gemmini.TutorialGemminiConfig ++                              // rerocc tile1 is gemmini
-  new gemmini.TutorialGemminiConfig ++                              // rerocc tile0 is gemmini                               
-  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new gemmini.LeanGemminiConfig ++                              // rerocc tile3 is gemmini
+  new gemmini.LeanGemminiConfig ++                              // rerocc tile2 is gemmini
+  new gemmini.LeanGemminiConfig ++                              // rerocc tile1 is gemmini
+  new gemmini.LeanGemminiConfig ++                              // rerocc tile0 is gemmini                               
+  new freechips.rocketchip.rocket.WithNHugeCores(2) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
