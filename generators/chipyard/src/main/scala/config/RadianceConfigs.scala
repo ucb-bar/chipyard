@@ -6,7 +6,7 @@ import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.resources.BigIntHexContext
 import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.Config
-import radiance.subsystem.{CoreSerialized, RadianceGemminiDataType}
+import radiance.subsystem.RadianceGemminiDataType
 
 class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt = 0x10100) extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x))
@@ -56,7 +56,9 @@ class RadianceFP16ClusterConfig extends Config(
 class Radiance4CFP16ClusterConfig extends Config(
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 64, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
   new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), tensorCoreFP16 = true, useVxCache = false) ++
-  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 16, serializeUnaligned = CoreSerialized) ++
+  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 16,
+                                               memType = radiance.subsystem.TwoReadOneWrite,
+                                               serializeUnaligned = radiance.subsystem.CoreSerialized) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
   new radiance.subsystem.WithRadianceCluster(0) ++
