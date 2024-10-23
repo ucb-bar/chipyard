@@ -73,23 +73,23 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
         }
 
         // SOOHYUK: Debug: Print program header information
-        std::cout << "\nProcessing Segment " << i << ":" << std::endl;
-        std::cout << "  Type: " << phdr.p_type << std::endl;
-        std::cout << "  Offset: 0x" << std::hex << phdr.p_offset << std::dec << std::endl;
-        std::cout << "  Virtual Address: 0x" << std::hex << phdr.p_vaddr << std::dec << std::endl;
-        std::cout << "  Physical Address: 0x" << std::hex << phdr.p_paddr << std::dec << std::endl;
-        std::cout << "  File Size: " << phdr.p_filesz << " bytes" << std::endl;
-        std::cout << "  Memory Size: " << phdr.p_memsz << " bytes" << std::endl;
-        std::cout << "  Flags: " << phdr.p_flags << std::endl;
+        // std::cout << "\nProcessing Segment " << i << ":" << std::endl;
+        // std::cout << "  Type: " << phdr.p_type << std::endl;
+        // std::cout << "  Offset: 0x" << std::hex << phdr.p_offset << std::dec << std::endl;
+        // std::cout << "  Virtual Address: 0x" << std::hex << phdr.p_vaddr << std::dec << std::endl;
+        // std::cout << "  Physical Address: 0x" << std::hex << phdr.p_paddr << std::dec << std::endl;
+        // std::cout << "  File Size: " << phdr.p_filesz << " bytes" << std::endl;
+        // std::cout << "  Memory Size: " << phdr.p_memsz << " bytes" << std::endl;
+        // std::cout << "  Flags: " << phdr.p_flags << std::endl;
 
         if (phdr.p_type != PT_LOAD) {
-            std::cout << "  Skipping non-loadable segment." << std::endl;
+            // std::cout << "  Skipping non-loadable segment." << std::endl;
             continue;
         }
 
         // SOOHYUK: Debug: Print virtual address and size (to accomodate memory concatenations)
-        std::cout << "  Segment Virtual Address: 0x" << std::hex << phdr.p_vaddr << std::dec << std::endl;
-        std::cout << "  Segment Size (filesz): " << phdr.p_filesz << " bytes" << std::endl;
+        // std::cout << "  Segment Virtual Address: 0x" << std::hex << phdr.p_vaddr << std::dec << std::endl;
+        // std::cout << "  Segment Size (filesz): " << phdr.p_filesz << " bytes" << std::endl;
 
         // Seek to the segment's file offset
         if (lseek(fd_in, phdr.p_offset, SEEK_SET) < 0) {
@@ -126,11 +126,11 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
             Elf64_Addr absolute_start_addr = phdr.p_vaddr + chunk_offset;
 
             // Debug: Print chunk information
-            std::cout << "  Chunk " << chunk_idx << ": "
-                      << "Offset " << std::hex << chunk_offset
-                      << ", Size " << std::dec << actual_chunk_size
-                      << ", Absolute Start Address: 0x" << std::hex << absolute_start_addr
-                      << ", All Zero: " << (all_zero ? "Yes" : "No") << std::dec << std::endl;
+            // std::cout << "  Chunk " << chunk_idx << ": "
+            //           << "Offset " << std::hex << chunk_offset
+            //           << ", Size " << std::dec << actual_chunk_size
+            //           << ", Absolute Start Address: 0x" << std::hex << absolute_start_addr
+            //           << ", All Zero: " << (all_zero ? "Yes" : "No") << std::dec << std::endl;
 
             if (!all_zero) {
                 // Record the useful memory region
@@ -165,7 +165,8 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
 
     ofs.close();
 
-    std::cout << "\nScan complete. Useful memory regions written to: " << output_file << std::endl;
+    std::cout << "\nELF file scan complete." << std::endl;
+    // std::cout << "\nScan complete. Useful memory regions written to: " << output_file << std::endl;
     return 0;
 }
 
