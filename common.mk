@@ -282,9 +282,6 @@ ifeq (,$(BINARIES))
 	$(error BINARIES variable is not set. Set it to the list of simulation binaries to run)
 endif
 
-# check-binary-exists:
-# 	if [ "$(BINARY)" != "none" ] && [ ! -f "$(BINARY)" ]; then printf "\n\nBinary $(BINARY) not found\n\n"; exit 1; fi
-
 %.check-exists:
 	if [ "$*" != "none" ] && [ ! -f "$*" ]; then printf "\n\nBinary $* not found\n\n"; exit 1; fi
 
