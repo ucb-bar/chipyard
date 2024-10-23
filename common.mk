@@ -282,6 +282,9 @@ ifeq (,$(BINARIES))
 	$(error BINARIES variable is not set. Set it to the list of simulation binaries to run)
 endif
 
+# check-binary-exists:
+# 	if [ "$(BINARY)" != "none" ] && [ ! -f "$(BINARY)" ]; then printf "\n\nBinary $(BINARY) not found\n\n"; exit 1; fi
+
 %.check-exists:
 	if [ "$*" != "none" ] && [ ! -f "$*" ]; then printf "\n\nBinary $* not found\n\n"; exit 1; fi
 
@@ -317,13 +320,13 @@ get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_l
 run-binary: check-binary $(BINARY_PLUS_ARGS).run
 run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
 
-%.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
+%.run: $(BINARY).check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
 		$(PERMISSIVE_ON) \
 		$(call get_common_sim_flags,$*) \
 		$(VERBOSE_FLAGS) \
 		$(PERMISSIVE_OFF) \
-		$* \
+		$(BINARY) \
 		$(BINARY_ARGS) \
 		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
@@ -331,12 +334,12 @@ run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
 run-binary-fast: check-binary $(BINARY_PLUS_ARGS).run.fast
 run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
 
-%.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
+%.run.fast: $(BINARY).check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
 		$(PERMISSIVE_ON) \
 		$(call get_common_sim_flags,$*) \
 		$(PERMISSIVE_OFF) \
-		$* \
+		$(BINARY) \
 		$(BINARY_ARGS) \
 		</dev/null | tee $(call get_sim_out_name,$*).log)
 
@@ -344,9 +347,9 @@ run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
 run-binary-debug: check-binary $(BINARY_PLUS_ARGS).run.debug
 run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
 
-%.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
+%.run.debug: $(BINARY).check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
 ifeq (1,$(DUMP_BINARY))
-	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
+	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $(BINARY) > $(call get_sim_out_name,$*).dump ; fi
 endif
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
 		$(PERMISSIVE_ON) \
@@ -354,7 +357,7 @@ endif
 		$(VERBOSE_FLAGS) \
 		$(call get_waveform_flag,$(call get_sim_out_name,$*)) \
 		$(PERMISSIVE_OFF) \
-		$* \
+		$(BINARY) \
 		$(BINARY_ARGS) \
 		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
