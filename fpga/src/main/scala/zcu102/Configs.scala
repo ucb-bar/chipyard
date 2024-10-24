@@ -67,7 +67,7 @@ class WithZCU102Tweaks extends Config(
 class RocketZCU102Config extends Config(
   new WithFPGAFrequency(25) ++
   new WithZCU102Tweaks ++
-  new chipyard.DualRocketConfig)
+  new chipyard.RocketConfig)
 // DOC include end: AbstractZCU102 and Rocket
 
 class BoomZCU102Config extends Config(
