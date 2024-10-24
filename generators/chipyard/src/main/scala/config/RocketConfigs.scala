@@ -13,6 +13,7 @@ class RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class DualRocketConfig extends Config(
+  new freechips.rocketchip.system.HypervisorConfig ++
   new freechips.rocketchip.rocket.WithNHugeCores(2) ++
   new chipyard.config.AbstractConfig)
 
