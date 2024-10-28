@@ -46,7 +46,7 @@ class RadianceBaseConfig extends Config(
 
 class RadianceFP16ClusterConfig extends Config(
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 64, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
-  new radiance.subsystem.WithRadianceCores(8, location = InCluster(0), tensorCoreFP16 = true, useVxCache = false) ++
+  new radiance.subsystem.WithRadianceCores(8, location = InCluster(0), tensorCoreFP16 = true, tensorCoreDecoupled = false, useVxCache = false) ++
   new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 16) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8)++
@@ -66,7 +66,7 @@ class RadianceClusterConfig extends Config(
   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
   // new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
-  new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), tensorCoreFP16 = false, useVxCache = false) ++
+  new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), tensorCoreFP16 = false, tensorCoreDecoupled = true, useVxCache = false) ++
   // new radiance.subsystem.WithRadianceFrameBuffer(x"ff018000", 16, 0x8000, x"ff011000", "fb0") ++
   new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 256 << 10/*KBytes*/, numBanks = 8, numWords = 8) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
