@@ -66,7 +66,7 @@ class Radiance4CFP16ClusterConfig extends Config(
   // new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 16,
   //                                              memType = radiance.subsystem.TwoReadOneWrite,
   //                                              serializeUnaligned = radiance.subsystem.CoreSerialized) ++
-  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 8, numWords = 8) ++
+  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 16) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8) ++
   new radiance.subsystem.WithRadianceCluster(0) ++
