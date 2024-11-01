@@ -53,8 +53,8 @@ class WithZCU102Tweaks extends Config(
   new WithDDRMem ++
   new WithJTAG ++
   // io binders
-  // new WithUARTIOPassthrough ++
-  // new WithSPIIOPassthrough ++
+  new chipyard.iobinders.WithUARTTSIPunchthrough ++
+  new chipyard.iobinders.WithSPIIOPunchthrough ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory

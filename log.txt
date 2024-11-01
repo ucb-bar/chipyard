@@ -1,0 +1,16 @@
+nohup: ignoring input
+ ========== BEGINNING STEP 8: Setting up FireMarshal ==========
+/media/jerry/SSD/workspace/chipyard/software/firemarshal /workspace/chipyard
++ git submodule update --progress --filter=tree:0 --init boards/default/linux boards/default/firmware/opensbi wlutil/busybox boards/default/distros/br/buildroot boards/firechip/drivers/iceblk-driver boards/firechip/drivers/icenet-driver
+ ========== BEGINNING STEP 9: Pre-compiling FireMarshal buildroot sources ==========
+WARNING: Submodule: /media/jerry/SSD/workspace/chipyard/software/firemarshal/boards/firechip/distros/br/buildroot has uncommited changes. Any dependent workloads will be rebuilt
+To check on progress, either call marshal with '-v' or see the live output at: 
+/media/jerry/SSD/workspace/chipyard/software/firemarshal/logs/br-base-build-2024-10-25--11-44-01-460WB4QFOQ9D809Y.log
+WARNING: Submodule: /media/jerry/SSD/workspace/chipyard/software/firemarshal/wlutil/busybox has uncommited changes. Any dependent workloads will be rebuilt
+WARNING: Submodule: /media/jerry/SSD/workspace/chipyard/software/firemarshal/boards/firechip/base-workloads/br-base/../../firmware/opensbi has uncommited changes. Any dependent workloads will be rebuilt
+WARNING: Submodule: /media/jerry/SSD/workspace/chipyard/software/firemarshal/boards/firechip/base-workloads/br-base/../../linux has uncommited changes. Any dependent workloads will be rebuilt
+.  /media/jerry/SSD/workspace/chipyard/software/firemarshal/boards/firechip/base-workloads/br-base/host-init.sh 
+.  /media/jerry/SSD/workspace/chipyard/software/firemarshal/images/firechip/br.0321/br.0321.img
+Attempting to download cached image: https://raw.githubusercontent.com/firesim/firemarshal-public-br-images/main/images/firechip/br.0321/br.0321.img.zip
+Attempting to download cached image: https://raw.githubusercontent.com/firesim/firemarshal-public-br-images/main/images/firechip/br.0321/br.0321.img.zip
+Attempting to download cached image: https://raw.githubusercontent.com/firesim/firemarshal-public-br-images/main/images/firechip/br.0321/br.0321.img.zip

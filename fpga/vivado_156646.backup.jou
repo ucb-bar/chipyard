@@ -1,0 +1,33 @@
+#-----------------------------------------------------------
+# Vivado v2022.2 (64-bit)
+# SW Build 3671981 on Fri Oct 14 04:59:54 MDT 2022
+# IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+# Start of session at: Sat Oct 26 21:47:21 2024
+# Process ID: 156646
+# Current directory: /media/parallels/SSD/workspace/chipyard/fpga
+# Command line: vivado
+# Log file: /media/parallels/SSD/workspace/chipyard/fpga/vivado.log
+# Journal file: /media/parallels/SSD/workspace/chipyard/fpga/vivado.jou
+# Running On: ubuntu-linux-22-04-02-desktop, OS: Linux, CPU Frequency: 2592.000 MHz, CPU Physical cores: 8, Host memory: 4095 MB
+#-----------------------------------------------------------
+start_gui
+open_project /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.xpr
+update_compile_order -fileset sources_1
+launch_runs impl_1 -jobs 6
+wait_on_run impl_1
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+wait_on_run impl_1
+create_bd_design "design_1"
+update_compile_order -fileset sources_1
+set_property synth_checkpoint_mode None [get_files  /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd]
+generate_target all [get_files  /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd]
+export_ip_user_files -of_objects [get_files /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd] -no_script -sync -force -quiet
+export_simulation -of_objects [get_files /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd] -directory /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.ip_user_files/sim_scripts -ip_user_files_dir /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.ip_user_files -ipstatic_source_dir /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.ip_user_files/ipstatic -lib_map_path [list {modelsim=/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.cache/compile_simlib/modelsim} {questa=/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.cache/compile_simlib/questa} {xcelium=/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.cache/compile_simlib/xcelium} {vcs=/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.cache/compile_simlib/vcs} {riviera=/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.cache/compile_simlib/riviera}] -use_ip_compiled_libs -force -quiet
+open_bd_design {/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd}
+open_bd_design {/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd}
+open_run impl_1
+open_bd_design {/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd}
+regenerate_bd_layout
+regenerate_bd_layout
+open_bd_design {/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd}
+open_bd_design {/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.arty100t.Arty100THarness.RocketArty100TConfig/Arty100THarness.srcs/sources_1/bd/design_1/design_1.bd}

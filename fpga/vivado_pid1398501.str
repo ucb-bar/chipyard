@@ -1,0 +1,425 @@
+/*
+
+Xilinx Vivado v2022.2 (64-bit) [Major: 2022, Minor: 2]
+SW Build: 3671981 on Fri Oct 14 04:59:54 MDT 2022
+IP Build: 3669848 on Fri Oct 14 08:30:02 MDT 2022
+
+Process ID (PID): 1398501
+License: Customer
+Mode: GUI Mode
+
+Current time: 	Mon Oct 28 04:01:24 CST 2024
+Time zone: 	China Standard Time (Asia/Shanghai)
+
+OS: Ubuntu
+OS Version: 6.8.0-40-generic
+OS Architecture: amd64
+Available processors (cores): 8
+
+Display: 0
+Screen size: 1792x1120
+Screen resolution (DPI): 100
+Available screens: 1
+Default font: family=Dialog,name=Dialog,style=plain,size=12
+Scale size: 12
+
+Java version: 	11.0.11 64-bit
+Java home: 	/media/parallels/SSD/Xilinx/Vivado/2022.2/tps/lnx64/jre11.0.11_9
+Java executable: 	/media/parallels/SSD/Xilinx/Vivado/2022.2/tps/lnx64/jre11.0.11_9/bin/java
+Java arguments: 	[-Dsun.java2d.pmoffscreen=false, -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2, -Dsun.java2d.xrender=false, -Djdk.gtk.version=2, -Dsun.java2d.uiScale.enabled=false, -Xverify:none, -Dswing.aatext=true, -XX:-UsePerfData, -Djdk.map.althashing.threshold=512, -XX:StringTableSize=4072, --add-opens=java.desktop/com.sun.awt=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-opens=java.base/java.nio=ALL-UNNAMED, --add-opens=java.desktop/sun.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-opens=java.desktop/javax.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-opens=java.desktop/java.awt.event=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-exports=java.base/java.nio=ALL-UNNAMED, --add-exports=java.desktop/sun.swing=ALL-UNNAMED, --add-exports=java.desktop/javax.swing=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-exports=java.desktop/sun.swing=ALL-UNNAMED, --add-exports=java.desktop/sun.swing.table=ALL-UNNAMED, --add-exports=java.desktop/sun.swing.plaf.synth=ALL-UNNAMED, --add-exports=java.desktop/sun.awt.shell=ALL-UNNAMED, --add-exports=java.base/sun.security.action=ALL-UNNAMED, --add-exports=java.desktop/sun.font=ALL-UNNAMED, --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED, -XX:NewSize=60m, -XX:MaxNewSize=60m, -Xms256m, -Xmx3072m, -Xss5m, -Xrs]
+Java initial memory (-Xms): 	256 MB
+Java maximum memory (-Xmx):	 3 GB
+
+
+User name: 	parallels
+User home directory: /home/parallels
+User working directory: /media/parallels/SSD/workspace/chipyard/fpga
+User country: 	US
+User language: 	en
+User locale: 	en_US
+
+RDI_BASEROOT: /media/parallels/SSD/Xilinx/Vivado
+HDI_APPROOT: /tools/Xilinx/Vivado/2022.2
+RDI_DATADIR: /media/parallels/SSD/Xilinx/Vivado/2022.2/data
+RDI_BINDIR: /media/parallels/SSD/Xilinx/Vivado/2022.2/bin
+
+Vivado preferences file: /home/parallels/.Xilinx/Vivado/2022.2/vivado.xml
+Vivado preferences directory: /home/parallels/.Xilinx/Vivado/2022.2/
+Vivado layouts directory: /home/parallels/.Xilinx/Vivado/2022.2/data/layouts
+PlanAhead jar file: 	/media/parallels/SSD/Xilinx/Vivado/2022.2/lib/classes/planAhead.jar
+Vivado log file: 	/media/parallels/SSD/workspace/chipyard/fpga/vivado.log
+Vivado journal file: 	/media/parallels/SSD/workspace/chipyard/fpga/vivado.jou
+Engine tmp dir: 	./.Xil/Vivado-1398501-ubuntu-linux-22-04-02-desktop
+
+Xilinx Environment Variables
+----------------------------
+RDI_APPROOT: /tools/Xilinx/Vivado/2022.2
+RDI_BASEROOT: /tools/Xilinx/Vivado
+RDI_BINROOT: /tools/Xilinx/Vivado/2022.2/bin
+RDI_BUILD: yes
+RDI_DATADIR: /tools/Xilinx/Vivado/2022.2/data
+RDI_INSTALLROOT: /tools/Xilinx
+RDI_INSTALLVER: 2022.2
+RDI_JAVA_PLATFORM: 
+RDI_JAVA_VERSION: 11.0.11_9
+RDI_LIBDIR: /tools/Xilinx/Vivado/2022.2/lib/lnx64.o/Ubuntu:/tools/Xilinx/Vivado/2022.2/lib/lnx64.o
+RDI_OPT_EXT: .o
+RDI_PATCHROOT: 
+RDI_PLATFORM: lnx64
+RDI_PREPEND_PATH: /tools/Xilinx/Vivado/2022.2/ids_lite/ISE/bin/lin64
+RDI_PROG: /tools/Xilinx/Vivado/2022.2/bin/unwrapped/lnx64.o/vivado
+RDI_TPS_ROOT: /tools/Xilinx/Vivado/2022.2/tps/lnx64
+RDI_USE_JDK11: True
+XILINX: /tools/Xilinx/Vivado/2022.2/ids_lite/ISE
+XILINX_DSP: /tools/Xilinx/Vivado/2022.2/ids_lite/ISE
+XILINX_HLS: /tools/Xilinx/Vitis_HLS/2022.2
+XILINX_PLANAHEAD: /tools/Xilinx/Vivado/2022.2
+XILINX_VITIS: 
+XILINX_VIVADO: /tools/Xilinx/Vivado/2022.2
+XILINX_VIVADO_HLS: /tools/Xilinx/Vivado/2022.2
+
+
+GUI allocated memory:	256 MB
+GUI max memory:		3,072 MB
+Engine allocated memory: 1,389 MB
+
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+*/
+
+// TclEventType: START_GUI
+// Tcl Message: start_gui 
+// WARNING: HEventQueue.dispatchEvent() is taking  1268 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 1,423 MB. GUI used memory: 55 MB. Current time: 10/28/24, 4:01:26 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1006 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1003 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1003 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1004 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1002 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1174 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 1,466 MB. GUI used memory: 54 MB. Current time: 10/28/24, 4:01:56 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1002 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1007 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 1,508 MB. GUI used memory: 54 MB. Current time: 10/28/24, 4:02:10 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1003 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1006 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1003 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1041 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1078 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1002 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1003 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1002 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1075 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1003 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1004 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1002 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1002 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1004 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1046 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1008 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1077 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1374 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1202 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1007 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+selectList(PAResourceQtoS.SyntheticaGettingStartedView_RECENT_PROJECTS, "/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/ZCU102FPGATestHarness.xpr", 0); // b.a
+// [GUI Memory]: 102 MB (+104572kb) [00:17:58]
+// [Engine Memory]: 1,514 MB (+1436006kb) [00:17:58]
+// Opening Vivado Project: /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/ZCU102FPGATestHarness.xpr. Version: Vivado v2022.2 
+// WARNING: HEventQueue.dispatchEvent() is taking  1502 ms.
+// TclEventType: DEBUG_PROBE_SET_CHANGE
+// Tcl Message: open_project /media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/ZCU102FPGATestHarness.xpr 
+// TclEventType: FLOW_ADDED
+// TclEventType: MSGMGR_MOVEMSG
+selectButton(RDIResource.ProgressDialog_CANCEL, "Cancel"); // a
+// HMemoryUtils.trashcanNow. Engine heap size: 1,549 MB. GUI used memory: 55 MB. Current time: 10/28/24, 4:17:06 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  4570 ms.
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: PROJECT_CLOSE
+// CommandFailedException: ERROR: [Common 17-69] Command failed:  
+// Tcl Message: INFO: [Common 17-344] 'open_project' was cancelled 
+dismissDialog("Open Project"); // bq
+selectButton(PAResourceEtoH.GettingStartedView_OPEN_HARDWARE_MANAGER, "Open Hardware Manager"); // u
+// Run Command: PAResourceCommand.PACommandNames_OPEN_HARDWARE_MANAGER
+// Tcl Command: 'rdi::info_commands get_hw_probes'
+// Tcl Command: 'load_features labtools'
+// TclEventType: LOAD_FEATURE
+// Tcl Message: open_hw_manager 
+// TclEventType: FILE_SET_NEW
+// TclEventType: RUN_ADD
+// TclEventType: RUN_CURRENT
+// TclEventType: PROJECT_DASHBOARD_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_NEW
+// Tcl Message: INFO: [IP_Flow 19-234] Refreshing IP repositories INFO: [IP_Flow 19-1704] No user IP repositories specified 
+// TclEventType: PROJECT_NEW
+// [GUI Memory]: 111 MB (+4194kb) [00:18:12]
+// WARNING: HEventQueue.dispatchEvent() is taking  2196 ms.
+// TclEventType: FILE_SET_OPTIONS_CHANGE
+// Tcl Message: INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/tools/Xilinx/Vivado/2022.2/data/ip'. 
+// TclEventType: FILE_SET_OPTIONS_CHANGE
+// TclEventType: HW_SESSION_OPEN
+// WARNING: HEventQueue.dispatchEvent() is taking  1414 ms.
+// Tcl Message: open_hw_manager: Time (s): cpu = 00:00:13 ; elapsed = 00:00:09 . Memory (MB): peak = 6885.660 ; gain = 55.383 ; free physical = 284 ; free virtual = 23332 
+// [Engine Memory]: 1,626 MB (+37974kb) [00:18:18]
+// 'K' command handler elapsed time: 10 seconds
+// Elapsed time: 10 seconds
+selectButton(PAResourceEtoH.GettingStartedView_OPEN_HARDWARE_MANAGER, "Open Hardware Manager"); // u
+dismissDialog("Open Hardware Manager"); // bq
+selectButton(PAResourceOtoP.ProgramDebugTab_OPEN_TARGET, "Open target"); // g
+selectButton(PAResourceOtoP.ProgramDebugTab_OPEN_TARGET, "Open target"); // g
+// HMemoryUtils.trashcanNow. Engine heap size: 1,647 MB. GUI used memory: 61 MB. Current time: 10/28/24, 4:17:25 AM CST
+selectMenuItem(PAResourceCommand.PACommandNames_AUTO_CONNECT_TARGET, "Auto Connect"); // ao
+// Run Command: PAResourceCommand.PACommandNames_AUTO_CONNECT_TARGET
+// Tcl Message: connect_hw_server -allow_non_jtag 
+// Tcl Message: INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121 INFO: [Labtools 27-2222] Launching hw_server... 
+// TclEventType: HW_SERVER_UPDATE
+// Tcl Message: INFO: [Labtools 27-2221] Launch Output:  ****** Xilinx hw_server v2022.2   **** Build date : Oct 14 2022 at 05:10:28     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.   INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:0 INFO: [Labtools 27-3417] Launching cs_server... 
+// TclEventType: HW_SERVER_UPDATE
+// Tcl Message: INFO: [Labtools 27-2221] Launch Output:   ******** Xilinx cs_server v2022.2.0   ****** Build date   : Oct 05 2022-07:25:37     **** Build number : 2022.2.1664925937       ** Copyright 2017-2024 Xilinx, Inc. All Rights Reserved.    
+// TclEventType: HW_SERVER_UPDATE
+// Tcl Message: connect_hw_server: Time (s): cpu = 00:00:04 ; elapsed = 00:00:10 . Memory (MB): peak = 6909.648 ; gain = 4.074 ; free physical = 423 ; free virtual = 23272 
+// TclEventType: HW_TARGET_CHANGE
+// TclEventType: HW_TARGET_CLOSE
+// Tcl Message: open_hw_target 
+// Tcl Message: INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210308B0AD75 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_ADD
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_ADD
+// TclEventType: HW_TARGET_UPDATE
+// WARNING: HEventQueue.dispatchEvent() is taking  19673 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,562 MB. GUI used memory: 61 MB. Current time: 10/28/24, 4:18:03 AM CST
+// Tcl Message: open_hw_target: Time (s): cpu = 00:00:11 ; elapsed = 00:00:26 . Memory (MB): peak = 8793.684 ; gain = 1884.035 ; free physical = 194 ; free virtual = 21357 
+// Tcl Message: current_hw_device [get_hw_devices xczu9_0] 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_CHANGE
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xczu9_0] 0] 
+// Tcl Message: INFO: [Labtools 27-1435] Device xczu9 (JTAG device index = 0) is not programmed (DONE status = 0). 
+// Tcl Message: current_hw_device [get_hw_devices arm_dap_1] 
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: refresh_hw_device -update_hw_probes false [lindex [get_hw_devices arm_dap_1] 0] 
+// TclEventType: HW_SYSMON_CHANGE
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: current_hw_device [get_hw_devices xczu9_0] 
+// [Engine Memory]: 3,562 MB (+1945310kb) [00:19:00]
+// Elapsed time: 39 seconds
+dismissDialog("Auto Connect"); // bq
+selectButton(PAResourceAtoD.CmdMsgDialog_OK, "OK"); // f
+selectButton(PAResourceAtoD.CmdMsgDialog_OK, "OK"); // f
+dismissDialog("Critical Messages"); // a
+selectButton(PAResourceOtoP.ProgramDebugTab_PROGRAM_DEVICE, "Program device"); // g
+// PAPropertyPanels.initPanels (xczu9_0) elapsed time: 0.4s
+// Run Command: PAResourceCommand.PACommandNames_PROGRAM_FPGA
+selectButton(PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE, (String) null); // r
+// Elapsed time: 13 seconds
+setFileChooser("/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/obj/ZCU102FPGATestHarness.bit");
+selectButton(PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE, (String) null); // r
+selectButton(PAResourceOtoP.ProgramFpgaDialog_PROGRAM, "Program"); // a
+selectButton(PAResourceOtoP.ProgramFpgaDialog_PROGRAM, "Program"); // a
+dismissDialog("Program Device"); // aP
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: set_property PROBES.FILE {} [get_hw_devices xczu9_0] 
+// Tcl Message: set_property FULL_PROBES.FILE {} [get_hw_devices xczu9_0] 
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: set_property PROGRAM.FILE {/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/obj/ZCU102FPGATestHarness.bit} [get_hw_devices xczu9_0] 
+// Tcl Message: program_hw_devices [get_hw_devices xczu9_0] 
+// TclEventType: HW_TARGET_NEEDS_CLOSE
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: INFO: [Labtools 27-3164] End of startup status: HIGH 
+// Tcl Message: program_hw_devices: Time (s): cpu = 00:00:10 ; elapsed = 00:00:09 . Memory (MB): peak = 8835.660 ; gain = 0.000 ; free physical = 229 ; free virtual = 21323 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_CHANGE
+// TclEventType: HW_MIG_ADD
+// TclEventType: HW_DEVICE_UPDATE
+// Tcl Message: refresh_hw_device [lindex [get_hw_devices xczu9_0] 0] 
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_DEVICE_CHANGE
+// HMemoryUtils.trashcanNow. Engine heap size: 3,611 MB. GUI used memory: 64 MB. Current time: 10/28/24, 4:18:35 AM CST
+// Elapsed time: 10 seconds
+closeView(PAResourceOtoP.PAViews_MIG, "MIG - MIG_1"); // b
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// Tcl Message: INFO: [Labtools 27-2302] Device xczu9 (JTAG device index = 0) is programmed with a design that has 1 MIG core(s). 
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// TclEventType: DEBUG_PROBE_SET_CHANGE
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// 'D' command handler elapsed time: 28 seconds
+selectButton(PAResourceOtoP.ProgramDebugTab_PROGRAM_DEVICE, "Program device"); // g
+dismissDialog("Program Device"); // bq
+// TclEventType: HW_SERVER_UPDATE
+// [GUI Memory]: 123 MB (+6362kb) [00:20:43]
+// WARNING: HTimer (ActiveMsgMonitor Process Messages Timer) is taking 363ms to process. Increasing delay to 2000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  2661 ms.
+// WARNING: HTimer (ActiveMsgMonitor Process Messages Timer) is taking 447ms to process. Increasing delay to 3000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1070 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1061 ms.
+// WARNING: HTimer (WrapperUtils Delayed Delete Timer) is taking 287ms to process. Increasing delay to 2000 ms.
+// WARNING: HTimer (ExpRunMgr Pending Runs Timer) is taking 432ms to process. Increasing delay to 3000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  2672 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  2633 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,613 MB. GUI used memory: 65 MB. Current time: 10/28/24, 4:48:38 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1093 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1717 ms.
+// WARNING: HSwingWorker (Update Runs Swing Worker) is taking 1110 ms. Increasing delay to 3000 ms.
+// WARNING: HSwingWorker (Refresh Filesets Swing Worker) is taking 1105 ms. Increasing delay to 3315 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,613 MB. GUI used memory: 55 MB. Current time: 10/28/24, 5:18:41 AM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,613 MB. GUI used memory: 54 MB. Current time: 10/28/24, 5:48:38 AM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,613 MB. GUI used memory: 54 MB. Current time: 10/28/24, 6:18:38 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  3233 ms.
+// WARNING: HTimer (ActiveMsgMonitor Process Messages Timer) is taking 1498ms to process. Increasing delay to 4000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1502 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1186 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1171 ms.
+// WARNING: HSwingWorker (Refresh Filesets Swing Worker) is taking 2100 ms. Increasing delay to 6300 ms.
+// WARNING: HSwingWorker (Update Runs Swing Worker) is taking 2457 ms. Increasing delay to 4000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  3967 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,618 MB. GUI used memory: 49 MB. Current time: 10/28/24, 6:48:39 AM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,618 MB. GUI used memory: 48 MB. Current time: 10/28/24, 7:18:39 AM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,618 MB. GUI used memory: 48 MB. Current time: 10/28/24, 7:55:11 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  287644 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1054476 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,618 MB. GUI used memory: 48 MB. Current time: 10/28/24, 8:25:23 AM CST
+// WARNING: HTimer (WrapperUtils Delayed Delete Timer) is taking 1211ms to process. Increasing delay to 3000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1211 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,618 MB. GUI used memory: 48 MB. Current time: 10/28/24, 9:00:03 AM CST
+// TclEventType: HW_TARGET_NEEDS_CLOSE
+// TclEventType: HW_TARGET_CLOSE
+// TclEventType: HW_OBJECT_DELETE
+// Elapsed time: 16925 seconds
+closeView(PAResourceOtoP.PAViews_MIG, "MIG - MIG_1"); // b
+// TclEventType: HW_MIG_DELETE
+// TclEventType: HW_SYSMON_DELETE
+// TclEventType: HW_TARGET_UPDATE
+// TclEventType: DEBUG_PROBE_DELETE
+// Tcl Message: ERROR: [Labtoolstcl 44-513] HW Target shutdown. Closing target: localhost:3121/xilinx_tcf/Digilent/210308B0AD75 
+// TclEventType: HW_SERVER_UPDATE
+// WARNING: HEventQueue.dispatchEvent() is taking  1235967 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 56 MB. Current time: 10/28/24, 9:44:39 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1374 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1456 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 56 MB. Current time: 10/28/24, 10:24:31 AM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 56 MB. Current time: 10/28/24, 11:00:31 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1167839 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 11:45:21 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  994744 ms.
+// WARNING: HTimer (HSTRUtils Dump STR Log Timer) is taking 1755ms to process. Increasing delay to 5000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1750 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 12:26:11 PM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 1:03:06 PM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1308 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1012 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  784356 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1408 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  26306 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 1:46:06 PM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1098 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  353029 ms.
+// WARNING: HTimer (ExpRunMgr Pending Runs Timer) is taking 787ms to process. Increasing delay to 4000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1081 ms.
+// WARNING: HTimer (ActiveMsgMonitor Process Messages Timer) is taking 2525ms to process. Increasing delay to 5000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  26524 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 2:25:10 PM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  2769 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1206 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1783 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  3732 ms.
+// WARNING: HSwingWorker (Update Runs Swing Worker) is taking 3342 ms. Increasing delay to 5000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  27738 ms.
+// WARNING: HTimer (HSTRUtils Dump STR Log Timer) is taking 1270ms to process. Increasing delay to 6000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1124 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1640338 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 3:01:57 PM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 3:38:55 PM CST
+// WARNING: HTimer (MainWindowUtils Timer) is taking 1798419ms to process. Increasing delay to 11000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1798419 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 56 MB. Current time: 10/28/24, 4:14:52 PM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  257929 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1489492 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 4:50:49 PM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  913111 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 5:20:52 PM CST
+// WARNING: HTimer (ActiveMsgMonitor Process Messages Timer) is taking 1142ms to process. Increasing delay to 6000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1142 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  330105 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1797687 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 6:02:44 PM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  77738 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,619 MB. GUI used memory: 55 MB. Current time: 10/28/24, 6:40:27 PM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  2065 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1274497 ms.
+// WARNING: HSwingWorker (Update Runs Swing Worker) is taking 1271744 ms. Increasing delay to 6000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1210 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1339 ms.

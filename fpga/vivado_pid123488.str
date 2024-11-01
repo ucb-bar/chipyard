@@ -1,0 +1,355 @@
+/*
+
+Xilinx Vivado v2022.2 (64-bit) [Major: 2022, Minor: 2]
+SW Build: 3671981 on Fri Oct 14 04:59:54 MDT 2022
+IP Build: 3669848 on Fri Oct 14 08:30:02 MDT 2022
+
+Process ID (PID): 123488
+License: Customer
+Mode: GUI Mode
+
+Current time: 	Wed Oct 30 00:56:18 CST 2024
+Time zone: 	China Standard Time (Asia/Shanghai)
+
+OS: Ubuntu
+OS Version: 6.8.0-47-generic
+OS Architecture: amd64
+Available processors (cores): 8
+
+Display: 0
+Screen size: 1600x900
+Screen resolution (DPI): 100
+Available screens: 1
+Default font: family=Dialog,name=Dialog,style=plain,size=12
+Scale size: 12
+
+Java version: 	11.0.11 64-bit
+Java home: 	/media/parallels/SSD/Xilinx/Vivado/2022.2/tps/lnx64/jre11.0.11_9
+Java executable: 	/media/parallels/SSD/Xilinx/Vivado/2022.2/tps/lnx64/jre11.0.11_9/bin/java
+Java arguments: 	[-Dsun.java2d.pmoffscreen=false, -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2, -Dsun.java2d.xrender=false, -Djdk.gtk.version=2, -Dsun.java2d.uiScale.enabled=false, -Xverify:none, -Dswing.aatext=true, -XX:-UsePerfData, -Djdk.map.althashing.threshold=512, -XX:StringTableSize=4072, --add-opens=java.desktop/com.sun.awt=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-opens=java.base/java.nio=ALL-UNNAMED, --add-opens=java.desktop/sun.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-opens=java.desktop/javax.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-opens=java.desktop/java.awt.event=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-exports=java.base/java.nio=ALL-UNNAMED, --add-exports=java.desktop/sun.swing=ALL-UNNAMED, --add-exports=java.desktop/javax.swing=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-exports=java.desktop/sun.swing=ALL-UNNAMED, --add-exports=java.desktop/sun.swing.table=ALL-UNNAMED, --add-exports=java.desktop/sun.swing.plaf.synth=ALL-UNNAMED, --add-exports=java.desktop/sun.awt.shell=ALL-UNNAMED, --add-exports=java.base/sun.security.action=ALL-UNNAMED, --add-exports=java.desktop/sun.font=ALL-UNNAMED, --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED, -XX:NewSize=60m, -XX:MaxNewSize=60m, -Xms256m, -Xmx3072m, -Xss5m, -Xrs]
+Java initial memory (-Xms): 	256 MB
+Java maximum memory (-Xmx):	 3 GB
+
+
+User name: 	parallels
+User home directory: /home/parallels
+User working directory: /media/parallels/SSD/workspace/chipyard/fpga
+User country: 	US
+User language: 	en
+User locale: 	en_US
+
+RDI_BASEROOT: /media/parallels/SSD/Xilinx/Vivado
+HDI_APPROOT: /tools/Xilinx/Vivado/2022.2
+RDI_DATADIR: /media/parallels/SSD/Xilinx/Vivado/2022.2/data
+RDI_BINDIR: /media/parallels/SSD/Xilinx/Vivado/2022.2/bin
+
+Vivado preferences file: /home/parallels/.Xilinx/Vivado/2022.2/vivado.xml
+Vivado preferences directory: /home/parallels/.Xilinx/Vivado/2022.2/
+Vivado layouts directory: /home/parallels/.Xilinx/Vivado/2022.2/data/layouts
+PlanAhead jar file: 	/media/parallels/SSD/Xilinx/Vivado/2022.2/lib/classes/planAhead.jar
+Vivado log file: 	/media/parallels/SSD/workspace/chipyard/fpga/vivado.log
+Vivado journal file: 	/media/parallels/SSD/workspace/chipyard/fpga/vivado.jou
+Engine tmp dir: 	./.Xil/Vivado-123488-ubuntu-linux-22-04-02-desktop
+
+Xilinx Environment Variables
+----------------------------
+JAVA_HOME: /workspace/chipyard/.conda-env/lib/jvm
+JAVA_LD_LIBRARY_PATH: /workspace/chipyard/.conda-env/lib/jvm/lib/server
+RDI_APPROOT: /tools/Xilinx/Vivado/2022.2
+RDI_BASEROOT: /tools/Xilinx/Vivado
+RDI_BINROOT: /tools/Xilinx/Vivado/2022.2/bin
+RDI_BUILD: yes
+RDI_DATADIR: /tools/Xilinx/Vivado/2022.2/data
+RDI_INSTALLROOT: /tools/Xilinx
+RDI_INSTALLVER: 2022.2
+RDI_JAVA_PLATFORM: 
+RDI_JAVA_VERSION: 11.0.11_9
+RDI_LIBDIR: /tools/Xilinx/Vivado/2022.2/lib/lnx64.o/Ubuntu:/tools/Xilinx/Vivado/2022.2/lib/lnx64.o
+RDI_OPT_EXT: .o
+RDI_PATCHROOT: 
+RDI_PLATFORM: lnx64
+RDI_PREPEND_PATH: /tools/Xilinx/Vivado/2022.2/ids_lite/ISE/bin/lin64
+RDI_PROG: /tools/Xilinx/Vivado/2022.2/bin/unwrapped/lnx64.o/vivado
+RDI_TPS_ROOT: /tools/Xilinx/Vivado/2022.2/tps/lnx64
+RDI_USE_JDK11: True
+XILINX: /tools/Xilinx/Vivado/2022.2/ids_lite/ISE
+XILINX_DSP: /tools/Xilinx/Vivado/2022.2/ids_lite/ISE
+XILINX_HLS: /tools/Xilinx/Vitis_HLS/2022.2
+XILINX_PLANAHEAD: /tools/Xilinx/Vivado/2022.2
+XILINX_VITIS: 
+XILINX_VIVADO: /tools/Xilinx/Vivado/2022.2
+XILINX_VIVADO_HLS: /tools/Xilinx/Vivado/2022.2
+
+
+GUI allocated memory:	256 MB
+GUI max memory:		3,072 MB
+Engine allocated memory: 1,415 MB
+
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+*/
+
+// TclEventType: START_GUI
+// Tcl Message: start_gui 
+// HMemoryUtils.trashcanNow. Engine heap size: 1,439 MB. GUI used memory: 56 MB. Current time: 10/30/24, 12:56:19 AM CST
+selectButton(PAResourceEtoH.GettingStartedView_OPEN_HARDWARE_MANAGER, "Open Hardware Manager"); // u
+// Run Command: PAResourceCommand.PACommandNames_OPEN_HARDWARE_MANAGER
+// Tcl Command: 'rdi::info_commands get_hw_probes'
+// Tcl Command: 'load_features labtools'
+// TclEventType: LOAD_FEATURE
+// TclEventType: DEBUG_PROBE_SET_CHANGE
+// TclEventType: FLOW_ADDED
+// Tcl Message: open_hw_manager 
+// HMemoryUtils.trashcanNow. Engine heap size: 1,585 MB. GUI used memory: 54 MB. Current time: 10/30/24, 12:56:34 AM CST
+// TclEventType: FILE_SET_NEW
+// TclEventType: RUN_ADD
+// TclEventType: RUN_CURRENT
+// TclEventType: PROJECT_DASHBOARD_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_NEW
+// Tcl Message: INFO: [IP_Flow 19-234] Refreshing IP repositories INFO: [IP_Flow 19-1704] No user IP repositories specified 
+// TclEventType: PROJECT_NEW
+// [GUI Memory]: 114 MB (+117450kb) [00:00:48]
+// [Engine Memory]: 1,691 MB (+1621285kb) [00:00:48]
+// WARNING: HEventQueue.dispatchEvent() is taking  1335 ms.
+// TclEventType: FILE_SET_OPTIONS_CHANGE
+// Tcl Message: INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/tools/Xilinx/Vivado/2022.2/data/ip'. 
+// TclEventType: FILE_SET_OPTIONS_CHANGE
+// TclEventType: HW_SESSION_OPEN
+// Tcl Message: open_hw_manager: Time (s): cpu = 00:00:24 ; elapsed = 00:00:17 . Memory (MB): peak = 7029.680 ; gain = 261.391 ; free physical = 785 ; free virtual = 27867 
+// 'K' command handler elapsed time: 17 seconds
+// [Engine Memory]: 1,776 MB (+1038kb) [00:00:52]
+// Elapsed time: 17 seconds
+dismissDialog("Open Hardware Manager"); // bq
+selectButton(PAResourceOtoP.ProgramDebugTab_OPEN_TARGET, "Open target"); // g
+selectMenuItem(PAResourceCommand.PACommandNames_AUTO_CONNECT_TARGET, "Auto Connect"); // ao
+// Run Command: PAResourceCommand.PACommandNames_AUTO_CONNECT_TARGET
+// Tcl Message: connect_hw_server -allow_non_jtag 
+// Tcl Message: INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121 INFO: [Labtools 27-2222] Launching hw_server... 
+// TclEventType: HW_SERVER_UPDATE
+// HMemoryUtils.trashcanNow. Engine heap size: 1,797 MB. GUI used memory: 61 MB. Current time: 10/30/24, 12:56:49 AM CST
+// TclEventType: HW_SERVER_UPDATE
+// Tcl Message: INFO: [Labtools 27-2221] Launch Output:  ****** Xilinx hw_server v2022.2   **** Build date : Oct 14 2022 at 05:10:28     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.   INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:0 INFO: [Labtools 27-3417] Launching cs_server... 
+// TclEventType: HW_SERVER_UPDATE
+// Tcl Message: INFO: [Labtools 27-2221] Launch Output:   ******** Xilinx cs_server v2022.2.0   ****** Build date   : Oct 05 2022-07:25:37     **** Build number : 2022.2.1664925937       ** Copyright 2017-2024 Xilinx, Inc. All Rights Reserved.    
+// Tcl Message: connect_hw_server: Time (s): cpu = 00:00:02 ; elapsed = 00:00:05 . Memory (MB): peak = 7054.465 ; gain = 18.949 ; free physical = 581 ; free virtual = 27813 
+// TclEventType: HW_TARGET_CHANGE
+// TclEventType: HW_TARGET_CLOSE
+// Tcl Message: open_hw_target 
+// Tcl Message: INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210308B0AD75 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_ADD
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_ADD
+// TclEventType: HW_TARGET_UPDATE
+// WARNING: HEventQueue.dispatchEvent() is taking  4112 ms.
+// Tcl Message: open_hw_target: Time (s): cpu = 00:00:03 ; elapsed = 00:00:08 . Memory (MB): peak = 8914.500 ; gain = 1860.035 ; free physical = 170 ; free virtual = 25834 
+// Tcl Message: current_hw_device [get_hw_devices xczu9_0] 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_CHANGE
+// Tcl Message: refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xczu9_0] 0] 
+// TclEventType: HW_MIG_ADD
+// TclEventType: HW_DEVICE_UPDATE
+// [Engine Memory]: 3,680 MB (+1903122kb) [00:01:09]
+// TclEventType: HW_DEVICE_CHANGE
+// Elapsed time: 14 seconds
+closeView(PAResourceOtoP.PAViews_MIG, "MIG - MIG_1"); // b
+// Tcl Message: INFO: [Labtools 27-2302] Device xczu9 (JTAG device index = 0) is programmed with a design that has 1 MIG core(s). 
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: current_hw_device [get_hw_devices arm_dap_1] 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_CHANGE
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: refresh_hw_device -update_hw_probes false [lindex [get_hw_devices arm_dap_1] 0] 
+// Tcl Message: current_hw_device [get_hw_devices xczu9_0] 
+dismissDialog("Auto Connect"); // bq
+// PAPropertyPanels.initPanels (localhost:3121/xilinx_tcf/Digilent/210308B0AD75) elapsed time: 0.5s
+// Elapsed time: 21 seconds
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210308B0AD75 (2) ; Open", 1, "xilinx_tcf/Digilent/210308B0AD75 (2)", 0, true); // m - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "SysMon ; ", 3, "SysMon", 0, false); // m
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "MIG_1 ; CAL PASS", 4, "MIG_1", 0, false); // m
+selectMenu(PAResourceItoN.MainMenuMgr_FILE, "File"); // ag
+dismissMenu(PAResourceItoN.MainMenuMgr_FILE, "File"); // ag
+selectMenu(PAResourceItoN.MainMenuMgr_EDIT, "Edit"); // ag
+dismissMenu(PAResourceItoN.MainMenuMgr_EDIT, "Edit"); // ag
+selectMenu(PAResourceItoN.MainMenuMgr_TOOLS, "Tools"); // ag
+selectMenu(PAResourceCommand.PACommandNames_PROGRAM_FPGA, "Program Device"); // al
+selectMenuItem((HResource) null, "xczu9_0"); // ao
+dismissMenu(PAResourceItoN.MainMenuMgr_TOOLS, "Tools"); // ag
+// Run Command: PAResourceCommand.PACommandNames_OPEN_HARDWARE_MANAGER
+// Tcl Command: 'rdi::info_commands get_hw_probes'
+// Run Command: PAResourceCommand.PACommandNames_PROGRAM_FPGA
+selectButton(PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE, (String) null); // r
+setFileChooser("/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/obj/ZCU102FPGATestHarness.bit");
+selectButton(PAResourceOtoP.ProgramFpgaDialog_PROGRAM, "Program"); // a
+// TclEventType: HW_DEVICE_CHANGE
+dismissDialog("Program Device"); // aP
+// Tcl Message: set_property PROBES.FILE {} [get_hw_devices xczu9_0] 
+// Tcl Message: set_property FULL_PROBES.FILE {} [get_hw_devices xczu9_0] 
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: set_property PROGRAM.FILE {/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/obj/ZCU102FPGATestHarness.bit} [get_hw_devices xczu9_0] 
+// TclEventType: HW_OBJECT_DELETE
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_MIG_DELETE
+closeView(PAResourceOtoP.PAViews_MIG, "MIG - MIG_1"); // b
+// TclEventType: HW_DEVICE_UPDATE
+// Tcl Message: program_hw_devices [get_hw_devices xczu9_0] 
+// TclEventType: HW_TARGET_NEEDS_CLOSE
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: INFO: [Labtools 27-3164] End of startup status: HIGH 
+// Tcl Message: program_hw_devices: Time (s): cpu = 00:00:09 ; elapsed = 00:00:08 . Memory (MB): peak = 8967.348 ; gain = 0.000 ; free physical = 234 ; free virtual = 25846 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_CHANGE
+// TclEventType: HW_MIG_ADD
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// Tcl Message: refresh_hw_device [lindex [get_hw_devices xczu9_0] 0] 
+// Tcl Message: INFO: [Labtools 27-2302] Device xczu9 (JTAG device index = 0) is programmed with a design that has 1 MIG core(s). 
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// TclEventType: DEBUG_PROBE_SET_CHANGE
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// 'D' command handler elapsed time: 19 seconds
+dismissDialog("Program Device"); // bq
+// TclEventType: HW_SERVER_UPDATE
+// Elapsed time: 12 seconds
+selectMenu(PAResourceItoN.MainMenuMgr_REPORTS, "Reports"); // ag
+dismissMenu(PAResourceItoN.MainMenuMgr_REPORTS, "Reports"); // ag
+selectMenu(PAResourceItoN.MainMenuMgr_TOOLS, "Tools"); // ag
+selectMenu(PAResourceCommand.PACommandNames_PROGRAM_FPGA, "Program Device"); // al
+selectMenuItem((HResource) null, "xczu9_0"); // ao
+dismissMenu(PAResourceItoN.MainMenuMgr_TOOLS, "Tools"); // ag
+// Run Command: PAResourceCommand.PACommandNames_OPEN_HARDWARE_MANAGER
+// Tcl Command: 'rdi::info_commands get_hw_probes'
+// Run Command: PAResourceCommand.PACommandNames_PROGRAM_FPGA
+// [GUI Memory]: 127 MB (+7064kb) [00:02:15]
+selectButton(PAResourceOtoP.ProgramFpgaDialog_PROGRAM, "Program"); // a
+// TclEventType: HW_DEVICE_CHANGE
+dismissDialog("Program Device"); // aP
+// Tcl Message: set_property PROBES.FILE {} [get_hw_devices xczu9_0] 
+// Tcl Message: set_property FULL_PROBES.FILE {} [get_hw_devices xczu9_0] 
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: set_property PROGRAM.FILE {/media/parallels/SSD/workspace/chipyard/fpga/generated-src/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/obj/ZCU102FPGATestHarness.bit} [get_hw_devices xczu9_0] 
+// TclEventType: HW_OBJECT_DELETE
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_MIG_DELETE
+closeView(PAResourceOtoP.PAViews_MIG, "MIG - MIG_1"); // b
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_TARGET_NEEDS_CLOSE
+// Tcl Message: program_hw_devices [get_hw_devices xczu9_0] 
+// TclEventType: HW_TARGET_NEEDS_CLOSE
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: INFO: [Labtools 27-3164] End of startup status: HIGH 
+// Tcl Message: program_hw_devices: Time (s): cpu = 00:00:09 ; elapsed = 00:00:08 . Memory (MB): peak = 8967.348 ; gain = 0.000 ; free physical = 214 ; free virtual = 25839 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_CHANGE
+// TclEventType: HW_MIG_ADD
+// TclEventType: HW_DEVICE_UPDATE
+// Tcl Message: refresh_hw_device [lindex [get_hw_devices xczu9_0] 0] 
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// TclEventType: DEBUG_PROBE_SET_CHANGE
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// Tcl Message: INFO: [Labtools 27-2302] Device xczu9 (JTAG device index = 0) is programmed with a design that has 1 MIG core(s). 
+// 'D' command handler elapsed time: 11 seconds
+dismissDialog("Program Device"); // bq
+// TclEventType: HW_SERVER_UPDATE
+// Elapsed time: 68 seconds
+selectMenu(PAResourceItoN.MainMenuMgr_TOOLS, "Tools"); // ag
+dismissMenu(PAResourceItoN.MainMenuMgr_TOOLS, "Tools"); // ag
+selectMenu(PAResourceItoN.MainMenuMgr_REPORTS, "Reports"); // ag
+dismissMenu(PAResourceItoN.MainMenuMgr_REPORTS, "Reports"); // ag
+selectMenu(PAResourceItoN.MainMenuMgr_TOOLS, "Tools"); // ag
+selectMenu(PAResourceCommand.PACommandNames_PROGRAM_FPGA, "Program Device"); // al
+selectMenuItem((HResource) null, "xczu9_0"); // ao
+dismissMenu(PAResourceItoN.MainMenuMgr_TOOLS, "Tools"); // ag
+// Run Command: PAResourceCommand.PACommandNames_OPEN_HARDWARE_MANAGER
+// Tcl Command: 'rdi::info_commands get_hw_probes'
+// Run Command: PAResourceCommand.PACommandNames_PROGRAM_FPGA
+selectButton(PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE, (String) null); // r
+// HMemoryUtils.trashcanNow. Engine heap size: 3,736 MB. GUI used memory: 74 MB. Current time: 10/30/24, 12:59:34 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1711 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1004 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1207 ms.
+// Elapsed time: 16 seconds
+setFileChooser("/media/parallels/SSD/workspace/chipyard/fpga/generated-src-bak/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/obj/ZCU102FPGATestHarness.bit");
+selectButton(PAResourceOtoP.ProgramFpgaDialog_PROGRAM, "Program"); // a
+// TclEventType: HW_DEVICE_CHANGE
+dismissDialog("Program Device"); // aP
+// Tcl Message: set_property PROBES.FILE {} [get_hw_devices xczu9_0] 
+// Tcl Message: set_property FULL_PROBES.FILE {} [get_hw_devices xczu9_0] 
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: set_property PROGRAM.FILE {/media/parallels/SSD/workspace/chipyard/fpga/generated-src-bak/chipyard.fpga.zcu102.ZCU102FPGATestHarness.RocketZCU102Config/obj/ZCU102FPGATestHarness.bit} [get_hw_devices xczu9_0] 
+// TclEventType: HW_OBJECT_DELETE
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_MIG_DELETE
+closeView(PAResourceOtoP.PAViews_MIG, "MIG - MIG_1"); // b
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_TARGET_NEEDS_CLOSE
+// Tcl Message: program_hw_devices [get_hw_devices xczu9_0] 
+// TclEventType: HW_TARGET_NEEDS_CLOSE
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: INFO: [Labtools 27-3164] End of startup status: HIGH 
+// Tcl Message: program_hw_devices: Time (s): cpu = 00:00:12 ; elapsed = 00:00:10 . Memory (MB): peak = 8982.348 ; gain = 0.000 ; free physical = 182 ; free virtual = 25613 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_CHANGE
+// Tcl Message: refresh_hw_device [lindex [get_hw_devices xczu9_0] 0] 
+// TclEventType: HW_MIG_ADD
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// TclEventType: DEBUG_PROBE_SET_CHANGE
+// TclEventType: HW_DEVICE_PROBES_CHANGE
+// Tcl Message: INFO: [Labtools 27-2302] Device xczu9 (JTAG device index = 0) is programmed with a design that has 1 MIG core(s). 
+// 'D' command handler elapsed time: 31 seconds
+// Elapsed time: 11 seconds
+dismissDialog("Program Device"); // bq
+// TclEventType: HW_SERVER_UPDATE
+// WARNING: HTimer (ActiveMsgMonitor Process Messages Timer) is taking 508ms to process. Increasing delay to 2000 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,738 MB. GUI used memory: 70 MB. Current time: 10/30/24, 1:29:37 AM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 1:59:36 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1670 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  3123 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1450 ms.
+// WARNING: HSwingWorker (Update Runs Swing Worker) is taking 1917 ms. Increasing delay to 3000 ms.
+// WARNING: HSwingWorker (Refresh Filesets Swing Worker) is taking 2677 ms. Increasing delay to 8031 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 2:29:38 AM CST
+// WARNING: HTimer (WrapperUtils Delayed Delete Timer) is taking 299ms to process. Increasing delay to 2000 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 2:59:39 AM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 3:29:39 AM CST
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 3:59:39 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1796826 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 60 MB. Current time: 10/30/24, 4:37:41 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1524 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 5:07:48 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1797899 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 5:43:45 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1228456 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 6:27:09 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1797703 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 7:03:31 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  855271 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  938077 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 60 MB. Current time: 10/30/24, 7:40:59 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  484200 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  251369 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  536401 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1043 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  760799 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 3,739 MB. GUI used memory: 61 MB. Current time: 10/30/24, 8:23:21 AM CST
+// WARNING: HEventQueue.dispatchEvent() is taking  1672 ms.
+// WARNING: HTimer (FileMgr Design Graph Update Timer) is taking 480ms to process. Increasing delay to 3000 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1219 ms.

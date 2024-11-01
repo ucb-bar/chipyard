@@ -9,7 +9,7 @@
 #include "kprintf.h"
 
 // Total payload in B
-#define PAYLOAD_SIZE_B (128 << 20) // default: 30MiB
+#define PAYLOAD_SIZE_B (50 << 20) // default: 30MiB
 // A sector is 512 bytes, so (1 << 11) * 512B = 1 MiB
 #define SECTOR_SIZE_B 512
 // Payload size in # of sectors
@@ -331,8 +331,15 @@ int main(void)
 
 	}
 
+	for (volatile uint32_t* i = (void *)0x80000004; i< 0x80bbfb88; i++) {
+		uint64_t cycles, cycles2 = 0;
+		instr = *i;
+		uint64_t time = cycles2-cycles;
+		kprintf("%x; %x\r\n",i, instr);
+	}
 
-	kputs("BOOT");
+
+	kputs("BOOT, Ready to go to the opensbi");
 
 	__asm__ __volatile__ ("fence.i" : : : "memory");
 
