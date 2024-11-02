@@ -34,7 +34,7 @@ class WithSystemModifications extends Config((site, here, up) => {
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
    val make = s"make -C fpga/src/main/resources/zcu102/sdboot PBUS_CLK=${freqMHz} bin"
    require (make.! == 0, "Failed to build bootrom")
-   p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/zcu102/sdboot/build/sdboot.bin")
+   p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/zcu102/sdboot/build/sdboot.bin") // hang is 复位向量地址，当系统复位时，处理器会跳入该地址执行，即执行sdboot.bin
   }
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(ZCU102DDRSize)))) // set extmem to DDR size
   case SerialTLKey => Nil // remove serialized tl port

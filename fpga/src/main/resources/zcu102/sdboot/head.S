@@ -13,7 +13,7 @@ _prog_start:
   smp_resume(s1, s2)
   csrr a0, mhartid // hartid for next level bootloader
   la a1, dtb // dtb address for next level bootloader
-  li s1, PAYLOAD_DEST
+  li s1, PAYLOAD_DEST // 0x80000000 内存起始地址
   jr s1
 
   .section .dtb
