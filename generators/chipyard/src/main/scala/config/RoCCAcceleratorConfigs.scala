@@ -49,8 +49,10 @@ class TutorialGemminiReRoCCConfig extends Config(
   new gemmini.LeanGemminiConfig ++                              // rerocc tile0 is gemmini                               
   new freechips.rocketchip.rocket.WithNHugeCores(2) ++
   new chipyard.config.WithSystemBusWidth(128) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=1024) ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
   new chipyard.config.AbstractConfig)
 
 class MempressRocketConfig extends Config(
