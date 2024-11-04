@@ -27,7 +27,7 @@ REMOTE_COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
 declare -A grouping
 grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boomv3 chipyard-boomv4 chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone chipyard-prefetchers chipyard-shuttle chipyard-vexiiriscv"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboomv3 chipyard-dmiboomv4 chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike chipyard-tethered chipyard-symmetric chipyard-llcchiplet"
-grouping["group-accels"]="chipyard-compressacc chipyard-mempress chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla chipyard-aes256ecb chipyard-rerocc chipyard-rocketvector chipyard-shuttlevector chipyard-shuttleara chipyard-hlsacc"
+grouping["group-accels"]="chipyard-compressacc chipyard-mempress chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla chipyard-aes256ecb chipyard-rerocc chipyard-rocketvector chipyard-shuttlevector chipyard-hlsacc" # chipyard-shuttleara - Add when Ara works again
 grouping["group-constellation"]="chipyard-constellation"
 grouping["group-tracegen"]="tracegen tracegen-boomv3 tracegen-boomv4"
 grouping["group-other"]="icenet testchipip constellation rocketchip-amba rocketchip-tlsimple rocketchip-tlwidth rocketchip-tlxbar chipyard-clusters"
