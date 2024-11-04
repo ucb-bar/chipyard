@@ -154,3 +154,6 @@
 [submodule "generators/vexiiriscv"]
 	path = generators/vexiiriscv
 	url = https://github.com/ucb-bar/vexiiriscv-tile.git
+[submodule "generators/cnn-hw-accelerator"]
+	path = generators/cnn-hw-accelerator
+	url = https://github.com/osowatzke/cnn-hw-accelerator.git
