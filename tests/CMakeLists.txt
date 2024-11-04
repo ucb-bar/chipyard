@@ -69,6 +69,7 @@ add_link_options(-T ${LINKER_SCRIPT})
 # Build
 #################################
 
+add_executable(dma dma.c)
 add_executable(pwm pwm.c)
 add_executable(blkdev blkdev.c)
 add_executable(accum accum.c)
@@ -107,6 +108,7 @@ function(add_dump_target target_name)
     add_dependencies(dump ${target_name}-dump)
 endfunction()
 
+add_dump_target(dma)
 add_dump_target(pwm)
 add_dump_target(blkdev)
 add_dump_target(accum)
