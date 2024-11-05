@@ -64,37 +64,17 @@ class EinsteinRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class SmallEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=4, dataflow="is") ++
+  new einstein.LargeDenseEinsteinConfig(size=4) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class MidEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=8, dataflow="is") ++
+  new einstein.LargeDenseEinsteinConfig(size=8) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
 class LargeEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=16, dataflow="is") ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class WSEinsteinRocketConfig extends Config(
-  new einstein.DenseEinsteinConfig("ws") ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class SmallWSEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=4, dataflow="ws") ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class MidWSEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=8, dataflow="ws") ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class LargeWSEinsteinRocketConfig extends Config(
-  new einstein.LargeDenseEinsteinConfig(size=16, dataflow="ws") ++
+  new einstein.LargeDenseEinsteinConfig(size=16) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -115,46 +95,6 @@ class MidSparseDenseEinsteinRocketConfig extends Config(
 
 class LargeSparseDenseEinsteinRocketConfig extends Config(
   new einstein.SparseDenseEinsteinConfig(size = 16) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class SpDenseMVEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 2, isFloat = false) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class SmallSpDenseMVEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 4, isFloat = false) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class MidSpDenseMVEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 8, isFloat = false) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class LargeSpDenseMVEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 16, isFloat = false) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class SpDenseMVFloatEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 2, isFloat = true) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class SmallSpDenseMVFloatEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 4, isFloat = true) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class MidSpDenseMVFloatEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 8, isFloat = true) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
-
-class LargeSpDenseMVFloatEinsteinRocketConfig extends Config(
-  new einstein.SpDenseMVEinsteinConfig(size = 16, isFloat = true) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
