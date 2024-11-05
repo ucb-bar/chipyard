@@ -12,6 +12,12 @@
 
 To get started using Chipyard, see the documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
 
+## Accelerated Setup
+
+The setup instructions given in the Chipyard documentation are automated to simplify setup. First, download setup_chipyard.sh from the repo and place it in your home directory on a Linux/Ubuntu machine. Then run it as follows:
+
+`./setup_chipyard.sh`
+
 ## What is Chipyard
 
 Chipyard is an open source framework for agile development of Chisel-based systems-on-chip.
