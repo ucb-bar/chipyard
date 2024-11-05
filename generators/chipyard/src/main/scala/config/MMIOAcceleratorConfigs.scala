@@ -34,7 +34,7 @@ class GCDHLSRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class DMARocketConfig extends Config(
-  new cnnHwAccelator.WithDMA ++  // Use DMA, connect Tilelink
+  new cnnHwAccelerator.WithDMA ++  // Use DMA, connect Tilelink
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
