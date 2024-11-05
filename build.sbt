@@ -155,7 +155,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
 
 lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
-    dsptools, rocket_dsp_utils,
+    dsptools, rocket_dsp_utils, cnn_hw_accelerator,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
     constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
     compressacc, saturn, ara, firrtl2_bridge, vexiiriscv)
@@ -402,6 +402,16 @@ lazy val firechip_bridgestubs = (project in file("generators/firechip/bridgestub
 lazy val firechip = (project in file("generators/firechip/chip"))
   .dependsOn(chipyard, firesim_lib % "compile->compile;test->test", firechip_bridgestubs, firechip_bridgeinterfaces)
   .settings(
+    chiselSettings,
+    commonSettings,
+    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
+    Test / testOptions += Tests.Argument("-oF")
+  )
+  .settings(scalaTestSettings)
+
+lazy val cnn_hw_accelerator = (project in file("generators/cnn-hw-accelerator"))
+  .dependsOn(rocketchip, rocket_dsp_utils)
+  .settings(libraryDependencies ++= rocketLibDeps.value,
     chiselSettings,
     commonSettings,
     Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
