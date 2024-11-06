@@ -3,17 +3,16 @@ package chipyard.fpga.zcu102
 import sys.process._
 
 import org.chipsalliance.cde.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
-import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
-import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
-import freechips.rocketchip.diplomacy.{RegionType, AddressSet}
-import freechips.rocketchip.resources.{DTSModel, DTSTimebase}
+
+import freechips.rocketchip.subsystem.{SystemBusKey, ExtMem}
+import freechips.rocketchip.devices.debug.{JTAG}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
+import freechips.rocketchip.resources.{DTSTimebase}
 
 
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
 
-import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{ZCU102ShellPMOD, ZCU102DDRSize}
 
 import testchipip.serdes.{SerialTLKey}
@@ -30,14 +29,13 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 class WithSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
-    // invoke makefile for sdboot
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-   val make = s"make -C fpga/src/main/resources/zcu102/sdboot PBUS_CLK=${freqMHz} bin"
-   require (make.! == 0, "Failed to build bootrom")
-   p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/zcu102/sdboot/build/sdboot.bin")
+    val make = s"make -C fpga/src/main/resources/zcu102/sdboot PBUS_CLK=${freqMHz} bin"
+    require (make.! == 0, "Failed to build bootrom")
+    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/zcu102/sdboot/build/sdboot.bin")
   }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(ZCU102DDRSize)))) // set extmem to DDR size
-  case SerialTLKey => Nil // remove serialized tl port
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(ZCU102DDRSize))))
+  case SerialTLKey => Nil
 })
 
 // DOC include start: AbstractZCU102 and Rocket
@@ -57,9 +55,9 @@ class WithZCU102Tweaks extends Config(
   new chipyard.iobinders.WithSPIIOPunchthrough ++  // Is it correctly?
   // other configuration
   new WithDefaultPeripherals ++
-  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
-  new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-  // new chipyard.config.WithNoDebug ++ // remove debug module
+  new chipyard.config.WithTLBackingMemory ++
+  new WithSystemModifications ++
+  // new chipyard.config.WithNoDebug ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )
@@ -79,7 +77,7 @@ class RocketZCU102ConfigWithHyp extends Config(
 class BoomZCU102Config extends Config(
   new WithFPGAFrequency(50) ++
   new WithZCU102Tweaks ++
-  new chipyard.MegaBoomV3Config) //Changed to Small from Mega
+  new chipyard.MegaBoomV3Config)
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.harness.WithHarnessBinderClockFreqMHz(fMHz) ++

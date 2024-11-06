@@ -9,7 +9,6 @@ object FMCMap {
     // See https://www.xilinx.com/support/documentation/boards_and_kits/vcu118/ug1224-vcu118-eval-bd.pdf
     // Pages 97-98
     // Omitted pins are not connected to a GPIO
-    // ZCU106 Updates: https://docs.xilinx.com/v/u/en-US/ug1244-zcu106-eval-bd
     // Pages 105-109
     def apply(fmcPin: String): String = HashMap(
         //pg 105
