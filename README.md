@@ -14,7 +14,7 @@ To get started using Chipyard, see the documentation on the Chipyard documentati
 
 ## Accelerated Setup
 
-The setup instructions given in the Chipyard documentation are automated to simplify setup. First, download setup_chipyard.sh from the repo and place it in your home directory on a Linux/Ubuntu machine. Then run it as follows:
+The setup instructions given in the Chipyard documentation are automated to simplify setup. First, download [setup_chipyard.sh](https://github.com/osowatzke/chipyard/blob/main/setup_chipyard.sh) from the repo and place it in your home directory on a Linux/Ubuntu machine. Then run it as follows:
 
 `source setup_chipyard.sh`
 
