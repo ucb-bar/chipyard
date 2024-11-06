@@ -86,6 +86,19 @@ ifeq ($(SUB_PROJECT),arty100t)
 	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
 endif
+ifeq ($(SUB_PROJECT),zcu102)
+	SBT_PROJECT	      ?= chipyard_fpga
+	MODEL             ?= ZCU102FPGATestHarness
+	VLOG_MODEL        ?= ZCU102FPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.zcu102
+	CONFIG            ?= RocketZCU102Config
+	CONFIG_PACKAGE    ?= chipyard.fpga.zcu102
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none
+	TOP               ?= ChipTop
+	BOARD             ?= zcu102
+	FPGA_BRAND        ?= xilinx
+endif
 
 export USE_CHISEL6=1
 
