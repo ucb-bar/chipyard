@@ -4,7 +4,7 @@ import chisel3._
 
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters, Field}
-import freechips.rocketchip.tilelink.{TLInwardNode, TLAsyncCrossingSink}
+import freechips.rocketchip.tilelink.{TLAsyncCrossingSink}
 import freechips.rocketchip.prci._
 import sifive.fpgashells.shell._
 import sifive.fpgashells.ip.xilinx._
@@ -81,9 +81,7 @@ class DDR2ZCU102PlacedOverlay(val shell: ZCU102FPGATestHarness, name: String, va
     port.sys_rst := sys.reset // pllReset
     port.c0_ddr4_aresetn := !(ar.reset.asBool)
 
-    // This was just copied from the SiFive example, but it's hard to follow.
-    // The pins are emitted in the following order:
-    // adr[0->13], we_n, cas_n, ras_n, bg, ba[0->1], reset_n, act_n, ck_c, ck_t, cke, cs_n, odt, dq[0->63], dqs_c[0->7], dqs_t[0->7], dm_dbi_n[0->7]
+    // Fill from zcu102 manual.
     val allddrpins = Seq(
 
       "AM8", "AM9", "AP8", "AN8", "AK10", "AJ10", "AP9", "AN9", "AP10", "AP11", "AM10", "AL10", "AM11", "AL11",  // adr[0->13]

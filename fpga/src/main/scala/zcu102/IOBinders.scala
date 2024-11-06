@@ -4,6 +4,7 @@ package chipyard.fpga.zcu102
 /*
   This file has been replaced by 
   new chipyard.iobinders.WithUARTTSIPunchthrough ++
+  new chipyard.iobinders.WithSPIIOPunchthrough ++
 */
 
 // import chisel3._
