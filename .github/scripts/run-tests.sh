@@ -29,8 +29,7 @@ run_binary () {
 }
 
 build_tests() {
-    cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-    cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+    (cd $LOCAL_CHIPYARD_DIR/tests && cmake . && make)
 }
 
 case $1 in
