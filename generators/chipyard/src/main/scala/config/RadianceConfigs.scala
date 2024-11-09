@@ -26,6 +26,7 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
 class VirgoConfig extends RadianceClusterConfig
 class VirgoFP16Config extends RadianceFP16ClusterConfig
 class VirgoHopperConfig extends Radiance4CFP16ClusterConfig
+class VirgoFlashConfig extends RadianceClusterConfig
 class VirgoSynConfig extends RadianceClusterSynConfig
 class VirgoFP16SynConfig extends RadianceFP16ClusterSynConfig
 class VirgoHopperSynConfig extends Radiance4CFP16ClusterSynConfig
@@ -60,12 +61,23 @@ class RadianceFP16ClusterConfig extends Config(
   new radiance.subsystem.WithRadianceCluster(0) ++
   new RadianceBaseConfig)
 
+class Radiance8B8WFP16ClusterConfig extends Config(
+  new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 32, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
+  new radiance.subsystem.WithRadianceCores(8, location = InCluster(0), tensorCoreFP16 = true, tensorCoreDecoupled = false, useVxCache = false) ++
+  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 8, numWords = 8) ++
+  new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
+  new radiance.subsystem.WithVortexL1Banks(nBanks = 8) ++
+  new radiance.subsystem.WithRadianceCluster(0) ++
+  new RadianceBaseConfig)
+
 class Radiance4CFP16ClusterConfig extends Config(
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 32, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
   new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), tensorCoreFP16 = true, tensorCoreDecoupled = true, useVxCache = false) ++
   // new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 16,
   //                                              memType = radiance.subsystem.TwoReadOneWrite,
   //                                              serializeUnaligned = radiance.subsystem.CoreSerialized) ++
+  // NOTE: Hopper Tensor Core does not work with 16-word config due to the
+  // address alignment requirement
   new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 128 << 10, numBanks = 4, numWords = 8) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8) ++
@@ -75,8 +87,7 @@ class Radiance4CFP16ClusterConfig extends Config(
 class RadianceClusterConfig extends Config(
   // important to keep gemmini tile before RadianceCores to ensure radiance tile id is 0-indexed
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
-  // new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
-  new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), tensorCoreFP16 = false, tensorCoreDecoupled = true, useVxCache = false) ++
+  new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), tensorCoreFP16 = false, tensorCoreDecoupled = false, useVxCache = false) ++
   // new radiance.subsystem.WithRadianceFrameBuffer(x"ff018000", 16, 0x8000, x"ff011000", "fb0") ++
   new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 256 << 10/*KBytes*/, numBanks = 8, numWords = 8,
                                                // memType = radiance.subsystem.TwoReadOneWrite,
