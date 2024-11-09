@@ -78,8 +78,8 @@ class RadianceClusterConfig extends Config(
   // new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 8, accSizeInKB = 16, tileSize = 8) ++
   new radiance.subsystem.WithRadianceCores(4, location = InCluster(0), tensorCoreFP16 = false, tensorCoreDecoupled = true, useVxCache = false) ++
   // new radiance.subsystem.WithRadianceFrameBuffer(x"ff018000", 16, 0x8000, x"ff011000", "fb0") ++
-  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 256 << 10/*KBytes*/, numBanks = 4, numWords = 16,
-                                               memType = radiance.subsystem.TwoReadOneWrite,
+  new radiance.subsystem.WithRadianceSharedMem(address = x"ff000000", size = 256 << 10/*KBytes*/, numBanks = 8, numWords = 8,
+                                               // memType = radiance.subsystem.TwoReadOneWrite,
                                                serializeUnaligned = radiance.subsystem.CoreSerialized) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 16) ++
   new radiance.subsystem.WithVortexL1Banks(nBanks = 8) ++
