@@ -13,9 +13,9 @@ class NoCoresConfig extends Config(
   new chipyard.config.WithNoUART ++
   new chipyard.config.WithNoTileClockGaters ++
   new chipyard.config.WithNoTileResetSetters ++
-  new chipyard.config.WithNoBusErrorDevices ++
   new chipyard.config.WithNoDebug ++
   new chipyard.config.WithNoPLIC ++
+  new chipyard.config.WithNoBusErrorDevices ++
   new chipyard.config.AbstractConfig)
 
 // A config that uses a empty chiptop module with no rocket-chip soc components

@@ -6,6 +6,7 @@ runs:
   steps:
     - name: Remove extra conda environments
       run: |
+        conda env list
         CONDA_REMOVE_NAMES=$(conda env list | awk '{print $1}' | tail -n +3 | grep "${{ env.conda-env-name-no-time }}" || true)
         if [ -z "$CONDA_REMOVE_NAMES" ]; then
           echo "No matching conda environments for ${{ env.conda-env-name-no-time }}. Skip removal."

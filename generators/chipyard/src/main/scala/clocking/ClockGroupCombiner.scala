@@ -48,11 +48,12 @@ class ClockGroupCombiner(implicit p: Parameters, v: ValName) extends LazyModule 
       val name = combiners(i)._1
       i = i + 1
       require(g.size >= 1)
+      val names = g.map(_.name.getOrElse("unamed"))
       val takes = g.map(_.take).flatten
       require(takes.distinct.size <= 1,
-        s"Clock group $name has non-homogeneous requested ClockParameters $takes")
+        s"Clock group '$name' has non-homogeneous requested ClockParameters ${names.zip(takes)}")
       require(takes.size > 0,
-        s"Clock group $name has no inheritable frequencies")
+        s"Clock group '$name' has no inheritable frequencies")
       (grouped ++ Seq(ClockSinkParameters(take = takes.headOption, name = Some(name))), r)
     }
 

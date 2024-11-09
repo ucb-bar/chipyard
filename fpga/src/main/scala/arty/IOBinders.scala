@@ -1,7 +1,6 @@
 package chipyard.fpga.arty
 
 import chisel3._
-import chisel3.experimental.{IO}
 
 import freechips.rocketchip.devices.debug.{HasPeripheryDebug}
 

@@ -1,7 +1,6 @@
 package chipyard
 
 import org.chipsalliance.cde.config.{Config}
-import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem.{SBUS, MBUS}
 
 import constellation.channel._
@@ -82,7 +81,7 @@ class MultiNoCConfig extends Config(
         "L2 InclusiveCache[2]" -> 5, "L2 InclusiveCache[3]" -> 6),
       outNodeMapping = ListMap(
         "system[0]" -> 0, "system[1]" -> 3,  "system[2]" -> 4 , "system[3]" -> 7,
-        "serial_tl_0" -> 0)),
+        "ram[0]" -> 0)),
     NoCParams(
       topology        = TerminalRouter(BidirectionalTorus1D(8)),
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
@@ -102,7 +101,7 @@ class MultiNoCConfig extends Config(
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(8) { UserVirtualChannelParams(4) }),
       routingRelation = BlockingVirtualSubnetworksRouting(TerminalRouterRouting(Mesh2DEscapeRouting()), 5, 1))
   )) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(8) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(8) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++
   new chipyard.config.AbstractConfig
@@ -181,7 +180,7 @@ class SharedNoCConfig extends Config(
         "system[0]" -> 0, "system[1]" -> 2, "system[2]" -> 8, "system[3]" -> 6,
         "pbus" -> 4))
   )) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(8) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(8) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new chipyard.config.AbstractConfig
@@ -217,7 +216,7 @@ class SbusRingNoCConfig extends Config(
       channelParamGen = (a, b) => UserChannelParams(Seq.fill(4) { UserVirtualChannelParams(1) }),
       routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 2, 2))
   )) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(8) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(8) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.AbstractConfig
 )
@@ -261,9 +260,32 @@ class SbusMeshNoCConfig extends Config(
     ),
     beDivision = 4
   ), inlineNoC = true) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(12) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(12) ++
   new freechips.rocketchip.subsystem.WithNBanks(4) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig
 )
 
+class QuadRocketSbusRingNoCConfig extends Config(
+  new constellation.soc.WithSbusNoC(constellation.protocol.SimpleTLNoCParams(
+    constellation.protocol.DiplomaticNetworkNodeMapping(
+      inNodeMapping = ListMap(
+        "Core 0 " -> 0,
+        "Core 1 " -> 1,
+        "Core 2 " -> 2,
+        "Core 3 " -> 3,
+        "serial_tl" -> 4),
+      outNodeMapping = ListMap(
+        "system[0]" -> 5,
+        "system[1]" -> 6,
+        "system[2]" -> 7,
+        "system[3]" -> 8,
+        "pbus" -> 4)), // TSI is on the pbus, so serial-tl and pbus should be on the same node
+    nocParams = NoCParams(
+      topology        = UnidirectionalTorus1D(9),
+      channelParamGen = (a, b) => UserChannelParams(Seq.fill(10) { UserVirtualChannelParams(4) }),
+      routingRelation = NonblockingVirtualSubnetworksRouting(UnidirectionalTorus1DDatelineRouting(), 5, 2))
+  )) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(4) ++
+  new freechips.rocketchip.subsystem.WithNBanks(4) ++
+  new chipyard.config.AbstractConfig)

@@ -10,7 +10,12 @@ if [ ! -d "$REQS_DIR" ]; then
   exit 1
 fi
 
-for TOOLCHAIN_TYPE in riscv-tools esp-tools; do
+if ! conda-lock --version | grep $(grep "conda-lock" $REQS_DIR/chipyard-base.yaml | sed 's/^ \+-.*=//'); then
+  echo "Invalid conda-lock version, make sure you're calling this script with the sourced chipyard env.sh"
+  exit 1
+fi
+
+for TOOLCHAIN_TYPE in riscv-tools; do
     # note: lock file must end in .conda-lock.yml - see https://github.com/conda-incubator/conda-lock/issues/154
     LOCKFILE=$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-linux-64.conda-lock.yml
     rm -rf $LOCKFILE

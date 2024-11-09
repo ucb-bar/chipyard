@@ -20,6 +20,10 @@ Processor Cores
   An out-of-order RISC-V core.
   See :ref:`Generators/BOOM:Berkeley Out-of-Order Machine (BOOM)` for more information.
 
+**Shuttle Core**
+  A superscalar in-order RISC-V core.
+  See :ref:`Generators/Shuttle:Shuttle RISC-V Core` for more information
+
 **CVA6 Core**
   An in-order RISC-V core written in System Verilog. Previously called Ariane.
   See :ref:`Generators/CVA6:CVA6 Core` for more information.
@@ -28,21 +32,16 @@ Processor Cores
   An in-order 32 bit RISC-V core written in System Verilog.
   See :ref:`Generators/Ibex:Ibex Core` for more information.
 
+**VexiiRiscv Core**
+  A dual-issue in-order 64 bit RISC-V core implemented in SpinalHDL
+  See :ref:`Generators/VexiiRiscv:VexiiRiscv Core` for more information.
+
+
 Accelerators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Hwacha**
-  A decoupled vector architecture co-processor.
-  Hwacha currently implements a non-standard RISC-V extension, using a vector architecture programming model.
-  Hwacha integrates with a Rocket or BOOM core using the RoCC (Rocket Custom Co-processor) interface.
-  See :ref:`Generators/Hwacha:Hwacha` for more information.
-
 **Gemmini**
   A matrix-multiply accelerator targeting neural-networks
-
-**SHA3**
-  A fixed-function accelerator for the SHA3 hash function. This simple accelerator is used as a demonstration for some of the
-  Chipyard integration flows using the RoCC interface.
 
 System Components:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -94,10 +93,6 @@ Toolchains
   The include compiler and assembler toolchains, functional ISA simulator (spike), the Berkeley Boot Loader (BBL) and proxy kernel.
   The riscv-tools repository was previously required to run any RISC-V software, however, many of the riscv-tools components have since been upstreamed to their respective open-source projects (Linux, GNU, etc.).
   Nevertheless, for consistent versioning, as well as software design flexibility for custom hardware, we include the riscv-tools repository and installation in the Chipyard framework.
-
-**esp-tools**
-  A fork of riscv-tools, designed to work with the Hwacha non-standard RISC-V extension.
-  This fork can also be used as an example demonstrating how to add additional RoCC accelerators to the ISA-level simulation (Spike) and the higher-level software toolchain (GNU binutils, riscv-opcodes, etc.)
 
 Software
 -------------------------------------------

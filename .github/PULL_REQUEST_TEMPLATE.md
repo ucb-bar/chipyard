@@ -42,3 +42,12 @@ Provide a brief description of the PR immediately below this comment, if the tit
 - [ ] (If applicable) Did you add a test demonstrating the PR?
 <!-- Do this if this PR is a bugfix that should be applied to the latest release -->
 - [ ] (If applicable) Did you mark the PR as `Please Backport`?
+
+
+**CI Help**:
+Add the following labels to modify the CI for a set of features.
+Generally, a label added only affect subsequent changes to the PR (i.e. new commits, force pushing, closing/reopening).
+See `ci:*` for full list of labels:
+- `ci:fpga-deploy` - Run FPGA-based E2E testing
+- `ci:local-fpga-buildbitstream-deploy` - Build local FPGA bitstreams for platforms that are released
+- `ci:disable` - Disable CI

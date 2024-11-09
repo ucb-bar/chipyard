@@ -15,8 +15,9 @@ defaults:
     shell: bash -leo pipefail {0}
 
 env:
-  REMOTE_WORK_DIR: ${{ secrets.BUILDDIR }}/cy-ci-shared/cy-${{ github.sha }}
-  JAVA_TMP_DIR: /tmp/cy-${{ github.sha }}-full
+  # temporary directories should be located in /scratch (since it's larger)
+  REMOTE_WORK_DIR: /scratch/buildbot/cy-ci-shared/cy-workdir-${{ github.sha }}
+  JAVA_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-javatmpdir-${{ github.sha }}
 
 jobs:
   cancel-prior-workflows:
@@ -24,9 +25,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
+
+  start-workflow:
+    name: start-workflow
+    # unable to access env context in job.if thus have to put gh-a context expression directly here.
+    # note that the check is using a boolean true instead of string 'true' since it's directly using
+    # the expression not a variable like if checking against the env context string.
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') != true }}
+    runs-on: ubuntu-22.04
+    steps:
+      - run: true
 
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute This is based off the conditional job execution
@@ -34,15 +45,15 @@ jobs:
   change-filters:
     name: filter-jobs-on-changes
     runs-on: ubuntu-latest
+    needs: start-workflow
     # Queried by downstream jobs to determine if they should run.
     outputs:
       needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Git workaround
         uses: ./.github/actions/git-workaround
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -60,9 +71,12 @@ jobs:
               - '**/*.md'
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
+              - '.github/PULL_REQUEST_TEMPLATE.md'
+              - '.github/dependabot.yml'
+              - '.mergify.yml'
 
-  setup-repo:
-    name: setup-repo
+  full-flow:
+    name: full-flow
     needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: as4
@@ -73,7 +87,7 @@ jobs:
             rm -rf ${{ github.workspace }}/* || true
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup repo copy
         run: |
           git clone $GITHUB_WORKSPACE ${{ env.REMOTE_WORK_DIR }}
@@ -83,13 +97,8 @@ jobs:
           eval "$(conda shell.bash hook)"
           mkdir ${{ env.JAVA_TMP_DIR }}
           export MAKEFLAGS="-j32"
+          git submodule sync
           ./build-setup.sh -v
-
-  run-cfg-finder:
-    name: run-cfg-finder
-    needs: [setup-repo]
-    runs-on: as4
-    steps:
       - name: Run config finder
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
@@ -97,12 +106,6 @@ jobs:
           source env.sh
           cd sims/verilator
           make find-config-fragments
-
-  run-tutorial:
-    name: run-tutorial
-    needs: [setup-repo]
-    runs-on: as4
-    steps:
       - name: Run smoke test
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
@@ -118,20 +121,23 @@ jobs:
 
           cd vlsi
 
+          # remove extra channels if put in by default (avoid clashing deps)
+          conda config --remove channels litex-hub || true
+          conda config --remove channels defaults || true
+
           # NOTE: most conda installs are in separate conda envs because they mess up
           #   each other's versions (for no apparent reason) and we need the latest versions
-          conda config --add channels defaults
-          conda config --add channels litex-hub
 
           # installs for example-sky130.yml
-          conda create -y --prefix ./.conda-sky130 open_pdks.sky130a=1.0.457_0_g32e8f23
+          conda create -y --prefix ./.conda-sky130   -c defaults -c litex-hub open_pdks.sky130a=1.0.457_0_g32e8f23
           git clone https://github.com/rahulk29/sram22_sky130_macros.git
+          git -C sram22_sky130_macros checkout 1f20d16
 
           # installs for example-openroad.yml
-          conda create -y --prefix ./.conda-yosys yosys=0.27_4_gb58664d44
-          conda create -y --prefix ./.conda-openroad openroad=2.0_7070_g0264023b6
-          conda create -y --prefix ./.conda-klayout klayout=0.28.5_98_g87e2def28
-          conda create -y --prefix ./.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
+          conda create -y --prefix ./.conda-yosys    -c defaults -c litex-hub yosys=0.27_4_gb58664d44
+          conda create -y --prefix ./.conda-openroad -c defaults -c litex-hub openroad=2.0_7070_g0264023b6
+          conda create -y --prefix ./.conda-klayout  -c defaults -c litex-hub klayout=0.28.5_98_g87e2def28
+          conda create -y --prefix ./.conda-signoff  -c defaults -c litex-hub magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
 
           echo "# Tutorial configs" > tutorial.yml
           echo "# pdk" > tutorial.yml
@@ -150,9 +156,6 @@ jobs:
           echo "par.openroad.timing_driven: false" >> tutorial.yml
           echo "par.openroad.write_reports: false" >> tutorial.yml
 
-          conda config --remove channels litex-hub
-          conda config --remove channels defaults
-
           export tutorial=sky130-openroad
           export EXTRA_CONFS=tutorial.yml
           export VLSI_TOP=RocketTile
@@ -165,11 +168,35 @@ jobs:
           # make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
           # make drc
           # make lvs
-
+      - name: Run FireChip bridge tests
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+          pushd sims/firesim
+          source sourceme-manager.sh --skip-ssh-setup
+          popd
+          cd sims/firesim-staging
+          export TEST_DISABLE_VERILATOR=1
+          export TEST_DISABLE_VIVADO=1
+          make launch-sbt SBT_COMMAND=";project firechip_bridgestubs; testOnly firechip.bridgestubs.BridgeTests"
+      - name: Run FireChip FireSim target tests
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+          pushd sims/firesim
+          source sourceme-manager.sh --skip-ssh-setup
+          popd
+          cd sims/firesim-staging
+          export TEST_MINIMAL_BENCHMARKS=1 # seems like dhrystone is the longest so this doesn't affect runtime much
+          export TEST_DISABLE_VERILATOR=1
+          export TEST_DISABLE_VIVADO=1
+          make launch-sbt SBT_COMMAND=";project firechip; testOnly firechip.chip.CITests"
 
   cleanup:
     name: cleanup
-    needs: [run-tutorial]
+    needs: [full-flow]
     runs-on: as4
     if: ${{ always() }}
     steps:

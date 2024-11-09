@@ -2,7 +2,7 @@ package chipyard.config
 
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.diplomacy.{DTSTimebase}
+import freechips.rocketchip.resources.{DTSTimebase}
 import sifive.blocks.inclusivecache.{InclusiveCachePortParameters}
 
 // Replaces the L2 with a broadcast manager for maintaining coherence
@@ -16,6 +16,10 @@ class WithBroadcastParams(params: BroadcastParams) extends Config((site, here, u
 
 class WithSystemBusWidth(bitWidth: Int) extends Config((site, here, up) => {
   case SystemBusKey => up(SystemBusKey, site).copy(beatBytes=bitWidth/8)
+})
+
+class WithInclusiveCacheWriteBytes(b: Int) extends Config((site, here, up) => {
+  case InclusiveCacheKey => up(InclusiveCacheKey).copy(writeBytes = b)
 })
 
 // Adds buffers on the interior of the inclusive LLC, to improve PD

@@ -20,7 +20,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_uncore_clock", period: "20ns", uncertainty: "1ns"}
+  {name: "clock_uncore", period: "20ns", uncertainty: "1ns"}
 ]
 
 # Generate Make include to aid in flow
@@ -33,40 +33,45 @@ vlsi.inputs.placement_constraints:
     type: toplevel
     x: 0
     y: 0
-    width: 4000
-    height: 3000
+    width: 3588
+    height: 2992
     margins:
-      left: 10
-      right: 0
-      top: 10
-      bottom: 10
+      left: 10.12
+      right: 10.12
+      top: 10.88
+      bottom: 10.88
 
   # Place SRAM memory instances
-    # data cache
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_0_0"
+  # data cache
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/rockettile_dcache_data_arrays_0/rockettile_dcache_data_arrays_0_ext/mem_0_0"
     type: hardmacro
-    x: 50
-    y: 50
+    x: 49.68
+    y: 149.6
     orientation: r90
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/dcache/data/data_arrays_0/data_arrays_0_ext/mem_1_0"
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/rockettile_dcache_data_arrays_1/rockettile_dcache_data_arrays_0_ext/mem_0_0"
     type: hardmacro
-    x: 50
-    y: 800
+    x: 49.68
+    y: 748
     orientation: r90
 
   # tag array
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/tag_array_0/tag_array_0_ext/mem_0_0"
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_tag_array_0/rockettile_icache_tag_array_0_ext/mem_0_0"
     type: hardmacro
-    x: 50
-    y: 1600
-    orientation: r90
+    x: 2612.8
+    y: 1033.6
+    orientation: mx90
 
   # instruction cache
-  - path: "ChipTop/system/tile_prci_domain/tile_reset_domain_tile/frontend/icache/data_arrays_0_0/data_arrays_0_0_ext/mem_0_0"
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_data_arrays_0_0/rockettile_icache_data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
-    x: 50
-    y: 2100
-    orientation: r90
+    x: 2612.8
+    y: 149.6
+    orientation: mx90
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_data_arrays_1_0/rockettile_icache_data_arrays_0_0_ext/mem_0_0"
+    type: hardmacro
+    x: 2612.8
+    y: 598.4
+    orientation: mx90
 
 
 # Power Straps

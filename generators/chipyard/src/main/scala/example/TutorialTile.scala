@@ -14,7 +14,7 @@ import freechips.rocketchip.interrupts._
 import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.amba.axi4._
-import freechips.rocketchip.prci.ClockSinkParameters
+import freechips.rocketchip.prci._
 
 // Example parameter class copied from CVA6, not included in documentation but for compile check only
 // If you are here for documentation, DO NOT copy MyCoreParams and MyTileParams directly - always figure
@@ -26,6 +26,8 @@ case class MyCoreParams(
   bhtEntries: Int = 16,
   enableToFromHostCaching: Boolean = false,
 ) extends CoreParams {
+  val xLen: Int = 32
+  val pgLevels: Int = 2
   val useVM: Boolean = true
   val useHypervisor: Boolean = false
   val useUser: Boolean = true
@@ -62,12 +64,11 @@ case class MyCoreParams(
   val decodeWidth: Int = 1 // TODO: Check
   val fetchWidth: Int = 1 // TODO: Check
   val retireWidth: Int = 2
-  val useBitManip: Boolean = false
-  val useBitManipCrypto: Boolean = false
-  val useCryptoNIST: Boolean = false
-  val useCryptoSM: Boolean = false
   val traceHasWdata: Boolean = false
   val useConditionalZero = false
+  val useZba: Boolean = false
+  val useZbb: Boolean = false
+  val useZbs: Boolean = false
 }
 
 // DOC include start: CanAttachTile
@@ -245,8 +246,6 @@ class WithNMyCores(n: Int = 1) extends Config((site, here, up) => {
   }
   // Configurate # of bytes in one memory / IO transaction. For RV64, one load/store instruction can transfer 8 bytes at most.
   case SystemBusKey => up(SystemBusKey, site).copy(beatBytes = 8)
-  // The # of instruction bits. Use maximum # of bits if your core supports both 32 and 64 bits.
-  case XLen => 64
   case NumTiles => up(NumTiles) + n
 })
 // DOC include end: Config fragment

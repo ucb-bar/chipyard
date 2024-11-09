@@ -17,7 +17,7 @@ sim_name := none
 SUB_PROJECT ?= vcu118
 
 ifeq ($(SUB_PROJECT),vc707)
-	SBT_PROJECT       ?= fpga_platforms
+	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= VC707FPGATestHarness
 	VLOG_MODEL        ?= VC707FPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.vc707
@@ -31,7 +31,7 @@ ifeq ($(SUB_PROJECT),vc707)
 endif
 
 ifeq ($(SUB_PROJECT),vcu118)
-	SBT_PROJECT       ?= fpga_platforms
+	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= VCU118FPGATestHarness
 	VLOG_MODEL        ?= VCU118FPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.vcu118
@@ -45,7 +45,7 @@ ifeq ($(SUB_PROJECT),vcu118)
 endif
 
 ifeq ($(SUB_PROJECT),nexysvideo)
-	SBT_PROJECT       ?= fpga_platforms
+	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= NexysVideoHarness
 	VLOG_MODEL        ?= NexysVideoHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.nexysvideo
@@ -60,7 +60,7 @@ endif
 
 ifeq ($(SUB_PROJECT),arty35t)
 	# TODO: Fix with Arty
-	SBT_PROJECT       ?= fpga_platforms
+	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= Arty35THarness
 	VLOG_MODEL        ?= Arty35THarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty
@@ -74,7 +74,7 @@ ifeq ($(SUB_PROJECT),arty35t)
 endif
 ifeq ($(SUB_PROJECT),arty100t)
 	# TODO: Fix with Arty
-	SBT_PROJECT       ?= fpga_platforms
+	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= Arty100THarness
 	VLOG_MODEL        ?= Arty100THarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
@@ -86,6 +86,8 @@ ifeq ($(SUB_PROJECT),arty100t)
 	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
 endif
+
+export USE_CHISEL6=1
 
 include $(base_dir)/variables.mk
 

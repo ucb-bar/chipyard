@@ -3,7 +3,7 @@ package chipyard
 import scala.collection.mutable.{LinkedHashSet}
 
 import freechips.rocketchip.subsystem._
-import freechips.rocketchip.tile.{XLen, TileParams}
+import freechips.rocketchip.tile.{TileParams}
 import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite, RocketTestSuite}
 
@@ -64,7 +64,7 @@ class TestSuiteHelper
   * Add generic tests (asm, bmark, regression) for all cores.
   */
   def addGenericTestSuites(tiles: Seq[TileParams])(implicit p: Parameters) = {
-    val xlen = p(XLen)
+    val xlen = p(MaxXLen)
     tiles.find(_.tileId == 0).map { tileParams =>
       val coreParams = tileParams.core
       val vm = coreParams.useVM
@@ -95,6 +95,9 @@ class TestSuiteHelper
       val (rvi, rvu) =
         if (xlen == 64) ((if (vm) rv64i else rv64pi), (if (coreParams.mulDiv.isDefined) rv64u else List(rv64ui)))
         else            ((if (vm) rv32i else rv32pi), (if (coreParams.mulDiv.isDefined) rv32u else List(rv32ui)))
+      if (coreParams.useZba) addSuites(env.map(if (xlen == 64) rv64uzba else rv32uzba))
+      if (coreParams.useZbb) addSuites(env.map(if (xlen == 64) rv64uzbb else rv32uzbb))
+      if (coreParams.useZbs) addSuites(env.map(if (xlen == 64) rv64uzbs else rv32uzbs))
 
       addSuites(rvi.map(_("p")))
       addSuites(rvu.map(_("p")))

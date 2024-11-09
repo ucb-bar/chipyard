@@ -9,7 +9,7 @@ Chipyard is developed and tested on Linux-based systems.
 .. Warning:: It is possible to use this on macOS or other BSD-based systems, although GNU tools will need to be installed;
     it is also recommended to install the RISC-V toolchain from ``brew``.
 
-.. Warning:: If using Windows, it is recommended that you use `Windows Subsystem for Linux <https://learn.microsoft.com/en-us/windows/wsl/> (WSL)`.
+.. Warning:: If using Windows, it is recommended that you use `Windows Subsystem for Linux (WSL) <https://learn.microsoft.com/en-us/windows/wsl/>`.
 
 Running on AWS EC2 with FireSim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,12 +41,11 @@ Next, we install `libmamba <https://www.anaconda.com/blog/a-faster-conda-for-a-g
     conda install -n base conda-libmamba-solver
     conda config --set solver libmamba
 
-Finally we need to install ``conda-lock`` into the ``base`` conda environment.
-This is done by the following:
+Next ensure that you are able to use Conda.
+By default after Conda's setup you should already be in the ``base`` environment but you can run the following to enter it if needed:
 
 .. code-block:: shell
 
-    conda install -n base conda-lock==1.4.0
     conda activate base
 
 
@@ -63,11 +62,7 @@ Start by checking out the proper Chipyard version. Run:
     # note: this may not be the latest release if the documentation version != "stable"
     git checkout |version|
 
-Next run the following script to fully setup Chipyard with a specific toolchain.
-There are two toolchains, one for normal RISC-V programs called ``riscv-tools`` which is the one needed for most Chipyard use-cases, and another for Hwacha called ``esp-tools``.
-Run the following script based off which compiler you would like to use.
-
-.. Note:: Prior versions of Chipyard recommended ``esp-tools`` for Gemmini development. Gemmini should now be used with the standard ``riscv-tools``.
+Next run the following script to fully setup Chipyard with the ``riscv-tools`` toolchain.
 
 .. Warning:: The following script will complete a "full" installation of Chipyard which may take a long time depending on the system.
     Ensure that this script completes fully (no interruptions) before continuing on. User can use the ``--skip`` or ``-s`` flag to skip steps:
@@ -96,20 +91,22 @@ Run the following script based off which compiler you would like to use.
 
 .. code-block:: shell
 
-    ./build-setup.sh riscv-tools # or esp-tools
+    ./build-setup.sh riscv-tools
 
 This script wraps around the conda environment initialization process, initializes all submodules (with the ``init-submodules-no-riscv-tools.sh`` script), installs a toolchain, and runs other setups.
 See ``./build-setup.sh --help`` for more details on what this does and how to disable parts of the setup.
 
 .. Warning:: Using ``git`` directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
 
+.. Note:: If the ``build-setup.sh`` script fails on conflict issues, sometimes it helps to run ``conda update -n base --all`` to upgrade all packages in the conda environment.
+
 .. Note:: By default, the ``build-setup.sh`` script installs extra toolchain utilities (RISC-V tests, PK, Spike, etc) to ``$CONDA_PREFIX/<toolchain-type>``. Thus, if you uninstall the compiler using ``conda remove`` these utilities/tests will also have to be re-installed/built.
 
 .. Note:: If you already have a working conda environment setup, separate Chipyard clones can use that pre-used environment in combination with running the aforementioned scripts yourself (``init-submodules...``, ``build-toolchain...``, etc).
 
-.. Note:: If you are a power user and would like to build your own compiler/toolchain, you can refer to the https://github.com/ucb-bar/riscv-tools-feedstock and https://github.com/ucb-bar/esp-tools-feedstock repositories (submoduled in the ``toolchains/*`` directories) on how to build the compiler yourself.
+.. Note:: If you are a power user and would like to build your own compiler/toolchain, you can refer to the https://github.com/ucb-bar/riscv-tools-feedstock repository (submoduled in the ``toolchains/*`` directories) on how to build the compiler yourself.
 
-By running the following command you should see a environment listed with the path ``$CHIPYARD_DIRECTORY/.conda-env``.
+By running the following command you should see an environment listed with the path ``$CHIPYARD_DIRECTORY/.conda-env``.
 
 .. code-block:: shell
 

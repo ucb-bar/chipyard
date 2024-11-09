@@ -21,10 +21,12 @@ usage() {
     echo "Options"
     echo "   --prefix -p PREFIX    : Install destination."
     echo "   --help -h             : Display this message"
+    echo "   --no-conda            : Do not link CIRCT with conda libraries"
     exit "$1"
 }
 
 PREFIX=""
+CONDA=1
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -35,6 +37,8 @@ do
         -p | --prefix )
             shift
             PREFIX=$(realpath $1) ;;
+        --no-conda )
+            unset CONDA ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -71,12 +75,12 @@ echo "Building CIRCT's LLVM/MLIR"
     mkdir llvm/build
     cd llvm/build
     cmake -G Ninja ../llvm \
-	  -DLLVM_ENABLE_PROJECTS="mlir" \
-	  -DLLVM_TARGETS_TO_BUILD="host" \
-	  -DLLVM_ENABLE_ASSERTIONS=ON \
-	  -DCMAKE_BUILD_TYPE=RELEASE \
-	  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-	  -DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"
+          -DLLVM_ENABLE_PROJECTS="mlir" \
+          -DLLVM_TARGETS_TO_BUILD="host" \
+          -DLLVM_ENABLE_ASSERTIONS=ON \
+          -DCMAKE_BUILD_TYPE=RELEASE \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"}
     ninja
 )
 
@@ -87,12 +91,12 @@ echo "Building CIRCT"
     mkdir build
     cd build
     cmake -G Ninja .. \
-	  -DMLIR_DIR=$RDIR/tools/circt/llvm/build/lib/cmake/mlir \
-	  -DLLVM_DIR=$RDIR/tools/circt/llvm/build/lib/cmake/llvm \
-	  -DLLVM_ENABLE_ASSERTIONS=ON \
-	  -DCMAKE_BUILD_TYPE=RELEASE \
-	  -DCMAKE_INSTALL_PREFIX=$PREFIX \
-	  -DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"
+          -DMLIR_DIR=$RDIR/tools/circt/llvm/build/lib/cmake/mlir \
+          -DLLVM_DIR=$RDIR/tools/circt/llvm/build/lib/cmake/llvm \
+          -DLLVM_ENABLE_ASSERTIONS=ON \
+          -DCMAKE_BUILD_TYPE=RELEASE \
+          -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"}
     ninja
 )
 

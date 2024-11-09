@@ -16,7 +16,6 @@ dependencies:
     - constructor
 
     # misc
-    - pre-commit
     - readline
 
     # firemarshal deps
@@ -30,7 +29,7 @@ dependencies:
     - bison
     - flex
     - expat
-    - python>=3.9
+    - python>=3.9,<3.11
     - bc
     - unzip
     - patch
@@ -119,3 +118,4 @@ dependencies:
     - fsspec
     - pip:
         - fab-classic>=1.19.2
+        - bcrypt<4.0.0
