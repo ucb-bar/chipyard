@@ -32,8 +32,6 @@ set(CMAKE_OBJCOPY       "${TOOLCHAIN_PREFIX}objcopy")
 set(CMAKE_OBJDUMP       "${TOOLCHAIN_PREFIX}objdump")
 set(CMAKE_SIZE          "${TOOLCHAIN_PREFIX}size")
 
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY     "${CMAKE_BINARY_DIR}/..")
 set(CMAKE_EXECUTABLE_SUFFIX            ".riscv")
 
 
@@ -98,8 +96,8 @@ add_custom_target(dump ALL)
 # Function to add disassembly target for an executable
 function(add_dump_target target_name)
     add_custom_target(${target_name}-dump
-        BYPRODUCTS ${CMAKE_SOURCE_DIR}/${target_name}.dump
-        COMMAND ${CMAKE_OBJDUMP} -D $<TARGET_FILE:${target_name}> > ${CMAKE_SOURCE_DIR}/${target_name}.dump
+        BYPRODUCTS ${CMAKE_BINARY_DIR}/${target_name}.dump
+        COMMAND ${CMAKE_OBJDUMP} -D $<TARGET_FILE:${target_name}> > ${CMAKE_BINARY_DIR}/${target_name}.dump
         DEPENDS ${target_name}
         COMMENT "Generating disassembly for ${target_name}"
     )
