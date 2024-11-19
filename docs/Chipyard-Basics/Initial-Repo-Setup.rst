@@ -34,13 +34,6 @@ After Conda is installed and is on your ``PATH``, we need to install a version o
 For this you can use the system package manager like ``yum`` or ``apt`` to install ``git``.
 This ``git`` is only used to first checkout the repository, we will later install a newer version of ``git`` with Conda.
 
-Next, we install `libmamba <https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community>`__ for much faster dependency solving when initially setting up the repository.
-
-.. code-block:: shell
-
-    conda install -n base conda-libmamba-solver
-    conda config --set solver libmamba
-
 Next ensure that you are able to use Conda.
 By default after Conda's setup you should already be in the ``base`` environment but you can run the following to enter it if needed:
 
