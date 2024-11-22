@@ -60,8 +60,11 @@ int main() {
         }
     }
 
-    // Save the result to an external file
-    FILE *output_file = fopen("matrix_output.txt", "w");
+    // Specify the desired file path
+    const char *output_path = "/home/bhattisavage/chipyard/tests/matrix_output.txt";  // Update this path
+
+    // Save the result to the specified file path
+    FILE *output_file = fopen(output_path, "w");
     if (output_file == NULL) {
         perror("Error opening file");
         return EXIT_FAILURE;
@@ -79,6 +82,7 @@ int main() {
 
     // Output the result of the benchmark
     printf("CPU Matrix Multiplication took %f seconds\n", cpu_time_used);
+    printf("Matrix output saved to %s\n", output_path);
 
     return 0;
 }
