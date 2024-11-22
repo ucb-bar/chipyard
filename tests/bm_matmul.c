@@ -36,6 +36,9 @@ int main() {
         }
     }
 
+    // Start timing the matrix multiplication
+    clock_t start = clock();
+
     // Copy data from volatile matrices to local matrices
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
@@ -44,14 +47,12 @@ int main() {
         }
     }
 
-    // Start timing the matrix multiplication
-    clock_t start = clock();
+    
 
     // Perform matrix multiplication
     matrix_multiply(local_A, local_B, local_C);
 
-    // Stop timing the matrix multiplication
-    clock_t end = clock();
+    
 
     // Copy the result to the volatile output matrix
     for (int i = 0; i < N; i++) {
@@ -59,7 +60,8 @@ int main() {
             C[i][j] = local_C[i][j];
         }
     }
-
+    // Stop timing the matrix multiplication
+    clock_t end = clock();
     // Specify the desired file path
     const char *output_path = "/home/bhattisavage/chipyard/tests/matrix_output.txt";  // Update this path
 
