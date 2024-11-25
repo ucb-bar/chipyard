@@ -56,7 +56,7 @@ int main() {
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf("2D Convolution completed.\n");
-    printf("Time taken: %f seconds\n", time_spent);
+    printf("Time taken: %.10f seconds\n", time_spent);
 
     // Free allocated memory
     free(input);
