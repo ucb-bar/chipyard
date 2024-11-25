@@ -1,8 +1,8 @@
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
+// Function to perform 2D convolution
 void convolve2D(float *input, float *kernel, float *output, 
                 int inputRows, int inputCols, 
                 int kernelRows, int kernelCols) {
@@ -29,17 +29,17 @@ void convolve2D(float *input, float *kernel, float *output,
 }
 
 int main() {
-    int inputRows = 32; // Larger input dimensions
+    int inputRows = 32; // Input dimensions
     int inputCols = 32;
-    int kernelRows = 2;
+    int kernelRows = 2;  // Kernel dimensions
     int kernelCols = 2;
 
-    int iterations = 100; // Number of repetitions
-
+    // Allocate memory for input, kernel, and output
     float *input = (float *)malloc(inputRows * inputCols * sizeof(float));
     float *kernel = (float *)malloc(kernelRows * kernelCols * sizeof(float));
     float *output = (float *)malloc(inputRows * inputCols * sizeof(float));
 
+    // Initialize input and kernel with random values
     srand(time(0));
     for (int i = 0; i < inputRows * inputCols; i++) {
         input[i] = rand() % 10 + 1;
@@ -48,18 +48,17 @@ int main() {
         kernel[i] = (rand() % 5 + 1) / 5.0f;
     }
 
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-    for (int iter = 0; iter < iterations; iter++) {
-        convolve2D(input, kernel, output, inputRows, inputCols, kernelRows, kernelCols);
-    }
-    gettimeofday(&end, NULL);
+    // Measure time taken for convolution
+    clock_t start = clock();
+    convolve2D(input, kernel, output, inputRows, inputCols, kernelRows, kernelCols);
+    clock_t end = clock();
 
-    double elapsed = ((end.tv_sec - start.tv_sec) * 1000.0) + ((end.tv_usec - start.tv_usec) / 1000.0);
-    elapsed /= iterations; // Average time per iteration in milliseconds
+    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+
     printf("2D Convolution completed.\n");
-    printf("Average time per iteration: %f milliseconds\n", elapsed);
+    printf("Time taken: %.10f seconds\n", time_spent);
 
+    // Free allocated memory
     free(input);
     free(kernel);
     free(output);
