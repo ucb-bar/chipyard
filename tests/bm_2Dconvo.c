@@ -29,10 +29,10 @@ void convolve2D(float *input, float *kernel, float *output,
 }
 
 int main() {
-    int inputRows = 256; // Input dimensions
-    int inputCols = 256;
-    int kernelRows = 3;  // Kernel dimensions
-    int kernelCols = 3;
+    int inputRows = 32; // Input dimensions
+    int inputCols = 32;
+    int kernelRows = 2;  // Kernel dimensions
+    int kernelCols = 2;
 
     // Allocate memory for input, kernel, and output
     float *input = (float *)malloc(inputRows * inputCols * sizeof(float));
