@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <riscv-pk/encoding.h>
+#include <stdint.h>
+
+static inline uint64_t read_cycles() {
+    uint64_t cycles;
+    asm volatile ("rdcycle %0" : "=r" (cycles));
+    return cycles;
+}
 
 // Function to perform 2D convolution
 void convolve2D(float *input, float *kernel, float *output, 
@@ -48,16 +56,15 @@ int main() {
         kernel[i] = (rand() % 5 + 1) / 5.0f;
     }
 
-    // Measure time taken for convolution
-    clock_t start = clock();
-    convolve2D(input, kernel, output, inputRows, inputCols, kernelRows, kernelCols);
-    clock_t end = clock();
+    uint64_t start = read_cycles();
+convolve2D(input, kernel, output, inputRows, inputCols, kernelRows, kernelCols);
+uint64_t end = read_cycles();
+printf("Cycles taken: %lu\n", end - start);
 
-    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+   
 
     printf("2D Convolution completed.\n");
-    printf("Time taken: %.10f seconds\n", time_spent);
-
+    
     // Free allocated memory
     free(input);
     free(kernel);
