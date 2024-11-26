@@ -70,7 +70,7 @@ case class SpikeCoreParams(
   override def vLen = 128
   override def eLen = 64
   override def vfLen = 64
-  override def vMemDataBits = 128
+  override def vMemDataBits = 64 //128
 }
 
 case class SpikeTileAttachParams(
@@ -132,6 +132,7 @@ class SpikeTile(
     "zbb",
     "zbs"
   ) ++ spikeTileParams.core.useZicntr.option("zicntr")).mkString("_")
+  // override def isaDTS = "rv64gcv_Zfh_Zicntr"
 
   // Required entry of CPU device in the device tree for interrupt purpose
   val cpuDevice: SimpleDevice = new SimpleDevice("cpu", Seq("ucb-bar,spike", "riscv")) {
@@ -192,6 +193,21 @@ class SpikeTile(
   tlMasterXbar.node := TLWidthWidget(8) := TLBuffer() := mmioNode
 
   override lazy val module = new SpikeTileModuleImp(this)
+  val rocc_sequence = p(BuildRoCC).map(_(p))
+  val has_rocc = rocc_sequence.nonEmpty
+  val rocc_module = if (has_rocc) rocc_sequence.head else null
+
+  if (has_rocc) {
+    val roccCSRs = rocc_sequence.map(_.roccCSRs) // the set of custom CSRs requested by all roccs
+    require(roccCSRs.flatten.map(_.id).toSet.size == roccCSRs.flatten.size,
+    "LazyRoCC instantiations require overlapping CSRs")
+    rocc_sequence.map(_.atlNode).foreach { atl => tlMasterXbar.node :=* atl }
+    rocc_sequence.map(_.tlNode).foreach { tl => tlOtherMastersNode :=* tl }
+    // rocc_sequence.map(_.stlNode).foreach { stl => stl :*= tlSlaveXbar.node }
+
+    // nPTWPorts += rocc_sequence.map(_.nPTWPorts).sum
+    // nDCachePorts += rocc_sequence.size
+  }
 }
 
 class SpikeBlackBox(
@@ -209,7 +225,8 @@ class SpikeBlackBox(
   executable_regions: String,
   tcm_base: BigInt,
   tcm_size: BigInt,
-  use_dtm: Boolean) extends BlackBox(Map(
+  use_dtm: Boolean,
+  ) extends BlackBox(Map(
     "HARTID" -> IntParam(hartId),
     "ISA" -> StringParam(isa),
     "PMPREGIONS" -> IntParam(pmpregions),
@@ -234,6 +251,7 @@ class SpikeBlackBox(
     val ipc = Input(UInt(64.W))
     val cycle = Input(UInt(64.W))
     val insns_retired = Output(UInt(64.W))
+    val has_rocc = Input(Bool())
 
     val debug = Input(Bool())
     val mtip = Input(Bool())
@@ -319,6 +337,59 @@ class SpikeBlackBox(
         val data = Output(UInt(64.W))
       }
     }
+
+    /* RoCC Interface control signals
+    For the memory interface, some signals that are unnecessary from the software 
+    perspective are included from the RoCC spec but tied off internally */
+    val rocc = new Bundle {
+      val busy = Input(Bool())
+      val request = new Bundle {
+        val ready = Input(Bool())
+        val valid = Output(Bool())
+        val insn = Output(UInt(64.W))
+        val rs1 = Output(UInt(64.W))
+        val rs2 = Output(UInt(64.W))
+      }
+      val response = new Bundle {
+        val valid = Input(Bool())
+        val rd = Input(UInt(64.W))
+        val data = Input(UInt(64.W))
+      }
+      val mem_request = new Bundle {
+        val valid = Input(Bool())
+        val addr = Input(UInt(64.W))
+        val tag = Input(UInt(10.W))
+        val cmd = Input(UInt(5.W))
+        val size = Input(UInt(3.W))
+        val phys = Input(Bool())
+        val data = Input(UInt(64.W))
+        val mask = Input(UInt(8.W))
+      }
+      val mem_response = new Bundle {        
+        val valid = Output(Bool())
+        val addr = Output(UInt(64.W))
+        val tag = Output(UInt(10.W))
+        val cmd = Output(UInt(5.W))
+        val size = Output(UInt(3.W))
+        val data = Output(UInt(64.W))
+        val replay = Output(Bool())
+        val has_data = Output(Bool())
+        val word_bypass = Output(UInt(64.W))
+        val store_data = Output(UInt(64.W))
+        val mask = Output(UInt(8.W))
+      }
+      // val ptw_request = new Bundle {
+      //   val valid = Input(Bool())
+      //   val addr = Input(UInt(64.W))
+      //   val need_gpa = Input(Bool())
+      //   val vstage1 = Input(Bool())
+      //   val stage2 = Input(Bool())
+      // }
+      // val ptw_response = new Bundle {
+      //   val valid = Output(Bool())
+      //   val addr = Output(UInt(64.W))
+      // }
+    }
   })
   addResource("/vsrc/spiketile.v")
   addResource("/csrc/spiketile.cc")
@@ -363,6 +434,7 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     outer.spikeTileParams.tcmParams.map(_.size).getOrElse(0),
     useDTM
   ))
+  spike.io.has_rocc := outer.has_rocc.asBool
   spike.io.clock := clock.asBool
   val cycle = RegInit(0.U(64.W))
   cycle := cycle + 1.U
@@ -482,6 +554,135 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     tcm_tl.d.valid := spike.io.tcm.d.valid
     tcm_tl.d.bits.data := spike.io.tcm.d.data
   }
+
+  /* Begin RoCC Section */
+  if (outer.has_rocc) {
+    val to_rocc_req_enq_bits = IO(new Bundle{
+      val rs2 = UInt(64.W)
+      val rs1 = UInt(64.W)
+      val insn = UInt(64.W)
+    }) //Bundle for enqueuing RoCC requests
+
+    val to_rocc_req_q = Module(new Queue(UInt(192.W), 1, flow=true, pipe=true)) //Queue for RoCC requests
+    spike.io.rocc.request.ready := to_rocc_req_q.io.enq.ready && to_rocc_req_q.io.count === 0.U // TODO: Currently only one request allowed to be in-flight
+    // Attach signals coming from C++ side
+    to_rocc_req_q.io.enq.valid := spike.io.rocc.request.valid
+    to_rocc_req_enq_bits.insn := spike.io.rocc.request.insn
+    to_rocc_req_enq_bits.rs1 := spike.io.rocc.request.rs1
+    to_rocc_req_enq_bits.rs2 := spike.io.rocc.request.rs2
+    to_rocc_req_q.io.enq.bits := to_rocc_req_enq_bits.asUInt
+
+    outer.rocc_module.module.io.cmd.valid := to_rocc_req_q.io.deq.valid
+    to_rocc_req_q.io.deq.ready := outer.rocc_module.module.io.cmd.ready
+
+    // Set individual instruction fields
+    val insn = Wire(new RoCCInstruction()) 
+    insn.funct := to_rocc_req_q.io.deq.bits(31,25)
+    insn.rs2 := to_rocc_req_q.io.deq.bits(24,20)
+    insn.rs1 := to_rocc_req_q.io.deq.bits(19,15)
+    insn.xd := to_rocc_req_q.io.deq.bits(14)
+    insn.xs1 := to_rocc_req_q.io.deq.bits(13)
+    insn.xs2 := to_rocc_req_q.io.deq.bits(12)
+    insn.rd := to_rocc_req_q.io.deq.bits(11,7)
+    insn.opcode := to_rocc_req_q.io.deq.bits(6,0)
+
+    // Attach cmd signals correctly
+    val cmd = Wire(new RoCCCommand())
+    cmd.inst := insn
+    cmd.rs1 := to_rocc_req_q.io.deq.bits(127,64)
+    cmd.rs2 := to_rocc_req_q.io.deq.bits(191,128)
+    cmd.status := DontCare
+    outer.rocc_module.module.io.cmd.bits := cmd
+    outer.rocc_module.module.io.mem.req.ready := true.B
+    spike.io.rocc.busy := outer.rocc_module.module.io.busy
+    spike.io.rocc.mem_request.valid := outer.rocc_module.module.io.mem.req.valid
+    spike.io.rocc.mem_request.addr := outer.rocc_module.module.io.mem.req.bits.addr
+    spike.io.rocc.mem_request.tag := outer.rocc_module.module.io.mem.req.bits.tag
+    spike.io.rocc.mem_request.size := outer.rocc_module.module.io.mem.req.bits.size
+    spike.io.rocc.mem_request.cmd := outer.rocc_module.module.io.mem.req.bits.cmd
+    spike.io.rocc.mem_request.phys := outer.rocc_module.module.io.mem.req.bits.phys
+    spike.io.rocc.mem_request.data := outer.rocc_module.module.io.mem.req.bits.data
+    spike.io.rocc.mem_request.mask := outer.rocc_module.module.io.mem.req.bits.mask
+    
+    outer.rocc_module.module.io.mem.resp.valid := spike.io.rocc.mem_response.valid
+    outer.rocc_module.module.io.mem.resp.bits.addr := spike.io.rocc.mem_response.addr
+    outer.rocc_module.module.io.mem.resp.bits.tag := spike.io.rocc.mem_response.tag
+    outer.rocc_module.module.io.mem.resp.bits.cmd := spike.io.rocc.mem_response.cmd
+    outer.rocc_module.module.io.mem.resp.bits.size := spike.io.rocc.mem_response.size
+    outer.rocc_module.module.io.mem.resp.bits.data := spike.io.rocc.mem_response.data
+    outer.rocc_module.module.io.mem.resp.bits.data_raw := spike.io.rocc.mem_response.data
+    outer.rocc_module.module.io.mem.resp.bits.replay := spike.io.rocc.mem_response.replay
+    outer.rocc_module.module.io.mem.resp.bits.has_data := spike.io.rocc.mem_response.has_data
+    outer.rocc_module.module.io.mem.resp.bits.data_word_bypass := spike.io.rocc.mem_response.word_bypass
+    outer.rocc_module.module.io.mem.resp.bits.store_data := spike.io.rocc.mem_response.store_data
+    outer.rocc_module.module.io.mem.resp.bits.mask := spike.io.rocc.mem_response.mask
+
+    //Tie off unused signals, will probably be used as interface develops further.
+    outer.rocc_module.module.io.ptw := DontCare
+    outer.rocc_module.module.io.mem.resp.bits.signed := false.B
+    outer.rocc_module.module.io.mem.resp.bits.dprv := false.B
+    outer.rocc_module.module.io.mem.resp.bits.dv := false.B
+    outer.rocc_module.module.io.mem.s2_nack := false.B
+    outer.rocc_module.module.io.mem.s2_uncached := false.B
+    outer.rocc_module.module.io.mem.s2_paddr := 0.U
+    outer.rocc_module.module.io.mem.replay_next := false.B
+    outer.rocc_module.module.io.mem.s2_xcpt.ma.ld := false.B
+    outer.rocc_module.module.io.mem.s2_xcpt.ma.st := false.B
+    outer.rocc_module.module.io.mem.s2_xcpt.pf.ld := false.B
+    outer.rocc_module.module.io.mem.s2_xcpt.pf.st := false.B
+    outer.rocc_module.module.io.mem.s2_xcpt.ae.ld := false.B
+    outer.rocc_module.module.io.mem.s2_xcpt.ae.st := false.B
+    outer.rocc_module.module.io.mem.s2_xcpt.gf.ld := false.B
+    outer.rocc_module.module.io.mem.s2_xcpt.gf.st := false.B
+    outer.rocc_module.module.io.mem.s2_gpa := 0.U
+    outer.rocc_module.module.io.mem.ordered := false.B
+    outer.rocc_module.module.io.mem.perf.acquire := false.B
+    outer.rocc_module.module.io.mem.perf.release := false.B
+    outer.rocc_module.module.io.mem.perf.grant := false.B
+    outer.rocc_module.module.io.exception := false.B
+    outer.rocc_module.module.io.mem.clock_enabled := true.B
+    outer.rocc_module.module.io.mem.perf.storeBufferEmptyAfterStore := false.B
+    outer.rocc_module.module.io.mem.perf.storeBufferEmptyAfterLoad := false.B
+    outer.rocc_module.module.io.mem.perf.canAcceptLoadThenLoad := false.B
+    outer.rocc_module.module.io.mem.perf.canAcceptStoreThenLoad := false.B
+    outer.rocc_module.module.io.mem.perf.canAcceptStoreThenRMW := false.B
+    outer.rocc_module.module.io.mem.s2_nack_cause_raw := 0.U
+    outer.rocc_module.module.io.mem.s2_gpa_is_pte := false.B
+    outer.rocc_module.module.io.mem.perf.tlbMiss := false.B
+    outer.rocc_module.module.io.mem.perf.blocked := false.B
+
+    outer.rocc_module.module.io.fpu_req.ready := false.B
+    outer.rocc_module.module.io.fpu_resp.valid := false.B
+    outer.rocc_module.module.io.fpu_resp.bits := DontCare
+
+    val from_rocc_result_enq_bits = IO(new Bundle {
+      val rd = UInt(64.W)
+      val resp = UInt(64.W)
+    })
+
+    val from_rocc_q = Module(new Queue(UInt(128.W), 1, flow=true, pipe=true)) //rd and data stitched together
+    outer.rocc_module.module.io.resp.ready := from_rocc_q.io.enq.ready && from_rocc_q.io.count === 0.U
+    from_rocc_q.io.enq.valid := outer.rocc_module.module.io.resp.valid
+
+    from_rocc_result_enq_bits.rd := outer.rocc_module.module.io.resp.bits.rd
+    from_rocc_result_enq_bits.resp := outer.rocc_module.module.io.resp.bits.data
+    from_rocc_q.io.enq.bits := from_rocc_result_enq_bits.asUInt
+    spike.io.rocc.response.valid := false.B
+    from_rocc_q.io.deq.ready := true.B
+    spike.io.rocc.response.rd := from_rocc_q.io.deq.bits(127,64)
+    spike.io.rocc.response.data := 0.U
+
+    when (from_rocc_q.io.deq.fire) {
+      spike.io.rocc.response.valid := true.B
+      spike.io.rocc.response.data := from_rocc_q.io.deq.bits(63,0)
+    }
+  } else {
+    spike.io.rocc.request.ready := false.B
+    spike.io.rocc.response.valid := false.B
+    spike.io.rocc.response.data := 0.U
+    spike.io.rocc.response.rd := 0.U
+  }
+  /* End RoCC Section */
 }
 
 class WithSpikeZicntr extends TileAttachConfig[SpikeTileAttachParams](t =>
@@ -516,4 +717,34 @@ class WithSpikeTCM extends Config((site, here, up) => {
   }
   case ExtMem => None
   case SubsystemBankedCoherenceKey => up(SubsystemBankedCoherenceKey).copy(nBanks = 0)
+})
+
+/**
+ * Config fragments to enable different RoCCs
+ */
+class WithAdderRoCC extends Config((site, here, up) => {
+  case BuildRoCC => List(
+    (p: Parameters) => {
+        val adder = LazyModule(new AdderExample(OpcodeSet.custom0)(p))
+        adder
+    }
+  )
+})
+
+class WithCharCountRoCC extends Config((site, here, up) => {
+  case BuildRoCC => List(
+    (p: Parameters) => {
+        val charCounter = LazyModule(new CharacterCountExample(OpcodeSet.all)(p))
+        charCounter
+    }
+  )
+})
+
+class WithAccumRoCC extends Config((site, here, up) => {
+  case BuildRoCC => List(
+    (p: Parameters) => {
+        val accum = LazyModule(new AccumulatorExample(OpcodeSet.custom0)(p))
+        accum
+    }
+  )
 })

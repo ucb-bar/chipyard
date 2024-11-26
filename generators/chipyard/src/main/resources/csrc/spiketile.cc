@@ -10,6 +10,18 @@
 #include <vpi_user.h>
 #include <svdpi.h>
 
+/* Includes for rocc support */
+#include <riscv/extension.h>
+#include <riscv/rocc.h>
+#include <random>
+#include <limits>
+#include <riscv/mmu.h>
+#include <riscv/trap.h>
+#include <stdexcept>
+#include <iostream>
+#include <assert.h>
+#include <math.h>
+
 #if __has_include("spiketile_tsi.h")
 #define SPIKETILE_HTIF_TSI
 extern std::map<int, htif_t*> tsis;
@@ -63,6 +75,28 @@ struct writeback_t {
   bool voluntary;
 };
 
+struct rocc_mem_req_t {
+  long long int addr;
+  int tag;
+  int cmd;
+  int size;
+  bool phys;
+  long long int data;
+  int mask;
+};
+
+struct rocc_mem_resp_t {
+  long long int addr;
+  int tag;
+  int cmd;
+  int size;
+  long long int data = 0;
+  unsigned char replay = 0;
+  unsigned char has_data = 0;
+  long long int word_bypass = 0;
+  long long int store_data = 0;
+  int mask;
+};
 
 class chipyard_simif_t : public simif_t
 {
@@ -74,6 +108,8 @@ public:
   bool mmio_store(reg_t addr, size_t len, const uint8_t* bytes) override;
   void proc_reset(unsigned id) override { };
   const char* get_symbol(uint64_t addr) override { return nullptr; };
+
+  void handle_fence();
 
   bool icache_a(uint64_t *address, uint64_t *source);
   void icache_d(uint64_t sourceid, uint64_t data[8]);
@@ -88,6 +124,23 @@ public:
 
   void tcm_a(uint64_t address, uint64_t data, uint32_t mask, uint32_t opcode, uint32_t size);
   bool tcm_d(uint64_t *data);
+
+  bool rocc_handshake(rocc_insn_t *insn, reg_t* rs1, reg_t* rs2);
+  void push_rocc_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2);
+  void push_rocc_result(long long int result);
+  long long int get_rocc_result();
+
+  void push_rocc_mem_request(long long int address, int tag, int cmd, int size, bool phys, long long int data, int mask);
+  void push_rocc_mem_response(rocc_mem_resp_t data);
+  bool rocc_mem_response_handshake(long long int* addr, int* tag, int* cmd, int* size, long long int* data, unsigned char* replay, unsigned char* has_data, long long int* word_bypass, long long int* store_data, int* mask);
+  void handle_rocc_mem_request(processor_t* proc);
+
+  long long int translate_rocc_mem_addr(processor_t* proc, long long int addr);
+
+  void set_rocc_exists(bool exists);
+  bool get_rocc_exists();
+
+  void set_rocc_busy(bool busy);
 
   void loadmem(size_t base, const char* fname);
 
@@ -155,6 +208,16 @@ private:
   std::vector<writeback_t> wb_q;
   std::vector<stq_entry_t> st_q;
 
+  std::vector<rocc_insn_t> rocc_insn_q;
+  std::vector<long long int> rocc_result_q;
+  std::vector<reg_t> rocc_rs1_q;
+  std::vector<reg_t> rocc_rs2_q;
+  bool rocc_exists;
+
+  std::vector<rocc_mem_req_t> rocc_mem_request_q;
+  std::vector<rocc_mem_resp_t> rocc_mem_response_q;
+
+  bool rocc_busy;
   std::map<std::pair<uint64_t, size_t>, uint64_t> readonly_cache;
 
   bool mmio_valid;
@@ -181,6 +244,31 @@ public:
   context_t stq_context;
 };
 
+/* Begin RoCC header file */
+class generic_t : public extension_t
+{
+  public:
+    generic_t(chipyard_simif_t* s) {
+      simif = s;
+    }
+
+    const char* name() { return "generic" ; } 
+
+    reg_t custom0(rocc_insn_t insn, reg_t xs1, reg_t xs2);
+    reg_t custom1(rocc_insn_t insn, reg_t xs1, reg_t xs2);
+    reg_t custom2(rocc_insn_t insn, reg_t xs1, reg_t xs2);
+    reg_t custom3(rocc_insn_t insn, reg_t xs1, reg_t xs2);
+
+    virtual std::vector<insn_desc_t> get_instructions();
+    virtual std::vector<disasm_insn_t*> get_disasms();
+    
+    void reset() {};
+
+   protected:
+   chipyard_simif_t* simif; 
+};
+/* End RoCC header file */
+
 context_t *host;
 std::map<int, tile_t*> tiles;
 std::ostream sout(nullptr);
@@ -205,6 +293,7 @@ extern "C" void spike_tile(int hartid, char* isa,
                            long long int ipc,
                            long long int cycle,
                            long long int* insns_retired,
+                           unsigned char has_rocc,
 
                            char debug,
                            char mtip, char msip, char meip,
@@ -286,7 +375,47 @@ extern "C" void spike_tile(int hartid, char* isa,
 
                            unsigned char* tcm_d_valid,
                            unsigned char tcm_d_ready,
-                           long long int* tcm_d_data
+                           long long int* tcm_d_data,
+
+                           unsigned char rocc_request_ready,
+                           unsigned char* rocc_request_valid,
+                           int* rocc_request_insn,
+                           int* rocc_request_rs1,
+                           int* rocc_request_rs2,
+                           unsigned char rocc_response_valid,
+                           long long int rocc_response_rd,
+                           long long int rocc_response_data,
+                           unsigned char rocc_busy,
+
+                           unsigned char rocc_mem_request_valid,
+                           long long int rocc_mem_request_addr,
+                           int rocc_mem_request_tag,
+                           int rocc_mem_request_cmd,
+                           int rocc_mem_request_size,
+                           unsigned char rocc_mem_request_phys,
+                           long long int rocc_mem_request_data,
+                           int rocc_mem_request_mask,
+                           
+                           unsigned char* rocc_mem_response_valid,
+                           long long int* rocc_mem_response_addr,
+                           int* rocc_mem_response_tag,
+                           int* rocc_mem_response_cmd,
+                           int* rocc_mem_response_size,
+                           long long int* rocc_mem_response_data,
+                           unsigned char* rocc_mem_response_replay,
+                           unsigned char* rocc_mem_response_has_data,
+                           long long int* rocc_mem_response_word_bypass,
+                           long long int* rocc_mem_response_store_data,
+                           int* rocc_mem_response_mask
+
+                          //  unsigned char rocc_ptw_request_valid,
+                          //  long long int rocc_ptw_request_addr,
+                          //  unsigned char rocc_ptw_request_need_gpa,
+                          //  unsigned char rocc_ptw_request_vstage1,
+                          //  unsigned char rocc_ptw_request_stage2,
+
+                          //  unsigned char* rocc_ptw_response_valid,
+                          //  long long int* rocc_ptw_response_addr
                            )
 {
   if (!host) {
@@ -313,6 +442,11 @@ extern "C" void spike_tile(int hartid, char* isa,
                                      log_file->get(),
                                      sout);
     simif->harts[hartid] = p;
+
+    std::function<extension_t*()> extension;
+    generic_t* my_generic_extension = new generic_t(simif);
+    p->register_extension(my_generic_extension);
+    simif->set_rocc_exists(has_rocc);
 
     s_vpi_vlog_info vinfo;
     if (!vpi_get_vlog_info(&vinfo))
@@ -427,8 +561,108 @@ extern "C" void spike_tile(int hartid, char* isa,
   if (tcm_d_ready) {
     *tcm_d_valid = simif->tcm_d((uint64_t*)tcm_d_data);
   }
+
+  *rocc_request_valid = 0;
+  if (rocc_request_ready) {
+    *rocc_request_valid = simif->rocc_handshake((rocc_insn_t*) rocc_request_insn, (reg_t*) rocc_request_rs1, (reg_t*) rocc_request_rs2);
+  }
+
+  if (rocc_response_valid) {
+    simif->push_rocc_result(rocc_response_data);
+  }
+
+  if (rocc_mem_request_valid) {
+    simif->push_rocc_mem_request(rocc_mem_request_addr, rocc_mem_request_tag, rocc_mem_request_cmd, rocc_mem_request_size, rocc_mem_request_phys, rocc_mem_request_data, rocc_mem_request_mask);
+  }
+
+  simif->handle_rocc_mem_request(proc);
+  *rocc_mem_response_valid = simif->rocc_mem_response_handshake(rocc_mem_response_addr, rocc_mem_response_tag, rocc_mem_response_cmd, rocc_mem_response_size, rocc_mem_response_data, rocc_mem_response_replay, rocc_mem_response_has_data, rocc_mem_response_word_bypass, rocc_mem_response_store_data, rocc_mem_response_mask);
+
+  simif->set_rocc_busy(rocc_busy);
 }
 
+/* Begin RoCC Section */
+reg_t generic_t::custom0(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
+  bool has_rocc = simif->get_rocc_exists();
+  if (!has_rocc) {
+    printf("Accelerator not instantiated, are you using the right config?\n");
+    exit(1);
+  } else {
+    simif->push_rocc_insn(insn, xs1, xs2);
+    if (insn.xd) {
+      return simif->get_rocc_result();
+    } else {
+      return 0;
+    }
+  }
+}
+
+reg_t generic_t::custom1(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
+  bool has_rocc = simif->get_rocc_exists();
+  if (!has_rocc) {
+    printf("Accelerator not instantiated, are you using the right config?\n");
+    exit(1);
+  } else {
+    simif->push_rocc_insn(insn, xs1, xs2);
+    if (insn.xd) {
+      return simif->get_rocc_result();
+    } else {
+      return 0;
+    }
+  }
+}
+
+reg_t generic_t::custom2(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
+  bool has_rocc = simif->get_rocc_exists();
+  if (!has_rocc) {
+    printf("Accelerator not instantiated, are you using the right config?\n");
+    exit(1);
+  } else {
+    simif->push_rocc_insn(insn, xs1, xs2);
+    if (insn.xd) {
+      return simif->get_rocc_result();
+    } else {
+      return 0;
+    }
+  }
+}
+
+reg_t generic_t::custom3(rocc_insn_t insn, reg_t xs1, reg_t xs2) {
+  bool has_rocc = simif->get_rocc_exists();
+  if (!has_rocc) {
+    printf("Accelerator not instantiated, are you using the right config?\n");
+    exit(1);
+  } else {
+    simif->push_rocc_insn(insn, xs1, xs2);
+    if (insn.xd) {
+      return simif->get_rocc_result();
+    } else {
+      return 0;
+    }
+  }
+}
+
+define_custom_func(generic_t, "generic", generic_custom0, custom0);
+define_custom_func(generic_t, "generic", generic_custom1, custom1);
+define_custom_func(generic_t, "generic", generic_custom2, custom2);
+define_custom_func(generic_t, "generic", generic_custom3, custom3);
+
+std::vector<insn_desc_t> generic_t::get_instructions()
+{
+  std::vector<insn_desc_t> insns;
+  push_custom_insn(insns, ROCC_OPCODE0, ROCC_OPCODE_MASK, ILLEGAL_INSN_FUNC, generic_custom0);
+  push_custom_insn(insns, ROCC_OPCODE1, ROCC_OPCODE_MASK, ILLEGAL_INSN_FUNC, generic_custom1);
+  push_custom_insn(insns, ROCC_OPCODE2, ROCC_OPCODE_MASK, ILLEGAL_INSN_FUNC, generic_custom2);
+  push_custom_insn(insns, ROCC_OPCODE3, ROCC_OPCODE_MASK, ILLEGAL_INSN_FUNC, generic_custom3);
+  return insns;
+}
+
+std::vector<disasm_insn_t*> generic_t::get_disasms()
+{
+  std::vector<disasm_insn_t*> insns;
+  return insns;
+}
+/*End RoCC Section*/
 
 chipyard_simif_t::chipyard_simif_t(size_t icache_ways,
                                    size_t icache_sets,
@@ -1056,6 +1290,126 @@ bool chipyard_simif_t::tcm_d(uint64_t* data) {
   return true;
 }
 
+bool chipyard_simif_t::rocc_handshake(rocc_insn_t* insn, reg_t* rs1, reg_t* rs2) {
+  if (rocc_insn_q.empty()) {
+    return false;
+  }
+  *insn = rocc_insn_q[0];
+  *rs1 = rocc_rs1_q[0];
+  *rs2 = rocc_rs2_q[0];
+  
+  rocc_insn_q.erase(rocc_insn_q.begin());
+  rocc_rs1_q.erase(rocc_rs1_q.begin());
+  rocc_rs2_q.erase(rocc_rs2_q.begin());
+  return true;
+}
+
+void chipyard_simif_t::push_rocc_insn(rocc_insn_t insn, reg_t rs1, reg_t rs2) {
+  rocc_insn_q.push_back(insn);
+  rocc_rs1_q.push_back(rs1);
+  rocc_rs2_q.push_back(rs2);
+  
+  host->switch_to();
+}
+
+void chipyard_simif_t::push_rocc_result(long long int result) {
+  rocc_result_q.push_back(result);
+}
+
+long long int chipyard_simif_t::get_rocc_result() {
+  while (rocc_result_q.size() == 0) {
+    host->switch_to();
+  }
+
+  if (rocc_result_q.size() == 0) {
+    return 0;
+  }
+  long long int result = rocc_result_q.front();
+  rocc_result_q.erase(rocc_result_q.begin());
+  return result;
+}
+
+void chipyard_simif_t::push_rocc_mem_request(long long int address, int tag, int cmd, int size, bool phys, long long int data, int mask) {
+  rocc_mem_request_q.push_back({address, tag, cmd, size, phys, data, mask});
+  // printf("Pushed rocc mem request: %llx %d %d %d %d %llx %d\n", address, tag, cmd, size, phys, data, mask);
+}
+
+void chipyard_simif_t::push_rocc_mem_response(struct rocc_mem_resp_t result) {
+  rocc_mem_response_q.push_back(result);
+  // printf("Pushed rocc mem response: %llx %d %d %d %llx %d %d %llx %llx %d\n", result.addr, result.tag, result.cmd, result.size, result.data, result.replay, result.has_data, result.word_bypass, result.store_data, result.mask);
+}
+
+bool chipyard_simif_t::rocc_mem_response_handshake(long long int* addr, int* tag, int* cmd, int* size, long long int* data, unsigned char* replay, unsigned char* has_data, long long int* word_bypass, long long int* store_data, int* mask) {
+  if (!rocc_mem_response_q.empty()) {
+    struct rocc_mem_resp_t resp_data = rocc_mem_response_q[0];
+    rocc_mem_response_q.erase(rocc_mem_response_q.begin());
+    *addr = resp_data.addr;
+    *tag = resp_data.tag;
+    *cmd = resp_data.cmd;
+    *size = resp_data.size;
+    *data = resp_data.data;
+    *replay = resp_data.replay;
+    *has_data = resp_data.has_data;
+    *word_bypass = resp_data.word_bypass;
+    *store_data = resp_data.store_data;
+    *mask = resp_data.mask;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void chipyard_simif_t::handle_rocc_mem_request(processor_t* proc) {
+  if (!rocc_mem_request_q.empty()) {
+    rocc_mem_req_t request = rocc_mem_request_q[0];
+    rocc_mem_resp_t response;
+
+    rocc_mem_request_q.erase(rocc_mem_request_q.begin());
+
+    response.addr = request.addr;
+    response.tag = request.tag;
+    response.cmd = request.cmd;
+    response.size = request.size;
+    response.mask = request.mask;
+
+    if (!request.phys) {
+      request.addr = proc->translate(request.addr, request.cmd); 
+    }
+    
+    if (request.cmd == 0) {
+      // Read req
+      response.has_data = 1;
+      mmio_load((reg_t) request.addr, (size_t) (1 << request.size), (uint8_t*) &response.data);
+    } else if (request.cmd == 1) {
+      // Write req
+      response.store_data = request.data;
+      mmio_store((reg_t) request.addr, (size_t) request.size, (uint8_t*) &request.data);
+    } else {
+      puts("MEM OPERATION UNDEFINED");
+      exit(-1);
+    }
+    
+    push_rocc_mem_response(response);
+  }
+}
+
+long long int chipyard_simif_t::translate_rocc_mem_addr(processor_t* proc, long long int addr) {
+  //TODO
+  //return proc->translate(addr, );
+}
+
+void chipyard_simif_t::set_rocc_exists(bool exists) {
+  rocc_exists = exists;
+}
+
+bool chipyard_simif_t::get_rocc_exists() {
+  return rocc_exists;
+}
+
+void chipyard_simif_t::set_rocc_busy(bool busy) {
+  rocc_busy = busy;
+}
+
 void chipyard_simif_t::loadmem(size_t base, const char* fname) {
   class loadmem_memif_t : public memif_t {
   public:
@@ -1078,6 +1432,12 @@ void chipyard_simif_t::loadmem(size_t base, const char* fname) {
 
   reg_t entry;
   load_elf(fname, &loadmem_memif, &entry, 0);
+}
+
+void chipyard_simif_t::handle_fence() {
+  while(rocc_busy || !stq_empty()) {
+    host->switch_to();
+  }
 }
 
 bool insn_should_fence(uint64_t bits) {
@@ -1108,6 +1468,11 @@ void spike_thread_main(void* arg)
       uint64_t old_minstret = state->minstret->read();
       proc->step(1);
       tile->max_insns--;
+
+      if (insn_should_fence(proc->get_last_inst())) { //If Instruction is fence, tick the RTL
+        simif->handle_fence();
+      }
+
       if (proc->is_waiting_for_interrupt()) {
         if (simif->fast_clint) {
           state->mip->backdoor_write_with_mask(MIP_MTIP, MIP_MTIP);

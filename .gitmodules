@@ -87,7 +87,7 @@
 	url = https://github.com/ucb-bar/libgloss-htif.git
 [submodule "toolchains/riscv-tools/riscv-isa-sim"]
 	path = toolchains/riscv-tools/riscv-isa-sim
-	url = https://github.com/riscv-software-src/riscv-isa-sim.git
+	url = https://github.com/doihead/riscv-isa-sim
 [submodule "toolchains/riscv-tools/riscv-openocd"]
 	path = toolchains/riscv-tools/riscv-openocd
 	url = https://github.com/riscv/riscv-openocd.git

@@ -243,6 +243,11 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
+lazy val ee290 = (project in file("generators/ee290"))
+  .dependsOn(rocketchip, midas_target_utils)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
 lazy val gemmini = freshProject("gemmini", file("generators/gemmini"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)

@@ -14,6 +14,13 @@ class GemminiRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: GemminiRocketConfig
 
+class FastGemminiRocketConfig extends Config(
+  new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
+
 class FPGemminiRocketConfig extends Config(
   new gemmini.GemminiFP32DefaultConfig ++                         // use FP32Gemmini systolic array GEMM accelerator
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
@@ -71,3 +78,21 @@ class ZstdCompressorRocketConfig extends Config(
   new compressacc.WithZstdCompressor ++
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
+
+  class CharCountRocketConfig extends Config(
+    new freechips.rocketchip.subsystem.WithRoccExample ++
+    new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+    new chipyard.config.WithSystemBusWidth(256) ++
+    new chipyard.config.AbstractConfig)
+
+  class AdderRocketConfig extends Config(
+    new chipyard.WithAdderRoCC ++
+    new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+    new chipyard.config.WithSystemBusWidth(256) ++
+    new chipyard.config.AbstractConfig)
+
+  class AccumRocketConfig extends Config(
+    new chipyard.WithAccumRoCC ++
+    new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+    new chipyard.config.WithSystemBusWidth(256) ++
+    new chipyard.config.AbstractConfig)

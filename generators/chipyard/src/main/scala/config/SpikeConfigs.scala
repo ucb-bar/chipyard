@@ -1,6 +1,7 @@
 package chipyard
 
 import org.chipsalliance.cde.config.{Config}
+// import freechips.rocketchip.tile.{BuildRoCC, OpcodeSet, XLen}
 
 // Configs which instantiate a Spike-simulated
 // tile that interacts with the Chipyard SoC
@@ -8,12 +9,38 @@ import org.chipsalliance.cde.config.{Config}
 
 class SpikeConfig extends Config(
   new chipyard.WithNSpikeCores(1) ++
+  // new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.AbstractConfig)
 
 class SpikeZicntrConfig extends Config(
   new chipyard.WithSpikeZicntr ++
   new chipyard.WithNSpikeCores(1) ++
   new chipyard.config.AbstractConfig)
+
+class SpikeAdderExampleConfig extends Config(
+  new chipyard.WithSpikeZicntr ++
+  new chipyard.WithAdderRoCC ++
+  new SpikeConfig)
+
+class SpikeAccumExampleConfig extends Config(
+  new chipyard.WithSpikeZicntr ++
+  new chipyard.WithAccumRoCC ++
+  new SpikeConfig)
+
+class SpikeCharCountExampleConfig extends Config(
+  new chipyard.WithSpikeZicntr ++
+  new chipyard.WithCharCountRoCC ++
+  new SpikeConfig)
+
+class SpikeEE290L1BMMRoCCConfig extends Config(
+  new chipyard.WithSpikeZicntr ++
+  new ee290.WithEE290RoCCAccelWithCacheBlackBox ++
+  new SpikeConfig)
+
+class SpikeGemminiConfig extends Config(
+  new chipyard.WithSpikeZicntr ++
+  new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accelerator
+  new SpikeConfig)
 
 class dmiSpikeConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tilelink
