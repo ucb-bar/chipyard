@@ -288,16 +288,18 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
 })
 
 // Rocketchip's JTAGIO exposes the oe signal, which doesn't go off-chip
-class JTAGChipIO extends Bundle {
+class JTAGChipIO(hasReset: Boolean) extends Bundle {
   val TCK = Input(Clock())
   val TMS = Input(Bool())
   val TDI = Input(Bool())
   val TDO = Output(Bool())
+  val reset = Option.when(hasReset)(Input(Bool()))
 }
 
 // WARNING: Don't disable syncReset unless you are trying to
 // get around bugs in RTL simulators
-class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
+// If externalReset, exposes a reset in through JTAGChipIO, which is sync'd to TCK
+class WithDebugIOCells(syncReset: Boolean = true, externalReset: Boolean = true) extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
     implicit val p = GetSystemParameters(system)
     val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
@@ -319,13 +321,6 @@ class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
           }
           // Tie off disableDebug
           d.disableDebug.foreach { d => d := false.B }
-          // Drive JTAG on-chip IOs
-          d.systemjtag.map { j =>
-            j.reset := (if (syncReset) ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.asBool) else clockBundle.reset.asBool)
-            j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
-            j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
-            j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
-          }
         }
         Debug.connectDebugClockAndReset(Some(debug), clockBundle.clock)
 
@@ -336,7 +331,15 @@ class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
         }
 
         val jtagTuple = debug.systemjtag.map { j =>
-          val jtag_wire = Wire(new JTAGChipIO)
+          val jtag_wire = Wire(new JTAGChipIO(externalReset))
+
+          // Drive JTAG on-chip IOs
+          val jReset = if (externalReset) jtag_wire.reset.get else clockBundle.reset.asBool
+          j.reset := (if (syncReset) ResetCatchAndSync(j.jtag.TCK, jReset) else jReset)
+          j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
+          j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
+          j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
+
           j.jtag.TCK := jtag_wire.TCK
           j.jtag.TMS := jtag_wire.TMS
           j.jtag.TDI := jtag_wire.TDI

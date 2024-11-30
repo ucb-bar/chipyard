@@ -131,7 +131,7 @@ class FlatChipTop(implicit p: Parameters) extends LazyModule with HasChipyardPor
     require(!debug.clockeddmi.isDefined)
     require(!debug.apb.isDefined)
     val (jtag_pad, jtagIOCells) = debug.systemjtag.map { j =>
-      val jtag_wire = Wire(new JTAGChipIO)
+      val jtag_wire = Wire(new JTAGChipIO(false))
       j.jtag.TCK := jtag_wire.TCK
       j.jtag.TMS := jtag_wire.TMS
       j.jtag.TDI := jtag_wire.TDI
