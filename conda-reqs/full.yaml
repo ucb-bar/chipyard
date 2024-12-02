@@ -1,0 +1,155 @@
+channels:
+    - ucb-bar
+    - conda-forge
+    - litex-hub
+    - nodefaults
+
+platforms:
+    - linux-64
+
+dependencies:
+    # https://conda-forge.org/feedstock-outputs/
+    #   filterable list of all conda-forge packages
+    # https://conda-forge.org/#contribute
+    #   instructions on adding a recipe
+    # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
+    #   documentation on package_spec syntax for constraining versions
+    - gcc=13.2
+    - gxx=13.2
+    - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
+    - conda-gcc-specs=13.2
+    - binutils=2.43
+    - python=3.10.14
+    - riscv-tools==1.0.7 # from ucb-bar channel - https://github.com/ucb-bar/riscv-tools-feedstock
+
+    # docs
+    - sphinx=7.3.7
+    - pygments=2.18.0
+    - sphinx-autobuild=2024.10.3
+    - sphinx_rtd_theme=3.0.0
+    - docutils=0.19
+
+    # misc
+    - autoconf=2.71
+    - coreutils=9.5
+    - jq=1.7.1
+    - pip=24.2
+    - make=4.4.1
+    - git=2.45.0
+    - ninja=1.12.1 # needed in case we need to built circt from scratch
+
+    - sbt=1.10.2
+    - openjdk=20.0.2
+    - dtc=1.6.1
+    - verilator==5.022
+
+    # Below requirements are full-only - for firemarshal and firesim
+
+    # handy tool for introspecting package relationships and file ownership
+    # see https://github.com/rvalieris/conda-tree
+    - conda-tree=1.1.0
+
+    # bundle FireSim driver with deps into installer shell-script
+    - constructor=3.9.3
+
+    # misc
+    - readline=8.2
+
+    # firemarshal deps
+    - qemu=5.0.0 # from ucb-bar channel - https://github.com/ucb-bar/qemu-feedstock
+    - rsync=3.3.0
+    - psutil=6.0.0
+    - doit=0.36.0
+    - gitpython=3.1.43
+    - humanfriendly=10.0
+    - ctags=5.8
+    - bison=3.8.2
+    - flex=2.6.4
+    - expat=2.6.3
+    - bc=1.07.1
+    - unzip=6.0
+    - patch=2.7.6
+    - which=2.21
+    - sed=4.8
+    - diffutils=3.10
+    - bash=5.2.21
+    - gzip=1.13
+    - bzip2=1.0.8
+    - perl=5.32.1
+    - tar=1.34
+    - file=5.39
+    - wget=1.21.4
+    - findutils=4.6.0
+    - lzop=1.04
+
+    - bash-completion=2.11
+    - ca-certificates=2024.8.30
+    - mosh=1.4.0
+    - gmp=6.3.0
+    - mpfr=4.2.1
+    - mpc=1.3.1
+    - zlib=1.2.13
+    - gengetopt=2.23
+    - libffi=3.4.2
+    - libusb1=2.0.1
+    - ncurses=6.5
+    - cmake=3.26.3
+    - graphviz=11.0.0
+    - expect=5.45.4
+
+    # clang-format for driver coding style enforcement.
+    - clang-format=18.1.7
+    - clang-tools=18.1.7
+
+    # hammer packages
+    - sty=1.0.0
+    - open_pdks.sky130a=1.0.471_0_g97d0844
+    - pip:
+        - hammer-vlsi[asap7]==1.2.0
+
+    # firesim python packages
+    # While it is possible to install using pip after creating the
+    # conda environment, pip's dependency resolution can conflict with
+    # conda and create broken environments.  It's best to use the conda
+    # packages so that the environment is consistent
+    - screen=4.8.0
+    - elfutils=0.187
+    - libdwarf-dev==0.0.0.20190110_28_ga81397fc4 # from ucb-bar channel - using mainline libdwarf-feedstock
+    - colorama=0.4.6
+    - argcomplete=3.5.1
+    - python-graphviz=11.0.0
+    - pyparsing=3.2.0
+    - numpy=1.26.4
+    - kiwisolver=1.4.7
+    - matplotlib-base=3.9.2
+    - pandas=2.2.2
+    - awscli=2.18.8
+    - pytest=8.3.3
+    - pytest-dependency=0.5.1
+    - pytest-mock=3.14.0
+    - moto=5.0.16
+    - mypy=1.12.0
+    - s3fs==0.4.2
+    - aiohttp=3.10.0
+    - pip:
+        - sure
+        - pylddwrap
+
+    # firesim ci shared packages
+    - boto3=1.35.41
+    - boto3-stubs=1.35.41
+    - mypy-boto3-s3=1.35.32
+    - mypy_boto3_ec2=1.35.38
+    - botocore-stubs=1.35.41
+    - cryptography=40.0.2
+    - pytz=2024.3
+    - types-pytz=2024.2.0.20241003
+    - pyyaml=6.0.2
+    - types-pyyaml=6.0.12.20240917
+    - requests=2.32.3
+    - types-requests=2.31.0.6
+    - azure-identity=1.17.1
+    - fsspec=2024.9.0
+    - pip:
+        - fab-classic>=1.19.2
+        - bcrypt<4.0.0

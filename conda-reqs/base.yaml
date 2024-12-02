@@ -1,0 +1,45 @@
+channels:
+    - ucb-bar
+    - conda-forge
+    - litex-hub
+    - nodefaults
+
+platforms:
+    - linux-64
+
+dependencies:
+    # https://conda-forge.org/feedstock-outputs/
+    #   filterable list of all conda-forge packages
+    # https://conda-forge.org/#contribute
+    #   instructions on adding a recipe
+    # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
+    #   documentation on package_spec syntax for constraining versions
+    - gcc=13.2
+    - gxx=13.2
+    - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
+    - conda-gcc-specs=13.2
+    - binutils=2.43
+    - python=3.10.14
+    - riscv-tools==1.0.7 # from ucb-bar channel - https://github.com/ucb-bar/riscv-tools-feedstock
+
+    # docs
+    - sphinx=7.3.7
+    - pygments=2.18.0
+    - sphinx-autobuild=2024.10.3
+    - sphinx_rtd_theme=3.0.0
+    - docutils=0.19
+
+    # misc
+    - autoconf=2.71
+    - coreutils=9.5
+    - jq=1.7.1
+    - pip=24.2
+    - make=4.4.1
+    - git=2.45.0
+    - ninja=1.12.1 # needed in case we need to built circt from scratch
+
+    - sbt=1.10.2
+    - openjdk=20.0.2
+    - dtc=1.6.1
+    - verilator==5.022
+
