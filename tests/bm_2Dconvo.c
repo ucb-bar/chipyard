@@ -37,8 +37,8 @@ void convolve2D(float *input, float *kernel, float *output,
 }
 
 int main() {
-    int inputRows = 32; // Input dimensions
-    int inputCols = 32;
+    int inputRows = 64; // Input dimensions
+    int inputCols = 64;
     int kernelRows = 2;  // Kernel dimensions
     int kernelCols = 2;
 
