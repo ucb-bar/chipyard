@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 // Matrix size (NxN)
-#define N 64
+#define N 68
 
 // Function to read RISC-V cycles
 static inline uint64_t read_cycles() {
