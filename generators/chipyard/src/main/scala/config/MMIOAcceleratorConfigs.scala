@@ -38,6 +38,11 @@ class DMARocketConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class CnnHwAcceleratorRocketConfig extends Config(
+  new cnnHwAccelerator.WithCnnHwAccelerator ++  // Use CNN HW Accelerator, connect Tilelink
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
   new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero
