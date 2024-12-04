@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+#
+# Olimex ARM-USB-TINY-H
+#
+# http://www.olimex.com/dev/arm-usb-tiny-h.html
+#
+
+# Configure the FTDI adapter
+# Set adapter speed (in kHz)
+adapter speed 2000
+adapter driver ftdi
+
+ftdi device_desc "Olimex OpenOCD JTAG ARM-USB-TINY-H"
+ftdi vid_pid 0x15ba 0x002a
+
+# FTDI layout signals
+ftdi layout_init 0x0808 0x0a1b
+ftdi layout_signal nSRST -oe 0x0200
+ftdi layout_signal nTRST -data 0x0100 -oe 0x0100
+ftdi layout_signal LED -data 0x0800
+
+reset_config srst_only
+
+jtag newtap core_tap bs -irlen 5 -expected-id 0x20000913
+
+target create core_tap.cpu0 riscv -chain-position core_tap.bs -gdb-port 6666
+
+telnet_port 5533
+tcl_port 5566
+
+init
