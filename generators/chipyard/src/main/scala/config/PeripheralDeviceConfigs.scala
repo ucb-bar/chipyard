@@ -77,12 +77,15 @@ class dmiCospikeCheckpointingRocketConfig extends Config(
 
 
 class ManyPeripheralsRocketConfig extends Config(
+  new chipyard.harness.WithI2CTiedOff ++                    // Tie off the I2C port in the harness
+  new chipyard.harness.WithSimSPIFlashModel(true) ++         // add the SPI flash model in the harness (read-only)
+  new chipyard.harness.WithSimBlockDevice ++                 // drive block-device IOs with SimBlockDevice
+
   new testchipip.iceblk.WithBlockDevice ++                   // add block-device module to peripherybus
   new testchipip.soc.WithOffchipBusClient(MBUS) ++           // OBUS provides backing memory to the MBUS
   new testchipip.soc.WithOffchipBus ++                       // OBUS must exist for serial-tl to master off-chip memory
   new testchipip.serdes.WithSerialTLMem(isMainMemory=true) ++ // set lbwif memory base to DRAM_BASE, use as main memory
-  new chipyard.harness.WithSimSPIFlashModel(true) ++         // add the SPI flash model in the harness (read-only)
-  new chipyard.harness.WithSimBlockDevice ++                 // drive block-device IOs with SimBlockDevice
+  new chipyard.config.WithI2C ++                             // Add I2C peripheral
   new chipyard.config.WithPeripheryTimer ++                  // add the pwm timer device
   new chipyard.config.WithSPIFlash ++                        // add the SPI flash controller
   new freechips.rocketchip.subsystem.WithDefaultMMIOPort ++  // add default external master port

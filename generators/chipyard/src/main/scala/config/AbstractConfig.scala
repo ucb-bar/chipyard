@@ -22,6 +22,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithSimDMI ++                               /** add SimJTAG if DMI exposed */
   new chipyard.harness.WithGPIOPinsTiedOff ++                      /** tie-off chiptop GPIO-pins, if GPIO-punchthrough is used */
   new chipyard.harness.WithGPIOTiedOff ++                          /** tie-off chiptop GPIOs, if GPIOs are present */
+  new chipyard.harness.WithI2CTiedOff ++                           /** tie-off i2c ports if present */
   new chipyard.harness.WithSimSPIFlashModel ++                     /** add simulated SPI flash memory, if SPI is enabled */
   new chipyard.harness.WithSimAXIMMIO ++                           /** add SimAXIMem for axi4 mmio port, if enabled */
   new chipyard.harness.WithTieOffInterrupts ++                     /** tie-off interrupt ports, if present */
