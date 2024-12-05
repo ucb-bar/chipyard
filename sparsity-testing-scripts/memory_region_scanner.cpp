@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <cassert>
 #include <algorithm>
 
 struct MemoryRegion {
@@ -59,6 +60,7 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
         close(fd_in);
         return 1;
     }
+    std::cout << "\nProgram Headers: " << n_phdrs << std::endl;
 
     std::vector<MemoryRegion> useful_regions;
 
@@ -73,14 +75,14 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
         }
 
         // SOOHYUK: Debug: Print program header information
-        // std::cout << "\nProcessing Segment " << i << ":" << std::endl;
-        // std::cout << "  Type: " << phdr.p_type << std::endl;
-        // std::cout << "  Offset: 0x" << std::hex << phdr.p_offset << std::dec << std::endl;
-        // std::cout << "  Virtual Address: 0x" << std::hex << phdr.p_vaddr << std::dec << std::endl;
-        // std::cout << "  Physical Address: 0x" << std::hex << phdr.p_paddr << std::dec << std::endl;
-        // std::cout << "  File Size: " << phdr.p_filesz << " bytes" << std::endl;
-        // std::cout << "  Memory Size: " << phdr.p_memsz << " bytes" << std::endl;
-        // std::cout << "  Flags: " << phdr.p_flags << std::endl;
+        std::cout << "\nProcessing Segment " << i << ":" << std::endl;
+        std::cout << "  Type: " << phdr.p_type << std::endl;
+        std::cout << "  Offset: 0x" << std::hex << phdr.p_offset << std::dec << std::endl;
+        std::cout << "  Virtual Address: 0x" << std::hex << phdr.p_vaddr << std::dec << std::endl;
+        std::cout << "  Physical Address: 0x" << std::hex << phdr.p_paddr << std::dec << std::endl;
+        std::cout << "  File Size: " << phdr.p_filesz << " bytes" << std::endl;
+        std::cout << "  Memory Size: " << phdr.p_memsz << " bytes" << std::endl;
+        std::cout << "  Flags: " << phdr.p_flags << std::endl;
 
         if (phdr.p_type != PT_LOAD) {
             // std::cout << "  Skipping non-loadable segment." << std::endl;
@@ -88,8 +90,8 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
         }
 
         // SOOHYUK: Debug: Print virtual address and size (to accomodate memory concatenations)
-        // std::cout << "  Segment Virtual Address: 0x" << std::hex << phdr.p_vaddr << std::dec << std::endl;
-        // std::cout << "  Segment Size (filesz): " << phdr.p_filesz << " bytes" << std::endl;
+        std::cout << "  Segment Virtual Address: 0x" << std::hex << phdr.p_vaddr << std::dec << std::endl;
+        std::cout << "  Segment Size (filesz): " << phdr.p_filesz << " bytes" << std::endl;
 
         // Seek to the segment's file offset
         if (lseek(fd_in, phdr.p_offset, SEEK_SET) < 0) {
@@ -100,45 +102,46 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
         }
 
         // Read the segment's data
-        std::vector<unsigned char> segment_data(phdr.p_filesz);
-        ssize_t bytes_read = read(fd_in, segment_data.data(), phdr.p_filesz);
-        if (bytes_read != static_cast<ssize_t>(phdr.p_filesz)) {
-            perror("Failed to read segment data");
-            std::cerr << "Expected: " << phdr.p_filesz << ", Read: " << bytes_read << std::endl;
-            elf_end(e_in);
-            close(fd_in);
-            return 1;
-        }
+        std::vector<unsigned char> chunk_data(chunk_size);
+        std::cout << "  Start processing...\n" << std::endl;
 
-        // Calculate the number of chunks in this segment
-        size_t num_chunks = (phdr.p_filesz + chunk_size - 1) / chunk_size;
+        assert(phdr.p_filesz % chunk_size == 0);
 
-        for (size_t chunk_idx = 0; chunk_idx < num_chunks; ++chunk_idx) {
-            size_t chunk_offset = chunk_idx * chunk_size;
-            size_t chunk_end = std::min(chunk_offset + chunk_size, static_cast<size_t>(phdr.p_filesz));
-            size_t actual_chunk_size = chunk_end - chunk_offset;
+        ssize_t total_bytes_read = 0;
+        while (total_bytes_read != phdr.p_filesz) {
+            ssize_t bytes_read = read(fd_in, chunk_data.data(), chunk_size);
+            if (bytes_read == -1) {
+                perror("Failed to read segment data");
+                elf_end(e_in);
+                close(fd_in);
+                return 1;
+            }
 
             // Check if the chunk is all zeros
-            bool all_zero = std::all_of(segment_data.begin() + chunk_offset, segment_data.begin() + chunk_end,
+            bool all_zero = std::all_of(chunk_data.begin(), chunk_data.end(),
                                         [](unsigned char c) { return c == 0; });
 
             // Compute the absolute start address
-            Elf64_Addr absolute_start_addr = phdr.p_vaddr + chunk_offset;
-
-            // Debug: Print chunk information
-            // std::cout << "  Chunk " << chunk_idx << ": "
-            //           << "Offset " << std::hex << chunk_offset
-            //           << ", Size " << std::dec << actual_chunk_size
-            //           << ", Absolute Start Address: 0x" << std::hex << absolute_start_addr
-            //           << ", All Zero: " << (all_zero ? "Yes" : "No") << std::dec << std::endl;
+            Elf64_Addr absolute_start_addr = phdr.p_vaddr + total_bytes_read;
 
             if (!all_zero) {
-                // Record the useful memory region
-                MemoryRegion region;
-                region.start_addr = absolute_start_addr;
-                region.size = actual_chunk_size;
-                useful_regions.push_back(region);
+                if (useful_regions.size() != 0) {
+                    auto last_region = useful_regions.back();
+                    // check to see if you can compact
+                    if ((last_region.start_addr + last_region.size) == absolute_start_addr) {
+                        useful_regions.back() = {last_region.start_addr, last_region.size + bytes_read};
+                        //std::cout << "C";
+                    } else {
+                        useful_regions.push_back({absolute_start_addr, (Elf64_Xword)bytes_read});
+                        //std::cout << "N";
+                    }
+                } else {
+                    useful_regions.push_back({absolute_start_addr, (Elf64_Xword)bytes_read});
+                    //std::cout << "N";
+                }
             }
+
+            total_bytes_read += bytes_read;
         }
     }
 
@@ -152,6 +155,7 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
                   return a.start_addr < b.start_addr;
               });
 
+
     // Output the useful memory regions to the output file
     std::ofstream ofs(output_file);
     if (!ofs) {
@@ -159,14 +163,17 @@ int scan_memory_regions(const char *input_file, size_t chunk_size, const char *o
         return 1;
     }
 
+    size_t comp_size = 0;
+    std::cout << "Regions Found: " << useful_regions.size() << std::endl;
     for (const auto &region : useful_regions) {
         ofs << "0x" << std::hex << region.start_addr << " " << std::dec << region.size << std::endl;
+        comp_size += region.size;
     }
+    std::cout << "(In theory) Compressed ELF Size: " << comp_size << "bytes" << std::endl;
 
     ofs.close();
 
-    std::cout << "\nELF file scan complete." << std::endl;
-    // std::cout << "\nScan complete. Useful memory regions written to: " << output_file << std::endl;
+    std::cout << "\nScan complete. Useful memory regions written to: " << output_file << std::endl;
     return 0;
 }
 

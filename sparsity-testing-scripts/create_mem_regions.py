@@ -158,25 +158,25 @@ def main():
     if len(sys.argv) != 3:
         print("Usage: python3 extract_regions.py <mem.elf> <regions.txt>")
         sys.exit(1)
-    
+
     mem_elf = sys.argv[1]
     regions_file = sys.argv[2]
-    
+
     # Check if mem.elf exists
     if not os.path.isfile(mem_elf):
         print(f"Error: File '{mem_elf}' does not exist.")
         sys.exit(1)
-    
+
     # Check if regions.txt exists
     if not os.path.isfile(regions_file):
         print(f"Error: File '{regions_file}' does not exist.")
         sys.exit(1)
-    
+
     regions = parse_regions(regions_file)
     if not regions:
         print("Error: No valid regions found in regions.txt.")
         sys.exit(1)
-    
+
     # Open mem.elf
     with open(mem_elf, 'rb') as f:
         elf_header = read_elf_header(f)
@@ -190,28 +190,28 @@ def main():
             sys.exit(1)
         # Parse program headers
         program_headers = read_program_headers(f, elf_header)
-        
+
         for idx, (start, size) in enumerate(regions):
             # print(f"Processing region {idx}: Start=0x{start:X}, Size=0x{size:X}")
             data = extract_data(f, program_headers, start, size)
-            
+
             # Create binary file
-            data_bin = f"data_mem{idx}.bin"
+            data_bin = f"sparse_elf_workdir/data_mem{idx}.bin"
             create_binary_file(data, data_bin)
             # print(f"  Created binary file: {data_bin}")
-            
+
             # Create assembly file
             section_name = f".data_mem{idx}"
             symbol_name = f"data_mem{idx}"  # Changed symbol name to avoid leading '.'
-            asm_file = f"data_mem{idx}.S"
+            asm_file = f"sparse_elf_workdir/data_mem{idx}.S"
             create_assembly_file(symbol_name, section_name, data_bin, asm_file)
             # print(f"  Created assembly file: {asm_file}")
-            
+
             # Assemble into .o file
-            obj_file = f"data_mem{idx}.o"
+            obj_file = f"sparse_elf_workdir/data_mem{idx}.o"
             assemble_section(asm_file, obj_file)
             # print(f"  Assembled object file: {obj_file}")
-    
+
     print("All memory regions processed successfully.")
 
 if __name__ == "__main__":

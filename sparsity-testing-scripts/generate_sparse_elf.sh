@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # generate_sparse_elf.sh
 
 # Description:
@@ -23,6 +25,7 @@ OUTPUT_ELF="$2"
 
 # Temporary and intermediate files directory
 WORK_DIR="sparse_elf_workdir"
+rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR"
 
 # Paths to scripts (assuming they are in the same directory)
@@ -76,25 +79,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 5: Assemble the assembly files into object files
-echo "Assembling data section assembly files..."
-
-# Collect all .S files
-ASM_FILES=(data_mem*.S)
-
-for ASM_FILE in "${ASM_FILES[@]}"; do
-    OBJ_FILE="${ASM_FILE%.S}.o"
-    "$AS" -o "$OBJ_FILE" "$ASM_FILE"
-    if [ $? -ne 0 ]; then
-        echo "Error: Assembly failed for $ASM_FILE"
-        exit 1
-    fi
-done
-
-# Move generated files to work directory
-mv data_mem*.bin data_mem*.S data_mem*.o "$WORK_DIR/"
-
-# Step 6: Find 'tohost' and 'fromhost' symbols in the input ELF
+# Step 5: Find 'tohost' and 'fromhost' symbols in the input ELF
 echo "Finding 'tohost' and 'fromhost' symbols in $INPUT_ELF..."
 TOHOST_ADDR=$("$NM" "$INPUT_ELF" | grep " tohost$" | awk '{print $1}')
 FROMHOST_ADDR=$("$NM" "$INPUT_ELF" | grep " fromhost$" | awk '{print $1}')
@@ -107,7 +92,7 @@ fi
 echo "tohost address: 0x$TOHOST_ADDR"
 echo "fromhost address: 0x$FROMHOST_ADDR"
 
-# Step 7: Link all object files into the final ELF
+# Step 6: Link all object files into the final ELF
 echo "Linking object files to create $OUTPUT_ELF..."
 
 # Collect all object files
@@ -133,6 +118,6 @@ echo "Final sparse ELF file created: $OUTPUT_ELF"
 
 # Optional: Clean up the work directory
 # Uncomment the following line if you want to remove intermediate files
-# rm -rf "$WORK_DIR"
+rm -rf "$WORK_DIR"
 
 exit 0
