@@ -19,6 +19,12 @@ class SmallSPIFlashRocketConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class I2CRocketConfig extends Config(
+  new chipyard.harness.WithI2CTiedOff ++                    // Tie off the I2C port in the harness
+  new chipyard.config.WithI2C ++                            // Add I2C peripheral
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class SimBlockDeviceRocketConfig extends Config(
   new chipyard.harness.WithSimBlockDevice ++                // drive block-device IOs with SimBlockDevice
   new testchipip.iceblk.WithBlockDevice ++                  // add block-device module to peripherybus
