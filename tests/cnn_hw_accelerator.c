@@ -11,6 +11,7 @@
 #define FILT_ROWS 0x401C
 #define DEST_ADDR 0x4020
 #define START     0x4028
+#define BUSY      0x402C
 
 void stall(int clocks)
 {
@@ -68,7 +69,9 @@ int main(void)
 
   reg_write32(START, 1);
 
-  stall(1000);
+  while (reg_read32(BUSY) == 1);
+
+  // stall(1000);
 
   int passFail = 0;
 
