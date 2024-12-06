@@ -206,7 +206,7 @@ class WithI2CPunchthrough extends OverrideIOBinder({
     val ports = system.i2c.zipWithIndex.map { case (i2c, i) =>
       val io_i2c = IO(i2c.cloneType).suggestName(s"i2c_$i")
       io_i2c <> i2c
-      I2CPort(() => i2c)
+      I2CPort(() => io_i2c)
     }
     (ports, Nil)
   }
