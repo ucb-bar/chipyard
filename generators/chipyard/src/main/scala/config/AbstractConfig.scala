@@ -29,6 +29,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithCustomBootPinPlusArg ++                 /** drive custom-boot pin with a plusarg, if custom-boot-pin is present */
   new chipyard.harness.WithDriveChipIdPin ++                       /** drive chip id pin from harness binder, if chip id pin is present */
   new chipyard.harness.WithSimUARTToUARTTSI ++                     /** connect a SimUART to the UART-TSI port */
+  new chipyard.harness.WithSimTSIOverSerialTSI ++
   new chipyard.harness.WithClockFromHarness ++                     /** all Clock I/O in ChipTop should be driven by harnessClockInstantiator */
   new chipyard.harness.WithResetFromHarness ++                     /** reset controlled by harness */
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ /** generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz */
@@ -59,6 +60,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithNICIOPunchthrough ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithUARTTSIPunchthrough ++
+  new chipyard.iobinders.WithSerialTSIPunchthrough ++
   new chipyard.iobinders.WithGCDBusyPunchthrough ++
   new chipyard.iobinders.WithNMITiedOff ++
 

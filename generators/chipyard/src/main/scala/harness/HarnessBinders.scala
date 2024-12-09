@@ -262,6 +262,16 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
   }
 })
 
+class WithSimTSIOverSerialTSI extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: SerialTSIPort, chipId: Int) => {
+    val clock = th.harnessBinderClock
+    withClock (clock) {
+      val success = SimTSI.connect(Some(port.io), clock, th.harnessBinderReset, chipId)
+      when (success) { th.success := true.B }
+    }
+  }
+})
+
 class WithDriveChipIdPin extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: ChipIdPort, chipId: Int) => {
     require(chipId < math.pow(2, port.io.getWidth), "ID Pin is not wide enough")

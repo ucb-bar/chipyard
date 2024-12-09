@@ -10,7 +10,7 @@ import testchipip.serdes.{TLSerdesser, SerialIO, SerialTLParams}
 import testchipip.spi.{SPIChipIO}
 import testchipip.cosim.{TraceOutputTop, SpikeCosimConfig}
 import testchipip.iceblk.{BlockDeviceIO, BlockDeviceConfig}
-import testchipip.tsi.{UARTTSIIO}
+import testchipip.tsi.{UARTTSIIO, TSIIO}
 import icenet.{NICIOvonly, NICConfig}
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4EdgeParameters}
@@ -18,6 +18,7 @@ import freechips.rocketchip.subsystem.{MemoryPortParams, MasterPortParams, Slave
 import freechips.rocketchip.devices.debug.{ClockedDMIIO}
 import freechips.rocketchip.tilelink.{TLBundle}
 import org.chipsalliance.diplomacy.nodes.{HeterogeneousBag}
+import testchipip.tsi.SerialTSIIO
 
 trait Port[T <: Data] {
   val getIO: () => T
@@ -81,6 +82,9 @@ case class ChipIdPort      (val getIO: () => UInt)
 
 case class UARTTSIPort     (val getIO: () => UARTTSIIO)
     extends Port[UARTTSIIO]
+
+case class SerialTSIPort (val getIO: () => TSIIO)
+  extends Port[TSIIO]
 
 case class SuccessPort     (val getIO: () => Bool)
     extends Port[Bool]

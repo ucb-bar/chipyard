@@ -3,6 +3,7 @@ package chipyard
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.prci.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem.{InCluster}
+import chipyard.harness.HarnessBinderClockFrequencyKey
 
 // --------------
 // Rocket Configs
@@ -12,6 +13,13 @@ class SingleClockRocketConfig extends Config(
   new chipyard.harness.WithHarnessBinderClockFreqMHz(500) ++
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
   new chipyard.config.AbstractConfig)
+
+class TSIPunchThroughSingleClockRocketConfig extends Config(
+// new chipyard.harness.WithSerialTLTiedOff ++
+  new testchipip.tsi.WithSerialTSI(500) ++
+  new testchipip.serdes.WithNoSerialTL ++
+  new testchipip.soc.WithNoScratchpads ++                         // All memory is the Rocket TCMs
+  new chipyard.SingleClockRocketConfig)
 
 class RocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core

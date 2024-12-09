@@ -36,7 +36,7 @@ import testchipip.soc.{CanHavePeripheryChipIdPin}
 import testchipip.util.{ClockedIO}
 import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
 import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
-import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
+import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO, CanHavePeripherySerialTSI, TSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
 import chipyard.example.{CanHavePeripheryGCD}
@@ -383,6 +383,15 @@ class WithSerialTLPunchthrough extends OverrideIOBinder({
     }).unzip
     (ports.toSeq, cells.flatten.toSeq)
   }
+})
+
+class WithSerialTSIPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripherySerialTSI) => system.serial_tsi.map({ tsi =>
+      val sys = system.asInstanceOf[BaseSubsystem]
+      val port = IO(new TSIIO)
+      port <> tsi.getWrappedValue
+      (Seq(SerialTSIPort(() => port)), Nil)
+  }).getOrElse(Nil, Nil)
 })
 
 class WithAXI4MemPunchthrough extends OverrideLazyIOBinder({
