@@ -39,7 +39,7 @@ import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
 import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
-import chipyard.example.{CanHavePeripheryGCD}
+import chipyard.example.{CanHavePeripheryGCD, CanHaveAXI4Lite, AXI4Lite}
 
 import scala.reflect.{ClassTag}
 
@@ -563,4 +563,12 @@ class WithGCDBusyPunchthrough extends OverrideIOBinder({
     io_gcd_busy := busy
     (Seq(GCDBusyPort(() => io_gcd_busy)), Nil)
   }.getOrElse((Nil, Nil))
+})
+
+class WithAXI4LitePunchthrough extends OverrideIOBinder({
+  (system: CanHaveAXI4Lite) => system.axi4_lite.map({ p =>
+    val axi4_lite = IO(new AXI4Lite()).suggestName("axi4_lite")
+    axi4_lite <> p
+    (Seq(AXI4LitePort(() => axi4_lite)), Nil)
+  }).getOrElse((Nil, Nil))
 })
