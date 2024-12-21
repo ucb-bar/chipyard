@@ -125,7 +125,8 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInsta
         if (p(FireSimMultiCycleRegFile)) ls.totalTiles.values.map {
           case r: RocketTile => {
             annotate(MemModelAnnotation(r.module.core.rocketImpl.rf.rf))
-            r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
+            // TODO: currently, fpu mem. model optimizations are broken with model multi-threading so disable for now
+            //r.module.fpuOpt.foreach(fpu => annotate(MemModelAnnotation(fpu.fpuImpl.regfile)))
           }
           case b: BoomTile => {
             val core = b.module.core
