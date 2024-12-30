@@ -8,6 +8,13 @@ import chipyard.harness.HarnessBinderClockFrequencyKey
 // --------------
 // Rocket Configs
 // --------------
+
+class SingleClockConfig extends Config(
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(500) ++
+  new chipyard.harness.WithSyncResetFromHarness ++
+  new chipyard.config.WithNoResetSynchronizers ++
+  new chipyard.config.WithNoTileClockGaters)
+
 class SingleClockRocketConfig extends Config(
   new chipyard.harness.WithSyncResetFromHarness ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(500) ++
@@ -15,7 +22,8 @@ class SingleClockRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class TSIPunchThroughSingleClockRocketConfig extends Config(
-// new chipyard.harness.WithSerialTLTiedOff ++
+  new chipyard.SingleClockConfig ++
+  new chipyard.harness.WithSerialTLTiedOff ++
   new testchipip.tsi.WithSerialTSI(500) ++
   new testchipip.serdes.WithNoSerialTL ++
   new testchipip.soc.WithNoScratchpads ++                         // All memory is the Rocket TCMs
