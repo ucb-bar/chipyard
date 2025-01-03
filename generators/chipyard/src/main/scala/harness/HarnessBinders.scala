@@ -224,16 +224,16 @@ class WithSerialTLTiedOff(tieoffs: Option[Seq[Int]] = None) extends HarnessBinde
   case (th: HasHarnessInstantiators, port: SerialTLPort, chipId: Int) if (tieoffs.map(_.contains(port.portId)).getOrElse(true)) => {
     port.io match {
       case io: DecoupledPhitIO => io.out.ready := false.B; io.in.valid := false.B; io.in.bits := DontCare;
-      case io: SourceSyncPhitIO => {
+      case io: CreditedSourceSyncPhitIO => {
         io.clock_in := false.B.asClock
         io.reset_in := false.B.asAsyncReset
         io.in := DontCare
       }
     }
     port.io match {
-      case io: InternalSyncPhitIO =>
-      case io: ExternalSyncPhitIO => io.clock_in := false.B.asClock
-      case io: SourceSyncPhitIO =>
+      case io: HasClockOut =>
+      case io: HasClockIn => io.clock_in := false.B.asClock
+      case io: CreditedSourceSyncPhitIO =>
       case _ =>
     }
   }
@@ -242,9 +242,9 @@ class WithSerialTLTiedOff(tieoffs: Option[Seq[Int]] = None) extends HarnessBinde
 class WithSimTSIOverSerialTL extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SerialTLPort, chipId: Int) if (port.portId == 0) => {
     port.io match {
-      case io: InternalSyncPhitIO =>
-      case io: ExternalSyncPhitIO => io.clock_in := th.harnessBinderClock
-      case io: SourceSyncPhitIO => io.clock_in := th.harnessBinderClock; io.reset_in := th.harnessBinderReset
+      case io: HasClockOut =>
+      case io: HasClockIn => io.clock_in := th.harnessBinderClock
+      case io: CreditedSourceSyncPhitIO => io.clock_in := th.harnessBinderClock; io.reset_in := th.harnessBinderReset
     }
 
     port.io match {
@@ -252,8 +252,8 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
         // If the port is locally synchronous (provides a clock), drive everything with that clock
         // Else, drive everything with the harnes clock
         val clock = port.io match {
-          case io: InternalSyncPhitIO => io.clock_out
-          case io: ExternalSyncPhitIO => th.harnessBinderClock
+          case io: HasClockOut => io.clock_out
+          case io: HasClockIn => th.harnessBinderClock
         }
         withClock(clock) {
           val ram = Module(LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p)).module)
