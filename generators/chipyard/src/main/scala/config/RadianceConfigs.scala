@@ -155,6 +155,14 @@ class RadianceNoCoalConfig extends Config(
   new radiance.subsystem.WithVortexL1Banks(nBanks = 1)++
   new RadianceBaseConfig)
 
+class RadianceEmulatorConfig extends Config(
+  new radiance.subsystem.WithEmulatorCores(1, useVxCache = false) ++
+  new radiance.subsystem.WithSimtConfig(nMemLanes = 4, nSrcIds = 4) ++
+  new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
+  new chipyard.harness.WithCeaseSuccess ++
+  new chipyard.iobinders.WithCeasePunchThrough ++
+  new AbstractConfig)
+
 class RadianceFuzzerConfig extends Config(
   new radiance.subsystem.WithFuzzerCores(1, useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 2) ++
