@@ -50,6 +50,7 @@ class RadianceBaseConfig extends Config(
   new chipyard.config.WithSystemBusFrequency(400.0) ++
   new chipyard.config.WithFrontBusFrequency(400.0) ++
   new chipyard.config.WithOffchipBusFrequency(400.0) ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(400.0) ++
   new AbstractConfig)
 
 class RadianceFP16ClusterConfig extends Config(
