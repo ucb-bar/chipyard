@@ -13,7 +13,7 @@ import ibex.{IbexTileAttachParams}
 import vexiiriscv.{VexiiRiscvTileAttachParams}
 import testchipip.cosim.{TracePortKey, TracePortParams}
 import barf.{TilePrefetchingMasterPortParams}
-import freechips.rocketchip.util.{TraceEncoderParams, TraceCoreParams}
+import freechips.rocketchip.trace.{TraceEncoderParams, TraceCoreParams}
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
@@ -68,19 +68,20 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
 class WithLTraceEncoder extends Config((site, here, up) => {
    case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
      case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-       ltrace = Some(new TraceEncoderParams(
-         coreParams = new TraceCoreParams(
-           nGroups = 1,
-           iretireWidth = 1,
-           xlen = tp.tileParams.core.xLen,
-           iaddrWidth = tp.tileParams.core.xLen
+      ltrace = Some(TraceEncoderParams(
+        coreParams = TraceCoreParams(
+          nGroups = 1,
+          iretireWidth = 1,
+          xlen = tp.tileParams.core.xLen,
+          iaddrWidth = tp.tileParams.core.xLen
          ),
          bufferDepth = 16,
          encoderBaseAddr = 0x3000000 + tp.tileParams.tileId * 0x1000,
          sinkDMABaseAddr = 0x3010000 + tp.tileParams.tileId * 0x1000,
          useSinkPrint = true,
          useSinkDMA = true
-       ))))
+       )),
+      core = tp.tileParams.core.copy(enableTraceCoreIngress=true)))
    }
  })
 
