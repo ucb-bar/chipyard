@@ -432,7 +432,7 @@ package:
   category: main
   optional: false
 - name: awscli
-  version: 2.23.0
+  version: 2.23.1
   manager: conda
   platform: linux-64
   dependencies:
@@ -450,10 +450,10 @@ package:
     ruamel.yaml.clib: '>=0.2.0,<=0.2.8'
     urllib3: '>=1.25.4,<1.27'
     zipp: <3.21.0
-  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-2.23.0-py310hff52083_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/awscli-2.23.1-py310hff52083_1.conda
   hash:
-    md5: ee3b72c9cc1dac762c927267533fe2f8
-    sha256: 7452c5e6372fb570b54b025ac5f92ea4b26729ce5ab457e8b8df89effa8b2b92
+    md5: e0166b828d892d43acb3fb5510fb564d
+    sha256: e2cbbdcb4e017df8fe5795361aac5a1417d2be29d422a49e54daf078e6243fb2
   category: main
   optional: false
 - name: awscrt
@@ -651,22 +651,22 @@ package:
   category: main
   optional: false
 - name: boto3
-  version: 1.36.0
+  version: 1.36.1
   manager: conda
   platform: linux-64
   dependencies:
-    botocore: '>=1.36.0,<1.37.0'
+    botocore: '>=1.36.1,<1.37.0'
     jmespath: '>=0.7.1,<2.0.0'
     python: '>=3.9'
     s3transfer: '>=0.11.0,<0.12.0'
-  url: https://conda.anaconda.org/conda-forge/noarch/boto3-1.36.0-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/boto3-1.36.1-pyhd8ed1ab_0.conda
   hash:
-    md5: 8f290181804ac838dbf684427e6c023e
-    sha256: 17f31c13a8785c7462204942930c1a1d87706578330603660991e71d3d1d0bac
+    md5: 5c93e40feecdff5020a668c118cdcbd6
+    sha256: d4683edae9c9d2a00a74a5cdd87cf6adfbccd7426fd2adb09e5f4030dc14608d
   category: main
   optional: false
 - name: boto3-stubs
-  version: 1.36.0
+  version: 1.36.1
   manager: conda
   platform: linux-64
   dependencies:
@@ -674,14 +674,14 @@ package:
     python: ''
     types-s3transfer: ''
     typing-extensions: '>=4.1.0'
-  url: https://conda.anaconda.org/conda-forge/noarch/boto3-stubs-1.36.0-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/boto3-stubs-1.36.1-pyhd8ed1ab_0.conda
   hash:
-    md5: d6d5a00e137d23b6d8090c8b21316578
-    sha256: c47b4728e375ac2b298563cf4a6c3bd65edcf8871aef77de834b403ad61233f9
+    md5: cffb76161d19fd6f716f9c03bcdfd35d
+    sha256: c75bb9000f77e1518cd4d2b98af46f4d535e18bdf755630bd4fb46a90bd97b16
   category: main
   optional: false
 - name: botocore
-  version: 1.36.0
+  version: 1.36.1
   manager: conda
   platform: linux-64
   dependencies:
@@ -689,24 +689,24 @@ package:
     python: '>=3.10'
     python-dateutil: '>=2.1,<3.0.0'
     urllib3: '>=1.25.4,!=2.2.0,<3'
-  url: https://conda.anaconda.org/conda-forge/noarch/botocore-1.36.0-pyge310_1234567_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/botocore-1.36.1-pyge310_1234567_0.conda
   hash:
-    md5: 2fac5270e9399992917330c247c7a005
-    sha256: 300918ce030f4e70df2afb6fc9c64220fc3a6835f3bad21d75fd066ed125eb1a
+    md5: 8be0efb498e635e845c2239437c7eaf3
+    sha256: 13f9452f3d75e8693730f542857e15391e5d7beb2724375a661dd8ea77d409a9
   category: main
   optional: false
 - name: botocore-stubs
-  version: 1.36.0
+  version: 1.36.1
   manager: conda
   platform: linux-64
   dependencies:
     python: '>=3.9'
     types-awscrt: ''
     typing_extensions: '>=4.1.0'
-  url: https://conda.anaconda.org/conda-forge/noarch/botocore-stubs-1.36.0-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/botocore-stubs-1.36.1-pyhd8ed1ab_0.conda
   hash:
-    md5: 6ac26e606272cfbcbd20761e1b5dee75
-    sha256: 33764deb7472c1a8764f5a65445380a0cfdaa462857f0ba189905bb28cb99a06
+    md5: a342145fa7323a75e9e16e4a1f75a7f5
+    sha256: 9681a4a0c2af0c8e46ef25c7613ea8703544bc8f59efe031668664d6180e8e61
   category: main
   optional: false
 - name: brotli
@@ -5345,14 +5345,14 @@ package:
   category: main
   optional: false
 - name: tzdata
-  version: 2024b
+  version: 2025a
   manager: conda
   platform: linux-64
   dependencies: {}
-  url: https://conda.anaconda.org/conda-forge/noarch/tzdata-2024b-hc8b5060_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025a-h78e105d_0.conda
   hash:
-    md5: 8ac3367aafb1cc0a068483c580af8015
-    sha256: 4fde5c3008bf5d2db82f2b50204464314cc3c91c1d953652f7bd01d9e52aefdf
+    md5: dbcace4706afdfb7eb891f7b37d07c04
+    sha256: c4b1ae8a2931fe9b274c44af29c5475a85b37693999f8c792dad0f8c6734b1de
   category: main
   optional: false
 - name: unicodedata2
@@ -5455,7 +5455,7 @@ package:
   category: main
   optional: false
 - name: virtualenv
-  version: 20.29.0
+  version: 20.29.1
   manager: conda
   platform: linux-64
   dependencies:
@@ -5463,10 +5463,10 @@ package:
     filelock: '>=3.12.2,<4'
     platformdirs: '>=3.9.1,<5'
     python: '>=3.9'
-  url: https://conda.anaconda.org/conda-forge/noarch/virtualenv-20.29.0-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/virtualenv-20.29.1-pyhd8ed1ab_0.conda
   hash:
-    md5: 0cc88f5f810eb15fe0a671f220290fe6
-    sha256: 34e0a910dd26202e81d22b4b3f2271b6ef60c4e943666985c158dbd8e15f366f
+    md5: de06336c9833cffd2a4bd6f27c4cf8ea
+    sha256: f09a9f2034669762ae875858253d472588f03689843e5f0b8ddc5cc48a1d0e50
   category: main
   optional: false
 - name: watchfiles
