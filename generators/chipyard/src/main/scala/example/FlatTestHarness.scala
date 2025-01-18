@@ -47,12 +47,12 @@ class FlatTestHarness(implicit val p: Parameters) extends Module {
 
   // Figure out which clock drives the harness TLSerdes, based on the port type
   val serial_ram_clock = dut.serial_tl_pad match {
-    case io: InternalSyncPhitIO => io.clock_out
-    case io: ExternalSyncPhitIO => clock
+    case io: HasClockOut => io.clock_out
+    case io: HasClockIn => clock
   }
   dut.serial_tl_pad match {
-    case io: ExternalSyncPhitIO => io.clock_in := clock
-    case io: InternalSyncPhitIO =>
+    case io: HasClockIn => io.clock_in := clock
+    case io: HasClockOut =>
   }
 
   dut.serial_tl_pad match {

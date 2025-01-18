@@ -71,7 +71,7 @@ class AbstractConfig extends Config(
   new testchipip.serdes.WithSerialTL(Seq(                           /** add a serial-tilelink interface */
     testchipip.serdes.SerialTLParams(
       client = Some(testchipip.serdes.SerialTLClientParams(totalIdBits=4)), // serial-tilelink interface will master the FBUS, and support 4 idBits
-      phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32) // serial-tilelink interface with 32 lanes
+      phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32) // serial-tilelink interface with 32 lanes
     )
   )) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++         /** Default 1 AXI-4 memory channels */

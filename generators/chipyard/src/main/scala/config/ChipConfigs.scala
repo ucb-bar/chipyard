@@ -31,7 +31,7 @@ class ChipLikeRocketConfig extends Config(
       isMemoryDevice = true
     )),
     client = Some(testchipip.serdes.SerialTLClientParams()),                            // Allow an external manager to probe this chip
-    phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=4, flitWidth=16)   // 4-bit bidir interface, sync'd to an external clock
+    phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=4, flitWidth=16)   // 4-bit bidir interface, sync'd to an external clock
   ))) ++
 
   new freechips.rocketchip.subsystem.WithNoMemPort ++                                   // Remove axi4 mem port
@@ -78,7 +78,7 @@ class ChipBringupHostConfig extends Config(
       ))
     )),
     client = Some(testchipip.serdes.SerialTLClientParams()),                                        // Allow chip to access this device's memory (DRAM)
-    phyParams = testchipip.serdes.InternalSyncSerialPhyParams(phitWidth=4, flitWidth=16, freqMHz = 75) // bringup platform provides the clock
+    phyParams = testchipip.serdes.DecoupledInternalSyncSerialPhyParams(phitWidth=4, flitWidth=16, freqMHz = 75) // bringup platform provides the clock
   ))) ++
 
   //============================
