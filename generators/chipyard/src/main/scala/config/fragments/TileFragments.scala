@@ -77,9 +77,7 @@ class WithLTraceEncoder extends Config((site, here, up) => {
          ),
          bufferDepth = 16,
          encoderBaseAddr = 0x3000000 + tp.tileParams.tileId * 0x1000,
-         sinkDMABaseAddr = 0x3010000 + tp.tileParams.tileId * 0x1000,
-         useSinkPrint = true,
-         useSinkDMA = true
+         useArbiterMonitor = true
        )),
       core = tp.tileParams.core.copy(enableTraceCoreIngress=true)))
    }

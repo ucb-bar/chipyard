@@ -4,6 +4,7 @@ import chisel3._
 
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system._
+import freechips.rocketchip.trace._
 import org.chipsalliance.cde.config.Parameters
 import freechips.rocketchip.devices.tilelink._
 
@@ -13,6 +14,8 @@ import freechips.rocketchip.devices.tilelink._
 
 // DOC include start: DigitalTop
 class DigitalTop(implicit p: Parameters) extends ChipyardSystem
+  with freechips.rocketchip.trace.CanHaveTraceSinkAlways
+  with freechips.rocketchip.trace.CanHaveTraceSinkDMA
   with testchipip.tsi.CanHavePeripheryUARTTSI // Enables optional UART-based TSI transport
   with testchipip.boot.CanHavePeripheryCustomBootPin // Enables optional custom boot pin
   with testchipip.boot.CanHavePeripheryBootAddrReg // Use programmable boot address register
