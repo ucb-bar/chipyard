@@ -14,7 +14,6 @@ import freechips.rocketchip.devices.tilelink._
 
 // DOC include start: DigitalTop
 class DigitalTop(implicit p: Parameters) extends ChipyardSystem
-  with freechips.rocketchip.trace.CanHaveTraceSinkAlways
   with freechips.rocketchip.trace.CanHaveTraceSinkDMA
   with testchipip.tsi.CanHavePeripheryUARTTSI // Enables optional UART-based TSI transport
   with testchipip.boot.CanHavePeripheryCustomBootPin // Enables optional custom boot pin
