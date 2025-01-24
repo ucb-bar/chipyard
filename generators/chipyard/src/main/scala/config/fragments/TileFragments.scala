@@ -6,6 +6,7 @@ import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams, ICacheParams}
+import freechips.rocketchip.diplomacy._
 
 import cva6.{CVA6TileAttachParams}
 import sodor.common.{SodorTileAttachParams}
@@ -13,7 +14,7 @@ import ibex.{IbexTileAttachParams}
 import vexiiriscv.{VexiiRiscvTileAttachParams}
 import testchipip.cosim.{TracePortKey, TracePortParams}
 import barf.{TilePrefetchingMasterPortParams}
-import freechips.rocketchip.trace.{TraceEncoderParams, TraceCoreParams}
+import freechips.rocketchip.trace.{TraceEncoderParams, TraceCoreParams, TacitEncoder}
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
@@ -68,20 +69,26 @@ class WithNPerfCounters(n: Int = 29) extends Config((site, here, up) => {
 class WithLTraceEncoder extends Config((site, here, up) => {
    case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
      case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
-      ltrace = Some(TraceEncoderParams(
-        coreParams = TraceCoreParams(
+      traceParams = Some(TraceEncoderParams(
+        encoderBaseAddr = 0x3000000 + tp.tileParams.tileId * 0x1000,
+        buildEncoder = (p: Parameters) => LazyModule(new TacitEncoder(new TraceCoreParams(
           nGroups = 1,
           iretireWidth = 1,
           xlen = tp.tileParams.core.xLen,
           iaddrWidth = tp.tileParams.core.xLen
-         ),
-         bufferDepth = 16,
-         encoderBaseAddr = 0x3000000 + tp.tileParams.tileId * 0x1000,
-         useArbiterMonitor = true
-       )),
+        ), 16)(p)),
+        useArbiterMonitor = false
+      )),
       core = tp.tileParams.core.copy(enableTraceCoreIngress=true)))
    }
  })
+
+class WithArbiterMonitor extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      traceParams = Some(tp.tileParams.traceParams.get.copy(useArbiterMonitor = true))))
+  }
+})
 
 class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
