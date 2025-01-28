@@ -160,6 +160,3 @@
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git
-[submodule "generators/rocket-gpu"]
-	path = generators/rocket-gpu
-	url = https://github.com/hansungk/rocket-gpu.git
