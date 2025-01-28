@@ -14,7 +14,8 @@ import ibex.{IbexTileAttachParams}
 import vexiiriscv.{VexiiRiscvTileAttachParams}
 import testchipip.cosim.{TracePortKey, TracePortParams}
 import barf.{TilePrefetchingMasterPortParams}
-import freechips.rocketchip.trace.{TraceEncoderParams, TraceCoreParams, TacitEncoder}
+import freechips.rocketchip.trace.{TraceEncoderParams, TraceCoreParams}
+import tacit.{TacitEncoder}
 
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {

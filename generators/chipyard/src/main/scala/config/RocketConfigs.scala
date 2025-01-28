@@ -117,8 +117,8 @@ class SV48RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 
 class LTraceEncoderRocketConfig extends Config(
-  new freechips.rocketchip.trace.WithTraceSinkDMA(1) ++
-  new freechips.rocketchip.trace.WithTraceSinkAlways(0) ++
+  new tacit.WithTraceSinkDMA(1) ++
+  new tacit.WithTraceSinkAlways(0) ++
   new chipyard.config.WithArbiterMonitor ++
   new chipyard.config.WithLTraceEncoder ++
   new chipyard.config.WithNPerfCounters(29) ++
