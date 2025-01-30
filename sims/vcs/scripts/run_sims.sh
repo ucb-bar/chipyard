@@ -45,8 +45,7 @@ sleep 5
 
 suffix="-debug"
 
-# dims=(256 512 1024)
-dims=(256 512)
+dims=(256 512 1024)
 for dim in "${dims[@]}"; do
     echo "$element"
     start_run VirgoFP16Config sgemm_tcore/kernel.radiance.gemm.tcore.volta.dim${dim}.elf          "volta${dim} " "${suffix}"
