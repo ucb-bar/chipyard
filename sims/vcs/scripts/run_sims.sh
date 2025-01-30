@@ -19,7 +19,7 @@ lineno=0
 start_run() {
     echo "kickoff elf $KERNELS_PATH/$2 on config $1"
     lineno=$((lineno+1))
-    make CONFIG=$1 BINARY="$KERNELS_PATH/$2" LOADMEM=1 run-binary"$4" 2>&1 | ./scripts/pprint "$3" $lineno &
+    make CONFIG=$1 TIMEOUT_CYCLES=0 BINARY="$KERNELS_PATH/$2" LOADMEM=1 run-binary"$4" 2>&1 | ./scripts/pprint "$3" $lineno &
 }
 
 check_exists() {
