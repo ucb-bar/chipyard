@@ -38,6 +38,8 @@ check_exists "simv-chipyard.harness-VirgoHopperConfig-debug"
 check_exists "$KERNELS_PATH/sgemm_tcore/kernel.radiance.gemm.tcore.volta.dim256.elf"
 check_exists "$KERNELS_PATH/sgemm_tcore/kernel.radiance.gemm.tcore.hopper.dim512.elf"
 check_exists "$KERNELS_PATH/sgemm_gemmini_dma/kernel.radiance.gemm.virgo.hopper.dim1024.elf"
+check_exists "$KERNELS_PATH/flash_attention/kernel.radiance.flash.ampere.seqlen1024.headdim64.elf"
+check_exists "$KERNELS_PATH/flash_attention/kernel.radiance.flash.virgo.seqlen1024.headdim64.elf"
 
 echo "Simulations will be started in parallel in 5 seconds. Please do not Ctrl+C as it kills all subprocesses."
 
@@ -53,6 +55,9 @@ for dim in "${dims[@]}"; do
     start_run VirgoHopperConfig sgemm_gemmini_dma/kernel.radiance.gemm.virgo.hopper.dim${dim}.elf "virgo${dim} " "${suffix}"
     suffix=""
 done
+
+start_run VirgoFlashConfig flash_attention/kernel.radiance.flash.ampere.seqlen1024.headdim64.elf  "ampere" "${suffix}"
+start_run VirgoFlashConfig flash_attention/kernel.radiance.flash.virgo.seqlen1024.headdim64.elf   "virgo"  "${suffix}"
 
 wait
 
