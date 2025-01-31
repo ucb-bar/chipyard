@@ -18,5 +18,4 @@ make CONFIG=VirgoHopperConfig
 make CONFIG=VirgoHopperConfig debug
 echo -e "\nCompiling flash designs"
 make CONFIG=VirgoFlashConfig
-make CONFIG=VirgoFlashConfig debug
 echo -e "\nCompilation completed"

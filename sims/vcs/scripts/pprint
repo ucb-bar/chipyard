@@ -156,7 +156,7 @@ def main():
             print(translated_line, end='')
             sys.stdout.flush()
 
-    print("\033[s", end='')
+    print("\033[2J\033[s", end='')
     print("\033[" + str(lineno) + "H\033[2K\033[1m" + run_label, "DONE", "\033[0m", end='')
     print("\033[u", end='', flush=True)
 

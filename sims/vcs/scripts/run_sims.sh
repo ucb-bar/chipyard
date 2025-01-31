@@ -56,8 +56,8 @@ for dim in "${dims[@]}"; do
     suffix=""
 done
 
-start_run VirgoFlashConfig flash_attention/kernel.radiance.flash.ampere.seqlen1024.headdim64.elf  "ampere" "${suffix}"
-start_run VirgoFlashConfig flash_attention/kernel.radiance.flash.virgo.seqlen1024.headdim64.elf   "virgo"  "${suffix}"
+start_run VirgoFlashConfig flash_attention/kernel.radiance.flash.ampere.seqlen1024.headdim64.elf  "flash ampere" ""
+start_run VirgoFlashConfig flash_attention/kernel.radiance.flash.virgo.seqlen1024.headdim64.elf   "flash virgo " ""
 
 wait
 
