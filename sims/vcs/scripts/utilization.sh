@@ -18,11 +18,15 @@ runtime() {
     check_exists "${log_path}"
     if [ -z "$(tail -n10 ${log_path} | rg 'finish called')" ]; then
         echo "$3,0"
+        echoerr "$3 run is not complete"
         return
     fi
     rg "(e0d0a013|be90a013)" ${log_path} > /tmp/markers.log
     echo -n "$3,"
-    python3 ./scripts/runtime_fast.py /tmp/markers.log
+    cycles=$(python3 ./scripts/runtime_fast.py /tmp/markers.log)
+    echo "$cycles"
+    util=$(echo "scale=2; $dim * $dim * $dim * 100 / 256 / $cycles" | bc)
+    echoerr "$3 cycles: $cycles, hw utilization: ${util}%"
     rm -f /tmp/markers.log
 }
 
