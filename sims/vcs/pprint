@@ -3,6 +3,7 @@
 import sys
 import signal
 import re
+import time
 
 PRINT_BUF = 0x20000 / 4
 
@@ -54,9 +55,9 @@ def translator(line):
                     return ""
 
 def timestamp_parser(line):
-    parts = line.strip().split()
-    if parts:
-        return parts[0][:-1]
+    match = re.match(r"^\s*(\d+):", line)
+    if match:
+        return match.group(1)
     else:
         return ""
 
@@ -65,13 +66,16 @@ sim_ended = False
 
 def signal_handler(sig, frame):
     if sim_started:
-        print("\033[u")
+        print("\033[B")
     sys.exit(0)
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
 
-    current_timestamp = ""
+    curr_timestamp = -1
+    prev_timestamp = -1
+    curr_clock = time.time()
+    prev_clock = time.time()
     re_start_num = re.compile(r"^\s*[0-9]+:")
 
     print("\033[2J\033[H")
@@ -81,28 +85,36 @@ def main():
     perf_counters = False
     hang_detector = 0
 
+    if (len(sys.argv) > 1) and (sys.argv[1] == "started"):
+        sim_started = True
+
     for line in sys.stdin:
         line = line.rstrip('\n')
-        ts_countdown -= 1
 
         if "Chronologic VCS simulator" in line:
             sim_started = True
 
         sim_nontrace = re.match(re_start_num, line) is None
 
-        if "has no more active warps" in line:
-            sim_ended = True
-
         if "====================CORE" in line:
             perf_counters = True
             if hang_detector >= 8:
                 print("\n\033[3mpossible hang detected\033[0m\n")
 
-        if (not sim_started) or sim_ended:
-            if "has no more active warps" not in line:
-                print(line)
+        if "has no more active warps" in line:
+            sim_ended = True
+
+        if (not sim_started):
+            print(line)
             continue
-        elif sim_started and (not sim_ended):
+        
+        if sim_ended:
+            if "has no more active warps" not in line:
+                sim_ended = False
+            else:
+                continue
+        
+        if sim_started and (not sim_ended):
             if sim_nontrace:
                 if not perf_counters:
                     print(line)
@@ -114,19 +126,24 @@ def main():
                 hang_detector = 0
 
         if ts_countdown == 0:
-            timestamp = timestamp_parser(line)
-    
-            if timestamp:
-                current_timestamp = timestamp
+            match = re.match(r"^\s*(\d+):", line)
+            if match:
+                prev_clock = curr_clock
+                prev_timestamp = curr_timestamp
+                curr_clock = time.time()
+                curr_timestamp = match.group(1)
+                speed_in_hz = (int(curr_timestamp) - int(prev_timestamp)) / (curr_clock - prev_clock) if curr_clock - prev_clock > 0 else 0
+
                 # Save cursor position
                 print("\033[s", end='')
                 # Move cursor to top-left corner, clear line, bold, timestamp, unbold
-                print("\033[H\033[2K\033[1", current_timestamp, "\033[0m", end='')
+                print("\033[H\033[2K\033[1m[TIME]", curr_timestamp, "[SPEED]", int(speed_in_hz), "\033[0m", end='')
                 # Restore cursor position
-                print("\033[u", end='')
-                ts_countdown = 100
+                print("\033[u", end='', flush=True)
+
+                ts_countdown = 200
             else:
-                ts_countdown = 1
+                ts_countdown = 10
 
         ts_countdown -= 1
         translated_line = translator(line)

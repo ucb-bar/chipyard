@@ -9,8 +9,6 @@ fsdbs=(
 )
 
 for fsdb_file in "${fsdbs[@]}"; do
-    #n=${files_and_n_values[$fsdb_file]}
-    n=256
 
     echo "parsing sharedmem reads for file $fsdb_file"
 
@@ -24,11 +22,11 @@ for fsdb_file in "${fsdbs[@]}"; do
     # Clean up temp file
     rm -f /tmp/smem_activity.log
 
-    echo "reads: $reads"
+    echo "number of 4-byte reads: $reads"
 
     # Calculate final value
-    result=$(echo "scale=6; $reads / ($n * $n / 64)" | bc)
+    result=$(echo "scale=3; $reads * 4 / 1048576" | bc)
 
-    echo -e "multiple of input data size: $result\n"
+    echo -e "total read data in MiB: $result\n"
 done
 

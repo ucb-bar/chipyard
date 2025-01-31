@@ -47,7 +47,6 @@ suffix="-debug"
 
 dims=(256 512 1024)
 for dim in "${dims[@]}"; do
-    echo "$element"
     start_run VirgoFP16Config sgemm_tcore/kernel.radiance.gemm.tcore.volta.dim${dim}.elf          "volta${dim} " "${suffix}"
     start_run VirgoFP16Config sgemm_tcore/kernel.radiance.gemm.tcore.ampere.dim${dim}.elf         "ampere${dim}" "${suffix}"
     start_run VirgoHopperConfig sgemm_tcore/kernel.radiance.gemm.tcore.hopper.dim${dim}.elf       "hopper${dim}" "${suffix}"
