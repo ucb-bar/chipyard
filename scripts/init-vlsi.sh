@@ -10,9 +10,9 @@ if [[ `basename $CONDA_PREFIX` != .conda-env ]]; then
     exit
 fi
 
-# Initialize HAMMER CAD-plugins
-if [[ $1 != *openroad* ]] && [[ $2 != *openroad* ]]; then
-    git submodule update --init --recursive vlsi/hammer-mentor-plugins
+# Explicitly install mentor plugins for Calibre if you have access
+if [[ $1 == "calibre" ]]; then
+    git clone git@github.com:ucb-bar/hammer-mentor-plugins.git vlsi/hammer-mentor-plugins
     pip install -e vlsi/hammer-mentor-plugins
 fi
 
