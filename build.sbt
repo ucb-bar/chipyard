@@ -254,7 +254,7 @@ lazy val nvdla = (project in file("generators/nvdla"))
   .settings(commonSettings)
 
 lazy val tacit = (project in file("generators/tacit"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 

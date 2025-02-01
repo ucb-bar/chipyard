@@ -16,7 +16,7 @@ import testchipip.cosim.{TracePortKey, TracePortParams}
 import barf.{TilePrefetchingMasterPortParams}
 import freechips.rocketchip.trace.{TraceEncoderParams, TraceCoreParams}
 import tacit.{TacitEncoder}
-
+import shuttle.common.{ShuttleTileAttachParams}
 class WithL2TLBs(entries: Int) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
@@ -77,7 +77,21 @@ class WithLTraceEncoder extends Config((site, here, up) => {
           iretireWidth = 1,
           xlen = tp.tileParams.core.xLen,
           iaddrWidth = tp.tileParams.core.xLen
-        ), 16)(p)),
+        ), 
+        bufferDepth = 16,
+        coreStages = 5)(p)),
+        useArbiterMonitor = false
+      )),
+      core = tp.tileParams.core.copy(enableTraceCoreIngress=true)))
+    case tp: ShuttleTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      traceParams = Some(TraceEncoderParams(
+        encoderBaseAddr = 0x3000000 + tp.tileParams.tileId * 0x1000,
+        buildEncoder = (p: Parameters) => LazyModule(new TacitEncoder(new TraceCoreParams(
+          nGroups = tp.tileParams.core.retireWidth,
+          iretireWidth = 1,
+          xlen = tp.tileParams.core.xLen,
+          iaddrWidth = tp.tileParams.core.xLen
+        ), bufferDepth = 16, coreStages = 5)(p)),
         useArbiterMonitor = false
       )),
       core = tp.tileParams.core.copy(enableTraceCoreIngress=true)))
@@ -87,6 +101,8 @@ class WithLTraceEncoder extends Config((site, here, up) => {
 class WithArbiterMonitor extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      traceParams = Some(tp.tileParams.traceParams.get.copy(useArbiterMonitor = true))))
+    case tp: ShuttleTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       traceParams = Some(tp.tileParams.traceParams.get.copy(useArbiterMonitor = true))))
   }
 })

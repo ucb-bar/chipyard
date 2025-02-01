@@ -30,3 +30,12 @@ class GemminiShuttleConfig extends Config(
   new gemmini.DefaultGemminiConfig ++                            // use Gemmini systolic array GEMM accel
   new shuttle.common.WithNShuttleCores ++
   new chipyard.config.AbstractConfig)
+
+class TacitShuttleConfig extends Config(
+  // new tacit.WithTraceSinkDMA(1) ++
+  new tacit.WithTraceSinkAlways(0) ++
+  new chipyard.config.WithArbiterMonitor ++
+  new chipyard.config.WithLTraceEncoder ++
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new shuttle.common.WithNShuttleCores ++
+  new chipyard.config.AbstractConfig)
