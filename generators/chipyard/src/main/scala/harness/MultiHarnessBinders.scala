@@ -58,12 +58,12 @@ class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1p
   (p0: SerialTLPort) => p0.portId == chip0portId,
   (p1: SerialTLPort) => p1.portId == chip1portId,
   (th: HasHarnessInstantiators, p0: SerialTLPort, p1: SerialTLPort) => {
-    def connectDecoupledSyncPhitIO(clkSource: InternalSyncPhitIO, clkSink: ExternalSyncPhitIO) = {
+    def connectDecoupledSyncPhitIO(clkSource: DecoupledInternalSyncPhitIO, clkSink: DecoupledExternalSyncPhitIO) = {
       clkSink.clock_in := clkSource.clock_out
       clkSink.in <> clkSource.out
       clkSource.in <> clkSink.out
     }
-    def connectSourceSyncPhitIO(a: SourceSyncPhitIO, b: SourceSyncPhitIO) = {
+    def connectSourceSyncPhitIO(a: CreditedSourceSyncPhitIO, b: CreditedSourceSyncPhitIO) = {
       a.clock_in := b.clock_out
       b.clock_in := a.clock_out
       a.reset_in := b.reset_out
@@ -72,9 +72,9 @@ class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1p
       b.in := a.out
     }
     (p0.io, p1.io) match {
-      case (io0: InternalSyncPhitIO, io1: ExternalSyncPhitIO) => connectDecoupledSyncPhitIO(io0, io1)
-      case (io0: ExternalSyncPhitIO, io1: InternalSyncPhitIO) => connectDecoupledSyncPhitIO(io1, io0)
-      case (io0: SourceSyncPhitIO  , io1: SourceSyncPhitIO  ) => connectSourceSyncPhitIO   (io0, io1)
+      case (io0: DecoupledInternalSyncPhitIO, io1: DecoupledExternalSyncPhitIO) => connectDecoupledSyncPhitIO(io0, io1)
+      case (io0: DecoupledExternalSyncPhitIO, io1: DecoupledInternalSyncPhitIO) => connectDecoupledSyncPhitIO(io1, io0)
+      case (io0: CreditedSourceSyncPhitIO   , io1: CreditedSourceSyncPhitIO   ) => connectSourceSyncPhitIO   (io0, io1)
     }
   }
 )

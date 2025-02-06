@@ -1,0 +1,32 @@
+version: 2
+
+# update weekly (to avoid spam)
+updates:
+  # bump submodules.
+  # updates a submodule to the latest commit on the branch given in .gitmodules.
+  # if branch not given, then it defaults to the main/master branch.
+  - package-ecosystem: gitsubmodule
+    schedule:
+      interval: "weekly"
+    directory: /
+    labels:
+      - "dependencies"
+      - "changelog:omit"
+    # allow certain submodules
+    allow:
+      - dependency-name: "sims/firesim"
+      - dependency-name: "software/baremetal-ide"
+      - dependency-name: "software/firemarshal"
+      - dependency-name: "toolchains/riscv-tools/riscv-isa-sim"
+      - dependency-name: "toolchains/riscv-tools/riscv-openocd"
+      - dependency-name: "toolchains/riscv-tools/riscv-pk"
+      - dependency-name: "toolchains/riscv-tools/riscv-spike-devices"
+      - dependency-name: "toolchains/riscv-tools/riscv-tests"
+  # submit a PR for bumping GH-A dependencies
+  - package-ecosystem: github-actions
+    schedule:
+      interval: "weekly"
+    directory: /
+    labels:
+      - "dependencies"
+      - "changelog:omit"

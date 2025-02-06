@@ -1,0 +1,213 @@
+# ci tests that use a separate repository to run (can potentially share ci resources with other workflows)
+name: firesim-cluster-tests
+
+on:
+  # run ci when pring to main (note: ci runs on the merge commit of the pr!)
+  pull_request:
+    branches:
+      - main
+      - stable
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+env:
+  # needed for local FPGA build bitstream (access GH repo to store bitstreams)
+  PERSONAL_ACCESS_TOKEN: ${{ secrets.BARTENDER_PERSONAL_ACCESS_TOKEN }}
+
+  # temporary directories should be located in /scratch (since it's larger)
+  REMOTE_WORK_DIR: /scratch/buildbot/cy-ci-shared/cy-${{ github.sha }}-${{ github.workflow }}
+  JAVA_TMP_DIR: /scratch/buildbot/cy-ci-shared/cy-javatmpdir-${{ github.sha }}-${{ github.workflow }}
+
+  # misc
+  TERM: xterm-256-color
+
+jobs:
+  cancel-prior-workflows:
+    name: cancel-prior-workflows
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Cancel previous workflow runs
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:persist-prior-workflows') != true }}
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
+  start-workflow:
+    name: start-workflow
+    # unable to access env context in job.if thus have to put gh-a context expression directly here.
+    # note that the check is using a boolean true instead of string 'true' since it's directly using
+    # the expression not a variable like if checking against the env context string.
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') != true }}
+    runs-on: ubuntu-22.04
+    steps:
+      - run: true
+
+  # Set up a set of boolean conditions to control which branches of the CI
+  # workflow will execute. This is based off the conditional job execution
+  # example here: https://github.com/dorny/paths-filter#examples
+  filter-jobs-on-changes:
+    name: filter-jobs-on-changes
+    runs-on: ubuntu-22.04
+    needs: start-workflow
+    # Queried by downstream jobs to determine if they should run.
+    outputs:
+      run-ci: ${{ steps.filter.outputs.all_count != steps.filter.outputs.non-ci-files_count }}
+      both-conda-reqs-lock-modified: ${{
+        ((steps.filter.outputs.conda-reqs == 'false') && (steps.filter.outputs.conda-lockfile == 'false')) ||
+        ((steps.filter.outputs.conda-reqs == 'true') && (steps.filter.outputs.conda-lockfile == 'true')) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            all:
+              - '**'
+
+            docs: &docs-handle
+              - 'docs/**'
+              - '.readthedocs.yml'
+
+            release: &release-handle
+              - '.github/workflows/release-notes.yml'
+              - '.github/workflows/config/release-notes.json'
+
+            non-ci-files:
+              - *docs-handle
+              - *release-handle
+              - '**/*.md'
+              - '**/.gitignore'
+              - '**/.gitattributes'
+              - '.github/ISSUE_TEMPLATE/**'
+              - '.github/PULL_REQUEST_TEMPLATE.md'
+              - '.github/dependabot.yml'
+              - '.mergify.yml'
+
+            conda-reqs:
+                - 'conda-reqs/*.yaml'
+
+            conda-lockfile:
+                - 'conda-reqs/conda-lock-reqs/*.conda-lock.yml'
+
+  # Note: This doesn't check if the lock file is synced/faithful to the requirements file.
+  # This just ensures that both were modified in the same PR (ideally the lock file was regenerated
+  # from the requirements file). This job only runs when that condition is not met and
+  # so always fails.
+  check-conda-lock-modified:
+    name: check-conda-lock-modified
+    needs: filter-jobs-on-changes
+    if: needs.filter-jobs-on-changes.outputs.both-conda-reqs-lock-modified == 'false'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check conda lock file was regenerated with conda requirements file
+        run: |
+          echo "ERROR: Either the conda-reqs/*.yaml or conda-reqs/conda-lock-reqs/*.conda-lock.yml was not updated properly. Please regenerate lockfiles."
+          false
+
+  setup-persistent-repo:
+    name: setup-persistent-repo
+    runs-on: as4
+    needs: filter-jobs-on-changes
+    if: needs.filter-jobs-on-changes.outputs.run-ci == 'true'
+    steps:
+      # This forces a fresh clone of the repo during the `checkout` step
+      # to resolve stale submodule URLs. See https://github.com/ucb-bar/chipyard/pull/1156.
+      - name: Delete old checkout
+        run: |
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+      - uses: actions/checkout@v4
+      - name: Setup repo copy
+        run: |
+          mkdir -p $(dirname ${{ env.REMOTE_WORK_DIR }})
+          git clone ${{ github.workspace }} ${{ env.REMOTE_WORK_DIR }}
+      - name: Setup Java temp. directory
+        run: |
+          mkdir -p ${{ env.JAVA_TMP_DIR }}
+      - name: Setup repo (for xilinx_alveo_u250 platform)
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          export MAKEFLAGS="-j32"
+          ./build-setup.sh --verbose
+          cd sims/firesim
+          source sourceme-manager.sh --skip-ssh-setup
+          firesim managerinit --platform xilinx_alveo_u250
+
+  run-metasims-xilinx_alveo_u250:
+    name: run-metasims-xilinx_alveo_u250
+    needs: [setup-persistent-repo]
+    runs-on: as4
+    steps:
+      - name: Run metasims (VCS + Verilator)
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          source env.sh
+          .github/scripts/run-metasims.py
+
+  run-basic-linux-poweroffs-xilinx_alveo_u250:
+    name: run-basic-linux-poweroffs-xilinx_alveo_u250
+    if: contains(github.event.pull_request.labels.*.name, 'ci:fpga-deploy')
+    needs: [setup-persistent-repo, run-metasims-xilinx_alveo_u250] # must not run in parallel
+    runs-on: as4
+    steps:
+      - name: Run non-networked single-node Linux poweroff tests (single-core Rocket/BOOM, multi-core Rocket) w/ Xilinx Alveo U250
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          source env.sh
+          .github/scripts/run-linux-poweroff.py --platform xilinx_alveo_u250
+
+  build-default-bitstreams:
+    name: build-default-bitstreams
+    if: contains(github.event.pull_request.labels.*.name, 'ci:local-fpga-buildbitstream-deploy')
+    needs: [setup-persistent-repo, run-metasims-xilinx_alveo_u250 ] # must not run in parallel
+    runs-on: as4
+    env:
+      CHIPYARD_HWDB_PATH: sims/firesim-staging/sample_config_hwdb.yaml
+      GH_ORG: firesim
+      GH_REPO: firesim-public-bitstreams
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create temporary clone of repo to store built bitstreams into
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GH_ORG }}/${{ env.GH_REPO }}
+          ssh-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}
+          path: ${{ env.GH_REPO }}
+          fetch-depth: 1
+      # requires checkout above
+      - name: Run buildbitstream command and update sample local bitstreams in bitstream repository
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          source env.sh
+          .github/scripts/build-default-bitstreams.py
+      - name: Push bitstreams built/copied in bitstream repo
+        run: |
+          cd ${{ github.workspace }}/${{ env.GH_REPO }}
+          git log
+          git diff origin/main
+          git push origin main
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          base: ${{ github.head_ref }}
+          add-paths: ${{ env.CHIPYARD_HWDB_PATH }}
+          commit-message: "Update local bitstream(s) [ci skip]"
+          body: "Update local bitstream(s) for PR #${{ github.event.pull_request.number }}"
+          branch-suffix: random
+          title: "Update local bitstream(s) for PR #${{ github.event.pull_request.number }} (`${{ github.head_ref }}`)"
+
+  cleanup-local-fpga-repo:
+    name: cleanup-local-fpga-repo
+    needs: [
+      run-metasims-xilinx_alveo_u250,
+      run-basic-linux-poweroffs-xilinx_alveo_u250,
+      build-default-bitstreams]
+    # uses a separate runner to cleanup (irrespective, of other jobs cancelled, running, etc)
+    runs-on: as4
+    if: ${{ always() }}
+    steps:
+      - name: Delete repo copy
+        run: |
+          rm -rf ${{ env.REMOTE_WORK_DIR }}
+          rm -rf ${{ env.JAVA_TMP_DIR }}

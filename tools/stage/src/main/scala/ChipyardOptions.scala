@@ -3,20 +3,23 @@
 package chipyard.stage
 
 class ChipyardOptions private[stage] (
-                                         val topModule:         Option[Class[_ <: Any]] = None,
-                                         val configNames:       Option[Seq[String]] = None,
-                                         val outputBaseName:    Option[String] = None) {
+                                         val topModule:               Option[Class[_ <: Any]] = None,
+                                         val configNames:             Option[Seq[String]] = None,
+                                         val outputBaseName:          Option[String] = None,
+                                         val enableSFCFIRRTLEmission: Boolean = false) {
 
   private[stage] def copy(
-                           topModule:         Option[Class[_ <: Any]] = topModule,
-                           configNames:       Option[Seq[String]] = configNames,
-                           outputBaseName:    Option[String] = outputBaseName,
+                           topModule:               Option[Class[_ <: Any]] = topModule,
+                           configNames:             Option[Seq[String]] = configNames,
+                           outputBaseName:          Option[String] = outputBaseName,
+                           enableSFCFIRRTLEmission: Boolean = enableSFCFIRRTLEmission,
                          ): ChipyardOptions = {
 
     new ChipyardOptions(
       topModule=topModule,
       configNames=configNames,
       outputBaseName=outputBaseName,
+      enableSFCFIRRTLEmission=enableSFCFIRRTLEmission,
     )
   }
 

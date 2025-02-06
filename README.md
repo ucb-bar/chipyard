@@ -4,25 +4,25 @@
 
 ## Quick Links
 
-* **Stable Documentation**: https://chipyard.readthedocs.io/
+* **Latest Documentation**: https://chipyard.readthedocs.io/
 * **User Question Forum**: https://groups.google.com/forum/#!forum/chipyard
 * **Bugs and Feature Requests**: https://github.com/ucb-bar/chipyard/issues
 
 ## Using Chipyard
 
-To get started using Chipyard, see the stable documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
+To get started using Chipyard, see the documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
 
 ## What is Chipyard
 
 Chipyard is an open source framework for agile development of Chisel-based systems-on-chip.
 It will allow you to leverage the Chisel HDL, Rocket Chip SoC generator, and other [Berkeley][berkeley] projects to produce a [RISC-V][riscv] SoC with everything from MMIO-mapped peripherals to custom accelerators.
-Chipyard contains processor cores ([Rocket][rocket-chip], [BOOM][boom], [CVA6 (Ariane)][cva6]), accelerators ([Gemmini][gemmini], [NVDLA][nvdla]), memory systems, and additional peripherals and tooling to help create a full featured SoC.
+Chipyard contains processor cores ([Rocket][rocket-chip], [BOOM][boom], [CVA6 (Ariane)][cva6]), vector units ([Saturn](saturn), [Ara](ara)), accelerators ([Gemmini][gemmini], [NVDLA][nvdla]), memory systems, and additional peripherals and tooling to help create a full featured SoC.
 Chipyard supports multiple concurrent flows of agile hardware development, including software RTL simulation, FPGA-accelerated simulation ([FireSim][firesim]), automated VLSI flows ([Hammer][hammer]), and software workload generation for bare-metal and Linux-based systems ([FireMarshal][firemarshal]).
 Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb-bar] in the [Electrical Engineering and Computer Sciences Department][eecs] at the [University of California, Berkeley][berkeley].
 
 ## Resources
 
-* Chipyard Stable Documentation: https://chipyard.readthedocs.io/
+* Chipyard Documentation: https://chipyard.readthedocs.io/
 * Chipyard (x FireSim) Tutorial: https://fires.im/tutorial-recent/
 * Chipyard Basics slides: https://fires.im/asplos23-slides-pdf/02_chipyard_basics.pdf
 
@@ -98,3 +98,5 @@ This work is supported by the NSF CCRI ENS Chipyard Award #2016662.
 [cva6]: https://github.com/openhwgroup/cva6/
 [gemmini]: https://github.com/ucb-bar/gemmini
 [nvdla]: http://nvdla.org/
+[saturn]: https://github.com/ucb-bar/saturn-vectors
+[ara]: https://github.com/pulp-platform/ara
