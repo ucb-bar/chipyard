@@ -46,6 +46,7 @@ We recommend reading all these pages in order. Hit next to get started!
    Keys-Traits-Configs
    DMA-Devices
    Incorporating-Verilog-Blocks
+   Incorporating-HLS
    Memory-Hierarchy
    Boot-Process
    IOBinders

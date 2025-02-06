@@ -62,8 +62,8 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
     harnessIO match {
       case io: DecoupledPhitIO => {
         val clkIO = io match {
-          case io: InternalSyncPhitIO => IOPin(io.clock_out)
-          case io: ExternalSyncPhitIO => IOPin(io.clock_in)
+          case io: HasClockOut => IOPin(io.clock_out)
+          case io: HasClockIn => IOPin(io.clock_in)
         }
         val packagePinsWithPackageIOs = Seq(
           ("G13", clkIO),
@@ -87,10 +87,10 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
 
         // Don't add IOB to the clock, if its an input
         io match {
-          case io: InternalSyncPhitIO => packagePinsWithPackageIOs foreach { case (pin, io) => {
+          case io: DecoupledInternalSyncPhitIO => packagePinsWithPackageIOs foreach { case (pin, io) => {
             artyTh.xdc.addIOB(io)
           }}
-          case io: ExternalSyncPhitIO => packagePinsWithPackageIOs.drop(1).foreach { case (pin, io) => {
+          case io: DecoupledExternalSyncPhitIO => packagePinsWithPackageIOs.drop(1).foreach { case (pin, io) => {
             artyTh.xdc.addIOB(io)
           }}
         }

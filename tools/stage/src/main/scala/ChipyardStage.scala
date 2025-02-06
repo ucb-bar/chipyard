@@ -4,14 +4,13 @@
 package chipyard.stage
 
 import circt.stage.{ChiselStage, CIRCTTargetAnnotation, CIRCTTarget}
-import firrtl.options.PhaseManager.PhaseDependency
 import firrtl.options.{Shell}
+import firrtl.options.Viewer.view
 import firrtl.{AnnotationSeq}
-import firrtl.options.{Phase, PhaseManager, Shell, Stage, StageError, StageMain, Dependency}
+import firrtl.options.{Phase, PhaseManager, Shell, Dependency}
 
 final class ChipyardChiselStage extends ChiselStage {
   override def run(annotations: AnnotationSeq): AnnotationSeq = {
-
     val pm = new PhaseManager(
       targets = Seq(
         Dependency[chisel3.stage.phases.Checks],
@@ -36,9 +35,16 @@ final class ChipyardChiselStage extends ChiselStage {
 }
 
 class ChipyardStage extends ChiselStage {
-  override val shell = new Shell("chipyard") with ChipyardCli with circt.stage.CLI
+  override val shell = new Shell("chipyard") with ChipyardCli with circt.stage.CLI {
+    // These are added by firrtl.options.Shell (which we must extend because we are a Stage)
+    override protected def includeLoggerOptions = false
+  }
   override def run(annotations: AnnotationSeq): AnnotationSeq = {
-
+    val enableSFCFIRRTLEmissionPasses = if (view[ChipyardOptions](annotations).enableSFCFIRRTLEmission) {
+      Seq(Dependency[chipyard.stage.phases.LegacyFirrtl2Emission])
+    } else {
+      Seq.empty
+    }
     val pm = new PhaseManager(
       targets = Seq(
         Dependency[chipyard.stage.phases.Checks],
@@ -49,7 +55,7 @@ class ChipyardStage extends ChiselStage {
         Dependency[chipyard.stage.phases.AddDefaultTests],
         Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
         Dependency[chipyard.stage.phases.GenerateArtefacts],
-      ),
+      ) ++ enableSFCFIRRTLEmissionPasses,
       currentState = Seq(
         Dependency[firrtl.stage.phases.AddDefaults],
         Dependency[firrtl.stage.phases.Checks]
@@ -57,15 +63,5 @@ class ChipyardStage extends ChiselStage {
     )
     pm.transform(annotations)
   }
-  // override val targets: Seq[PhaseDependency] = Seq(
-  //   Dependency[chipyard.stage.phases.Checks],
-  //   Dependency[chipyard.stage.phases.TransformAnnotations],
-  //   Dependency[chipyard.stage.phases.PreElaboration],
-  //   Dependency[ChipyardChiselStage],
-  //   Dependency[chipyard.stage.phases.GenerateFirrtlAnnos],
-  //   Dependency[chipyard.stage.phases.AddDefaultTests],
-  //   Dependency[chipyard.stage.phases.GenerateTestSuiteMakefrags],
-  //   Dependency[chipyard.stage.phases.GenerateArtefacts],
-  // )
   override final def invalidates(a: Phase): Boolean = false
 }

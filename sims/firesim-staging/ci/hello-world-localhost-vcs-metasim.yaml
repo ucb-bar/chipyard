@@ -1,0 +1,48 @@
+run_farm:
+  base_recipe: run-farm-recipes/externally_provisioned.yaml
+  recipe_arg_overrides:
+    run_farm_tag: helloworldlocalhost
+    default_platform: XilinxAlveoU250InstanceDeployManager
+    default_simulation_dir: /scratch/buildbot/RUN_DIR
+    run_farm_hosts_to_use:
+      - localhost: four_metasims_spec
+
+metasimulation:
+  metasimulation_enabled: true
+  metasimulation_host_simulator: vcs
+  metasimulation_only_plusargs: "+fesvr-step-size=128 +max-cycles=100000000"
+  metasimulation_only_vcs_plusargs: "+vcs+initreg+0 +vcs+initmem+0"
+
+target_config:
+  topology: no_net_config
+  no_net_num_nodes: 4
+  link_latency: 6405
+  switching_latency: 10
+  net_bandwidth: 200
+  profile_interval: -1
+  default_hw_config: firesim_rocket_quadcore_no_nic_l2_llc4mb_ddr3
+  plusarg_passthrough: ""
+
+tracing:
+  enable: no
+  output_format: 0
+  selector: 1
+  start: 0
+  end: -1
+
+autocounter:
+  read_rate: 0
+
+workload:
+  workload_name: bare.json
+  terminate_on_completion: yes
+  suffix_tag: null
+
+host_debug:
+  zero_out_dram: no
+  disable_synth_asserts: no
+
+synth_print:
+  start: 0
+  end: -1
+  cycle_prefix: yes

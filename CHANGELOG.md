@@ -2,6 +2,165 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.13.0]
+
+Chipyard 1.13.0 contains numerous new RTL changes and decouples Firesim from Chipyard.
+
+RTL changes:
+ - Integration of Saturn and Ara vector units
+ - Support for RISC-V `B` extension instructions in Rocket, Shuttle, and BOOMv4
+ - Added VexiiRiscv SpinalHDL RV64GCB core
+ - Added example VivadoHLS accelerator flow
+
+Firesim's compiler is now decoupled from Chipyard's making Firesim more modular and reusable.
+
+## Added
+
+- Add dependabot to auto-update submodules (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1940)
+- Update dependabot to also update GH-A workflows (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1950)
+- Nexys video fpga bringup config (by @SeahK in https://github.com/ucb-bar/chipyard/pull/1942)
+- Integrate vector unit (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1928)
+- Update Initial-Repo-Setup.rst (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1977)
+- Add FireSim paper tests (migrating them from FireSim) (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1980)
+- Integrate Ara vector unit (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1973)
+- Bump rocket-chip/saturn/shuttle (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1991)
+- Update rerocc to support rerocc MMIO ctrl (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1981)
+- Enable B extension in Rocket/Shuttle/BoomV4 (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2001)
+- Add CI help text to PR template | Reduce more CI runs (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/2022)
+- Move FireChip target-specific CI from FireSim to Chipyard (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/2014)
+- ADD: Add CMake build option for tests and example C++ program (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/2036)
+- Add vexiiriscv CPU support (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2057)
+- Add example accelerator using HLS (by @schwarz-em in https://github.com/ucb-bar/chipyard/pull/2056)
+
+## Changed
+
+- Remove need for users to install conda-lock themselves (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1941)
+- Cleaner CI conda env setup | Selective weekly dependabot updates (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1957)
+- Add hook into Chipyard build system for FireSim (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1935)
+- FireSim x Chipyard Decoupled (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1984)
+- Support FIRRTL2 bridge + Chisel 6 annos for FireSim (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/2013)
+
+## Fixed
+
+- Fix VLSI CI - Fix conda environment creation (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1963)
+- Create fresh conda environment for conda-lock instead of cloning base (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1970)
+- Bump constellation to fix support for AXI-converted TL (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1976)
+- Update generate-conda-lockfiles.sh (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1978)
+- Bump Checkpointing Script + Docs (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1911)
+- Vector bugfixes (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2003)
+- ADD: add dump flow and documentation on tests building (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/2051)
+
+## [1.12.3] - 2024-8-21
+
+Small QoL updates and fixes.
+
+## Added
+
+- Bump rocket-chip/saturn/shuttle (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1991)
+- Update rerocc to support rerocc MMIO ctrl (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1981)
+- Enable B extension in Rocket/Shuttle/BoomV4 (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2001)
+
+## Fixed
+
+- Vector bugfixes (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2003)
+
+## [1.12.0] - 2024-8-1
+
+Major update switching to Chisel 6 for RTL/FPGA/VLSI flows. Compress-acc and ReRoCC added as new RTL blocks. Software updated to GCC-13 with Linux Kernel 6.4.
+
+## Added
+
+- Support BINARIES_DIR make flag (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1773)
+- Add large boom cospike config (by @joonho3020 in https://github.com/ucb-bar/chipyard/pull/1786)
+- Enable debug SBA on all default designs (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1763)
+- Allow passing BINARY_ARGS to target binaries (pk) (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1792)
+- Add example rocket-chip-blocks timer integration (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1793)
+- Add support for building CIRCT from source (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1806)
+- Bump constellation - adds support for inlining noc routers (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1809)
+- Add GPIOPunchthrough harnessbinder (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1823)
+- EXT_FILELISTS and EXT_INCDIR APIs for including external verilog projects (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1832)
+- Add EmptyChipTop example (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1845)
+- add sv39 fragments (by @joonho3020 in https://github.com/ucb-bar/chipyard/pull/1874)
+- Support Chisel6 for RTL-sim/VLSI/FPGA flows (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1854)
+- Add GCD IOBinders examples (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1884)
+- Integrate ReRoCC (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1783)
+- Generate a log file of the CIRCT output (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1899)
+- Add compress-acc (by @joonho3020 in https://github.com/ucb-bar/chipyard/pull/1906)
+- Add DMI Bridge to FireSim (by @soohyuk-cho in https://github.com/ucb-bar/chipyard/pull/1852)
+- Add makefile flag to disable binary disassembly during sims (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1921)
+
+## Changed
+
+- Improve GCD example (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1757)
+- Update MMIO peripheral docs (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1774)
+- Bump to latest rocket-chip (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1770)
+- CHANGE: Organize abstract config into sections and change comment format to docstrings (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1722)
+- Bump to Verilator v5.022 (by @vighneshiyer in https://github.com/ucb-bar/chipyard/pull/1800)
+- Bump testchipip for improved TLSerdesser (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1768)
+- REFACTOR: minor fix on code styling (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1815)
+- REFACTOR: rearrange gitsubmodule list to match directory order (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1813)
+- Add PD-optimized variant of boom (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1816)
+- Bump rocket-chip to standalone diplomacy (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1818)
+- Bump to gcc 13 (by @vighneshiyer in https://github.com/ucb-bar/chipyard/pull/1802)
+- Use SV48 when possible (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1847)
+- Flatten barstools into Chipyard (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1855)
+- Automatically set `DTSTimebase` to PBUS frequency (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1856)
+	- Bump firesim to version with detached build.sbt (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1864)
+- add upper bound for python version to avoid incompatible packages (by @bwhitchurch in https://github.com/ucb-bar/chipyard/pull/1898)
+- Bump FireMarshal (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1903)
+- Update checkpointing script (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1909)
+- Update rocket-chip with modern diplomacy/prci packaging (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1895)
+- Non-recursive clone of compress-acc (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1910)
+- Bump rc/components to improve module naming (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1894)
+- Bump rocc-acc-utils for updated logger (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1917)
+- Bump rocket-chip/submods for reorganized rocket configs (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1914)
+- Update testchipip for bootrom that clears MIP (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1923)
+- Bump to chisel 6.5.0 (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1927)
+
+## Fixed
+
+- Fix unnecessary runs/rebuilds of RTL simulators (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1758)
+- Fix submodule recusive cloning (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1765)
+- Fix invalid escape sequences (by @tymcauley in https://github.com/ucb-bar/chipyard/pull/1798)
+- docs: Update FireSim docs (by @geekLucian in https://github.com/ucb-bar/chipyard/pull/1795)
+- Fix Gemmini Spike test in CI + Fix FireMarshal launch jobs erroring (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1804)
+- FIX: Change default UART FIFO size and combine UART Config fragments (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/1683)
+- Fix InitZero example + add to CI (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1826)
+- Fix driver dts issues (align w/ RTL) (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1837)
+- Bump FireMarshal (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1840)
+- Bump rc w/ tile interrupt fix (by @joonho3020 in https://github.com/ucb-bar/chipyard/pull/1841)
+- Update build-toolchain-extra.sh (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1848)
+- Update MultiHarnessBinders to connect differently typed ports + Ignore TLMonitors on DigitalTop scope (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1868)
+- Fix classpath_cache bug (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1880)
+- Fix clock name and macro paths for Sky130 VLSI flow (by @nayiri-k in https://github.com/ucb-bar/chipyard/pull/1882)
+- Name all the generated ClockDomains (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1891)
+- Bump FireMarshal + PK (Pk bumped to fix toolchain bump issues w/ linux) (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1905)
+
+## Removed
+
+- Remove useless conda env sourcing (by @joonho3020 in https://github.com/ucb-bar/chipyard/pull/1759)
+- Remove legacy SFC flags (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1859)
+- Remove tapeout.GenerateModelStageMain (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1860)
+
+## Uncategorized
+
+- Fix typo in build-setup.sh (by @buggy213 in https://github.com/ucb-bar/chipyard/pull/1760)
+- vlsi/Makefile: truncate file SRAM_GENERATOR_CONF (by @oharboe in https://github.com/ucb-bar/chipyard/pull/1778)
+- Switch update-circt action to v1 (by @seldridge in https://github.com/ucb-bar/chipyard/pull/1788)
+- Ensure all GPIO signals are tied off (by @tymcauley in https://github.com/ucb-bar/chipyard/pull/1732)
+- Enabling JTAG Debuging in VCU118 FPGA changelog:added (by @ksungkeun84 in https://github.com/ucb-bar/chipyard/pull/1796)
+- Bump boom to fix Chisel 6 compatibility (by @tymcauley in https://github.com/ucb-bar/chipyard/pull/1820)
+- fix: Link conda lib during CIRCT build (by @geekLucian in https://github.com/ucb-bar/chipyard/pull/1824)
+- Fix missing step in documentation. (by @gonsolo in https://github.com/ucb-bar/chipyard/pull/1830)
+- Spelling fix. (by @gonsolo in https://github.com/ucb-bar/chipyard/pull/1833)
+- [docs] Fix sim output executable name usage in docs (NFC) (by @eymay in https://github.com/ucb-bar/chipyard/pull/1858)
+- Spelling fixes. (by @gonsolo in https://github.com/ucb-bar/chipyard/pull/1862)
+- Improve insert includes (by @bwhitchurch in https://github.com/ucb-bar/chipyard/pull/1902)
+- Bump firesim (by @joonho3020 in https://github.com/ucb-bar/chipyard/pull/1913)
+- Add configuration for MegaBoom that uses SimBlockDevice (by @eszpotanski in https://github.com/ucb-bar/chipyard/pull/1924)
+
+**Full Changelog:** https://github.com/ucb-bar/chipyard/compare/1.11.0...1.12.0
+
 ## [1.11.0] - 2024-1-22
 
 Adds Ubuntu support for firemarshal, multi-chiptop configuration for chiplets, caliptra accelerator, spike-cosim.

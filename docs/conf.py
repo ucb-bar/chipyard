@@ -72,40 +72,62 @@ if on_rtd:
     for item, value in os.environ.items():
         print("[READTHEDOCS] {} = {}".format(item, value))
 
-# Come up with a short version string for the build. This is doing a bunch of lifting:
-# - format doc text that self-references its version (see title page). This may be used in an ad-hoc
-#   way to produce references to things like ScalaDoc, etc...
-# - procedurally generate github URL references using via `gh-file-ref`
-if on_rtd:
-    rtd_version = os.environ.get("READTHEDOCS_VERSION")
-    if rtd_version in ["stable", "latest"]:
-        # get the latest git tag (which is what rtd normally builds under "stable")
-        # this works since rtd builds things within the repo
-        process = subprocess.Popen(["git", "describe", "--exact-match", "--tags"], stdout=subprocess.PIPE)
-        output = process.communicate()[0].decode("utf-8").strip()
-        if process.returncode == 0:
-            version = output
-        else:
-            version = "v?.?.?" # this should not occur as "stable" is always pointing to tagged version
+def get_git_tag():
+    # get the latest git tag (which is what rtd normally builds under "stable")
+    # this works since rtd builds things within the repo
+    process = subprocess.Popen(["git", "describe", "--exact-match", "--tags"], stdout=subprocess.PIPE)
+    tag = process.communicate()[0].decode("utf-8").strip()
+    if process.returncode == 0:
+        return tag
     else:
-        version = rtd_version # name of a branch
-elif on_gha:
-    # GitHub actions does a build of the docs to ensure they are free of warnings.
-    # Looking up a branch name or tag requires switching on the event type that triggered the workflow
-    # so just use the SHA of the commit instead.
-    version = os.environ.get("GITHUB_SHA")
-    rtd_version = "stable" # default to stable when not on rtd
-else:
+        return None
+
+def get_git_branch_name():
     # When running locally, try to set version to a branch name that could be
     # used to reference files on GH that could be added or moved. This should match rtd_version when running
     # in a RTD build container
     process = subprocess.Popen(["git", "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE)
-    output = process.communicate()[0].decode("utf-8").strip()
+    branchname = process.communicate()[0].decode("utf-8").strip()
     if process.returncode == 0:
-        version = output
+        return branchname
     else:
-        raise Exception("git rev-parse --abbrev-ref HEAD returned non-zero")
-    rtd_version = "stable" # default to stable when not on rtd
+        return None
+
+# Come up with a short version string for the build. This is doing a bunch of lifting:
+#   - format doc text that self-references its version (see title page). This may be used in an ad-hoc
+#     way to produce references to things like ScalaDoc, etc...
+#   - procedurally generate github URL references using via `gh-file-ref`
+#
+# For Chipyard, the RTD version can be multiple things:
+#   1. 'stable' - This points to a branch called 'stable' in the repo. that was previously manually updated each release. This is outdated.
+#   2. 'latest' - This points to the 'main' branch documentation. This is recommended.
+#   3. '<another-branch-name>' - This points to a branch. Normally used for testing if a branches documentation builds.
+if on_rtd:
+    rtd_version = os.environ.get("READTHEDOCS_VERSION")
+    if rtd_version == "latest":
+        branchname = get_git_branch_name()
+        assert branchname is not None
+        version = branchname
+    elif rtd_version == "stable":
+        tag = get_git_tag()
+        assert tag is not None
+        version = tag
+    else:
+        version = rtd_version # should be name of a branch
+elif on_gha:
+    rtd_version = "latest"
+    # GitHub actions does a build of the docs to ensure they are free of warnings.
+    # Looking up a branch name or tag requires switching on the event type that triggered the workflow
+    # so just use the SHA of the commit instead.
+    version = os.environ.get("GITHUB_SHA")
+else:
+    rtd_version = "latest"
+    # When running locally, try to set version to a branch name that could be
+    # used to reference files on GH that could be added or moved. This should match rtd_version when running
+    # in a RTD build container
+    branchname = get_git_branch_name()
+    assert branchname is not None
+    version = branchname
 
 # for now make these match
 release = version
@@ -254,3 +276,61 @@ autosectionlabel_prefix_document = True
 extlinks = {
     'fsim_doc' : ('https://docs.fires.im/en/' + rtd_version + '/%s', 'fsim_doc %s')
 }
+
+# -- handle re-directs for pages that move
+# taken from https://tech.signavio.com/2017/managing-sphinx-redirects
+
+redirect_files = [ ]
+
+def copy_legacy_redirects(app, docname): # Sphinx expects two arguments
+    if app.builder.name == 'html':
+        for html_src_path in redirect_files:
+            target_path = app.outdir + '/' + html_src_path
+            src_path = app.srcdir + '/' + html_src_path
+
+            if os.path.isfile(src_path):
+                shutil.copyfile(src_path, target_path)
+
+def gh_file_ref_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    """
+    Produces a github.com reference to a blob or tree at path {text}.
+
+    Example:
+
+    :gh-file-ref:`my/path`
+
+    Produces a hyperlink with the text "my/path" that refers the url:
+    https://www.github.com/ucb-bar/chipyard/blob/<version>/my/path.
+
+    Where version is the same as would be substituted by using |version| in
+    html text, and is resolved in conf.py.
+
+    This is based off custom role sphinx plugins like
+    https://github.com/tdi/sphinxcontrib-manpage. I've inlined this here for
+    now, but we could just as well make it a module and register it under
+    `extensions` in conf.py
+    """
+
+    import docutils
+    import requests
+
+    # Note GitHub permits referring to a tree as a 'blob' in these URLs without returning a 404.
+    # So I've unconditionally chosen to use blob.
+    url = f"https://www.github.com/ucb-bar/chipyard/blob/{version}/{text}"
+
+    print(f"Testing GitHub URL {url} exists...")
+    status_code = requests.get(url).status_code
+    if status_code != 200:
+        message = f"[Line {lineno}] :{name}:`{text}` produces URL {url} returning status code {status_code}. " \
+                  "Ensure your path is correct and all commits that may have moved or renamed files have been pushed to github.com."
+        print(message)
+        sys.exit(1)
+
+    docutils.parsers.rst.roles.set_classes(options)
+    node = docutils.nodes.reference(rawtext, text, refuri=url, **options)
+    return [node], []
+
+def setup(app):
+    # Add roles to simplify github reference generation
+    app.add_role('gh-file-ref', gh_file_ref_role)
+    app.connect('build-finished', copy_legacy_redirects)

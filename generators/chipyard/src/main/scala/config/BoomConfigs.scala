@@ -48,7 +48,8 @@ class MediumBoomV3CosimConfig extends Config(
   new boom.v3.common.WithNMediumBooms(1) ++
   new chipyard.config.AbstractConfig)
 
-class dmiMediumBoomV3Config extends Config(
+class dmiCheckpointingMediumBoomV3Config extends Config(
+  new chipyard.config.WithNPMPs(0) ++                            // remove PMPs (reduce non-core arch state)
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tl
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new boom.v3.common.WithNMediumBooms(1) ++
@@ -62,6 +63,12 @@ class dmiMediumBoomV3CosimConfig extends Config(
   new boom.v3.common.WithNMediumBooms(1) ++
   new chipyard.config.AbstractConfig)
 
+class SimBlockDeviceMegaBoomV3Config extends Config(
+  new chipyard.harness.WithSimBlockDevice ++                     // drive block-device IOs with SimBlockDevice
+  new testchipip.iceblk.WithBlockDevice ++                       // add block-device module to peripherybus
+  new boom.v3.common.WithNMegaBooms(1) ++                        // mega boom config
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new chipyard.config.AbstractConfig)
 
 // ---------------------
 // BOOM V4 Configs
@@ -103,7 +110,8 @@ class MediumBoomV4CosimConfig extends Config(
   new boom.v4.common.WithNMediumBooms(1) ++
   new chipyard.config.AbstractConfig)
 
-class dmiMediumBoomV4Config extends Config(
+class dmiCheckpointingMediumBoomV4Config extends Config(
+  new chipyard.config.WithNPMPs(0) ++                            // remove PMPs (reduce non-core arch state)
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tl
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new boom.v4.common.WithNMediumBooms(1) ++
@@ -115,4 +123,11 @@ class dmiMediumBoomV4CosimConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anythint to serial-tl
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new boom.v4.common.WithNMediumBooms(1) ++
+  new chipyard.config.AbstractConfig)
+
+class SimBlockDeviceMegaBoomV4Config extends Config(
+  new chipyard.harness.WithSimBlockDevice ++                     // drive block-device IOs with SimBlockDevice
+  new testchipip.iceblk.WithBlockDevice ++                       // add block-device module to peripherybus
+  new boom.v4.common.WithNMegaBooms(1) ++                        // mega boom config
+  new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)

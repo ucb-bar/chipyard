@@ -16,7 +16,7 @@ class SymmetricChipletRocketConfig extends Config(
   new testchipip.serdes.WithSerialTL(Seq(
     testchipip.serdes.SerialTLParams(                               // 0th serial-tl is chip-to-bringup-fpga
       client = Some(testchipip.serdes.SerialTLClientParams()),      // bringup serial-tl acts only as a client
-      phyParams = testchipip.serdes.ExternalSyncSerialPhyParams()   // bringup serial-tl is sync'd to external clock
+      phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams()   // bringup serial-tl is sync'd to external clock
     ),
     testchipip.serdes.SerialTLParams(                               // 1st serial-tl is chip-to-chip
       client = Some(testchipip.serdes.SerialTLClientParams()),      // chip-to-chip serial-tl acts as a client
@@ -27,7 +27,7 @@ class SymmetricChipletRocketConfig extends Config(
         )),
         slaveWhere = OBUS
       )),
-      phyParams = testchipip.serdes.SourceSyncSerialPhyParams()     // chip-to-chip serial-tl is symmetric source-sync'd
+      phyParams = testchipip.serdes.CreditedSourceSyncSerialPhyParams() // chip-to-chip serial-tl is symmetric source-sync'd
     ))
   ) ++
   new testchipip.soc.WithOffchipBusClient(SBUS,                     // obus provides path to other chip's memory
@@ -35,7 +35,7 @@ class SymmetricChipletRocketConfig extends Config(
     replicationBase = Some(1L << 32)                                // The upper 4GB goes off-chip
   ) ++
   new testchipip.soc.WithOffchipBus ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
 // Simulates 2X of the SymmetricChipletRocketConfig in a multi-sim config
@@ -51,7 +51,7 @@ class RocketCoreChipletConfig extends Config(
   new testchipip.serdes.WithSerialTL(Seq(
     testchipip.serdes.SerialTLParams(
       client = Some(testchipip.serdes.SerialTLClientParams()),
-      phyParams = testchipip.serdes.ExternalSyncSerialPhyParams()     // chip-to-chip serial-tl is symmetric source-sync'd
+      phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams()     // chip-to-chip serial-tl is symmetric source-sync'd
     ),
     testchipip.serdes.SerialTLParams(
       manager = Some(testchipip.serdes.SerialTLManagerParams(
@@ -62,7 +62,7 @@ class RocketCoreChipletConfig extends Config(
         slaveWhere = OBUS,
         isMemoryDevice = true
       )),
-      phyParams = testchipip.serdes.SourceSyncSerialPhyParams()
+      phyParams = testchipip.serdes.CreditedSourceSyncSerialPhyParams()
     )
   )) ++
   new testchipip.soc.WithOffchipBusClient(SBUS) ++
@@ -71,7 +71,7 @@ class RocketCoreChipletConfig extends Config(
   new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++
   new freechips.rocketchip.subsystem.WithNoMemPort ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
 // LLC-only chiplet
@@ -79,7 +79,7 @@ class LLCChipletConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++
   new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(                               // 1st serial-tl is chip-to-chip
     client = Some(testchipip.serdes.SerialTLClientParams(supportsProbe=true)),
-    phyParams = testchipip.serdes.SourceSyncSerialPhyParams()     // chip-to-chip serial-tl is symmetric source-sync'd
+    phyParams = testchipip.serdes.CreditedSourceSyncSerialPhyParams()  // chip-to-chip serial-tl is symmetric source-sync'd
   ))) ++
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 4L) ++
   new chipyard.NoCoresConfig

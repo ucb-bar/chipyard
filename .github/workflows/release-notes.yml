@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build Release Notes
         id: release-notes
-        uses: mikepenz/release-changelog-builder-action@v3.7.0
+        uses: mikepenz/release-changelog-builder-action@v5
         with:
           configuration: .github/workflows/config/release-notes.json
           failOnError: true
@@ -43,7 +43,7 @@ jobs:
         run: echo "$CHANGELOG" >> $GITHUB_STEP_SUMMARY
       - name: Upload Release Notes (on release)
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v0.1.15
+        uses: softprops/action-gh-release@v2.2.1
         with:
           body: ${{ steps.release-notes.outputs.changelog }}
       - name: Error on uncategorized PRs

@@ -64,3 +64,16 @@ private[stage] object OutputBaseNameAnnotation extends HasShellOptions {
     )
   )
 }
+
+/** Optionally generate legacy FIRRTL2 SFC FIRRTL generation */
+case class LegacySFCAnnotation() extends NoTargetAnnotation with ChipyardOption
+private[stage] object LegacySFCAnnotation extends HasShellOptions {
+  override val options = Seq(
+    new ShellOption[Unit](
+      longOption = "emit-legacy-sfc",
+      toAnnotationSeq = a => Seq(LegacySFCAnnotation()),
+      helpText = "Emit a legacy FIRRTL2 SFC FIRRTL file",
+      shortOption = Some("els")
+    )
+  )
+}
