@@ -57,5 +57,5 @@ class NoCoresDatastormConfig extends Config(
 class BringupDatastormConfig extends Config(
   new WithDatastormSerialTLToFMC ++
   new WithDatastormTweaks ++
-  new testchipip.serdes.WithSerialTLPHYParams(testchipip.serdes.InternalSyncSerialPhyParams(freqMHz=40)) ++
+  new testchipip.serdes.WithSerialTLPHYParams(testchipip.serdes.DecoupledInternalSyncSerialPhyParams(freqMHz=40)) ++
   new chipyard.ChipBringupHostConfig)

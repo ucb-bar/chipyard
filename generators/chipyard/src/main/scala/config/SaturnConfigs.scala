@@ -36,6 +36,11 @@ class REFV256D128RocketConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class REFV256D128M64RocketConfig extends Config(
+  new saturn.rocket.WithRocketVectorUnit(256, 128, VectorParams.refParams, mLen = Some(64)) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class REFV512D128RocketConfig extends Config(
   new saturn.rocket.WithRocketVectorUnit(512, 128, VectorParams.refParams) ++
   new chipyard.config.WithSystemBusWidth(128) ++
@@ -130,6 +135,13 @@ class REFV256D256ShuttleConfig extends Config(
   new saturn.shuttle.WithShuttleVectorUnit(256, 256, VectorParams.refParams) ++
   new chipyard.config.WithSystemBusWidth(256) ++
   new shuttle.common.WithShuttleTileBeatBytes(32) ++
+  new shuttle.common.WithNShuttleCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class REFV512D256M128ShuttleConfig extends Config(
+  new saturn.shuttle.WithShuttleVectorUnit(512, 256, VectorParams.refParams, mLen = Some(128)) ++
+  new chipyard.config.WithSystemBusWidth(128) ++
+  new shuttle.common.WithShuttleTileBeatBytes(16) ++
   new shuttle.common.WithNShuttleCores(1) ++
   new chipyard.config.AbstractConfig)
 

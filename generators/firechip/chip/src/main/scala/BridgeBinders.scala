@@ -8,7 +8,7 @@ import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.subsystem._
 import sifive.blocks.devices.uart._
-import testchipip.serdes.{ExternalSyncPhitIO}
+import testchipip.serdes.{DecoupledExternalSyncPhitIO}
 import testchipip.tsi.{SerialRAM}
 
 import chipyard.iocell._
@@ -59,7 +59,7 @@ class WithFireSimIOCellModels extends Config((site, here, up) => {
 class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
   case (th: FireSim, port: SerialTLPort, chipId: Int) => {
     port.io match {
-      case io: ExternalSyncPhitIO => {
+      case io: DecoupledExternalSyncPhitIO => {
         io.clock_in := th.harnessBinderClock
         val ram = Module(LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p)).module)
         ram.io.ser.in <> io.out
