@@ -31,11 +31,12 @@ class GemminiShuttleConfig extends Config(
   new shuttle.common.WithNShuttleCores ++
   new chipyard.config.AbstractConfig)
 
+// Shuttle with Tacit encoder and trace sinks
 class TacitShuttleConfig extends Config(
-  // new tacit.WithTraceSinkDMA(1) ++
+  new tacit.WithTraceSinkDMA(1) ++
   new tacit.WithTraceSinkAlways(0) ++
-  new chipyard.config.WithArbiterMonitor ++
-  new chipyard.config.WithLTraceEncoder ++
+  new chipyard.config.WithTraceArbiterMonitor ++
+  new chipyard.config.WithTacitEncoder ++
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new shuttle.common.WithNShuttleCores ++
   new chipyard.config.AbstractConfig)
