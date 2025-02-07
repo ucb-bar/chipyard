@@ -50,7 +50,7 @@ case $1 in
         # Test cospike without checkpoint-restore
         run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv LOADMEM=1
         ;;
-    chipyard-boomv3|chipyard-boomv4|chipyard-shuttle|chipyard-spike)
+    chipyard-boomv3|chipyard-boomv4|chipyard-shuttle|chipyard-spike|chipyard-shuttle3)
         run_asm LOADMEM=1
         run_bmark LOADMEM=1
         ;;
