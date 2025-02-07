@@ -6,11 +6,13 @@ Zephyr RTOS
 Overview
 --------
 
-### What is an RTOS?
+What is an RTOS?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A **Real-Time Operating System (RTOS)** is a lightweight OS designed to provide deterministic scheduling, minimal latency, and efficient resource management. Unlike general-purpose operating systems like Linux, an RTOS prioritizes **real-time constraints**, ensuring critical tasks meet strict timing deadlines. RTOSs are commonly used in embedded systems, microcontrollers, and simulation environments where fast boot times and efficient execution are essential.
 
 
-### Zephyr Use Cases
+Zephyr Use Cases
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Zephyr provides a lightweight build flow and excution environment that supports running complex end-to-end workloads without the overhead of Linux.
 
