@@ -66,19 +66,10 @@ trait CanHaveChosenInDTS { this: BaseSubsystem =>
   }
 }
 
-trait HasCeaseIO { this: HasTileNotificationSinks =>
-  val cease = InModuleBody {
-    val cease = IO(Output(Bool()))
-    cease := tileCeaseSinkNode.in.head._1.asUInt.andR
-    cease
-  }
-}
-
 class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
     with InstantiatesHierarchicalElements
     with HasTileNotificationSinks
     with HasTileInputConstants
-    with HasCeaseIO
     with CanHavePeripheryCLINT
     with CanHavePeripheryPLIC
     with HasPeripheryDebug

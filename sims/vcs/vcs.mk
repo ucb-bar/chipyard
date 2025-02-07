@@ -36,10 +36,9 @@ VCS_CC_OPTS = \
 	$(filter -l%,$(VCS_LDFLAGS))
 
 VCS_NONCC_OPTS = \
-	-j36 \
 	-notice \
 	-line \
-	+lint=all,noVCDE,noONGS,noUI,noPCTIO-L,noPCTI-L,noNS,noSVA-UA \
+	+lint=all,noVCDE,noONGS,noUI \
 	-error=PCWM-L \
 	-error=noZMMCM \
 	-timescale=1ns/10ps \
@@ -48,9 +47,6 @@ VCS_NONCC_OPTS = \
 	+rad \
 	+vcs+lic+wait \
 	+vc+list \
-	+incdir+$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/common_cells/include \
-	$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/fpnew_pkg.sv \
-	$(base_dir)/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/fpu_div_sqrt_mvp/hdl/defs_div_sqrt_mvp.sv \
 	-f $(sim_common_files) \
 	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
 	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \

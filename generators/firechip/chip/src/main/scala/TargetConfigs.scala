@@ -3,7 +3,6 @@
 package firechip.chip
 
 import java.io.File
-import chipyard.WithRadBootROM
 
 import chisel3._
 import chisel3.util.{log2Up}
@@ -100,7 +99,7 @@ class WithFireSimDesignTweaks extends Config(
     txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer,
   new chipyard.config.WithNoUART() ++       // so we overwrite the default one
   // Optional: Adds IO to attach tracerV bridges
-//  new chipyard.config.WithTraceIO ++
+  new chipyard.config.WithTraceIO ++
   // Optional: Request 16 GiB of target-DRAM by default (can safely request up to 64 GiB on F1)
   new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 16L) ++
   // Optional: Removing this will require using an initramfs under linux
@@ -346,9 +345,10 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
 
 class FireSimRadianceClusterSynConfig extends Config(
   new chipyard.harness.WithHarnessBinderClockFreqMHz(500.0) ++
+  new chipyard.config.WithNoTraceIO ++
   new WithDefaultFireSimBridges ++
   new WithDefaultMemModel ++
-  new WithRadBootROM ++
+  new chipyard.WithRadBootROM ++
   new WithFireSimConfigTweaks ++
   new chipyard.RadianceClusterSynConfig)
 

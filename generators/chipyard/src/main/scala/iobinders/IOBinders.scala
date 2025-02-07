@@ -38,7 +38,7 @@ import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDevi
 import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
 import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
-import chipyard.{CanHaveMasterTLMemPort, HasCeaseIO, ChipyardSystem, ChipyardSystemModule}
+import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
 import chipyard.example.{CanHavePeripheryGCD}
 
 import scala.reflect.{ClassTag}
@@ -465,14 +465,6 @@ class WithNICIOPunchthrough extends OverrideIOBinder({
       NICPort(() => port, p(NICKey).get)
     }).toSeq
     (ports, Nil)
-  }
-})
-
-class WithCeasePunchThrough extends OverrideIOBinder({
-  (system: HasCeaseIO) => {
-    val cease: Bool = IO(Output(Bool())).suggestName("cease")
-    cease := system.cease.getWrappedValue
-    (Seq(SuccessPort(() => cease)), Nil)
   }
 })
 

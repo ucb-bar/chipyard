@@ -298,12 +298,6 @@ class WithSimTSIToUARTTSI extends HarnessBinder({
   }
 })
 
-class WithCeaseSuccess extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: SuccessPort, chipId: Int) => {
-    when (port.io) { th.success := true.B }
-  }
-})
-
 class WithTraceGenSuccess extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SuccessPort, chipId: Int) => {
     when (port.io) { th.success := true.B }
