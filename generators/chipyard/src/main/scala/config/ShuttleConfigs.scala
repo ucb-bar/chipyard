@@ -10,11 +10,23 @@ class ShuttleConfig extends Config(
   new shuttle.common.WithNShuttleCores ++                        // 1x dual-issue shuttle core
   new chipyard.config.AbstractConfig)
 
+class Shuttle3WideConfig extends Config(
+  new shuttle.common.WithNShuttleCores(retireWidth=3) ++         // 1x three-issue shuttle core
+  new chipyard.config.AbstractConfig)
+
+
 class ShuttleCosimConfig extends Config(
   new chipyard.harness.WithCospike ++                            // attach spike-cosim
   new chipyard.config.WithTraceIO ++                             // enable trace-io for cosim
   new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
   new shuttle.common.WithNShuttleCores ++
+  new chipyard.config.AbstractConfig)
+
+class Shuttle3WideCosimConfig extends Config(
+  new chipyard.harness.WithCospike ++                            // attach spike-cosim
+  new chipyard.config.WithTraceIO ++                             // enable trace-io for cosim
+  new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
+  new shuttle.common.WithNShuttleCores(retireWidth=3) ++
   new chipyard.config.AbstractConfig)
 
 class dmiShuttleCosimConfig extends Config(
