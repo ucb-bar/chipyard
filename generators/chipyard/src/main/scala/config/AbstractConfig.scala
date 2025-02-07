@@ -25,6 +25,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithI2CTiedOff ++                           /** tie-off i2c ports if present */
   new chipyard.harness.WithSimSPIFlashModel ++                     /** add simulated SPI flash memory, if SPI is enabled */
   new chipyard.harness.WithSimAXIMMIO ++                           /** add SimAXIMem for axi4 mmio port, if enabled */
+  new chipyard.harness.WithPeripheralAXI4LiteTieOff ++             /** tie-off peripheral AXI4Lite ports, if present */
   new chipyard.harness.WithTieOffInterrupts ++                     /** tie-off interrupt ports, if present */
   new chipyard.harness.WithTieOffL2FBusAXI ++                      /** tie-off external AXI4 master, if present */
   new chipyard.harness.WithCustomBootPinPlusArg ++                 /** drive custom-boot pin with a plusarg, if custom-boot-pin is present */
@@ -33,7 +34,6 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithClockFromHarness ++                     /** all Clock I/O in ChipTop should be driven by harnessClockInstantiator */
   new chipyard.harness.WithResetFromHarness ++                     /** reset controlled by harness */
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ /** generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz */
-
 
   // ================================================
   //   Set up I/O cells + punch I/Os in ChipTop
@@ -54,6 +54,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithSPIIOPunchthrough ++
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithAXI4MMIOPunchthrough ++
+  new chipyard.iobinders.WithPeripheralAXI4LitePunchthrough ++
   new chipyard.iobinders.WithTLMemPunchthrough ++
   new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
   new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++

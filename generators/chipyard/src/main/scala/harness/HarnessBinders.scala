@@ -332,3 +332,15 @@ class WithResetFromHarness extends HarnessBinder({
   }
 })
 
+class WithPeripheralAXI4LiteTieOff extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: AXI4LitePort, chipId: Int) => {
+    port.io.s_axi_awready := false.B
+    port.io.s_axi_wready := false.B
+    port.io.s_axi_bresp := 0.U
+    port.io.s_axi_bvalid := false.B
+    port.io.s_axi_arready := false.B
+    port.io.s_axi_rdata := 0.U
+    port.io.s_axi_rresp := 0.U
+    port.io.s_axi_rvalid := false.B
+  }
+})
