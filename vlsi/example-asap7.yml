@@ -2,12 +2,12 @@
 # Technology used is ASAP7
 vlsi.core.technology: "hammer.technology.asap7"
 # Specify dir with ASAP7 Calibre deck tarball
-technology.asap7.tarball_dir: "/nscratch/hansung/asap7"
+technology.asap7.tarball_dir: "/path/to/asap7"
 # Specify PDK and std cell install directories
 # technology.asap7.pdk_install_dir: "/path/to/asap7/asap7PDK_r1p7"
 # technology.asap7.stdcell_install_dir: "/path/to/asap7/asap7sc7p5t_27"
 
-vlsi.core.max_threads: 36
+vlsi.core.max_threads: 12
 
 # General Hammer Inputs
 
@@ -17,7 +17,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_uncore", period: "2.5ns", uncertainty: "0.1ns"}
+  {name: "clock_uncore", period: "1ns", uncertainty: "0.1ns"}
 ]
 
 # Generate Make include to aid in flow
