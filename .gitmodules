@@ -154,3 +154,6 @@
 [submodule "generators/vexiiriscv"]
 	path = generators/vexiiriscv
 	url = https://github.com/ucb-bar/vexiiriscv-tile.git
+[submodule "software/zephyr"]
+	path = software/zephyr
+	url = https://github.com/ucb-bar/zephyr.git
