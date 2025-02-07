@@ -34,6 +34,7 @@ class WithArtyJTAGHarnessBinder extends HarnessBinder({
     port.io.TCK := jtag_wire.TCK
     port.io.TMS := jtag_wire.TMS
     port.io.TDI := jtag_wire.TDI
+    port.io.reset.foreach(_ := th.referenceReset)
 
     val io_jtag = Wire(new JTAGPins(() => new BasePin(), false)).suggestName("jtag")
 
