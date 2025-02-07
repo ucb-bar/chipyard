@@ -2,6 +2,68 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [1.13.0]
+
+Chipyard 1.13.0 contains numerous new RTL changes and decouples Firesim from Chipyard.
+
+RTL changes:
+ - Integration of Saturn and Ara vector units
+ - Support for RISC-V `B` extension instructions in Rocket, Shuttle, and BOOMv4
+ - Added VexiiRiscv SpinalHDL RV64GCB core
+ - Added example VivadoHLS accelerator flow
+
+Firesim's compiler is now decoupled from Chipyard's making Firesim more modular and reusable.
+
+## Added
+
+- Add dependabot to auto-update submodules (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1940)
+- Update dependabot to also update GH-A workflows (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1950)
+- Nexys video fpga bringup config (by @SeahK in https://github.com/ucb-bar/chipyard/pull/1942)
+- Integrate vector unit (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1928)
+- Update Initial-Repo-Setup.rst (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1977)
+- Add FireSim paper tests (migrating them from FireSim) (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1980)
+- Integrate Ara vector unit (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1973)
+- Bump rocket-chip/saturn/shuttle (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1991)
+- Update rerocc to support rerocc MMIO ctrl (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1981)
+- Enable B extension in Rocket/Shuttle/BoomV4 (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2001)
+- Add CI help text to PR template | Reduce more CI runs (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/2022)
+- Move FireChip target-specific CI from FireSim to Chipyard (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/2014)
+- ADD: Add CMake build option for tests and example C++ program (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/2036)
+- Add vexiiriscv CPU support (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2057)
+- Add example accelerator using HLS (by @schwarz-em in https://github.com/ucb-bar/chipyard/pull/2056)
+
+## Changed
+
+- Remove need for users to install conda-lock themselves (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1941)
+- Cleaner CI conda env setup | Selective weekly dependabot updates (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1957)
+- Add hook into Chipyard build system for FireSim (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1935)
+- FireSim x Chipyard Decoupled (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1984)
+- Support FIRRTL2 bridge + Chisel 6 annos for FireSim (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/2013)
+
+## Fixed
+
+- Fix VLSI CI - Fix conda environment creation (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1963)
+- Create fresh conda environment for conda-lock instead of cloning base (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1970)
+- Bump constellation to fix support for AXI-converted TL (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1976)
+- Update generate-conda-lockfiles.sh (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1978)
+- Bump Checkpointing Script + Docs (by @abejgonzalez in https://github.com/ucb-bar/chipyard/pull/1911)
+- Vector bugfixes (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2003)
+- ADD: add dump flow and documentation on tests building (by @T-K-233 in https://github.com/ucb-bar/chipyard/pull/2051)
+
+## [1.12.3] - 2024-8-21
+
+Small QoL updates and fixes.
+
+## Added
+
+- Bump rocket-chip/saturn/shuttle (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1991)
+- Update rerocc to support rerocc MMIO ctrl (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/1981)
+- Enable B extension in Rocket/Shuttle/BoomV4 (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2001)
+
+## Fixed
+
+- Vector bugfixes (by @jerryz123 in https://github.com/ucb-bar/chipyard/pull/2003)
+
 ## [1.12.0] - 2024-8-1
 
 Major update switching to Chisel 6 for RTL/FPGA/VLSI flows. Compress-acc and ReRoCC added as new RTL blocks. Software updated to GCC-13 with Linux Kernel 6.4.

@@ -29,16 +29,26 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+  start-workflow:
+    name: start-workflow
+    # unable to access env context in job.if thus have to put gh-a context expression directly here.
+    # note that the check is using a boolean true instead of string 'true' since it's directly using
+    # the expression not a variable like if checking against the env context string.
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') != true }}
+    runs-on: ubuntu-22.04
+    steps:
+      - run: true
+
   # Set up a set of boolean conditions to control which branches of the CI
   # workflow will execute This is based off the conditional job execution
   # example here: https://github.com/dorny/paths-filter#examples
   change-filters:
     name: filter-jobs-on-changes
     runs-on: ubuntu-latest
+    needs: start-workflow
     # Queried by downstream jobs to determine if they should run.
     outputs:
       needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
-
     steps:
       - uses: actions/checkout@v4
       - name: Git workaround
@@ -61,6 +71,9 @@ jobs:
               - '**/*.md'
               - '**/.gitignore'
               - '.github/ISSUE_TEMPLATE/**'
+              - '.github/PULL_REQUEST_TEMPLATE.md'
+              - '.github/dependabot.yml'
+              - '.mergify.yml'
 
   full-flow:
     name: full-flow
@@ -84,6 +97,7 @@ jobs:
           eval "$(conda shell.bash hook)"
           mkdir ${{ env.JAVA_TMP_DIR }}
           export MAKEFLAGS="-j32"
+          git submodule sync
           ./build-setup.sh -v
       - name: Run config finder
         run: |
@@ -99,7 +113,6 @@ jobs:
           source env.sh
           cd sims/verilator
           make verilog
-
       - name: VLSI test
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
@@ -155,7 +168,31 @@ jobs:
           # make redo-par HAMMER_EXTRA_ARGS="--start_before_step extraction"
           # make drc
           # make lvs
-
+      - name: Run FireChip bridge tests
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+          pushd sims/firesim
+          source sourceme-manager.sh --skip-ssh-setup
+          popd
+          cd sims/firesim-staging
+          export TEST_DISABLE_VERILATOR=1
+          export TEST_DISABLE_VIVADO=1
+          make launch-sbt SBT_COMMAND=";project firechip_bridgestubs; testOnly firechip.bridgestubs.BridgeTests"
+      - name: Run FireChip FireSim target tests
+        run: |
+          cd ${{ env.REMOTE_WORK_DIR }}
+          eval "$(conda shell.bash hook)"
+          source env.sh
+          pushd sims/firesim
+          source sourceme-manager.sh --skip-ssh-setup
+          popd
+          cd sims/firesim-staging
+          export TEST_MINIMAL_BENCHMARKS=1 # seems like dhrystone is the longest so this doesn't affect runtime much
+          export TEST_DISABLE_VERILATOR=1
+          export TEST_DISABLE_VIVADO=1
+          make launch-sbt SBT_COMMAND=";project firechip; testOnly firechip.chip.CITests"
 
   cleanup:
     name: cleanup

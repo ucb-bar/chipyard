@@ -111,8 +111,6 @@ do
             SKIP_LIST+=(10) ;;
         --skip-clean)
             SKIP_LIST+=(11) ;;
-        --force | -f | --skip-validate) # Deprecated flags
-            ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -148,6 +146,9 @@ function exit_if_last_command_failed
         die "Build script failed with exit code $exitcode at step $thisStepNum: $thisStepDesc" $exitcode;
     fi
 }
+
+# add helper variable pointing to current chipyard top-level dir
+replace_content env.sh cy-dir-helper "CY_DIR=${CYDIR}"
 
 # setup and install conda environment
 if run_step "1"; then
@@ -204,8 +205,7 @@ if ! type conda >& /dev/null; then
     return 1  # don't want to exit here because this file is sourced
 fi
 
-# if we're sourcing this in a sub process that has conda in the PATH but not as a function, init it again
-conda activate --help >& /dev/null || source $(conda info --base)/etc/profile.d/conda.sh
+source $(conda info --base)/etc/profile.d/conda.sh
 \0
 END_CONDA_ACTIVATE
 
@@ -213,7 +213,6 @@ END_CONDA_ACTIVATE
 $CONDA_ACTIVATE_PREAMBLE
 conda activate $CONDA_ENV_NAME
 source $CYDIR/scripts/fix-open-files.sh"
-
 fi
 
 if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
@@ -273,11 +272,10 @@ if run_step "6"; then
         pushd $CYDIR/sims/firesim &&
         (
             set -e # Subshells un-set "set -e" so it must be re enabled
-            echo $CYDIR
             source sourceme-manager.sh --skip-ssh-setup
             pushd sim
-            make target-classpath
-            make firesim-main-classpath
+            # avoid directly building classpath s.t. target-injected files can be recompiled
+            make sbt SBT_COMMAND="compile"
             popd
         )
         exit_if_last_command_failed
@@ -297,7 +295,7 @@ if run_step "8"; then
         begin_step "9" "Pre-compiling FireMarshal buildroot sources"
         source $CYDIR/scripts/fix-open-files.sh &&
         ./marshal $VERBOSE_FLAG build br-base.json &&
-        ./marshal $VERBOSE_FLAG clean br-base.json
+        ./marshal $VERBOSE_FLAG build bare-base.json
         exit_if_last_command_failed
     fi
     popd

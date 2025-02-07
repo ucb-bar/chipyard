@@ -19,6 +19,7 @@ runs:
     - name: Init submodules (since only the RTL is cached)
       run: |
         conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+        git submodule sync
         ./scripts/init-submodules-no-riscv-tools.sh
       shell: bash -leo pipefail {0}
 

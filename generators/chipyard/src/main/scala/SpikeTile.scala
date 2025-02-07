@@ -16,7 +16,10 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.prci._
 
-case class SpikeCoreParams() extends CoreParams {
+case class SpikeCoreParams(
+  nPMPs: Int = 16,
+  useZicntr: Boolean = false
+) extends CoreParams {
   val xLen = 64
   val pgLevels = 5
   val useVM = true
@@ -35,7 +38,6 @@ case class SpikeCoreParams() extends CoreParams {
   val nLocalInterrupts = 0
   val useNMI = false
   val nPTECacheEntries = 0
-  val nPMPs = 16
   val pmpGranularity = 4
   val nBreakpoints = 0
   val useBPWatch = false
@@ -60,11 +62,10 @@ case class SpikeCoreParams() extends CoreParams {
   val btbEntries = 0
   val bhtEntries = 0
   val traceHasWdata = false
-  val useBitManip = false
-  val useBitManipCrypto = false
-  val useCryptoNIST = false
-  val useCryptoSM = false
   val useConditionalZero = false
+  val useZba = true
+  val useZbb = true
+  val useZbs = true
 
   override def vLen = 128
   override def eLen = 64
@@ -119,7 +120,18 @@ class SpikeTile(
   val masterNode = visibilityNode
   val slaveNode = TLIdentityNode()
 
-  override def isaDTS = "rv64imafdcv_zicsr_zifencei_zihpm_zvl128b_zve64d"
+  // Note: Rocket doesn't support zicntr but Spike does (err on the side of having Rocket's ISA)
+  override def isaDTS = (Seq(
+    "rv64imafdcbv",
+    "zicsr",
+    "zifencei",
+    "zihpm",
+    "zvl128b",
+    "zve64d",
+    "zba",
+    "zbb",
+    "zbs"
+  ) ++ spikeTileParams.core.useZicntr.option("zicntr")).mkString("_")
 
   // Required entry of CPU device in the device tree for interrupt purpose
   val cpuDevice: SimpleDevice = new SimpleDevice("cpu", Seq("ucb-bar,spike", "riscv")) {
@@ -471,6 +483,10 @@ class SpikeTileModuleImp(outer: SpikeTile) extends BaseTileModuleImp(outer) {
     tcm_tl.d.bits.data := spike.io.tcm.d.data
   }
 }
+
+class WithSpikeZicntr extends TileAttachConfig[SpikeTileAttachParams](t =>
+  t.copy(tileParams=t.tileParams.copy(core=t.tileParams.core.copy(useZicntr=true)))
+)
 
 class WithNSpikeCores(n: Int = 1, tileParams: SpikeTileParams = SpikeTileParams()
 ) extends Config((site, here, up) => {

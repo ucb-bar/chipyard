@@ -29,3 +29,4 @@ project/project/
 .sbt
 .classpath_cache/
 .vscode/
+tests/build/

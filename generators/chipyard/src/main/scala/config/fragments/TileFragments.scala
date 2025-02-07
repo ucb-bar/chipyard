@@ -10,6 +10,7 @@ import freechips.rocketchip.rocket.{RocketCoreParams, MulDivParams, DCacheParams
 import cva6.{CVA6TileAttachParams}
 import sodor.common.{SodorTileAttachParams}
 import ibex.{IbexTileAttachParams}
+import vexiiriscv.{VexiiRiscvTileAttachParams}
 import testchipip.cosim.{TracePortKey, TracePortParams}
 import barf.{TilePrefetchingMasterPortParams}
 
@@ -71,6 +72,8 @@ class WithNPMPs(n: Int = 8) extends Config((site, here, up) => {
       core = tp.tileParams.core.copy(nPMPs = n)))
     case tp: boom.v4.common.BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
       core = tp.tileParams.core.copy(nPMPs = n)))
+    case tp: chipyard.SpikeTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(
+      core = tp.tileParams.core.copy(nPMPs = n)))
     case other => other
   }
 })
@@ -104,13 +107,15 @@ class WithTilePrefetchers extends Config((site, here, up) => {
       master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
     case tp: IbexTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
       master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
+    case tp: VexiiRiscvTileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
+      master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
     case tp: CVA6TileAttachParams => tp.copy(crossingParams = tp.crossingParams.copy(
       master = TilePrefetchingMasterPortParams(tp.tileParams.tileId, tp.crossingParams.master)))
   }
 })
 
-// Uses SV48 if possible, otherwise default to the Rocket Chip core default
-class WithSV48IfPossible extends Config((site, here, up) => {
+// Use SV48
+class WithSV48 extends Config((site, here, up) => {
   case TilesLocated(loc) => up(TilesLocated(loc), site) map {
     case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core =
       tp.tileParams.core.copy(pgLevels = 4)))

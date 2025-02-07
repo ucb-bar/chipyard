@@ -10,7 +10,7 @@ import org.chipsalliance.diplomacy.nodes._
 import org.chipsalliance.diplomacy.aop._
 import org.chipsalliance.diplomacy.lazymodule._
 import org.chipsalliance.diplomacy.bundlebridge._
-import freechips.rocketchip.diplomacy.{Resource, ResourceBinding, ResourceAddress}
+import freechips.rocketchip.diplomacy.{Resource, ResourceBinding, ResourceAddress, RegionType}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
@@ -206,7 +206,7 @@ class WithI2CPunchthrough extends OverrideIOBinder({
     val ports = system.i2c.zipWithIndex.map { case (i2c, i) =>
       val io_i2c = IO(i2c.cloneType).suggestName(s"i2c_$i")
       io_i2c <> i2c
-      I2CPort(() => i2c)
+      I2CPort(() => io_i2c)
     }
     (ports, Nil)
   }
@@ -288,16 +288,18 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
 })
 
 // Rocketchip's JTAGIO exposes the oe signal, which doesn't go off-chip
-class JTAGChipIO extends Bundle {
+class JTAGChipIO(hasReset: Boolean) extends Bundle {
   val TCK = Input(Clock())
   val TMS = Input(Bool())
   val TDI = Input(Bool())
   val TDO = Output(Bool())
+  val reset = Option.when(hasReset)(Input(Bool()))
 }
 
 // WARNING: Don't disable syncReset unless you are trying to
 // get around bugs in RTL simulators
-class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
+// If externalReset, exposes a reset in through JTAGChipIO, which is sync'd to TCK
+class WithDebugIOCells(syncReset: Boolean = true, externalReset: Boolean = true) extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
     implicit val p = GetSystemParameters(system)
     val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
@@ -319,13 +321,6 @@ class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
           }
           // Tie off disableDebug
           d.disableDebug.foreach { d => d := false.B }
-          // Drive JTAG on-chip IOs
-          d.systemjtag.map { j =>
-            j.reset := (if (syncReset) ResetCatchAndSync(j.jtag.TCK, clockBundle.reset.asBool) else clockBundle.reset.asBool)
-            j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
-            j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
-            j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
-          }
         }
         Debug.connectDebugClockAndReset(Some(debug), clockBundle.clock)
 
@@ -336,7 +331,15 @@ class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
         }
 
         val jtagTuple = debug.systemjtag.map { j =>
-          val jtag_wire = Wire(new JTAGChipIO)
+          val jtag_wire = Wire(new JTAGChipIO(externalReset))
+
+          // Drive JTAG on-chip IOs
+          val jReset = if (externalReset) jtag_wire.reset.get else clockBundle.reset.asBool
+          j.reset := (if (syncReset) ResetCatchAndSync(j.jtag.TCK, jReset) else jReset)
+          j.mfr_id := p(JtagDTMKey).idcodeManufId.U(11.W)
+          j.part_number := p(JtagDTMKey).idcodePartNum.U(16.W)
+          j.version := p(JtagDTMKey).idcodeVersion.U(4.W)
+
           j.jtag.TCK := jtag_wire.TCK
           j.jtag.TMS := jtag_wire.TMS
           j.jtag.TDI := jtag_wire.TDI
@@ -484,16 +487,31 @@ class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
       val p = GetSystemParameters(system)
       val chipyardSystem = system.asInstanceOf[ChipyardSystem]
       val tiles = chipyardSystem.totalTiles.values
+      val viewpointBus = system.asInstanceOf[HasConfigurableTLNetworkTopology].viewpointBus
+      val mems = viewpointBus.unifyManagers.filter { m =>
+        val regionTypes = Seq(RegionType.CACHED, RegionType.TRACKED, RegionType.UNCACHED, RegionType.IDEMPOTENT)
+        val ignoreAddresses = Seq(
+          0x10000 // bootrom is handled specially
+        )
+        regionTypes.contains(m.regionType) && !ignoreAddresses.contains(m.address.map(_.base).min)
+      }.map { m =>
+        val base = m.address.map(_.base).min
+        val size = m.address.map(_.max).max - base + 1
+        (base, size)
+      }
+      val useSimDTM = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
       val cfg = SpikeCosimConfig(
         isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
         priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
         maxpglevels = tiles.headOption.map(_.tileParams.core.pgLevels).getOrElse(0),
-        mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
-        mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
         pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
         nharts = tiles.size,
         bootrom = chipyardSystem.bootROM.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
-        has_dtm = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
+        has_dtm = useSimDTM,
+        mems = mems,
+        // Connect using the legacy API for firesim only
+        mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
+        mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
       )
       TracePort(() => trace, cfg)
     }

@@ -16,7 +16,7 @@ dependencies:
     #   documentation on package_spec syntax for constraining versions
     - gcc=13.2
     - gxx=13.2
-    - sysroot_linux-64=2.17 # needed to match pre-built CI XRT glibc version
+    - sysroot_linux-64=2.34 # need to be close to system glibc for VCS compatibility
     - conda-gcc-specs
     - binutils
 
@@ -27,6 +27,7 @@ dependencies:
     - pip
     - make
     - git
+    - ninja # needed in case we need to built circt from scratch
 
     - sbt
     - openjdk=20

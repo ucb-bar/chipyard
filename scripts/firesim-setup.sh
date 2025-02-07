@@ -5,12 +5,12 @@
 set -e
 set -o pipefail
 
-RDIR=$(git rev-parse --show-toplevel)
+CYDIR=$(git rev-parse --show-toplevel)
 
-cd "$RDIR"
+cd "$CYDIR"
 
 # Reenable the FireSim submodule
 git config --unset submodule.sims/firesim.update || true
 pushd sims/firesim
-./build-setup.sh "$@" --library --skip-validate
+./build-setup.sh "$@" --library
 popd

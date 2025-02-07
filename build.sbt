@@ -1,10 +1,10 @@
 import Tests._
 
-val chisel6 = sys.env.get("USE_CHISEL6").isDefined
 val chisel6Version = "6.5.0"
+val chiselTestVersion = "6.0.0"
+val scalaVersionFromChisel = "2.13.12"
+
 val chisel3Version = "3.6.1"
-val chiselTestVersion = if (chisel6) "6.0.0" else "0.6.0"
-val scalaVersionFromChisel = if (chisel6) "2.13.12" else "2.13.10"
 
 // This gives us a nicer handle to the root project instead of using the
 // implicit one
@@ -64,13 +64,6 @@ lazy val commonSettings = Seq(
 
 val rocketChipDir = file("generators/rocket-chip")
 
-lazy val firesimAsLibrary = sys.env.get("FIRESIM_STANDALONE") == None
-lazy val firesimDir = if (firesimAsLibrary) {
-  file("sims/firesim/sim/")
-} else {
-  file("../../sim")
-}
-
 /**
   * It has been a struggle for us to override settings in subprojects.
   * An example would be adding a dependency to rocketchip on midas's targetutils library,
@@ -104,10 +97,16 @@ lazy val chisel3Settings = Seq(
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chisel3Version cross CrossVersion.full)
 )
 
-lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++ Seq(
+lazy val chiselSettings = chisel6Settings ++ Seq(
   libraryDependencies ++= Seq(
     "org.apache.commons" % "commons-lang3" % "3.12.0",
     "org.apache.commons" % "commons-text" % "1.9"
+  )
+)
+
+lazy val scalaTestSettings =  Seq(
+  libraryDependencies ++= Seq(
+    "org.scalatest" %% "scalatest" % "3.2.+" % "test"
   )
 )
 
@@ -119,19 +118,12 @@ lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++
 lazy val hardfloat = freshProject("hardfloat", file("generators/hardfloat/hardfloat"))
   .settings(chiselSettings)
   .settings(commonSettings)
-  .dependsOn(if (chisel6) midasStandaloneTargetUtils else midasTargetUtils)
-  .settings(
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test"
-    )
-  )
+  .dependsOn(midas_target_utils)
+  .settings(scalaTestSettings)
 
 lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(commonSettings)
-  .settings(
-    libraryDependencies ++= Seq(
-    )
-  )
+  .settings(scalaTestSettings)
 
 lazy val diplomacy = freshProject("diplomacy", file("generators/diplomacy/diplomacy"))
   .dependsOn(cde)
@@ -143,11 +135,11 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .dependsOn(hardfloat, rocketMacros, diplomacy, cde)
   .settings(commonSettings)
   .settings(chiselSettings)
+  .settings(scalaTestSettings)
   .settings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "mainargs" % "0.5.0",
       "org.json4s" %% "json4s-jackson" % "4.0.5",
-      "org.scalatest" %% "scalatest" % "3.2.0" % "test",
       "org.scala-graph" %% "graph-core" % "1.13.5"
     )
   )
@@ -156,27 +148,17 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
 // -- Chipyard-managed External Projects --
 
-// Contains annotations & firrtl passes you may wish to use in rocket-chip without
-// introducing a circular dependency between RC and MIDAS
-lazy val midasTargetUtils = (project in file ("sims/firesim/sim/midas/targetutils"))
-  .settings(commonSettings)
-  .settings(chiselSettings)
-lazy val midasStandaloneTargetUtils = (project in file("tools/midas-targetutils"))
-  .settings(commonSettings)
-  .settings(chiselSettings)
-
 lazy val testchipip = (project in file("generators/testchipip"))
   .dependsOn(rocketchip, rocketchip_blocks)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-val stageDir = if (chisel6) "tools/stage/src/main/scala" else "tools/stage-chisel3/src/main/scala"
 lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
     dsptools, rocket_dsp_utils,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
     constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
-    compressacc)
+    compressacc, saturn, ara, firrtl2_bridge, vexiiriscv)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
     libraryDependencies ++= Seq(
@@ -184,7 +166,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
     )
   )
   .settings(commonSettings)
-  .settings(Compile / unmanagedSourceDirectories += file(stageDir))
+  .settings(Compile / unmanagedSourceDirectories += file("tools/stage/src/main/scala"))
 
 lazy val compressacc = (project in file("generators/compress-acc"))
   .dependsOn(rocketchip)
@@ -198,6 +180,11 @@ lazy val mempress = (project in file("generators/mempress"))
 
 lazy val barf = (project in file("generators/bar-fetchers"))
   .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val saturn = (project in file("generators/saturn"))
+  .dependsOn(rocketchip, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -236,7 +223,17 @@ lazy val cva6 = (project in file("generators/cva6"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
+lazy val ara = (project in file("generators/ara"))
+  .dependsOn(rocketchip, shuttle)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
 lazy val ibex = (project in file("generators/ibex"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val vexiiriscv = (project in file("generators/vexiiriscv"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
@@ -262,7 +259,7 @@ lazy val caliptra_aes = (project in file("generators/caliptra-aes-acc"))
   .settings(commonSettings)
 
 lazy val rerocc = (project in file("generators/rerocc"))
-  .dependsOn(rocketchip, constellation, boom)
+  .dependsOn(rocketchip, constellation, boom, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -277,20 +274,18 @@ lazy val tapeout = (project in file("./tools/tapeout/"))
   .settings(scalaVersion := "2.13.10") // stuck on chisel3 2.13.10
   .settings(libraryDependencies ++= Seq("com.typesafe.play" %% "play-json" % "2.9.2"))
 
-val fixedpointDir = if (chisel6) "./tools/fixedpoint" else "./tools/fixedpoint-chisel3"
-lazy val fixedpoint = freshProject("fixedpoint", file(fixedpointDir))
+lazy val fixedpoint = freshProject("fixedpoint", file("./tools/fixedpoint"))
   .settings(chiselSettings)
   .settings(commonSettings)
 
-val dsptoolsDir = if (chisel6) "./tools/dsptools" else "./tools/dsptools-chisel3"
-lazy val dsptools = freshProject("dsptools", file(dsptoolsDir))
+lazy val dsptools = freshProject("dsptools", file("./tools/dsptools"))
   .dependsOn(fixedpoint)
   .settings(
     chiselSettings,
     commonSettings,
+    scalaTestSettings,
     libraryDependencies ++= Seq(
       "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
-      "org.scalatest" %% "scalatest" % "3.2.+" % "test",
       "org.typelevel" %% "spire" % "0.18.0",
       "org.scalanlp" %% "breeze" % "2.1.0",
       "junit" % "junit" % "4.13" % "test",
@@ -318,27 +313,6 @@ lazy val rocketchip_inclusive_cache = (project in file("generators/rocket-chip-i
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
 
-// Library components of FireSim
-lazy val midas      = (project in file ("sims/firesim/sim/midas"))
-  .dependsOn(rocketchip, midasTargetUtils)
-  .settings(libraryDependencies ++= Seq(
-     "org.scalatestplus" %% "scalacheck-1-14" % "3.1.3.0" % "test"))
-  .settings(commonSettings)
-  .settings(chiselSettings)
-
-lazy val firesimLib = (project in file("sims/firesim/sim/firesim-lib"))
-  .dependsOn(midas, icenet, testchipip, rocketchip_blocks)
-  .settings(commonSettings)
-  .settings(chiselSettings)
-
-lazy val firechip = (project in file("generators/firechip"))
-  .dependsOn(chipyard, midasTargetUtils, midas, firesimLib % "test->test;compile->compile")
-  .settings(
-    chiselSettings,
-    commonSettings,
-    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
-    Test / testOptions += Tests.Argument("-oF")
-  )
 lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
   .dependsOn(rocketchip, rocketchip_blocks)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -347,3 +321,90 @@ lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
 lazy val chipyard_fpga = (project in file("./fpga"))
   .dependsOn(chipyard, fpga_shells)
   .settings(commonSettings)
+
+// Components of FireSim
+
+lazy val firrtl2 = freshProject("firrtl2", file("./tools/firrtl2"))
+  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(Antlr4Plugin)
+  .settings(commonSettings)
+  .settings(
+    sourceDirectory := file("./tools/firrtl2/src"),
+    scalacOptions ++= Seq(
+      "-language:reflectiveCalls",
+      "-language:existentials",
+      "-language:implicitConversions"),
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "3.2.14" % "test",
+      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.11.0" % "test",
+      "com.github.scopt" %% "scopt" % "4.1.0",
+      "org.json4s" %% "json4s-native" % "4.1.0-M4",
+      "org.apache.commons" % "commons-text" % "1.10.0",
+      "com.lihaoyi" %% "os-lib" % "0.8.1",
+      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"),
+    Antlr4 / antlr4GenVisitor := true,
+    Antlr4 / antlr4GenListener := true,
+    Antlr4 / antlr4PackageName := Option("firrtl2.antlr"),
+    Antlr4 / antlr4Version := "4.9.3",
+    Antlr4 / javaSource := (Compile / sourceManaged).value,
+    buildInfoPackage := "firrtl2",
+    buildInfoUsePackageAsPath := true,
+    buildInfoKeys := Seq[BuildInfoKey](buildInfoPackage, version, scalaVersion, sbtVersion)
+  )
+
+lazy val firrtl2_bridge = freshProject("firrtl2_bridge", file("./tools/firrtl2/bridge"))
+  .dependsOn(firrtl2)
+  .settings(commonSettings)
+  .settings(chiselSettings)
+
+lazy val firesimDir = file("sims/firesim")
+
+// Contains annotations & firrtl passes you may wish to use in rocket-chip without
+// introducing a circular dependency between RC and MIDAS.
+// Minimal in scope (should only depend on Chisel/Firrtl that is
+// cross-compilable between FireSim Chisel 3.* and Chipyard Chisel 6+)
+lazy val midas_target_utils = (project in firesimDir / "sim/midas/targetutils")
+  .settings(commonSettings)
+  .settings(chiselSettings)
+
+// Provides API for bridges to be created in the target.
+// Includes target-side of FireSim-provided bridges and their interfaces that are shared
+// between FireSim and the target. Minimal in scope (should only depend on Chisel/Firrtl that is
+// cross-compilable between FireSim Chisel 3.* and Chipyard Chisel 6+)
+lazy val firesim_lib = (project in firesimDir / "sim/firesim-lib")
+  .dependsOn(midas_target_utils)
+  .settings(commonSettings)
+  .settings(chiselSettings)
+  .settings(scalaTestSettings)
+
+// Interfaces for target-specific bridges shared with FireSim.
+// Minimal in scope (should only depend on Chisel/Firrtl).
+// This is copied to FireSim's GoldenGate compiler.
+lazy val firechip_bridgeinterfaces = (project in file("generators/firechip/bridgeinterfaces"))
+  .settings(
+    chiselSettings,
+    commonSettings,
+  )
+
+// Target-side bridge definitions, CC files, etc used for FireSim.
+// This only compiled with Chipyard.
+lazy val firechip_bridgestubs = (project in file("generators/firechip/bridgestubs"))
+  .dependsOn(chipyard, firesim_lib % "compile->compile;test->test", firechip_bridgeinterfaces)
+  .settings(
+    chiselSettings,
+    commonSettings,
+    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
+    Test / testOptions += Tests.Argument("-oF")
+  )
+  .settings(scalaTestSettings)
+
+// FireSim top-level project that includes the FireSim harness, CC files, etc needed for FireSim.
+lazy val firechip = (project in file("generators/firechip/chip"))
+  .dependsOn(chipyard, firesim_lib % "compile->compile;test->test", firechip_bridgestubs, firechip_bridgeinterfaces)
+  .settings(
+    chiselSettings,
+    commonSettings,
+    Test / testGrouping := isolateAllTests( (Test / definedTests).value ),
+    Test / testOptions += Tests.Argument("-oF")
+  )
+  .settings(scalaTestSettings)

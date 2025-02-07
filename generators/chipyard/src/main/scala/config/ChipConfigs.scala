@@ -17,7 +17,7 @@ class ChipLikeRocketConfig extends Config(
   // Set up tiles
   //==================================
   new freechips.rocketchip.rocket.WithAsynchronousCDCs(depth=8, sync=3) ++ // Add async crossings between RocketTile and uncore
-  new freechips.rocketchip.rocket.WithNBigCores(1) ++                      // 1 RocketTile
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++                      // 1 RocketTile
 
   //==================================
   // Set up I/O
@@ -31,7 +31,7 @@ class ChipLikeRocketConfig extends Config(
       isMemoryDevice = true
     )),
     client = Some(testchipip.serdes.SerialTLClientParams()),                            // Allow an external manager to probe this chip
-    phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=4, flitWidth=16)   // 4-bit bidir interface, sync'd to an external clock
+    phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=4, flitWidth=16)   // 4-bit bidir interface, sync'd to an external clock
   ))) ++
 
   new freechips.rocketchip.subsystem.WithNoMemPort ++                                   // Remove axi4 mem port
@@ -78,7 +78,7 @@ class ChipBringupHostConfig extends Config(
       ))
     )),
     client = Some(testchipip.serdes.SerialTLClientParams()),                                        // Allow chip to access this device's memory (DRAM)
-    phyParams = testchipip.serdes.InternalSyncSerialPhyParams(phitWidth=4, flitWidth=16, freqMHz = 75) // bringup platform provides the clock
+    phyParams = testchipip.serdes.DecoupledInternalSyncSerialPhyParams(phitWidth=4, flitWidth=16, freqMHz = 75) // bringup platform provides the clock
   ))) ++
 
   //============================
@@ -102,12 +102,7 @@ class ChipBringupHostConfig extends Config(
   // Set up clocks of the bringup system
   //=============================
   new chipyard.clocking.WithPassthroughClockGenerator ++ // pass all the clocks through, since this isn't a chip
-  new chipyard.config.WithFrontBusFrequency(75.0) ++     // run all buses of this system at 75 MHz
-  new chipyard.config.WithMemoryBusFrequency(75.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(75.0) ++
-  new chipyard.config.WithSystemBusFrequency(75.0) ++
-  new chipyard.config.WithControlBusFrequency(75.0) ++
-  new chipyard.config.WithOffchipBusFrequency(75.0) ++
+  new chipyard.config.WithUniformBusFrequencies(75.0) ++   // run all buses of this system at 75 MHz
 
   // Base is the no-cores config
   new chipyard.NoCoresConfig)
