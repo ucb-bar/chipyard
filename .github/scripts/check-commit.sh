@@ -46,7 +46,7 @@ search () {
 }
 
 
-submodules=("cva6" "boom" "ibex" "gemmini" "icenet" "nvdla" "rocket-chip" "rocket-chip-blocks" "rocket-chip-inclusive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle" "constellation" "fft-generator" "hardfloat" "caliptra-aes-acc" "rocc-acc-utils" "diplomacy" "rerocc" "compress-acc" "saturn" "ara" "vexiiriscv")
+submodules=("cva6" "boom" "ibex" "gemmini" "icenet" "nvdla" "rocket-chip" "rocket-chip-blocks" "rocket-chip-inclusive-cache" "testchipip" "riscv-sodor" "mempress" "bar-fetchers" "shuttle" "constellation" "fft-generator" "hardfloat" "caliptra-aes-acc" "rocc-acc-utils" "diplomacy" "rerocc" "compress-acc" "saturn" "ara" "vexiiriscv" "radiance")
 dir="generators"
 branches=("master" "main" "dev")
 search

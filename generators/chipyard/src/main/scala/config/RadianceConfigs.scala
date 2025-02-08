@@ -8,16 +8,6 @@ import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.Config
 import radiance.subsystem.RadianceGemminiDataType
 
-class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt = 0x10100) extends Config((site, here, up) => {
-  case BootROMLocated(x) => up(BootROMLocated(x))
-    .map(_.copy(
-      address = address,
-      size = size,
-      hang = hang,
-      contentFileName = s"${site(TargetDirKey)}/bootrom.radiance.rv32.img"
-    ))
-})
-
 // ----------------
 // Radiance Configs
 // ----------------
@@ -38,7 +28,6 @@ class RadianceBaseConfig extends Config(
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
   new WithExtMemSize(BigInt("80000000", 16)) ++
   new WithRadBootROM() ++
-  new chipyard.iobinders.WithCeasePunchThrough ++
   new radiance.subsystem.WithRadianceSimParams(true) ++
   new WithCacheBlockBytes(64) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
@@ -158,9 +147,6 @@ class RadianceNoCoalConfig extends Config(
 class RadianceEmulatorConfig extends Config(
   new radiance.subsystem.WithEmulatorCores(1, useVxCache = false) ++
   new radiance.subsystem.WithSimtConfig(nMemLanes = 4, nSrcIds = 4) ++
-  new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
-  new chipyard.harness.WithCeaseSuccess ++
-  new chipyard.iobinders.WithCeasePunchThrough ++
   new AbstractConfig)
 
 class RadianceFuzzerConfig extends Config(
@@ -168,6 +154,4 @@ class RadianceFuzzerConfig extends Config(
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 2) ++
   new radiance.subsystem.WithSimtConfig(nMemLanes = 4, nSrcIds = 2) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
-  new chipyard.harness.WithCeaseSuccess ++
-  new chipyard.iobinders.WithCeasePunchThrough ++
   new AbstractConfig)
