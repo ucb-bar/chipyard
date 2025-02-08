@@ -38,13 +38,6 @@ Next, in your Chipyard directory, initialize the Zephyr submodule:
 
     git submodule update --init software/zephyr
 
-Next, install the following depenencies:
-
-.. code-block:: shell
-
-    conda install cmake ninja gperf ccache dtc
-    pip install west pyelftools
-
 Next, run the following commands to initiaize the Zephyr workspace. `west`` is Zephyr's CMake-based build tool and dependency manager, designed to streamline project setup, compilation, and firmware deployment. It automates building Zephyr applications into ELF binaries and manages multiple repositories and submodules. In Chipyard, `west`` is used to build ELF files for simulation on Spike, software RTL simulation, or FireSim
 
 .. code-block:: shell
