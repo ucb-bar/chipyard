@@ -151,6 +151,12 @@
 [submodule "generators/vexiiriscv"]
 	path = generators/vexiiriscv
 	url = https://github.com/ucb-bar/vexiiriscv-tile.git
+[submodule "software/tacit_decoder"]
+	path = software/tacit_decoder
+	url = https://github.com/ucb-bar/tacit_decoder.git
+[submodule "generators/tacit"]
+	path = generators/tacit
+	url = https://github.com/ucb-bar/tacit.git
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git
