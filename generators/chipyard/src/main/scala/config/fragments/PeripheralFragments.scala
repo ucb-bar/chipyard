@@ -162,6 +162,16 @@ class WithNoBootROM extends Config((site, here, up) => {
   case BootROMLocated(_) => None
 })
 
+class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt = 0x10100) extends Config((site, here, up) => {
+  case BootROMLocated(x) => up(BootROMLocated(x))
+    .map(_.copy(
+      address = address,
+      size = size,
+      hang = hang,
+      contentFileName = s"${site(TargetDirKey)}/bootrom.radiance.rv32.img"
+    ))
+})
+
 class WithNoBusErrorDevices extends Config((site, here, up) => {
   case SystemBusKey => up(SystemBusKey).copy(errorDevice = None)
   case ControlBusKey => up(ControlBusKey).copy(errorDevice = None)
