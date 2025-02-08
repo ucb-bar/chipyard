@@ -46,7 +46,6 @@ dependencies:
     - findutils
     - lzop
 
-
     - bash-completion
     - ca-certificates
     - mosh
