@@ -60,7 +60,7 @@ mapping["chipyard-spiflashwrite"]=" CONFIG=SmallSPIFlashRocketConfig EXTRA_SIM_F
 mapping["chipyard-manyperipherals"]=" CONFIG=ManyPeripheralsRocketConfig EXTRA_SIM_FLAGS='+spiflash0=${LOCAL_CHIPYARD_DIR}/tests/spiflash.img'"
 mapping["chipyard-chiplike"]=" CONFIG=ChipLikeRocketConfig MODEL=FlatTestHarness MODEL_PACKAGE=chipyard.example verilog"
 mapping["chipyard-tethered"]=" CONFIG=VerilatorCITetheredChipLikeRocketConfig"
-mapping["chipyard-symmetric"]=" CONFIG=MultiSimSymmetricChipletRocketConfig"
+mapping["chipyard-symmetric"]=" CONFIG=MultiSimMultiLinkSymmetricChipletRocketConfig"
 mapping["chipyard-llcchiplet"]=" CONFIG=MultiSimLLCChipletRocketConfig"
 mapping["chipyard-cloneboom"]=" CONFIG=Cloned64MegaBoomV3Config verilog"
 mapping["chipyard-nocores"]=" CONFIG=NoCoresConfig verilog"
