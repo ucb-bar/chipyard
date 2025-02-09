@@ -170,6 +170,9 @@ case $1 in
     chipyard-constellation)
         run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
+    chipyard-tacit-rocket)
+        run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
+        ;;
     icenet)
         run_binary BINARY=none
         ;;
