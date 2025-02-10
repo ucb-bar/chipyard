@@ -31,26 +31,29 @@ Installation and Basic Usage
 ----------------------------
 Before beginning, ensure that your Chipyard RISCV toolchain is installed, and `env.sh` is sourced.
 
-Next, in your Chipyard directory, initialize the Zephyr submodule:
-
-
-.. code-block:: shell
-
-    git submodule update --init software/zephyr
 
 Next, run the following commands to initiaize the Zephyr workspace. `west`` is Zephyr's CMake-based build tool and dependency manager, designed to streamline project setup, compilation, and firmware deployment. It automates building Zephyr applications into ELF binaries and manages multiple repositories and submodules. In Chipyard, `west`` is used to build ELF files for simulation on Spike, software RTL simulation, or FireSim
 
 .. code-block:: shell
 
     cd software/zephyr
-    west init -l zephyr
+    west init -l .
+    west config manifest.file west-riscv.yml
     west update
+
+Next, set the followwing environment variables:
+
+.. code-block:: shell
+
+    export ZEPHYR_BASE=$(pwd)
+    export ZEPHYR_TOOLCHAIN_VARIANT=cross-compile
+    export CROSS_COMPILE=$RISCV/bin/riscv64-unknown-elf-
 
 After initializing the workspace, you can build the Zephyr kernel and sample applications. For example, to build the `hello_world` sample application, run the following commands within the Zephyr directory:
 
 .. code-block:: shell
 
-    west build -b -p spike_riscv64 .samples/hello_world
+    west build -p -b spike_riscv64 ./samples/chipyard/hello_world
 
 This will generate a build directory with the compiled ELF file, with example output below:
 
