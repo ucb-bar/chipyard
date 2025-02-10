@@ -22,6 +22,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithSimDMI ++                               /** add SimJTAG if DMI exposed */
   new chipyard.harness.WithGPIOPinsTiedOff ++                      /** tie-off chiptop GPIO-pins, if GPIO-punchthrough is used */
   new chipyard.harness.WithGPIOTiedOff ++                          /** tie-off chiptop GPIOs, if GPIOs are present */
+  new chipyard.harness.WithI2CTiedOff ++                           /** tie-off i2c ports if present */
   new chipyard.harness.WithSimSPIFlashModel ++                     /** add simulated SPI flash memory, if SPI is enabled */
   new chipyard.harness.WithSimAXIMMIO ++                           /** add SimAXIMem for axi4 mmio port, if enabled */
   new chipyard.harness.WithTieOffInterrupts ++                     /** tie-off interrupt ports, if present */
@@ -70,7 +71,7 @@ class AbstractConfig extends Config(
   new testchipip.serdes.WithSerialTL(Seq(                           /** add a serial-tilelink interface */
     testchipip.serdes.SerialTLParams(
       client = Some(testchipip.serdes.SerialTLClientParams(totalIdBits=4)), // serial-tilelink interface will master the FBUS, and support 4 idBits
-      phyParams = testchipip.serdes.ExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32) // serial-tilelink interface with 32 lanes
+      phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32) // serial-tilelink interface with 32 lanes
     )
   )) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++         /** Default 1 AXI-4 memory channels */

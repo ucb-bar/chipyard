@@ -62,8 +62,8 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
     harnessIO match {
       case io: DecoupledPhitIO => {
         val clkIO = io match {
-          case io: InternalSyncPhitIO => IOPin(io.clock_out)
-          case io: ExternalSyncPhitIO => IOPin(io.clock_in)
+          case io: HasClockOut => IOPin(io.clock_out)
+          case io: HasClockIn => IOPin(io.clock_in)
         }
         val packagePinsWithPackageIOs = Seq(
           ("G13", clkIO),
@@ -87,10 +87,10 @@ class WithArty100TSerialTLToGPIO extends HarnessBinder({
 
         // Don't add IOB to the clock, if its an input
         io match {
-          case io: InternalSyncPhitIO => packagePinsWithPackageIOs foreach { case (pin, io) => {
+          case io: DecoupledInternalSyncPhitIO => packagePinsWithPackageIOs foreach { case (pin, io) => {
             artyTh.xdc.addIOB(io)
           }}
-          case io: ExternalSyncPhitIO => packagePinsWithPackageIOs.drop(1).foreach { case (pin, io) => {
+          case io: DecoupledExternalSyncPhitIO => packagePinsWithPackageIOs.drop(1).foreach { case (pin, io) => {
             artyTh.xdc.addIOB(io)
           }}
         }
@@ -126,8 +126,12 @@ class WithArty100TPMODUART extends WithArty100TUART("G2", "F3")
 class WithArty100TJTAG extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: JTAGPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-    val harnessIO = IO(chiselTypeOf(port.io)).suggestName("jtag")
-    harnessIO <> port.io
+    val harnessIO = IO(new JTAGChipIO(false)).suggestName("jtag")
+    harnessIO.TDO := port.io.TDO
+    port.io.TCK := harnessIO.TCK
+    port.io.TDI := harnessIO.TDI
+    port.io.TMS := harnessIO.TMS
+    port.io.reset.foreach(_ := th.referenceReset)
 
     ath.sdc.addClock("JTCK", IOPin(harnessIO.TCK), 10)
     ath.sdc.addGroup(clocks = Seq("JTCK"))
@@ -138,6 +142,7 @@ class WithArty100TJTAG extends HarnessBinder({
       ("E2", IOPin(harnessIO.TDI)),
       ("D4", IOPin(harnessIO.TDO))
     )
+    
     packagePinsWithPackageIOs foreach { case (pin, io) => {
       ath.xdc.addPackagePin(io, pin)
       ath.xdc.addIOStandard(io, "LVCMOS33")

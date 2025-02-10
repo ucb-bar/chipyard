@@ -126,3 +126,4 @@ dependencies:
     - fsspec
     - pip:
         - fab-classic>=1.19.2
+        - bcrypt<4.0.0

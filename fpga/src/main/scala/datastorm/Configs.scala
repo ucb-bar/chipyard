@@ -1,5 +1,5 @@
 // See LICENSE for license details.
-package chipyard.fpga.arty100t
+package chipyard.fpga.datastorm
 
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
@@ -16,43 +16,46 @@ import sifive.fpgashells.shell.{DesignKey}
 import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem}
+import testchipip.soc.WithNoScratchpads
+import sifive.blocks.devices.spi.SPIProtocol.width
+import chipyard.iobinders.WithGPIOPunchthrough
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
   case DesignKey => (p: Parameters) => new SimpleLazyRawModule()(p)
 })
 
-// By default, this uses the on-board USB-UART for the TSI-over-UART link
-// The PMODUART HarnessBinder maps the actual UART device to JD pin
-class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
-  new WithArty100TPMODUART ++
-  new WithArty100TUARTTSI ++
-  new WithArty100TDDRTL ++
-  new WithArty100TJTAG ++
+class WithDatastormTweaks(freqMHz: Double = 40) extends Config(
+  new WithDatastormPMODUART ++
+  new WithDatastormUARTTSI ++
+  new WithDatastormDDRTL ++
+  new WithDatastormJTAG ++
   new WithNoDesignKey ++
-  new testchipip.tsi.WithUARTTSIClient ++
+  new testchipip.tsi.WithUARTTSIClient(initBaudRate = BigInt(921600)) ++
   new chipyard.harness.WithSerialTLTiedOff ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(freqMHz) ++
   new chipyard.config.WithUniformBusFrequencies(freqMHz) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithTLBackingMemory ++ // FPGA-shells converts the AXI to TL for us
-  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 30) ++ // 1GB on Datastorm
   new freechips.rocketchip.subsystem.WithoutTLMonitors)
 
-class RocketArty100TConfig extends Config(
-  new WithArty100TTweaks ++
+class RocketDatastormConfig extends Config(
+  new WithDatastormTweaks ++
+  new WithNoScratchpads ++
+  new testchipip.serdes.WithNoSerialTL ++
   new chipyard.config.WithBroadcastManager ++ // no l2
-  new chipyard.RocketConfig)
+  new freechips.rocketchip.rocket.WithNBigCores(1) ++ // Use bigrocket instead of huge due to space constraints
+  new chipyard.config.AbstractConfig)
 
-class NoCoresArty100TConfig extends Config(
-  new WithArty100TTweaks ++
+class NoCoresDatastormConfig extends Config(
+  new WithDatastormTweaks ++
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.NoCoresConfig)
 
-// This will fail to close timing above 50 MHz
-class BringupArty100TConfig extends Config(
-  new WithArty100TSerialTLToGPIO ++
-  new WithArty100TTweaks(freqMHz = 50) ++
-  new testchipip.serdes.WithSerialTLPHYParams(testchipip.serdes.DecoupledInternalSyncSerialPhyParams(freqMHz=50)) ++
+class BringupDatastormConfig extends Config(
+  new WithDatastormSerialTLToFMC ++
+  new WithDatastormTweaks ++
+  new testchipip.serdes.WithSerialTLPHYParams(testchipip.serdes.DecoupledInternalSyncSerialPhyParams(freqMHz=40)) ++
   new chipyard.ChipBringupHostConfig)

@@ -13,7 +13,7 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: 378cefab3c166adf9dad8b6aa4dbf015480e69379da0ee016f95786897ee902e
+    linux-64: 9a11014088c155fdec2d3941f9fac33a9b0b6ba932aa83d82fe3f7dd6bb7f3c7
   channels:
   - url: ucb-bar
     used_env_vars: []
@@ -2366,14 +2366,14 @@ package:
   category: main
   optional: false
 - name: kernel-headers_linux-64
-  version: 3.10.0
+  version: 5.14.0
   manager: conda
   platform: linux-64
   dependencies: {}
-  url: https://conda.anaconda.org/conda-forge/noarch/kernel-headers_linux-64-3.10.0-he073ed8_18.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/kernel-headers_linux-64-5.14.0-h8bc681e_0.conda
   hash:
-    md5: ad8527bf134a90e1c9ed35fa0b64318c
-    sha256: a922841ad80bd7b222502e65c07ecb67e4176c4fa5b03678a005f39fcc98be4b
+    md5: 4a62b1f923962a289bb64eaafeb49910
+    sha256: 1a6f93e76adbc6e603b26afe778df92aac8496685cc08b1b392661086cf59623
   category: main
   optional: false
 - name: keyring
@@ -4175,17 +4175,17 @@ package:
   category: main
   optional: false
 - name: pip
-  version: '25.0'
+  version: 25.0.1
   manager: conda
   platform: linux-64
   dependencies:
     python: '>=3.9,<3.13.0a0'
     setuptools: ''
     wheel: ''
-  url: https://conda.anaconda.org/conda-forge/noarch/pip-25.0-pyh8b19718_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pip-25.0.1-pyh8b19718_0.conda
   hash:
-    md5: c2548760a02ed818f92dd0d8c81b55b4
-    sha256: 094fa4c825f8b9e8403e0c0b569c3d50892325acdac1010ff43cc3ac65bf62cd
+    md5: 79b5c1440aedc5010f687048d9103628
+    sha256: 585940f09d87787f79f73ff5dff8eb2af8a67e5bec5eebf2f553cd26c840ba69
   category: main
   optional: false
 - name: pixman
@@ -5234,16 +5234,16 @@ package:
   category: main
   optional: false
 - name: sysroot_linux-64
-  version: '2.17'
+  version: '2.34'
   manager: conda
   platform: linux-64
   dependencies:
-    kernel-headers_linux-64: 3.10.0
+    kernel-headers_linux-64: 5.14.0
     tzdata: ''
-  url: https://conda.anaconda.org/conda-forge/noarch/sysroot_linux-64-2.17-h0157908_18.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/sysroot_linux-64-2.34-h8bc681e_0.conda
   hash:
-    md5: 460eba7851277ec1fd80a1a24080787a
-    sha256: 69ab5804bdd2e8e493d5709eebff382a72fab3e9af6adf93a237ccf8f7dbd624
+    md5: ee08592458e9a1ff26de931a1864505f
+    sha256: f58cf7e0c790bb7e8678ec122b806e3b7733d0e8d18e334266283ce3e2d82d69
   category: main
   optional: false
 - name: tar
@@ -6122,13 +6122,14 @@ package:
   category: main
   optional: false
 - name: bcrypt
-  version: 4.2.1
+  version: 3.2.2
   manager: pip
   platform: linux-64
-  dependencies: {}
-  url: https://files.pythonhosted.org/packages/d6/c3/4b4bad4da852924427c651589d464ad1aa624f94dd904ddda8493b0a35e5/bcrypt-4.2.1-cp39-abi3-manylinux_2_28_x86_64.whl
+  dependencies:
+    cffi: '>=1.1'
+  url: https://files.pythonhosted.org/packages/86/1b/f4d7425dfc6cd0e405b48ee484df6d80fb39e05f25963dbfcc2c511e8341/bcrypt-3.2.2-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl
   hash:
-    sha256: 687cf30e6681eeda39548a93ce9bfbb300e48b4d445a43db4298d2474d2a1e54
+    sha256: 6d2cb9d969bfca5bc08e45864137276e4c3d3d7de2b162171def3d188bf9d34a
   category: main
   optional: false
 - name: fab-classic

@@ -86,6 +86,19 @@ ifeq ($(SUB_PROJECT),arty100t)
 	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
 endif
+ifeq ($(SUB_PROJECT),datastorm)
+	SBT_PROJECT       ?= chipyard_fpga
+	MODEL             ?= DatastormHarness
+	VLOG_MODEL        ?= DatastormHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.datastorm
+	CONFIG            ?= RocketDatastormConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.datastorm
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD			  ?= trenz_datastorm
+	FPGA_BRAND        ?= altera
+endif
 
 export USE_CHISEL6=1
 
@@ -133,9 +146,11 @@ all_vsrcs := \
 # combine all sources into single .f
 synth_list_f := $(build_dir)/$(long_name).vsrcs.f
 $(synth_list_f): $(sim_common_files) $(all_vsrcs)
+	rm -f $@
 	$(foreach file,$(all_vsrcs),echo "$(file)" >> $@;)
 	cat $(sim_common_files) >> $@
 
+ifeq ($(FPGA_BRAND),xilinx)
 BIT_FILE := $(build_dir)/obj/$(MODEL).bit
 $(BIT_FILE): $(synth_list_f)
 	cd $(build_dir); vivado \
@@ -146,6 +161,17 @@ $(BIT_FILE): $(synth_list_f)
 			-F "$(synth_list_f)" \
 			-board "$(BOARD)" \
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')"
+endif
+ifeq ($(FPGA_BRAND),altera)
+BIT_FILE := $(build_dir)/output_files/$(MODEL).qsf
+$(BIT_FILE): $(synth_list_f)
+	cd $(build_dir); quartus_sh \
+		-t $(fpga_common_script_dir)/quartus.tcl \
+		"$(MODEL)" \
+		"$(BOARD)" \
+		"$(long_name)" \
+		"$(shell find '$(build_dir)' -name '*.quartus.tcl')"
+endif
 
 .PHONY: bitstream
 bitstream: $(BIT_FILE)

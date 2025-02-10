@@ -295,7 +295,7 @@ if run_step "8"; then
         begin_step "9" "Pre-compiling FireMarshal buildroot sources"
         source $CYDIR/scripts/fix-open-files.sh &&
         ./marshal $VERBOSE_FLAG build br-base.json &&
-        ./marshal $VERBOSE_FLAG clean br-base.json
+        ./marshal $VERBOSE_FLAG build bare-base.json
         exit_if_last_command_failed
     fi
     popd

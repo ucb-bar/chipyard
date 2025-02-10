@@ -29,8 +29,7 @@ run_binary () {
 }
 
 build_tests() {
-    cmake $LOCAL_CHIPYARD_DIR/tests/ -S $LOCAL_CHIPYARD_DIR/tests/ -B $LOCAL_CHIPYARD_DIR/tests/build/ -D CMAKE_BUILD_TYPE=Debug
-    cmake --build $LOCAL_CHIPYARD_DIR/tests/build/ --target all
+    (cd $LOCAL_CHIPYARD_DIR/tests && cmake . && make)
 }
 
 case $1 in
@@ -51,7 +50,7 @@ case $1 in
         # Test cospike without checkpoint-restore
         run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv LOADMEM=1
         ;;
-    chipyard-boomv3|chipyard-boomv4|chipyard-shuttle|chipyard-spike)
+    chipyard-boomv3|chipyard-boomv4|chipyard-shuttle|chipyard-spike|chipyard-shuttle3)
         run_asm LOADMEM=1
         run_bmark LOADMEM=1
         ;;
@@ -127,8 +126,8 @@ case $1 in
         run_binary BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1
         ;;
     chipyard-rerocc)
-        make -C $LOCAL_CHIPYARD_DIR/generators/rerocc/tests
-        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rerocc/tests/rerocc.riscv LOADMEM=1
+        make -C $LOCAL_CHIPYARD_DIR/generators/rerocc/software
+        run_binary BINARY=$LOCAL_CHIPYARD_DIR/generators/rerocc/software/test.riscv LOADMEM=1
         ;;
     chipyard-rocketvector|chipyard-shuttlevector)
         run_binary BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-sgemm.riscv LOADMEM=1
@@ -168,6 +167,9 @@ case $1 in
         run_asm
         ;;
     chipyard-constellation)
+        run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
+        ;;
+    chipyard-tacit-rocket)
         run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
     icenet)
