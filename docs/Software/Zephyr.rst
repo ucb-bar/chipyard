@@ -25,6 +25,7 @@ Key benefits:
 
 
 .. _zephyr-installation:
+
 Installation and Basic Usage
 ----------------------------
 Before beginning, ensure that your Chipyard RISCV toolchain is installed, and `env.sh` is sourced.
@@ -152,11 +153,14 @@ Console: Standard Output Interface
 The **console subsystem** provides a standard output interface for logging and debugging.
 
 To enable a UART device as the console:
+
 .. code-block:: dts
 
    chosen {
        zephyr,console = &htif;
    };
+
+
 
 Zephyr will automatically redirect `printf`-like output to the chosen console device.
 
