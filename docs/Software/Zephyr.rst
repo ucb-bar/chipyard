@@ -14,16 +14,14 @@ A **Real-Time Operating System (RTOS)** is a lightweight OS designed to provide 
 Zephyr Use Cases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Zephyr provides a lightweight build flow and excution environment that supports running complex end-to-end workloads without the overhead of Linux.
+Zephyr provides a lightweight build flow and execution environment that supports running complex end-to-end workloads without the overhead of Linux.
 
 Key benefits:
-- **Multicore & Threading Support**: Zephyr provides a task scheduler with multithreading and multicore support. Heterogeneous SoCs can be used via task pinning. 
-- **POSIX-like API**: Zephyr provides POSIX APIs for threading and synchronization, useful for migrating Linux-based workloads.
-- **Fast Boot Times**: Zephyr has a significantly **faster startup time** in **RTL simulations**.
-  - On **RocketConfig**, the **main thread boots from reset in ~20K cycles**, making it suitable for VCS/Verilator-based simulations.
-  - For FireSim, Zephyr can be used to bypass the Linux boot process.
-- **Small Footprint**: Zephyr ELF files are 20-100KB (exculding application code), suitable for bringup and prototyping targets.
-- **Simplified Virtual Memory**: While Zephyr does not support **full virtual memory** like Linux, it does provide basic memory mapping and demand paging.
+* **Multicore & Threading Support**: Zephyr provides a task scheduler with multithreading and multicore support. Heterogeneous SoCs can be used via task pinning.
+* **POSIX-like API**: Zephyr provides POSIX APIs for threading and synchronization, useful for migrating Linux-based workloads.
+* **Fast Boot Times**: Zephyr has a significantly **faster startup time** in **RTL simulations** (~20K cycles for RocketConfig).
+* **Small Footprint**: Zephyr ELF files are 20-100KB (excluding application code), suitable for bringup and prototyping targets.
+* **Simplified Virtual Memory**: While Zephyr does not support **full virtual memory** like Linux, it does provide basic memory mapping and demand paging.
 
 
 .. _zephyr-installation:
@@ -92,19 +90,20 @@ KConfig: Configuring Zephyr
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Zephyr uses **KConfig**, a configuration system that allows developers to **enable or disable features**, **select drivers**, and **tune system parameters**. KConfig files are used to specify options that influence the build process.
 
-- Located in `Kconfig` files within the Zephyr source tree.
-- Used to enable hardware drivers (e.g., `CONFIG_UART_HTIF=y` for HTIF UART support).
-- Managed using the `menuconfig` or `guiconfig` tools.
+* Located in `Kconfig` files within the Zephyr source tree.
+* Used to enable hardware drivers (e.g., `CONFIG_UART_HTIF=y` for HTIF UART support).
+* Managed using the `menuconfig` or `guiconfig` tools.
 
 Example:
 .. code-block:: kconfig
 
-   config UART_HTIF
-       bool "Enable HTIF UART driver"
-       select SERIAL_HAS_DRIVER
-       depends on RISCV
-       help
-           Enable the HTIF (Host-Target Interface) UART driver for RISC-V Spike simulation.
+    config UART_HTIF
+        bool "Enable HTIF UART driver"
+        select SERIAL_HAS_DRIVER
+        depends on RISCV
+
+        help
+            Enable the HTIF (Host-Target Interface) UART driver for RISC-V Spike simulation.
 
 To modify configuration:
 .. code-block:: shell
