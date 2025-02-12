@@ -11,6 +11,7 @@ import freechips.rocketchip.resources.{DTSModel, DTSTimebase}
 
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
+import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize}
@@ -23,6 +24,7 @@ import chipyard.harness._
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
   case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
+  case PeripheryGPIOKey => List(GPIOParams(address = BigInt(0x64002000L), width=4))
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
@@ -46,12 +48,16 @@ class WithVC707Tweaks extends Config (
 
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new WithFPGAFrequency(50) ++ // default 50MHz freq
+
   // harness binders
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++
+  new WithVC707GPIOHarnessBinder ++
+
   // other configuration
+  new chipyard.iobinders.WithGPIOPunchthrough ++
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
