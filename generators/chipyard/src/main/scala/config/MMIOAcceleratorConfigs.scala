@@ -62,7 +62,22 @@ class LargeNVDLARocketConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
+class VerilogTLDeviceRocketConfig extends Config(
+  new chipyard.example.WithVerilogTLDevice(chipyard.example.VerilogTLDeviceParams(
+    deviceName = "example",
+    moduleName = "ExampleVerilogTLDevice",
+    verilogResourceFiles = Seq("ExampleVerilogTL.v")
+  )) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+
 class ManyMMIOAcceleratorRocketConfig extends Config(
+  new chipyard.example.WithVerilogTLDevice(chipyard.example.VerilogTLDeviceParams(
+    deviceName = "example",
+    moduleName = "ExampleVerilogTLDevice",
+    verilogResourceFiles = Seq("ExampleVerilogTL.v")
+  )) ++
   new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero
   new chipyard.harness.WithDontTouchChipTopPorts(false) ++   // TODO: hack around dontTouch not working in SFC
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
