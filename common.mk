@@ -304,6 +304,8 @@ ifneq ($(LOADARCH),)
 get_loadarch_flag = +loadarch=$(subst mem.elf,loadarch,$(1))
 endif
 
+# add binary args to the binary string for output log names
+BINARY_PLUS_ARGS = $(BINARY)$(call get_out_name,$(BINARY_ARGS))
 # get the output path base name for simulation outputs, First arg is the binary
 get_sim_out_name = $(output_dir)/$(call get_out_name,$(1))
 # sim flags that are common to run-binary/run-binary-fast/run-binary-debug
@@ -312,39 +314,39 @@ get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_l
 .PHONY: %.run %.run.debug %.run.fast
 
 # run normal binary with hardware-logged insn dissassembly
-run-binary: check-binary $(BINARY).run
+run-binary: check-binary $(BINARY_PLUS_ARGS).run
 run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
 
-%.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
+%.run: $(BINARY).check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
 		$(PERMISSIVE_ON) \
 		$(call get_common_sim_flags,$*) \
 		$(VERBOSE_FLAGS) \
 		$(PERMISSIVE_OFF) \
-		$* \
+		$(BINARY) \
 		$(BINARY_ARGS) \
 		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
 # run simulator as fast as possible (no insn disassembly)
-run-binary-fast: check-binary $(BINARY).run.fast
+run-binary-fast: check-binary $(BINARY_PLUS_ARGS).run.fast
 run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
 
-%.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
+%.run.fast: $(BINARY).check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
 		$(PERMISSIVE_ON) \
 		$(call get_common_sim_flags,$*) \
 		$(PERMISSIVE_OFF) \
-		$* \
+		$(BINARY) \
 		$(BINARY_ARGS) \
 		</dev/null | tee $(call get_sim_out_name,$*).log)
 
 # run simulator with as much debug info as possible
-run-binary-debug: check-binary $(BINARY).run.debug
+run-binary-debug: check-binary $(BINARY_PLUS_ARGS).run.debug
 run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
 
-%.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
+%.run.debug: $(BINARY).check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
 ifeq (1,$(DUMP_BINARY))
-	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
+	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $(BINARY) > $(call get_sim_out_name,$*).dump ; fi
 endif
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
 		$(PERMISSIVE_ON) \
@@ -352,7 +354,7 @@ endif
 		$(VERBOSE_FLAGS) \
 		$(call get_waveform_flag,$(call get_sim_out_name,$*)) \
 		$(PERMISSIVE_OFF) \
-		$* \
+		$(BINARY) \
 		$(BINARY_ARGS) \
 		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
 
@@ -362,11 +364,11 @@ run-fast: run-asm-tests-fast run-bmark-tests-fast
 # helper rules to run simulator with fast loadmem
 # LEGACY - use LOADMEM=1 instead
 #########################################################################################
-run-binary-hex: $(BINARY).run
+run-binary-hex: $(BINARY_PLUS_ARGS).run
 run-binary-hex: override SIM_FLAGS += +loadmem=$(BINARY)
-run-binary-debug-hex: $(BINARY).run.debug
+run-binary-debug-hex: $(BINARY_PLUS_ARGS).run.debug
 run-binary-debug-hex: override SIM_FLAGS += +loadmem=$(BINARY)
-run-binary-fast-hex: $(BINARY).run.fast
+run-binary-fast-hex: $(BINARY_PLUS_ARGS).run.fast
 run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 
 #########################################################################################
