@@ -63,6 +63,14 @@ dependencies:
     - graphviz
     - expect
 
+    # zephyr deps
+    - ninja
+    - gperf
+    - ccache
+    - dtc
+    - west
+    - pyelftools
+
     # clang-format for driver coding style enforcement.
     - clang-format
     - clang-tools
