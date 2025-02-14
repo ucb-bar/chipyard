@@ -112,8 +112,8 @@ fi
 
 echo '==>  Installing DRAMSim2 Shared Library'
 cd $RDIR
-git submodule update --init tools/DRAMSim2
-cd tools/DRAMSim2
+git submodule update --init tools/DRAMSim3
+cd tools/DRAMSim3
 make clean
 make libdramsim.so
 cp libdramsim.so $RISCV/lib/

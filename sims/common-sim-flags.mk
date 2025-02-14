@@ -11,9 +11,12 @@ SIM_CXXFLAGS = \
 	$(SIM_OPT_CXXFLAGS) \
 	-std=c++17 \
 	-I$(RISCV)/include \
-	-I$(dramsim_dir) \
 	-I$(GEN_COLLATERAL_DIR) \
-	$(EXTRA_SIM_CXXFLAGS)
+	$(EXTRA_SIM_CXXFLAGS)  \
+	-I$(dramsim_dir) \
+	-I$(dramsim_dir)/src \
+	-I/scratch/achaurasia/chipyard/tools/DRAMSim3/ext/fmt/include/fmt \
+	-I/scratch/achaurasia/chipyard/tools/DRAMSim3/ext/headers \
 
 SIM_LDFLAGS = \
 	$(LDFLAGS) \
@@ -21,6 +24,7 @@ SIM_LDFLAGS = \
 	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \
 	-L$(dramsim_dir) \
+	-L$(dramsim_dir)/build \
 	$(LRISCV) \
 	-lfesvr \
 	-ldramsim \

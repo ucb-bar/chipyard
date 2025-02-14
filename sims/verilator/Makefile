@@ -206,10 +206,10 @@ $(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS)
 #########################################################################################
 # invoke make to make verilator sim rules
 #########################################################################################
-$(sim): $(model_mk) $(dramsim_lib)
+$(sim): $(model_mk) $(dramsim_lib) $(dramsim3_lib)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(TB).mk
 
-$(sim_debug): $(model_mk_debug) $(dramsim_lib)
+$(sim_debug): $(model_mk_debug) $(dramsim_lib) $(dramsim3_lib)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(TB).mk
 
 #########################################################################################

@@ -255,7 +255,7 @@ PERMISSIVE_OFF=+permissive-off
 BINARY ?=
 BINARIES ?=
 BINARY_ARGS ?=
-override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim2_ini +max-cycles=$(TIMEOUT_CYCLES)
+override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim3_ini +max-cycles=$(TIMEOUT_CYCLES)
 VERBOSE_FLAGS ?= +verbose
 # get_out_name is a function, 1st argument is the binary
 get_out_name = $(subst $() $(),_,$(notdir $(basename $(1))))

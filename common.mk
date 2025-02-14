@@ -394,8 +394,17 @@ endif
 #######################################
 # Rules for building DRAMSim2 library
 #######################################
-dramsim_dir = $(base_dir)/tools/DRAMSim2
-dramsim_lib = $(dramsim_dir)/libdramsim.a
+# dramsim_dir = $(base_dir)/tools/DRAMSim2
+# dramsim_lib = $(dramsim_dir)/libdramsim.a
+
+# $(dramsim_lib):
+# 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
+#######################################
+# Rules for building DRAMSim3 library
+#######################################
+dramsim_dir = $(base_dir)/tools/DRAMSim3
+dramsim_lib = $(base_dir)/tools/DRAMSim3/libdramsim.a
 
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
