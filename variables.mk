@@ -135,6 +135,7 @@ endif
 ROCKETCHIP_DIR       = $(base_dir)/generators/rocket-chip
 ROCKETCHIP_RSRCS_DIR = $(ROCKETCHIP_DIR)/src/main/resources
 TESTCHIP_DIR         = $(base_dir)/generators/testchipip
+TOOLS_DIR 			 = $(base_dir)/tools
 TESTCHIP_RSRCS_DIR   = $(TESTCHIP_DIR)/src/main/resources
 CHIPYARD_FIRRTL_DIR  = $(base_dir)/tools/firrtl
 CHIPYARD_RSRCS_DIR   = $(base_dir)/generators/chipyard/src/main/resources
@@ -255,7 +256,7 @@ PERMISSIVE_OFF=+permissive-off
 BINARY ?=
 BINARIES ?=
 BINARY_ARGS ?=
-override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TESTCHIP_DIR)/src/main/resources/dramsim3_ini +max-cycles=$(TIMEOUT_CYCLES)
+override SIM_FLAGS += +dramsim +dramsim_ini_dir=$(TOOLS_DIR)/DRAMSim3/configs +max-cycles=$(TIMEOUT_CYCLES)
 VERBOSE_FLAGS ?= +verbose
 # get_out_name is a function, 1st argument is the binary
 get_out_name = $(subst $() $(),_,$(notdir $(basename $(1))))

@@ -37,6 +37,8 @@ $(LIB_NAME): $(OBJECTS)
 
 $(STATIC_LIB_NAME): $(OBJECTS)
 	$(AR) crs $@ $^
+	rm $(RISCV)/lib/libdramsim.*
+	cp libdramsim.a $(RISCV)/lib
 
 %.o : %.cc
 	$(CXX)  $(CXXFLAGS) -o $@ -c $<

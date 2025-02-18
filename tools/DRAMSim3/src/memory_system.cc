@@ -1,5 +1,4 @@
 #include "memory_system.h"
-#include <iostream>
 
 namespace dramsim3 {
 MemorySystem::MemorySystem(const std::string &config_file,
@@ -7,8 +6,6 @@ MemorySystem::MemorySystem(const std::string &config_file,
                            std::function<void(uint64_t)> read_callback,
                            std::function<void(uint64_t)> write_callback)
     : config_(new Config(config_file, output_dir)) {
-    std::cout << "1 Creating mem system in dramsim3 " << std::endl;
-    std::cout << "Creating mem system in dramsim3 " << __FILE__ << "::" << __LINE__ << std::endl;
     // TODO: ideal memory type?
     if (config_->IsHMC()) {
         dram_system_ = new HMCMemorySystem(*config_, output_dir, read_callback,
@@ -56,8 +53,6 @@ void MemorySystem::ResetStats() { dram_system_->ResetStats(); }
 MemorySystem* GetMemorySystem(const std::string &config_file, const std::string &output_dir,
                  std::function<void(uint64_t)> read_callback,
                  std::function<void(uint64_t)> write_callback) {
-    std::cout << "1 Creating mem system in dramsim3 " << std::endl;
-    std::cout << "Creating mem system in dramsim3 " << __FILE__ << "::" << __LINE__ << std::endl;
     return new MemorySystem(config_file, output_dir, read_callback, write_callback);
 }
 }  // namespace dramsim3

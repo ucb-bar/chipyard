@@ -106,6 +106,9 @@
 [submodule "tools/DRAMSim2"]
 	path = tools/DRAMSim2
 	url = https://github.com/firesim/DRAMSim2.git
+[submodule "tools/DRAMSim3"]
+	path = tools/DRAMSim3
+	url = https://github.com/AnshKetchum/DRAMSim3.git
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
