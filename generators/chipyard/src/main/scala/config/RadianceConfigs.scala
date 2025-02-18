@@ -1,6 +1,5 @@
 package chipyard
 
-import chipyard.config.AbstractConfig
 import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.resources.BigIntHexContext
@@ -26,10 +25,10 @@ class RadianceBaseConfig extends Config(
   // the verilog source as well!
   new radiance.subsystem.WithSimtConfig(nWarps = 8, nCoreLanes = 8, nMemLanes = 8, nSrcIds = 32) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
-  new WithExtMemSize(BigInt("80000000", 16)) ++
-  new WithRadBootROM() ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt("80000000", 16)) ++
+  new chipyard.config.WithRadBootROM() ++
   new radiance.subsystem.WithRadianceSimParams(true) ++
-  new WithCacheBlockBytes(64) ++
+  new freechips.rocketchip.subsystem.WithCacheBlockBytes(64) ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(2) ++
   new freechips.rocketchip.subsystem.WithEdgeDataBits(256) ++
 
@@ -40,7 +39,7 @@ class RadianceBaseConfig extends Config(
   new chipyard.config.WithFrontBusFrequency(400.0) ++
   new chipyard.config.WithOffchipBusFrequency(400.0) ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(400.0) ++
-  new AbstractConfig)
+  new chipyard.config.AbstractConfig)
 
 class RadianceFP16ClusterConfig extends Config(
   new radiance.subsystem.WithRadianceGemmini(location = InCluster(0), dim = 16, accSizeInKB = 32, tileSize = (8, 4, 8), dataType = RadianceGemminiDataType.FP16) ++
@@ -128,11 +127,11 @@ class RadianceFP16ClusterSynConfig extends Config(
 
 class Radiance4CFP16ClusterSynConfig extends Config(
   new radiance.subsystem.WithRadianceSimParams(false) ++
-    new Radiance4CFP16ClusterConfig)
+  new Radiance4CFP16ClusterConfig)
 
 class RadianceBigLittleClusterSynConfig extends Config(
   new radiance.subsystem.WithRadianceSimParams(false) ++
-    new RadianceBigLittleClusterConfig)
+  new RadianceBigLittleClusterConfig)
 
 class RadianceNoCacheConfig extends Config(
   new radiance.subsystem.WithRadianceCores(1, useVxCache = false) ++
@@ -147,11 +146,11 @@ class RadianceNoCoalConfig extends Config(
 class RadianceEmulatorConfig extends Config(
   new radiance.subsystem.WithEmulatorCores(1, useVxCache = false) ++
   new radiance.subsystem.WithSimtConfig(nMemLanes = 4, nSrcIds = 4) ++
-  new AbstractConfig)
+  new chipyard.config.AbstractConfig)
 
 class RadianceFuzzerConfig extends Config(
   new radiance.subsystem.WithFuzzerCores(1, useVxCache = false) ++
   new radiance.subsystem.WithCoalescer(nNewSrcIds = 2) ++
   new radiance.subsystem.WithSimtConfig(nMemLanes = 4, nSrcIds = 2) ++
   new chipyard.config.WithSystemBusWidth(bitWidth = 256) ++
-  new AbstractConfig)
+  new chipyard.config.AbstractConfig)
