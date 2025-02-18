@@ -237,8 +237,8 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 		--model-module-name $(MODEL) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
 		--out-model-smems-conf $(MODEL_SMEMS_CONF)
-#	for blackboxed SRAMs: define mem here and use generated module name in blackbox source
-	-[ -f $(base_dir)/vlsi/add.mem.conf ] && cat $(base_dir)/vlsi/add.mems.conf >> $(TOP_SMEMS_CONF)
+#	for blackboxed SRAMs: add custom.mems.conf as blackbox and use generated module name in blackbox verilog source
+	-[ -f $(GEN_COLLATERAL_DIR)/custom.mems.conf ] && cat $(GEN_COLLATERAL_DIR)/custom.mems.conf >> $(TOP_SMEMS_CONF)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 TOP_MACROCOMPILER_MODE ?= --mode synflops
@@ -262,7 +262,7 @@ ifneq (,$(EXT_FILELISTS))
 else
 	rm -f $@
 endif
-	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' >> $@
+	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\|conf\)$$' >> $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@
 
