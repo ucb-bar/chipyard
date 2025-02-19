@@ -347,8 +347,7 @@ class FireSimRadianceClusterSynConfig extends Config(
   new chipyard.harness.WithHarnessBinderClockFreqMHz(500.0) ++
   new chipyard.config.WithNoTraceIO ++
   new WithDefaultFireSimBridges ++
-  new WithDefaultMemModel ++
-  new chipyard.WithRadBootROM ++
+  new chipyard.config.WithRadBootROM ++
   new WithFireSimConfigTweaks ++
   new chipyard.RadianceClusterSynConfig)
 
