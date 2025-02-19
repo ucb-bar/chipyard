@@ -1,7 +1,7 @@
 Chipyard Continuous Integration (CI)
 ===========
 
-Website: https://gihub.com/gh/ucb-bar/chipyard/actions
+Website: https://github.com/ucb-bar/chipyard/actions
 
 GitHub Actions Brief Explanation
 ---------------------------
