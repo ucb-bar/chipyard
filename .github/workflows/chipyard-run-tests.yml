@@ -535,6 +535,29 @@ jobs:
           group-key: "group-cores"
           project-key: "chipyard-shuttle3"
     
+  chipyard-radiance-run-tests:
+    name: chipyard-radiance-run-tests
+    needs: prepare-chipyard-cores
+    runs-on: self-hosted
+    steps:
+      - name: Delete old checkout
+        run: |
+            ls -alh .
+            rm -rf ${{ github.workspace }}/* || true
+            rm -rf ${{ github.workspace }}/.* || true
+            ls -alh .
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          group-key: "group-cores"
+          project-key: "chipyard-radiance"
+
   chipyard-tacit-rocket-run-tests:
     name: chipyard-tacit-rocket-run-tests
     needs: prepare-chipyard-cores

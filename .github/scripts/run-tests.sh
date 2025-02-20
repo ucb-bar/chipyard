@@ -173,6 +173,10 @@ case $1 in
     chipyard-tacit-rocket)
         run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
+    chipyard-radiance)
+        # Verilator fails to build sim binary, just generate verilog
+        make verilog CONFIG=RadianceFP16ClusterConfig
+        ;;
     icenet)
         run_binary BINARY=none
         ;;
