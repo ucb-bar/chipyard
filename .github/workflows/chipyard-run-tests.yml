@@ -538,7 +538,7 @@ jobs:
   chipyard-radiance-run-tests:
     name: chipyard-radiance-run-tests
     needs: prepare-chipyard-cores
-    runs-on: self-hosted
+    runs-on: as4
     steps:
       - name: Delete old checkout
         run: |
