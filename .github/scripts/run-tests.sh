@@ -175,7 +175,6 @@ case $1 in
         ;;
     chipyard-radiance)
         # Verilator fails to build sim binary, just generate verilog
-        make verilog CONFIG=RadianceFP16ClusterConfig
         ;;
     icenet)
         run_binary BINARY=none

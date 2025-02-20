@@ -80,7 +80,7 @@ mapping["chipyard-rerocc"]=" CONFIG=ReRoCCTestConfig"
 mapping["chipyard-rocketvector"]=" CONFIG=MINV128D64RocketConfig"
 mapping["chipyard-shuttlevector"]=" CONFIG=GENV256D128ShuttleConfig"
 mapping["chipyard-shuttleara"]=" CONFIG=V4096Ara2LaneShuttleConfig USE_ARA=1 verilog"
-mapping["chipyard-radiance"]=" CONFIG=RadianceFP16ClusterConfig"
+mapping["chipyard-radiance"]=" CONFIG=RadianceFP16ClusterConfig verilog"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
 mapping["icenet"]="SUB_PROJECT=icenet"
