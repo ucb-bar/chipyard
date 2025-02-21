@@ -157,3 +157,6 @@
 [submodule "generators/tacit"]
 	path = generators/tacit
 	url = https://github.com/ucb-bar/tacit.git
+[submodule "generators/radiance"]
+	path = generators/radiance
+	url = https://github.com/ucb-bar/radiance.git

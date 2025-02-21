@@ -343,6 +343,14 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LeanGemminiRocketConfig)
 
+class FireSimRadianceClusterSynConfig extends Config(
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(500.0) ++
+  new chipyard.config.WithNoTraceIO ++
+  new WithDefaultFireSimBridges ++
+  new chipyard.config.WithRadBootROM ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RadianceClusterSynConfig)
+
 class FireSimLargeBoomCospikeConfig extends Config(
   new WithCospikeBridge ++
   new WithDefaultFireSimBridges ++

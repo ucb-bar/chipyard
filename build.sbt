@@ -156,7 +156,7 @@ lazy val testchipip = (project in file("generators/testchipip"))
 lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
     dsptools, rocket_dsp_utils,
-    gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
+    radiance, gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
     constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
     compressacc, saturn, ara, firrtl2_bridge, vexiiriscv, tacit)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -241,6 +241,17 @@ lazy val vexiiriscv = (project in file("generators/vexiiriscv"))
 lazy val sodor = (project in file("generators/riscv-sodor"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val radiance = (project in file("generators/radiance"))
+  .dependsOn(rocketchip, gemmini)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= Seq(
+      "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
+      "org.scalatest" %% "scalatest" % "3.2.+" % "test",
+      "junit" % "junit" % "4.13" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
+  ))
   .settings(commonSettings)
 
 lazy val gemmini = freshProject("gemmini", file("generators/gemmini"))
