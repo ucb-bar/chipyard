@@ -171,9 +171,6 @@ class MyTile(
 
 // DOC include start: Implementation class
 class MyTileModuleImp(outer: MyTile) extends BaseTileModuleImp(outer){
-  // annotate the parameters
-  Annotated.params(this, outer.myParams)
-
   // TODO: Create the top module of the core and connect it with the ports in "outer"
 
   // If your core is in Verilog (assume your blackbox is called "MyCoreBlackbox"), instantiate it here like
