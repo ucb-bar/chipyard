@@ -29,3 +29,4 @@ submodules are located in the ``software`` directory.
    FireMarshal
    Spike
    Baremetal
+   Zephyr
