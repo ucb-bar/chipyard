@@ -153,20 +153,30 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val chipyard = (project in file("generators/chipyard"))
-  .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
-    dsptools, rocket_dsp_utils,
-    radiance, gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-    constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
-    compressacc, saturn, ara, firrtl2_bridge, vexiiriscv, tacit)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(
+lazy val chipyard = {
+  var chipyard = (project in file("generators/chipyard"))
+    .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
+      dsptools, rocket_dsp_utils,
+      radiance, gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
+      constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
+      compressacc, saturn, firrtl2_bridge, vexiiriscv, tacit)
+    .settings(libraryDependencies ++= rocketLibDeps.value)
+    .settings(
     libraryDependencies ++= Seq(
       "org.reflections" % "reflections" % "0.10.2"
     )
   )
   .settings(commonSettings)
   .settings(Compile / unmanagedSourceDirectories += file("tools/stage/src/main/scala"))
+
+  val includeAra = file("generators/ara/.git").exists()
+  if (includeAra) chipyard = chipyard.dependsOn(ara)
+
+  val includeRadiance = file("generators/radiance/.git").exists()
+  if (includeRadiance) chipyard = chipyard.dependsOn(radiance)
+
+  chipyard
+}
 
 lazy val compressacc = (project in file("generators/compress-acc"))
   .dependsOn(rocketchip)
