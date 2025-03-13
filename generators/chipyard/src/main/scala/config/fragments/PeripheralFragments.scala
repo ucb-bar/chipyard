@@ -10,6 +10,7 @@ import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, D
 import freechips.rocketchip.prci.{AsynchronousCrossing}
 import chipyard.stage.phases.TargetDirKey
 import freechips.rocketchip.subsystem._
+import freechips.rocketchip.util.{ResourceFileName}
 
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
@@ -35,7 +36,7 @@ class WithBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt =
         address = address,
         size = size,
         hang = hang,
-        contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(MaxXLen)}.img"
+        contentFileName = ResourceFileName(s"/testchipip/bootrom/bootrom.rv${site(MaxXLen)}.img")
       ))
 })
 
@@ -159,7 +160,7 @@ class WithNoCLINT extends Config((site, here, up) => {
 })
 
 class WithNoBootROM extends Config((site, here, up) => {
-  case BootROMLocated(_) => None
+  case BootROMLocated(_) => Nil
 })
 
 class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigInt = 0x10100) extends Config((site, here, up) => {
@@ -168,7 +169,7 @@ class WithRadBootROM(address: BigInt = 0x10000, size: Int = 0x10000, hang: BigIn
       address = address,
       size = size,
       hang = hang,
-      contentFileName = s"${site(TargetDirKey)}/bootrom.radiance.rv32.img"
+      contentFileName = ResourceFileName(s"/testchipip/bootrom/bootrom.radiance.rv32.img")
     ))
 })
 

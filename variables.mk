@@ -218,9 +218,6 @@ EXT_FILELISTS ?=
 # external verilog incdirs. Users, or project-supplied make fragments can append to this
 EXT_INCDIRS ?=
 
-BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img bootrom.radiance.rv32.img
-BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
-
 # files that contain lists of files needed for VCS or Verilator simulation
 SIM_FILE_REQS =
 sim_files              ?= $(build_dir)/sim_files.f

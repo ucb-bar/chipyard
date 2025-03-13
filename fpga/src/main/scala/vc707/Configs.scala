@@ -8,6 +8,7 @@ import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{RegionType, AddressSet}
 import freechips.rocketchip.resources.{DTSModel, DTSTimebase}
+import freechips.rocketchip.util.{SystemFileName}
 
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
@@ -32,7 +33,7 @@ class WithSystemModifications extends Config((site, here, up) => {
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
     val make = s"make -C fpga/src/main/resources/vc707/sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
-    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin")
+    p.copy(hang = 0x10000, contentFileName = SystemFileName(s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin"))
   }
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
   case SerialTLKey => Nil // remove serialized tl port

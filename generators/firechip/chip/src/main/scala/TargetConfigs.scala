@@ -20,20 +20,6 @@ import icenet._
 import chipyard.clocking.{ChipyardPRCIControlKey}
 import chipyard.harness.{HarnessClockInstantiatorKey}
 
-class WithBootROM extends Config((site, here, up) => {
-  case BootROMLocated(x) => {
-    val chipyardBootROM = new File(s"./generators/testchipip/bootrom/bootrom.rv${site(MaxXLen)}.img")
-    val firesimBootROM = new File(s"./target-rtl/chipyard/generators/testchipip/bootrom/bootrom.rv${site(MaxXLen)}.img")
-
-    val bootROMPath = if (chipyardBootROM.exists()) {
-      chipyardBootROM.getAbsolutePath()
-    } else {
-      firesimBootROM.getAbsolutePath()
-    }
-    up(BootROMLocated(x)).map(_.copy(contentFileName = bootROMPath))
-  }
-})
-
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey).map(_.copy(clockGate = false))
@@ -76,8 +62,6 @@ class WithMinimalFireSimDesignTweaks extends Config(
   new chipyard.harness.WithResetFromHarness ++
   new chipyard.config.WithNoClockTap ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
-  // Required*: When using FireSim-as-top to provide a correct path to the target bootrom source
-  new WithBootROM ++
   // Required: Existing FAME-1 transform cannot handle black-box clock gates
   new WithoutClockGating ++
   // Optional: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
@@ -240,7 +224,6 @@ class FireSimQuadRocketConfig extends Config(
 // Flat to avoid having to reorganize the config class hierarchy to remove certain features
 class FireSimSmallSystemConfig extends Config(
   new WithDefaultFireSimBridges ++
-  new WithBootROM ++
   new chipyard.config.WithPeripheryBusFrequency(3200.0) ++
   new chipyard.config.WithControlBusFrequency(3200.0) ++
   new chipyard.config.WithSystemBusFrequency(3200.0) ++
