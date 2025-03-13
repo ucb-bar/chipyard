@@ -153,20 +153,57 @@ lazy val testchipip = (project in file("generators/testchipip"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-lazy val chipyard = (project in file("generators/chipyard"))
-  .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
-    dsptools, rocket_dsp_utils,
-    radiance, gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-    constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
-    compressacc, saturn, ara, firrtl2_bridge, vexiiriscv, tacit)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(
-    libraryDependencies ++= Seq(
-      "org.reflections" % "reflections" % "0.10.2"
+lazy val chipyard = {
+  // Base chipyard project with always-on dependencies
+  // Use explicit Project(...) so the project id remains 'chipyard'
+  var cy = Project(id = "chipyard", base = file("generators/chipyard"))
+    .dependsOn(
+      testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
+      dsptools, rocket_dsp_utils,
+      radiance, gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
+      constellation, barf, shuttle, rerocc,
+      firrtl2_bridge, vexiiriscv, tacit
     )
+    .settings(libraryDependencies ++= rocketLibDeps.value)
+    .settings(
+      libraryDependencies ++= Seq(
+        "org.reflections" % "reflections" % "0.10.2"
+      )
+    )
+    .settings(commonSettings)
+    .settings(Compile / unmanagedSourceDirectories += file("tools/stage/src/main/scala"))
+
+  // Optional modules discovered via initialized submodules (no env or manifest)
+  val optionalModules: Seq[(String, ProjectReference)] = Seq(
+    "ara" -> ara,
+    "saturn" -> saturn,
+    "caliptra-aes-acc" -> caliptra_aes,
+    "compress-acc" -> compressacc,
+    "mempress" -> mempress
   )
-  .settings(commonSettings)
-  .settings(Compile / unmanagedSourceDirectories += file("tools/stage/src/main/scala"))
+
+  // Discover optional modules if their submodule is initialized
+  val discovered = optionalModules.filter { case (dir, _) =>
+    file(s"generators/$dir/.git").exists
+  }
+
+  // Wire in project dependencies only for discovered modules
+  if (discovered.nonEmpty) {
+    // dependsOn requires ClasspathDep[ProjectReference]; wrap explicitly
+    cy = cy.dependsOn(discovered.map { case (_, pr) => sbt.ClasspathDependency(pr, None) }: _*)
+  }
+
+  // Also add their Chipyard-facing sources without symlinks
+  cy = cy.settings(
+    Compile / unmanagedSourceDirectories ++=
+      discovered.map { case (dir, _) =>
+        // Resolve from repo root so paths are correct regardless of project base
+        (ThisBuild / baseDirectory).value / s"generators/$dir/chipyard"
+      }.filter(_.exists)
+  )
+
+  cy
+}
 
 lazy val compressacc = (project in file("generators/compress-acc"))
   .dependsOn(rocketchip)

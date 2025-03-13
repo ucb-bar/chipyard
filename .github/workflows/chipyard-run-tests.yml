@@ -365,7 +365,7 @@ jobs:
       - name: Build Gemmini FireMarshal
         run: |
           conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
-          cd ${{ github.workspace }} && ./scripts/init-submodules-no-riscv-tools.sh
+          cd ${{ github.workspace }} && ./scripts/init-submodules-no-riscv-tools.sh --full
           cd ${{ github.workspace }} && source ./scripts/fix-open-files.sh
           git submodule update --init software/firemarshal && cd software/firemarshal && ./init-submodules.sh
           cd ${{ github.workspace }}/generators/gemmini/software && ${{ github.workspace }}/software/firemarshal/marshal -v -d build gemmini-smoke.json

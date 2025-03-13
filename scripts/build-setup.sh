@@ -232,7 +232,7 @@ fi
 # initialize all submodules (without the toolchain submodules)
 if run_step "2"; then
     begin_step "2" "Initializing Chipyard submodules"
-    $CYDIR/scripts/init-submodules-no-riscv-tools.sh
+    $CYDIR/scripts/init-submodules-no-riscv-tools.sh --full
     exit_if_last_command_failed
 fi
 

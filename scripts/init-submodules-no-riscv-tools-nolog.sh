@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-# exit script if any command fails
-set -e
-set -o pipefail
+# Strict mode: exit on error, unset vars, and fail on pipe errors
+set -euo pipefail
 
 RDIR=$(git rev-parse --show-toplevel)
 
@@ -29,10 +28,26 @@ trap 'error_handler $LINENO "$submodule_name"' ERR
 
 function usage
 {
-    echo "Usage: $0"
+    echo "Usage: $0 <options>"
     echo "Initialize Chipyard submodules and setup initial env.sh script."
+    echo "By default, this will only initialize minimally required submodules"
+    echo "Enable other submodules with the --full or submodule-specific flags"
+    echo ""
+    echo "Options:"
+    echo "  -h            Display this help message"
+    echo "  --full        Initialize all submodules"
+    echo "  --ara         Initialize the optional ara vector-unit submodule"
+    echo "  --compressacc Initialize the optional compressor accelerator submodule"
+    echo "  --mempress    Initialize the optional mempress accelerator submodule"
+    echo "  --saturn      Initialize the optional saturn vector-unit submodule"
     echo ""
 }
+
+ENABLE_ARA=0
+ENABLE_CALIPTRA=0
+ENABLE_COMPRESSACC=0
+ENABLE_MEMPRESS=0
+ENABLE_SATURN=0
 
 while test $# -gt 0
 do
@@ -43,6 +58,28 @@ do
             ;;
         --force | -f | --skip-validate) # Deprecated flags
             ;;
+	--full)
+	    ENABLE_ARA=1
+	    ENABLE_CALIPTRA=1
+	    ENABLE_COMPRESSACC=1
+	    ENABLE_MEMPRESS=1
+	    ENABLE_SATURN=1
+	    ;;
+	--ara)
+	    ENABLE_ARA=1
+	    ;;
+	--caliptra)
+	    ENABLE_CALIPTRA=1
+	    ;;
+	--compressacc)
+	    ENABLE_COMPRESSACC=1
+	    ;;
+	--mempress)
+	    ENABLE_MEMPRESS=1
+	    ;;
+	--saturn)
+	    ENABLE_SATURN=1
+	    ;;
         *)
             echo "ERROR: bad argument $1"
             usage
@@ -68,6 +105,8 @@ if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
   exit 4
 fi
 
+:
+
 # before doing anything verify that you are on a release branch/tag
 save_bash_options
 set +e
@@ -85,12 +124,16 @@ cd "$RDIR"
         # path to temporarily exclude during the recursive update
         for name in \
             toolchains/*-tools/* \
-            generators/cva6 \
+	    toolchains/libgloss \
+	    generators/cva6 \
             generators/ara \
+	    generators/caliptra-aes-acc \
+	    generators/compress-acc \
             generators/nvdla \
-            toolchains/libgloss \
+	    generators/mempress \
             generators/gemmini \
             generators/rocket-chip \
+	    generators/saturn \
             generators/compress-acc \
             generators/vexiiriscv \
             sims/firesim \
@@ -115,7 +158,7 @@ cd "$RDIR"
     (
         set -x
         git_submodule_exclude _skip
-        git submodule update --init --recursive || exit 1 # Force exit on error #--jobs 8
+        git submodule update --init --recursive || exit 1
     )
 )
 
@@ -137,11 +180,28 @@ cd "$RDIR"
     git submodule update --init generators/nvdla || exit 1
     git -C generators/nvdla submodule update --init src/main/resources/hw || exit 1
 
-    # Non-recursive clone to exclude ara submods
-    submodule_name="generators/ara"
-    git submodule update --init generators/ara || exit 1
-    git -C generators/ara submodule update --init ara || exit 1
+    # Optional clones
+    if [[ "$ENABLE_ARA" -eq 1 ]] ; then
+	git submodule update --init generators/ara || exit 1
+	git -C generators/ara submodule update --init ara || exit 1
+    fi
 
+    if [[ "$ENABLE_CALIPTRA" -eq 1 ]] ; then
+	git submodule update --init generators/caliptra-aes-acc || exit 1
+    fi
+
+    if [[ "$ENABLE_COMPRESSACC" -eq 1 ]] ; then
+	git submodule update --init generators/compress-acc || exit 1
+    fi
+
+    if [[ "$ENABLE_MEMPRESS" -eq 1 ]] ; then
+	git submodule update --init generators/mempress || exit 1
+    fi
+
+    if [[ "$ENABLE_SATURN" -eq 1 ]] ; then
+	git submodule update --init --recursive generators/saturn || exit 1
+    fi
+    
     # Non-recursive clone to exclude gemmini-software
     submodule_name="generators/gemmini"
     git submodule update --init generators/gemmini || exit 1
@@ -151,9 +211,6 @@ cd "$RDIR"
     submodule_name="generators/rocket-chip"
     git submodule update --init generators/rocket-chip || exit 1
 
-    # Non-recursive clone
-    submodule_name="generators/compress-acc"
-    git submodule update --init generators/compress-acc || exit 1
 
     # Non-recursive clone
     submodule_name="generators/vexiiriscv"

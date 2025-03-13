@@ -75,13 +75,16 @@ HELP_COMMANDS += \
 # include additional subproject make fragments
 # see HELP_COMPILATION_VARIABLES
 #########################################################################################
-include $(base_dir)/generators/cva6/cva6.mk
-include $(base_dir)/generators/ibex/ibex.mk
-include $(base_dir)/generators/ara/ara.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
-include $(base_dir)/generators/nvdla/nvdla.mk
-include $(base_dir)/generators/radiance/radiance.mk
 include $(base_dir)/tools/torture.mk
+# Optional generator make fragments should not fail build if absent
+-include $(base_dir)/generators/cva6/cva6.mk
+-include $(base_dir)/generators/ibex/ibex.mk
+-include $(base_dir)/generators/nvdla/nvdla.mk
+-include $(base_dir)/generators/radiance/radiance.mk
+# Wildcard include for standardized per-generator make fragments
+-include $(wildcard $(base_dir)/generators/*/chipyard.mk)
+
 
 #########################################################################################
 # Prerequisite lists
@@ -97,7 +100,7 @@ endif
 # Returns a list of files in directories $1 with *any* of the file extensions in $2
 lookup_srcs_by_multiple_type = $(foreach type,$(2),$(call lookup_srcs,$(1),$(type)))
 
-CHECK_SUBMODULES_COMMAND = echo "Checking all submodules in generators/ are initialized. Uninitialized submodules will be displayed" ; ! git submodule status $(base_dir)/generators | grep ^-
+CHECK_SUBMODULES_COMMAND = echo "Checking required submodules in generators/ are initialized. Uninitialized submodules will be displayed" ; ! git submodule status $(base_dir)/generators | grep '^-.*' | grep -vE "(ara|caliptra|compress|mempress|saturn)"
 
 SCALA_EXT = scala
 VLOG_EXT = sv v
