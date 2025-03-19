@@ -80,7 +80,7 @@ include $(base_dir)/tools/torture.mk
 # Returns a list of files in directories $1 with single file extension $2.
 # If available, use 'fd' to find the list of files, which is faster than 'find'.
 ifeq ($(shell which fd 2> /dev/null),)
-	lookup_srcs = $(shell find -L $(1)/ -name target -prune -o \( -iname "*.$(2)" ! -iname ".*" \) -print 2> /dev/null)
+	lookup_srcs = $(shell find -L $(1)/ -name target -prune -o \( ! -xtype l -a -iname "*.$(2)" ! -iname ".*" \) -print 2> /dev/null)
 else
 	lookup_srcs = $(shell fd -L -t f -e $(2) . $(1))
 endif
