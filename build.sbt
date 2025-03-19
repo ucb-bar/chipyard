@@ -172,9 +172,6 @@ lazy val chipyard = {
   val includeAra = file("generators/ara/.git").exists()
   if (includeAra) chipyard = chipyard.dependsOn(ara)
 
-  val includeRadiance = file("generators/radiance/.git").exists()
-  if (includeRadiance) chipyard = chipyard.dependsOn(radiance)
-
   chipyard
 }
 
