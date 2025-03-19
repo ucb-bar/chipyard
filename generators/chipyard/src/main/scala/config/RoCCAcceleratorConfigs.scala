@@ -61,7 +61,3 @@ class ReRoCCManyGemminiConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(4) ++           // 4 rocket cores
   new chipyard.config.AbstractConfig)
 
-class ZstdCompressorRocketConfig extends Config(
-  new compressacc.WithZstdCompressor ++
-  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
-  new chipyard.config.AbstractConfig)

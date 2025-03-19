@@ -19,14 +19,16 @@ function usage
     echo "Enable other submodules with the --full or submodule-specific flags"
     echo ""
     echo "Options:"
-    echo "  -h      Display this help message"
-    echo "  --full  Initialize all submodules"
-    echo "  --ara   Initialize the ara submodule"
+    echo "  -h            Display this help message"
+    echo "  --full        Initialize all submodules"
+    echo "  --ara         Initialize the optional ara submodule"
+    echo "  --compressacc Initialize the optional compressor accelerator submodule"
     echo ""
 }
 
 ENABLE_ARA=""
 ENABLE_CALIPTRA=""
+ENABLE_COMPRESSACC=""
 
 while test $# -gt 0
 do
@@ -46,6 +48,9 @@ do
 	    ;;
 	--caliptra)
 	    ENABLE_CALIPTRA=1
+	    ;;
+	--compressacc)
+	    ENABLE_COMPRESSACC=1
 	    ;;
         *)
             echo "ERROR: bad argument $1"
@@ -92,6 +97,7 @@ cd "$RDIR"
             generators/cva6 \
             generators/ara \
 	    generators/caliptra-aes-acc \
+	    generators/compress-acc \
             generators/nvdla \
             toolchains/libgloss \
             generators/gemmini \
@@ -138,14 +144,18 @@ cd "$RDIR"
     git submodule update --init generators/nvdla
     git -C generators/nvdla submodule update --init src/main/resources/hw
 
-    # Non-recursive clone to exclude ara submods
+    # Optional clones
     if [[ "$ENABLE_ARA" -eq 1 ]] ; then
 	git submodule update --init generators/ara
 	git -C generators/ara submodule update --init ara
     fi
 
-    if [[ "$ENABLE_CALIPTRA" -eq 1]] ; then
+    if [[ "$ENABLE_CALIPTRA" -eq 1 ]] ; then
 	git submodule update --init generators/caliptra-aes-acc
+    fi
+
+    if [[ "$ENABLE_COMPRESSACC" -eq 1 ]] ; then
+	git submodule update --init generators/compress-acc
     fi
 
     # Non-recursive clone to exclude gemmini-software
@@ -155,8 +165,6 @@ cd "$RDIR"
     # Non-recursive clone
     git submodule update --init generators/rocket-chip
 
-    # Non-recursive clone
-    git submodule update --init generators/compress-acc
 
     # Non-recursive clone
     git submodule update --init generators/vexiiriscv

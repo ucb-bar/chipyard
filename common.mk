@@ -88,7 +88,7 @@ endif
 # Returns a list of files in directories $1 with *any* of the file extensions in $2
 lookup_srcs_by_multiple_type = $(foreach type,$(2),$(call lookup_srcs,$(1),$(type)))
 
-CHECK_SUBMODULES_COMMAND = echo "Checking required submodules in generators/ are initialized. Uninitialized submodules will be displayed" ; ! git submodule status $(base_dir)/generators | grep '^-.*' | grep -vE "(ara|caliptra)"
+CHECK_SUBMODULES_COMMAND = echo "Checking required submodules in generators/ are initialized. Uninitialized submodules will be displayed" ; ! git submodule status $(base_dir)/generators | grep '^-.*' | grep -vE "(ara|caliptra|compress)"
 
 SCALA_EXT = scala
 VLOG_EXT = sv v
