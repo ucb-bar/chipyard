@@ -160,3 +160,6 @@
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git
+[submodule "generators/riscv-vliw"]
+	path = generators/riscv-vliw
+	url = git@github.com:jerryz123/riscv-vliw.git
