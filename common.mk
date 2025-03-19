@@ -23,7 +23,7 @@ HELP_COMPILATION_VARIABLES += \
 "   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
 "   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
 
-EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
+EXTRA_GENERATOR_REQS ?=
 EXTRA_SIM_CXXFLAGS   ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
@@ -104,14 +104,8 @@ TAPEOUT_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
-#########################################################################################
-# copy over bootrom files
-#########################################################################################
 $(build_dir):
 	mkdir -p $@
-
-$(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
-	cp -f $< $@
 
 #########################################################################################
 # compile scala jars
