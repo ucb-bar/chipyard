@@ -26,6 +26,7 @@ function usage
 }
 
 ENABLE_ARA=""
+ENABLE_CALIPTRA=""
 
 while test $# -gt 0
 do
@@ -38,9 +39,13 @@ do
             ;;
 	--full)
 	    ENABLE_ARA=1
+	    ENABLE_CALIPTRA=1
 	    ;;
 	--ara)
 	    ENABLE_ARA=1
+	    ;;
+	--caliptra)
+	    ENABLE_CALIPTRA=1
 	    ;;
         *)
             echo "ERROR: bad argument $1"
@@ -86,6 +91,7 @@ cd "$RDIR"
             toolchains/*-tools/* \
             generators/cva6 \
             generators/ara \
+	    generators/caliptra-aes-acc \
             generators/nvdla \
             toolchains/libgloss \
             generators/gemmini \
@@ -136,6 +142,10 @@ cd "$RDIR"
     if [[ "$ENABLE_ARA" -eq 1 ]] ; then
 	git submodule update --init generators/ara
 	git -C generators/ara submodule update --init ara
+    fi
+
+    if [[ "$ENABLE_CALIPTRA" -eq 1]] ; then
+	git submodule update --init generators/caliptra-aes-acc
     fi
 
     # Non-recursive clone to exclude gemmini-software

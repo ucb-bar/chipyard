@@ -158,8 +158,8 @@ lazy val chipyard = {
     .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
       dsptools, rocket_dsp_utils,
       radiance, gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-      constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
-      compressacc, saturn, firrtl2_bridge, vexiiriscv, tacit)
+      constellation, mempress, barf, shuttle, rerocc,
+      saturn, firrtl2_bridge, vexiiriscv, tacit)
     .settings(libraryDependencies ++= rocketLibDeps.value)
     .settings(
     libraryDependencies ++= Seq(
@@ -171,6 +171,12 @@ lazy val chipyard = {
 
   val includeAra = file("generators/ara/.git").exists()
   if (includeAra) chipyard = chipyard.dependsOn(ara)
+
+  val includeCaliptraAes = file("generators/caliptra-aes-acc/.git").exists()
+  if (includeCaliptraAes) chipyard = chipyard.dependsOn(caliptra_aes)
+
+  val includeCompressAcc = file("generators/compress-acc/.git").exists()
+  if (includeCompressAcc) chipyard = chipyard.dependsOn(compressacc)
 
   chipyard
 }
