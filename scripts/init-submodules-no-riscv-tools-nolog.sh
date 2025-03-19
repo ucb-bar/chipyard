@@ -13,10 +13,19 @@ common_setup
 
 function usage
 {
-    echo "Usage: $0"
+    echo "Usage: $0 <options>"
     echo "Initialize Chipyard submodules and setup initial env.sh script."
+    echo "By default, this will only initialize minimally required submodules"
+    echo "Enable other submodules with the --full or submodule-specific flags"
+    echo ""
+    echo "Options:"
+    echo "  -h      Display this help message"
+    echo "  --full  Initialize all submodules"
+    echo "  --ara   Initialize the ara submodule"
     echo ""
 }
+
+ENABLE_ARA=""
 
 while test $# -gt 0
 do
@@ -27,6 +36,12 @@ do
             ;;
         --force | -f | --skip-validate) # Deprecated flags
             ;;
+	--full)
+	    ENABLE_ARA=1
+	    ;;
+	--ara)
+	    ENABLE_ARA=1
+	    ;;
         *)
             echo "ERROR: bad argument $1"
             usage
@@ -118,8 +133,10 @@ cd "$RDIR"
     git -C generators/nvdla submodule update --init src/main/resources/hw
 
     # Non-recursive clone to exclude ara submods
-    git submodule update --init generators/ara
-    git -C generators/ara submodule update --init ara
+    if [[ "$ENABLE_ARA" -eq 1 ]] ; then
+	git submodule update --init generators/ara
+	git -C generators/ara submodule update --init ara
+    fi
 
     # Non-recursive clone to exclude gemmini-software
     git submodule update --init generators/gemmini
