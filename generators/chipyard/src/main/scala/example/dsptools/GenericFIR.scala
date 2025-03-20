@@ -196,10 +196,11 @@ class TLGenericFIRChain[T<:Data:Ring] (genIn: T, genOut: T, coeffs: => Seq[T], p
 // DOC include end: TLGenericFIRChain chisel
 
 // DOC include start: CanHavePeripheryStreamingFIR chisel
-trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
+case object StreamingFIRInjector extends SubsystemInjector((p, baseSubsystem) => {
   val streamingFIR = p(GenericFIRKey) match {
     case Some(params) => {
-      val pbus = locateTLBusWrapper(PBUS)
+      implicit val q: Parameters = p
+      val pbus = baseSubsystem.locateTLBusWrapper(PBUS)
       val domain = pbus.generateSynchronousDomain.suggestName("fir_domain")
       val streamingFIR = domain { LazyModule(new TLGenericFIRChain(
         genIn = FixedPoint(8.W, 3.BP),
@@ -211,7 +212,7 @@ trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
     }
     case None => None
   }
-}
+})
 // DOC include end: CanHavePeripheryStreamingFIR chisel
 
 /**
@@ -220,5 +221,6 @@ trait CanHavePeripheryStreamingFIR extends BaseSubsystem {
 // DOC include start: WithStreamingFIR
 class WithStreamingFIR extends Config((site, here, up) => {
   case GenericFIRKey => Some(GenericFIRParams(depth = 8))
+  case SubsystemInjectorKey => up(SubsystemInjectorKey) + StreamingFIRInjector
 })
 // DOC include end: WithStreamingFIR
