@@ -42,6 +42,7 @@ do
 	--full)
 	    ENABLE_ARA=1
 	    ENABLE_CALIPTRA=1
+	    ENABLE_COMPRESSACC=1
 	    ;;
 	--ara)
 	    ENABLE_ARA=1
