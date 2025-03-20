@@ -13,10 +13,22 @@ common_setup
 
 function usage
 {
-    echo "Usage: $0"
+    echo "Usage: $0 <options>"
     echo "Initialize Chipyard submodules and setup initial env.sh script."
+    echo "By default, this will only initialize minimally required submodules"
+    echo "Enable other submodules with the --full or submodule-specific flags"
+    echo ""
+    echo "Options:"
+    echo "  -h            Display this help message"
+    echo "  --full        Initialize all submodules"
+    echo "  --ara         Initialize the optional ara submodule"
+    echo "  --compressacc Initialize the optional compressor accelerator submodule"
     echo ""
 }
+
+ENABLE_ARA=""
+ENABLE_CALIPTRA=""
+ENABLE_COMPRESSACC=""
 
 while test $# -gt 0
 do
@@ -27,6 +39,20 @@ do
             ;;
         --force | -f | --skip-validate) # Deprecated flags
             ;;
+	--full)
+	    ENABLE_ARA=1
+	    ENABLE_CALIPTRA=1
+	    ENABLE_COMPRESSACC=1
+	    ;;
+	--ara)
+	    ENABLE_ARA=1
+	    ;;
+	--caliptra)
+	    ENABLE_CALIPTRA=1
+	    ;;
+	--compressacc)
+	    ENABLE_COMPRESSACC=1
+	    ;;
         *)
             echo "ERROR: bad argument $1"
             usage
@@ -71,6 +97,8 @@ cd "$RDIR"
             toolchains/*-tools/* \
             generators/cva6 \
             generators/ara \
+	    generators/caliptra-aes-acc \
+	    generators/compress-acc \
             generators/nvdla \
             toolchains/libgloss \
             generators/gemmini \
@@ -117,9 +145,19 @@ cd "$RDIR"
     git submodule update --init generators/nvdla
     git -C generators/nvdla submodule update --init src/main/resources/hw
 
-    # Non-recursive clone to exclude ara submods
-    git submodule update --init generators/ara
-    git -C generators/ara submodule update --init ara
+    # Optional clones
+    if [[ "$ENABLE_ARA" -eq 1 ]] ; then
+	git submodule update --init generators/ara
+	git -C generators/ara submodule update --init ara
+    fi
+
+    if [[ "$ENABLE_CALIPTRA" -eq 1 ]] ; then
+	git submodule update --init generators/caliptra-aes-acc
+    fi
+
+    if [[ "$ENABLE_COMPRESSACC" -eq 1 ]] ; then
+	git submodule update --init generators/compress-acc
+    fi
 
     # Non-recursive clone to exclude gemmini-software
     git submodule update --init generators/gemmini
@@ -128,8 +166,6 @@ cd "$RDIR"
     # Non-recursive clone
     git submodule update --init generators/rocket-chip
 
-    # Non-recursive clone
-    git submodule update --init generators/compress-acc
 
     # Non-recursive clone
     git submodule update --init generators/vexiiriscv
