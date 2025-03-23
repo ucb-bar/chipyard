@@ -158,7 +158,7 @@ lazy val chipyard = {
     .dependsOn(testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
       dsptools, rocket_dsp_utils,
       radiance, gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-      constellation, mempress, barf, shuttle, rerocc,
+      constellation, barf, shuttle, rerocc,
       saturn, firrtl2_bridge, vexiiriscv, tacit)
     .settings(libraryDependencies ++= rocketLibDeps.value)
     .settings(
@@ -177,6 +177,9 @@ lazy val chipyard = {
 
   val includeCompressAcc = file("generators/compress-acc/.git").exists()
   if (includeCompressAcc) chipyard = chipyard.dependsOn(compressacc)
+
+  val includeMempress = file("generators/mempress/.git").exists()
+  if (includeMempress) chipyard = chipyard.dependsOn(mempress)
 
   chipyard
 }

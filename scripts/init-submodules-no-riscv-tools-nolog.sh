@@ -29,6 +29,7 @@ function usage
 ENABLE_ARA=""
 ENABLE_CALIPTRA=""
 ENABLE_COMPRESSACC=""
+ENABLE_MEMPRESS=""
 
 while test $# -gt 0
 do
@@ -43,6 +44,7 @@ do
 	    ENABLE_ARA=1
 	    ENABLE_CALIPTRA=1
 	    ENABLE_COMPRESSACC=1
+	    ENABLE_MEMPRESS=1
 	    ;;
 	--ara)
 	    ENABLE_ARA=1
@@ -52,6 +54,9 @@ do
 	    ;;
 	--compressacc)
 	    ENABLE_COMPRESSACC=1
+	    ;;
+	--mempress)
+	    ENABLE_MEMPRESS=1
 	    ;;
         *)
             echo "ERROR: bad argument $1"
@@ -95,12 +100,13 @@ cd "$RDIR"
         # path to temporarily exclude during the recursive update
         for name in \
             toolchains/*-tools/* \
-            generators/cva6 \
+	    toolchains/libgloss \
+	    generators/cva6 \
             generators/ara \
 	    generators/caliptra-aes-acc \
 	    generators/compress-acc \
             generators/nvdla \
-            toolchains/libgloss \
+	    generators/mempress \
             generators/gemmini \
             generators/rocket-chip \
             generators/compress-acc \
@@ -159,6 +165,10 @@ cd "$RDIR"
 	git submodule update --init generators/compress-acc
     fi
 
+    if [[ "$ENABLE_MEMPRESS" -eq 1 ]] ; then
+	git submodule update --init generators/mempress
+    fi
+    
     # Non-recursive clone to exclude gemmini-software
     git submodule update --init generators/gemmini
     git -C generators/gemmini/ submodule update --init --recursive software/gemmini-rocc-tests
