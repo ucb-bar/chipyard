@@ -21,8 +21,10 @@ function usage
     echo "Options:"
     echo "  -h            Display this help message"
     echo "  --full        Initialize all submodules"
-    echo "  --ara         Initialize the optional ara submodule"
+    echo "  --ara         Initialize the optional ara vector-unit submodule"
     echo "  --compressacc Initialize the optional compressor accelerator submodule"
+    echo "  --mempress    Initialize the optional mempress accelerator submodule"
+    echo "  --saturn      Initialize the optional saturn vector-unit submodule"
     echo ""
 }
 
@@ -30,6 +32,7 @@ ENABLE_ARA=""
 ENABLE_CALIPTRA=""
 ENABLE_COMPRESSACC=""
 ENABLE_MEMPRESS=""
+ENABLE_SATURN=""
 
 while test $# -gt 0
 do
@@ -45,6 +48,7 @@ do
 	    ENABLE_CALIPTRA=1
 	    ENABLE_COMPRESSACC=1
 	    ENABLE_MEMPRESS=1
+	    ENABLE_SATURN=1
 	    ;;
 	--ara)
 	    ENABLE_ARA=1
@@ -57,6 +61,9 @@ do
 	    ;;
 	--mempress)
 	    ENABLE_MEMPRESS=1
+	    ;;
+	--saturn)
+	    ENABLE_SATURN=1
 	    ;;
         *)
             echo "ERROR: bad argument $1"
@@ -109,6 +116,7 @@ cd "$RDIR"
 	    generators/mempress \
             generators/gemmini \
             generators/rocket-chip \
+	    generators/saturn \
             generators/compress-acc \
             generators/vexiiriscv \
             sims/firesim \
@@ -167,6 +175,10 @@ cd "$RDIR"
 
     if [[ "$ENABLE_MEMPRESS" -eq 1 ]] ; then
 	git submodule update --init generators/mempress
+    fi
+
+    if [[ "$ENABLE_SATURN" -eq 1 ]] ; then
+	git submodule update --init --recursive generators/saturn
     fi
     
     # Non-recursive clone to exclude gemmini-software

@@ -181,6 +181,9 @@ lazy val chipyard = {
   val includeMempress = file("generators/mempress/.git").exists()
   if (includeMempress) chipyard = chipyard.dependsOn(mempress)
 
+  val includeSaturn = file("generators/saturn/.git").exists()
+  if (includeSaturn) chipyard = chipyard.dependsOn(saturn)
+
   chipyard
 }
 
