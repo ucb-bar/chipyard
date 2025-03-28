@@ -6,7 +6,7 @@
 #
 # Install this environment as "YOURENV" with:
 #     conda-lock install -n YOURENV conda-requirements-riscv-tools-linux-64.conda-lock.yml
-# To update a single package to the latest version compatible witfh the version constraints in the source:
+# To update a single package to the latest version compatible with the version constraints in the source:
 #     conda-lock lock  --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml --update PACKAGE
 # To re-solve the entire environment, e.g. after changing a version constraint in the source file:
 #     conda-lock -f ../chipyard-base.yaml -f ../chipyard-extended.yaml -f ../docs.yaml -f ../riscv-tools.yaml --lockfile conda-requirements-riscv-tools-linux-64.conda-lock.yml
