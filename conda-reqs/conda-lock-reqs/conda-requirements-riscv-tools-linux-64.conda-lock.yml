@@ -3849,17 +3849,17 @@ package:
     sha256: bbff8a60f70d5ebab138b564554f28258472e1e63178614562d4feee29d10da2
   category: main
   optional: false
-- name: open_pdks.sky130a
-  version: 1.0.471_0_g97d0844
-  manager: conda
-  platform: linux-64
-  dependencies: {}
-  url: https://conda.anaconda.org/litex-hub/noarch/open_pdks.sky130a-1.0.471_0_g97d0844-20240223_100318.tar.bz2
-  hash:
-    md5: 3f9dab167b1bac3a6636f3f4311eb17e
-    sha256: 37736ab56036733eaaff5f8f77a42c98caf75c82bc6b5dae59a727d24eabdd83
-  category: main
-  optional: false
+# - name: open_pdks.sky130a
+#   version: 1.0.471_0_g97d0844
+#   manager: conda
+#   platform: linux-64
+#   dependencies: {}
+#   url: https://conda.anaconda.org/litex-hub/noarch/open_pdks.sky130a-1.0.471_0_g97d0844-20240223_100318.tar.bz2
+#   hash:
+#     md5: 3f9dab167b1bac3a6636f3f4311eb17e
+#     sha256: 37736ab56036733eaaff5f8f77a42c98caf75c82bc6b5dae59a727d24eabdd83
+#   category: main
+#   optional: false
 - name: openapi-schema-validator
   version: 0.6.3
   manager: conda
