@@ -110,7 +110,7 @@ cd "$RDIR"
     (
         set -x
         git_submodule_exclude _skip
-        git submodule update --init --recursive || { echo "Error: Failed to update submodules recursively."; exit 1; }
+        git submodule update --init --recursive || { echo "Error: Failed to update submodules recursively."; exit 1; } #--jobs 8
     )
 )
 
