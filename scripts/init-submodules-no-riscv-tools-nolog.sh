@@ -13,10 +13,26 @@ common_setup
 
 function usage
 {
-    echo "Usage: $0"
+    echo "Usage: $0 <options>"
     echo "Initialize Chipyard submodules and setup initial env.sh script."
+    echo "By default, this will only initialize minimally required submodules"
+    echo "Enable other submodules with the --full or submodule-specific flags"
+    echo ""
+    echo "Options:"
+    echo "  -h            Display this help message"
+    echo "  --full        Initialize all submodules"
+    echo "  --ara         Initialize the optional ara vector-unit submodule"
+    echo "  --compressacc Initialize the optional compressor accelerator submodule"
+    echo "  --mempress    Initialize the optional mempress accelerator submodule"
+    echo "  --saturn      Initialize the optional saturn vector-unit submodule"
     echo ""
 }
+
+ENABLE_ARA=""
+ENABLE_CALIPTRA=""
+ENABLE_COMPRESSACC=""
+ENABLE_MEMPRESS=""
+ENABLE_SATURN=""
 
 while test $# -gt 0
 do
@@ -27,6 +43,28 @@ do
             ;;
         --force | -f | --skip-validate) # Deprecated flags
             ;;
+	--full)
+	    ENABLE_ARA=1
+	    ENABLE_CALIPTRA=1
+	    ENABLE_COMPRESSACC=1
+	    ENABLE_MEMPRESS=1
+	    ENABLE_SATURN=1
+	    ;;
+	--ara)
+	    ENABLE_ARA=1
+	    ;;
+	--caliptra)
+	    ENABLE_CALIPTRA=1
+	    ;;
+	--compressacc)
+	    ENABLE_COMPRESSACC=1
+	    ;;
+	--mempress)
+	    ENABLE_MEMPRESS=1
+	    ;;
+	--saturn)
+	    ENABLE_SATURN=1
+	    ;;
         *)
             echo "ERROR: bad argument $1"
             usage
@@ -69,12 +107,16 @@ cd "$RDIR"
         # path to temporarily exclude during the recursive update
         for name in \
             toolchains/*-tools/* \
-            generators/cva6 \
+	    toolchains/libgloss \
+	    generators/cva6 \
             generators/ara \
+	    generators/caliptra-aes-acc \
+	    generators/compress-acc \
             generators/nvdla \
-            toolchains/libgloss \
+	    generators/mempress \
             generators/gemmini \
             generators/rocket-chip \
+	    generators/saturn \
             generators/compress-acc \
             generators/vexiiriscv \
             sims/firesim \
@@ -117,10 +159,28 @@ cd "$RDIR"
     git submodule update --init generators/nvdla
     git -C generators/nvdla submodule update --init src/main/resources/hw
 
-    # Non-recursive clone to exclude ara submods
-    git submodule update --init generators/ara
-    git -C generators/ara submodule update --init ara
+    # Optional clones
+    if [[ "$ENABLE_ARA" -eq 1 ]] ; then
+	git submodule update --init generators/ara
+	git -C generators/ara submodule update --init ara
+    fi
 
+    if [[ "$ENABLE_CALIPTRA" -eq 1 ]] ; then
+	git submodule update --init generators/caliptra-aes-acc
+    fi
+
+    if [[ "$ENABLE_COMPRESSACC" -eq 1 ]] ; then
+	git submodule update --init generators/compress-acc
+    fi
+
+    if [[ "$ENABLE_MEMPRESS" -eq 1 ]] ; then
+	git submodule update --init generators/mempress
+    fi
+
+    if [[ "$ENABLE_SATURN" -eq 1 ]] ; then
+	git submodule update --init --recursive generators/saturn
+    fi
+    
     # Non-recursive clone to exclude gemmini-software
     git submodule update --init generators/gemmini
     git -C generators/gemmini/ submodule update --init --recursive software/gemmini-rocc-tests
@@ -128,8 +188,6 @@ cd "$RDIR"
     # Non-recursive clone
     git submodule update --init generators/rocket-chip
 
-    # Non-recursive clone
-    git submodule update --init generators/compress-acc
 
     # Non-recursive clone
     git submodule update --init generators/vexiiriscv
