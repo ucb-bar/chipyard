@@ -53,7 +53,6 @@ class TutorialMMIOConfig extends Config(
 
 // Tutorial Phase 5: Map a multicore heterogeneous SoC with multiple cores and memory-mapped accelerators
 class TutorialNoCConfig extends Config(
-  new chipyard.harness.WithDontTouchChipTopPorts(false) ++
   // Try changing the dimensions of the Mesh topology
   new constellation.soc.WithGlobalNoC(constellation.soc.GlobalNoCParams(
     NoCParams(
