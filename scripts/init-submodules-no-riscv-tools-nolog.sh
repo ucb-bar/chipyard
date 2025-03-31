@@ -20,7 +20,7 @@ error_handler() {
     exit $exit_code
 }
 
-# Set the trap for catching errors - call the error_handler and pass in the line number on any on-zero exit status
+# Set the trap for catching errors - call the error_handler and pass in the line number on any non-zero exit status
 trap 'error_handler $LINENO' ERR
 
 function usage
@@ -125,6 +125,7 @@ cd "$RDIR"
     git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/riscv-dbg || { echo "Error: Failed to update riscv-dbg submodule."; exit 1; }
     git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/register_interface || { echo "Error: Failed to update register_interface submodule."; exit 1; }
     git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init --recursive src/fpu || { echo "Error: Failed to update fpu submodule."; exit 1; }
+    
     # Non-recursive clone to exclude nvdla submods
     git submodule update --init generators/nvdla || { echo "Error: Failed to update generators/nvdla submodule."; exit 1; }
     git -C generators/nvdla submodule update --init src/main/resources/hw || { echo "Error: Failed to update hw submodule in nvdla."; exit 1; }
