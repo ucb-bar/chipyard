@@ -11,6 +11,18 @@ source $RDIR/scripts/utils.sh
 
 common_setup
 
+# Custom error handler function
+error_handler() {
+    local exit_code=$?
+    local line_number=$1
+    echo "Error occurred at line $line_number with exit code $exit_code in \`init-submodules-no-riscv-tools-nolog.sh\`."
+    echo "Exiting script."
+    exit $exit_code
+}
+
+# Set the trap for catching errors - call the error_handler and pass in the line number on any on-zero exit status
+trap 'error_handler $LINENO' ERR
+
 function usage
 {
     echo "Usage: $0"
@@ -98,57 +110,57 @@ cd "$RDIR"
     (
         set -x
         git_submodule_exclude _skip
-        git submodule update --init --recursive #--jobs 8
+        git submodule update --init --recursive || { echo "Error: Failed to update submodules recursively."; exit 1; }
     )
 )
 
 (
     # Non-recursive clone to exclude cva6 submods
-    git submodule update --init generators/cva6
-    git -C generators/cva6 submodule update --init src/main/resources/cva6/vsrc/cva6
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi_riscv_atomics
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/common_cells
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/fpga-support
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/riscv-dbg
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/register_interface
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init --recursive src/fpu
+    git submodule update --init generators/cva6 || { echo "Error: Failed to update generators/cva6 submodule."; exit 1; }
+    git -C generators/cva6 submodule update --init src/main/resources/cva6/vsrc/cva6 || { echo "Error: Failed to update cva6 submodule."; exit 1; }
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi || { echo "Error: Failed to update axi submodule."; exit 1; }
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi_riscv_atomics || { echo "Error: Failed to update axi_riscv_atomics submodule."; exit 1; }
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/common_cells || { echo "Error: Failed to update common_cells submodule."; exit 1; }
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/fpga-support || { echo "Error: Failed to update fpga-support submodule."; exit 1; }
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/riscv-dbg || { echo "Error: Failed to update riscv-dbg submodule."; exit 1; }
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/register_interface || { echo "Error: Failed to update register_interface submodule."; exit 1; }
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init --recursive src/fpu || { echo "Error: Failed to update fpu submodule."; exit 1; }
     # Non-recursive clone to exclude nvdla submods
-    git submodule update --init generators/nvdla
-    git -C generators/nvdla submodule update --init src/main/resources/hw
+    git submodule update --init generators/nvdla || { echo "Error: Failed to update generators/nvdla submodule."; exit 1; }
+    git -C generators/nvdla submodule update --init src/main/resources/hw || { echo "Error: Failed to update hw submodule in nvdla."; exit 1; }
 
     # Non-recursive clone to exclude ara submods
-    git submodule update --init generators/ara
-    git -C generators/ara submodule update --init ara
+    git submodule update --init generators/ara || { echo "Error: Failed to update generators/ara submodule."; exit 1; }
+    git -C generators/ara submodule update --init ara || { echo "Error: Failed to update ara submodule."; exit 1; }
 
     # Non-recursive clone to exclude gemmini-software
-    git submodule update --init generators/gemmini
-    git -C generators/gemmini/ submodule update --init --recursive software/gemmini-rocc-tests
+    git submodule update --init generators/gemmini || { echo "Error: Failed to update generators/gemmini submodule."; exit 1; }
+    git -C generators/gemmini/ submodule update --init --recursive software/gemmini-rocc-tests || { echo "Error: Failed to update gemmini-rocc-tests submodule."; exit 1; }
 
     # Non-recursive clone
-    git submodule update --init generators/rocket-chip
+    git submodule update --init generators/rocket-chip || { echo "Error: Failed to update generators/rocket-chip submodule."; exit 1; }
 
     # Non-recursive clone
-    git submodule update --init generators/compress-acc
+    git submodule update --init generators/compress-acc || { echo "Error: Failed to update generators/compress-acc submodule."; exit 1; }
 
     # Non-recursive clone
-    git submodule update --init generators/vexiiriscv
-    git -C generators/vexiiriscv submodule update --init VexiiRiscv
-    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/SpinalHDL
-    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/rvls
+    git submodule update --init generators/vexiiriscv || { echo "Error: Failed to update generators/vexiiriscv submodule."; exit 1; }
+    git -C generators/vexiiriscv submodule update --init VexiiRiscv || { echo "Error: Failed to update VexiiRiscv submodule."; exit 1; }
+    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/SpinalHDL || { echo "Error: Failed to update SpinalHDL submodule."; exit 1; }
+    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/rvls || { echo "Error: Failed to update rvls submodule."; exit 1; }
 
     # Minimal non-recursive clone to initialize sbt dependencies
-    git submodule update --init sims/firesim
+    git submodule update --init sims/firesim || { echo "Error: Failed to update sims/firesim submodule."; exit 1; }
     git config --local submodule.sims/firesim.update none
 
     # Non-recursive clone
-    git submodule update --init tools/rocket-dsp-utils
+    git submodule update --init tools/rocket-dsp-utils || { echo "Error: Failed to update tools/rocket-dsp-utils submodule."; exit 1; }
 
     # Non-recursive clone
-    git submodule update --init tools/dsptools
+    git submodule update --init tools/dsptools || { echo "Error: Failed to update tools/dsptools submodule."; exit 1; }
 
     # Only shallow clone needed for basic SW tests
-    git submodule update --init software/firemarshal
+    git submodule update --init software/firemarshal || { echo "Error: Failed to update software/firemarshal submodule."; exit 1; }
 )
 
 # Configure firemarshal to know where our firesim installation is
@@ -157,5 +169,5 @@ if [ ! -f ./software/firemarshal/marshal-config.yaml ]; then
 fi
 
 replace_content env.sh init-submodules "# line auto-generated by init-submodules-no-riscv-tools.sh
-__DIR="$RDIR"
+__DIR=\"$RDIR\"
 PATH=\$__DIR/software/firemarshal:\$PATH"
