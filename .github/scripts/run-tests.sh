@@ -173,6 +173,9 @@ case $1 in
     chipyard-tacit-rocket)
         run_binary LOADMEM=1 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv
         ;;
+    chipyard-zephyr)
+        run_binary LOADMEM=1 BINARY=$LOCAL_CHIPYARD_DIR/software/zephyrproject/zephyr/build/zephyr/zephyr.elf
+        ;;
     chipyard-radiance)
         # Verilator fails to build sim binary, just generate verilog
         ;;

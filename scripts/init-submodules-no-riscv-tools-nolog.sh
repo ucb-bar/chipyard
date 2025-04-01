@@ -82,6 +82,7 @@ cd "$RDIR"
             software/coremark \
             software/firemarshal \
             software/spec2017 \
+            software/zephyrproject/zephyr \
             tools/dsptools \
             tools/rocket-dsp-utils \
             tools/circt \
