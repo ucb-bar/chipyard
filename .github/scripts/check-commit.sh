@@ -78,7 +78,7 @@ branches=("main")
 search
 
 
-submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017" "zephyr")
+submodules=("coremark" "firemarshal" "nvdla-workload" "spec2017" "zephyrproject/zephyr")
 dir="software"
 branches=("master" "dev")
 search
