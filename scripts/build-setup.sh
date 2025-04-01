@@ -166,6 +166,14 @@ if run_step "1"; then
     # create conda-lock only environment to be used in this section.
     # done with cloning base then installing conda lock to speed up dependency solving.
     CONDA_LOCK_ENV_PATH=$CYDIR/.conda-lock-env
+
+    # check if directories already exist
+    if [ -d $CONDA_LOCK_ENV_PATH ] || [ -d "$CYDIR/.conda-env" ]; then
+        echo "Error: Conda environment directories already exist! Delete them before trying to recreate the \
+conda environment or \`source env.sh\` and skip this step with \`-s 1\`." >&2
+        exit 1
+    fi
+    
     rm -rf $CONDA_LOCK_ENV_PATH &&
     conda create -y -p $CONDA_LOCK_ENV_PATH -c conda-forge $(grep "conda-lock" $CONDA_REQS/chipyard-base.yaml | sed 's/^ \+-//') &&
     source $(conda info --base)/etc/profile.d/conda.sh &&
