@@ -13,4 +13,12 @@ cd $LOCAL_CHIPYARD_DIR/software/zephyrproject/zephyr/
 west init -l .
 west config manifest.file west-riscv.yml
 west update
+
+# set environment variables for Zephyr
+export ZEPHYR_BASE=$LOCAL_CHIPYARD_DIR/software/zephyrproject/zephyr
+export ZEPHYR_TOOLCHAIN_VARIANT=cross-compile
+export CROSS_COMPILE=$RISCV/bin/riscv64-unknown-elf-
+
+
+# Build hello world
 west build -p -b chipyard_riscv64 samples/chipyard/hello_world/
