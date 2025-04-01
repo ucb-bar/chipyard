@@ -127,6 +127,29 @@ ifeq ($(SUB_PROJECT),constellation)
 	TB                ?= TestDriver
 	TOP               ?= NoC
 endif
+# For graphics developers
+ifeq ($(SUB_PROJECT),coalescer)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.unittest
+	CONFIG            ?= CoalescingUnitTestConfig
+	CONFIG_PACKAGE    ?= radiance.unittest
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
+ifeq ($(SUB_PROJECT),tensor)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.unittest
+	CONFIG            ?= TensorUnitTestConfig
+	CONFIG_PACKAGE    ?= radiance.unittest
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
 
 
 #########################################################################################
@@ -194,9 +217,6 @@ ALL_MODS_FILELIST ?= $(build_dir)/$(long_name).all.f
 EXT_FILELISTS ?=
 # external verilog incdirs. Users, or project-supplied make fragments can append to this
 EXT_INCDIRS ?=
-
-BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
-BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 
 # files that contain lists of files needed for VCS or Verilator simulation
 SIM_FILE_REQS =

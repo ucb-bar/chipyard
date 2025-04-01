@@ -16,16 +16,19 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_LDFLAGS         = additional LDFLAGS for building simulators" \
 "   EXTRA_SIM_SOURCES         = additional simulation sources needed for simulator" \
 "   EXTRA_SIM_REQS            = additional make requirements to build the simulator" \
+"   EXTRA_SIM_OUT_NAME        = additional suffix appended to the simulation .out log filename" \
+"   EXTRA_SIM_PREPROC_DEFINES = additional Verilog preprocessor defines passed to the simulator" \
 "   ENABLE_YOSYS_FLOW         = if set, add compilation flags to enable the vlsi flow for yosys(tutorial flow)" \
 "   EXTRA_CHISEL_OPTIONS      = additional options to pass to the Chisel compiler" \
 "   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
 "   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
 
-EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
+EXTRA_GENERATOR_REQS ?=
 EXTRA_SIM_CXXFLAGS   ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
 EXTRA_SIM_REQS       ?=
+EXTRA_SIM_OUT_NAME   ?=
 
 ifneq ($(ASPECTS), )
 	comma = ,
@@ -67,6 +70,7 @@ include $(base_dir)/generators/ibex/ibex.mk
 include $(base_dir)/generators/ara/ara.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
+include $(base_dir)/generators/radiance/radiance.mk
 include $(base_dir)/tools/torture.mk
 
 #########################################################################################
@@ -100,14 +104,8 @@ TAPEOUT_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS
 SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
-#########################################################################################
-# copy over bootrom files
-#########################################################################################
 $(build_dir):
 	mkdir -p $@
-
-$(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
-	cp -f $< $@
 
 #########################################################################################
 # compile scala jars
@@ -233,6 +231,8 @@ $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JS
 		--model-module-name $(MODEL) \
 		--out-dut-smems-conf $(TOP_SMEMS_CONF) \
 		--out-model-smems-conf $(MODEL_SMEMS_CONF)
+#	for blackboxed SRAMs: add custom.mems.conf as blackbox and use generated module name in blackbox verilog source
+	-[ -f $(GEN_COLLATERAL_DIR)/custom.mems.conf ] && cat $(GEN_COLLATERAL_DIR)/custom.mems.conf >> $(TOP_SMEMS_CONF)
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
 TOP_MACROCOMPILER_MODE ?= --mode synflops
@@ -256,7 +256,7 @@ ifneq (,$(EXT_FILELISTS))
 else
 	rm -f $@
 endif
-	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' >> $@
+	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\|conf\)$$' >> $@
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@
 
@@ -305,7 +305,7 @@ get_loadarch_flag = +loadarch=$(subst mem.elf,loadarch,$(1))
 endif
 
 # get the output path base name for simulation outputs, First arg is the binary
-get_sim_out_name = $(output_dir)/$(call get_out_name,$(1))
+get_sim_out_name = $(output_dir)/$(call get_out_name,$(1))$(if $(EXTRA_SIM_OUT_NAME),.$(EXTRA_SIM_OUT_NAME),)
 # sim flags that are common to run-binary/run-binary-fast/run-binary-debug
 get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_loadmem_flag,$(1)) $(call get_loadarch_flag,$(1))
 
@@ -313,7 +313,7 @@ get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_l
 
 # run normal binary with hardware-logged insn dissassembly
 run-binary: check-binary $(BINARY).run
-run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
+run-binaries: check-binaries $(addsuffix .run,$(wildcard $(BINARIES)))
 
 %.run: %.check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
@@ -327,7 +327,7 @@ run-binaries: check-binaries $(addsuffix .run,$(BINARIES))
 
 # run simulator as fast as possible (no insn disassembly)
 run-binary-fast: check-binary $(BINARY).run.fast
-run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
+run-binaries-fast: check-binaries $(addsuffix .run.fast,$(wildcard $(BINARIES)))
 
 %.run.fast: %.check-exists $(SIM_PREREQ) | $(output_dir)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) \
@@ -340,7 +340,9 @@ run-binaries-fast: check-binaries $(addsuffix .run.fast,$(BINARIES))
 
 # run simulator with as much debug info as possible
 run-binary-debug: check-binary $(BINARY).run.debug
-run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
+run-binary-debug-bg: check-binary $(BINARY).run.debug.bg
+run-binaries-debug: check-binaries $(addsuffix .run.debug,$(wildcard $(BINARIES)))
+run-binaries-debug-bg: check-binaries $(addsuffix .run.debug.bg,$(wildcard $(BINARIES)))
 
 %.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
 ifeq (1,$(DUMP_BINARY))
@@ -355,6 +357,19 @@ endif
 		$* \
 		$(BINARY_ARGS) \
 		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) | tee $(call get_sim_out_name,$*).log)
+
+%.run.debug.bg: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
+	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
+		$(PERMISSIVE_ON) \
+		$(call get_common_sim_flags,$*) \
+		$(VERBOSE_FLAGS) \
+		$(call get_waveform_flag,$(call get_sim_out_name,$*)) \
+		$(PERMISSIVE_OFF) \
+		$* \
+		$(BINARY_ARGS) \
+		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) >$(call get_sim_out_name,$*).log \
+		& echo "PID=$$!")
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 

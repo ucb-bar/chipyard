@@ -25,7 +25,7 @@ REMOTE_COURSIER_CACHE=$REMOTE_WORK_DIR/.coursier-cache
 
 # key value store to get the build groups
 declare -A grouping
-grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boomv3 chipyard-boomv4 chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone chipyard-prefetchers chipyard-shuttle chipyard-shuttle3 chipyard-vexiiriscv chipyard-tacit-rocket"
+grouping["group-cores"]="chipyard-cva6 chipyard-ibex chipyard-rocket chipyard-hetero chipyard-boomv3 chipyard-boomv4 chipyard-sodor chipyard-digitaltop chipyard-multiclock-rocket chipyard-nomem-scratchpad chipyard-spike chipyard-clone chipyard-prefetchers chipyard-shuttle chipyard-shuttle3 chipyard-vexiiriscv chipyard-tacit-rocket chipyard-radiance"
 grouping["group-peripherals"]="chipyard-dmirocket chipyard-dmiboomv3 chipyard-dmiboomv4 chipyard-spiflashwrite chipyard-mmios chipyard-nocores chipyard-manyperipherals chipyard-chiplike chipyard-tethered chipyard-symmetric chipyard-llcchiplet"
 grouping["group-accels"]="chipyard-compressacc chipyard-mempress chipyard-gemmini chipyard-manymmioaccels chipyard-nvdla chipyard-aes256ecb chipyard-rerocc chipyard-rocketvector chipyard-shuttlevector chipyard-hlsacc" # chipyard-shuttleara - Add when Ara works again
 grouping["group-constellation"]="chipyard-constellation"
@@ -80,6 +80,7 @@ mapping["chipyard-rerocc"]=" CONFIG=ReRoCCTestConfig"
 mapping["chipyard-rocketvector"]=" CONFIG=MINV128D64RocketConfig"
 mapping["chipyard-shuttlevector"]=" CONFIG=GENV256D128ShuttleConfig"
 mapping["chipyard-shuttleara"]=" CONFIG=V4096Ara2LaneShuttleConfig USE_ARA=1 verilog"
+mapping["chipyard-radiance"]=" CONFIG=RadianceFP16ClusterConfig verilog"
 
 mapping["constellation"]=" SUB_PROJECT=constellation"
 mapping["icenet"]="SUB_PROJECT=icenet"

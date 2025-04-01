@@ -176,6 +176,9 @@ case $1 in
     chipyard-zephyr)
         run_binary LOADMEM=1 BINARY=$LOCAL_CHIPYARD_DIR/software/zephyrproject/zephyr/build/zephyr/zephyr.elf
         ;;
+    chipyard-radiance)
+        # Verilator fails to build sim binary, just generate verilog
+        ;;
     icenet)
         run_binary BINARY=none
         ;;
