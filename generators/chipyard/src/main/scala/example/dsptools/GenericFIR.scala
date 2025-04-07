@@ -13,6 +13,7 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import fixedpoint._
 import fixedpoint.{fromIntToBinaryPoint, fromSIntToFixedPoint, fromUIntToFixedPoint}
+import testchipip.soc.{SubsystemInjector, SubsystemInjectorKey}
 
 // FIR params
 case class GenericFIRParams(

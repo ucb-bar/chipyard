@@ -18,6 +18,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with testchipip.tsi.CanHavePeripheryUARTTSI // Enables optional UART-based TSI transport
   with testchipip.boot.CanHavePeripheryCustomBootPin // Enables optional custom boot pin
   with testchipip.cosim.CanHaveTraceIO // Enables optionally adding trace IO
+  with testchipip.soc.CanHaveSubsystemInjectors // Enables the subsystem injector API
   with testchipip.soc.CanHaveSwitchableOffchipBus // Enables optional off-chip-bus with interface-switch
   with testchipip.iceblk.CanHavePeripheryBlockDevice // Enables optionally adding the block device
   with testchipip.serdes.CanHavePeripheryTLSerial // Enables optionally adding the tl-serial interface

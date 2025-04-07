@@ -6,6 +6,7 @@ import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, IdRange}
 import freechips.rocketchip.tilelink._
+import testchipip.soc.{SubsystemInjector, SubsystemInjectorKey}
 
 case class InitZeroConfig(base: BigInt, size: BigInt)
 case object InitZeroKey extends Field[Option[InitZeroConfig]](None)

@@ -12,6 +12,7 @@ import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
+import testchipip.soc.{SubsystemInjector, SubsystemInjectorKey}
 
 // Simple passthrough to use as testbed sanity check
 // StreamingPassthrough params
