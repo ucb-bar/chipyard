@@ -12,6 +12,7 @@ import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
+import testchipip.soc.{SubsystemInjector, SubsystemInjectorKey}
 
 // Simple passthrough to use as testbed sanity check
 // StreamingPassthrough params
@@ -128,10 +129,11 @@ class TLStreamingPassthroughChain[T<:Data:Ring](params: StreamingPassthroughPara
     TLReadQueue(params.depth, AddressSet(params.readAddress, 0xff))(_)
   ))
 
-trait CanHavePeripheryStreamingPassthrough { this: BaseSubsystem =>
+case object StreamingPassthroughInjector extends SubsystemInjector((p, baseSubsystem) => {
   val passthrough = p(StreamingPassthroughKey) match {
     case Some(params) => {
-      val pbus = locateTLBusWrapper(PBUS)
+      implicit val q: Parameters = p
+      val pbus = baseSubsystem.locateTLBusWrapper(PBUS)
       val domain = pbus.generateSynchronousDomain.suggestName("streaming_passthrough_domain")
       val streamingPassthroughChain = domain { LazyModule(new TLStreamingPassthroughChain(params, UInt(32.W))) }
       pbus.coupleTo("streamingPassthrough") { domain { streamingPassthroughChain.mem.get := TLFIFOFixer() := TLFragmenter(pbus.beatBytes, pbus.blockBytes)} := _ }
@@ -139,11 +141,12 @@ trait CanHavePeripheryStreamingPassthrough { this: BaseSubsystem =>
     }
     case None => None
   }
-}
+})
 
 /**
  * Mixin to add passthrough to rocket config
  */
 class WithStreamingPassthrough extends Config((site, here, up) => {
   case StreamingPassthroughKey => Some(StreamingPassthroughParams(depth = 8))
+  case SubsystemInjectorKey => up(SubsystemInjectorKey) + StreamingPassthroughInjector
 })
