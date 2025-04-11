@@ -1,0 +1,33 @@
+[workspace]
+channels = ["conda-forge"]
+name = "chipyard"
+platforms = ["linux-64", "osx-arm64"]
+
+[dependencies]
+# https://conda-forge.org/feedstock-outputs/
+#   filterable list of all conda-forge packages
+# https://conda-forge.org/#contribute
+#   instructions on adding a recipe
+# https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
+#   documentation on package_spec syntax for constraining versions
+sysroot_linux-64 = "2.*" # need to be close to system glibc for VCS compatibility
+autoconf = "2.*"
+coreutils = "9.*"
+jq = "1.*"
+pip = "25.*"
+make = "4.4.*"
+git = "2.*"
+ninja = "1.*"            # needed in case we need to built circt from scratch
+sbt = "1.10.*"
+openjdk = "21.*"
+dtc = "1.7.*"
+verilator = "==5.034"
+
+[target.linux-64.dependencies]
+gcc = "==14.2.0"
+gxx = "==14.2.0"
+conda-gcc-specs = "==14.2"
+binutils = "2.*"
+
+[target.osx-arm64.dependencies]
+clang = "18.*"
