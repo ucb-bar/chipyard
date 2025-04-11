@@ -14,10 +14,6 @@ dependencies:
     #   instructions on adding a recipe
     # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
     #   documentation on package_spec syntax for constraining versions
-    - gcc=13.2
-    - gxx=13.2
-    - conda-gcc-specs
-    - binutils
 
     # misc
     - autoconf

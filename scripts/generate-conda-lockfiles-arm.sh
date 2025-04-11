@@ -17,13 +17,12 @@ fi
 
 OS=osx-arm64
 
-LOCKFILE=$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-$OS-lean.conda-lock.yml
--rm -rf $LOCKFILE
+LOCKFILE=$REQS_DIR/conda-lock-reqs/conda-requirements-$OS-lean.conda-lock.yml
+rm -rf $LOCKFILE
 
 conda-lock \
   --no-mamba \
   --no-micromamba \
   -f "$REQS_DIR/chipyard-macos-arm-base.yaml" \
-  -f "$REQS_DIR/docs.yaml" \
   -p $OS \
   --lockfile $LOCKFILE
