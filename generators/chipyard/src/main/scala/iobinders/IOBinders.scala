@@ -561,11 +561,19 @@ class WithNMITiedOff extends ComposeIOBinder({
 })
 
 class WithGCDBusyPunchthrough extends OverrideIOBinder({
-  (system: CanHavePeripheryGCD) => system.gcd_busy.map { busy =>
-    val io_gcd_busy = IO(Output(Bool()))
-    io_gcd_busy := busy
-    (Seq(GCDBusyPort(() => io_gcd_busy)), Nil)
-  }.getOrElse((Nil, Nil))
+  (system: CanHavePeripheryGCD) => {
+    val gcdBusyPort = system.gcd_busy.map { busy =>
+      val io_gcd_busy = IO(Output(Bool()))
+      io_gcd_busy := busy
+      GCDBusyPort(() => io_gcd_busy)
+    }.toSeq
+    val gcdClockPort = system.gcd_clock.map { clock =>
+      val io_gcd_clock = IO(Input(Clock()))
+      clock := io_gcd_clock
+      ClockPort(() => io_gcd_clock, freqMHz = 60.0) // freqMHz used in sims
+    }.toSeq
+    (gcdBusyPort ++ gcdClockPort, Nil)
+  }
 })
 
 class WithOffchipBusSel extends OverrideIOBinder({

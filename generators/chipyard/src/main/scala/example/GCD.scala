@@ -12,7 +12,7 @@ import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper.{HasRegMap, RegField}
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.util.UIntIsOneOf
+import freechips.rocketchip.util._
 
 // DOC include start: GCD params
 case class GCDParams(
@@ -20,7 +20,11 @@ case class GCDParams(
   width: Int = 32,
   useAXI4: Boolean = false,
   useBlackBox: Boolean = true,
-  useHLS: Boolean = false)
+  useHLS: Boolean = false,
+  externallyClocked: Boolean = false
+) {
+  require(!(useAXI4 && useHLS))
+}
 // DOC include end: GCD params
 
 // DOC include start: GCD key
@@ -287,13 +291,33 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
   private val pbus = locateTLBusWrapper(PBUS)
 
   // Only build if we are using the TL (nonAXI4) version
-  val gcd_busy = p(GCDKey) match {
+  val (gcd_busy, gcd_clock) = p(GCDKey) match {
     case Some(params) => {
+
+      val gcd_clock = Option.when(params.externallyClocked) {
+        InModuleBody { IO(Input(Clock())).suggestName("gcd_clock_in") }
+      }
+      val gcdClockNode = if (params.externallyClocked) {
+        val gcdSourceClockNode = ClockSourceNode(Seq(ClockSourceParameters()))
+        InModuleBody {
+          gcdSourceClockNode.out(0)._1.clock := gcd_clock.get
+          gcdSourceClockNode.out(0)._1.reset := ResetCatchAndSync(gcd_clock.get, pbus.module.reset.asBool)
+        }
+        gcdSourceClockNode
+      } else {
+        pbus.fixedClockNode
+      }
+      val gcdCrossing = if (params.externallyClocked) {
+        AsynchronousCrossing()
+      } else {
+        SynchronousCrossing()
+      }
+
       val gcd = if (params.useAXI4) {
         val gcd = LazyModule(new GCDAXI4(params, pbus.beatBytes)(p))
-        gcd.clockNode := pbus.fixedClockNode
+        gcd.clockNode := gcdClockNode
         pbus.coupleTo(portName) {
-          gcd.node :=
+          AXI4InwardClockCrossingHelper("gcd_crossing", gcd, gcd.node)(gcdCrossing) :=
           AXI4Buffer () :=
           TLToAXI4 () :=
           // toVariableWidthSlave doesn't use holdFirstDeny, which TLToAXI4() needsx
@@ -302,13 +326,19 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
         gcd
       } else if (params.useHLS) {
         val gcd = LazyModule(new HLSGCDAccel(params, pbus.beatBytes)(p))
-        gcd.clockNode := pbus.fixedClockNode
-        pbus.coupleTo(portName) { gcd.node := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+        gcd.clockNode := gcdClockNode
+        pbus.coupleTo(portName) {
+          TLInwardClockCrossingHelper("gcd_crossing", gcd, gcd.node)(gcdCrossing) :=
+          TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _
+        }
         gcd
       } else {
         val gcd = LazyModule(new GCDTL(params, pbus.beatBytes)(p))
-        gcd.clockNode := pbus.fixedClockNode
-        pbus.coupleTo(portName) { gcd.node := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+        gcd.clockNode := gcdClockNode
+        pbus.coupleTo(portName) {
+          TLInwardClockCrossingHelper("gcd_crossing", gcd, gcd.node)(gcdCrossing) :=
+          TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _
+        }
         gcd
       }
       val gcd_busy = InModuleBody {
@@ -316,19 +346,19 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
         busy := gcd.module.io.gcd_busy
         busy
       }
-      Some(gcd_busy)
+      (Some(gcd_busy), gcd_clock)
     }
-    case None => None
+    case None => (None, None)
   }
 }
 // DOC include end: GCD lazy trait
 
 // DOC include start: GCD config fragment
-class WithGCD(useAXI4: Boolean = false, useBlackBox: Boolean = false, useHLS: Boolean = false) extends Config((site, here, up) => {
+class WithGCD(useAXI4: Boolean = false, useBlackBox: Boolean = false, useHLS: Boolean = false, externallyClocked: Boolean = false) extends Config((site, here, up) => {
   case GCDKey => {
     // useHLS cannot be used with useAXI4 and useBlackBox
-    assert(!useHLS || (useHLS && !useAXI4 && !useBlackBox)) 
-    Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox, useHLS = useHLS))
+    assert(!useHLS || (useHLS && !useAXI4 && !useBlackBox))
+    Some(GCDParams(useAXI4 = useAXI4, useBlackBox = useBlackBox, useHLS = useHLS, externallyClocked = externallyClocked))
   }
 })
 // DOC include end: GCD config fragment
