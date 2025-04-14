@@ -57,10 +57,10 @@ System
 
 ``generators/chipyard/src/main/scala/System.scala`` completes the definition of the ``System``.
 
-- ``HasHierarchicalBusTopology`` is defined in Rocket Chip, and specifies connections between the top-level buses
 - ``HasAsyncExtInterrupts`` and ``HasExtInterruptsModuleImp`` adds IOs for external interrupts and wires them appropriately to tiles
-- ``CanHave...AXI4Port`` adds various Master and Slave AXI4 ports, adds TL-to-AXI4 converters, and connects them to the appropriate buses
-- ``HasPeripheryBootROM`` adds a BootROM device
+- ``CanHaveMasterTLMemPort`` adds a TileLink port for outer memory
+- ``CanHave...AXI4...Port`` adds various Master and Slave AXI4 ports, adds TL-to-AXI4 converters, and connects them to the appropriate buses
+- ``HasRTCModuleImp`` adds a real time clock for the buses
 
 Tops
 ^^^^^^^^^^^^^^^^^^^^^^^^^

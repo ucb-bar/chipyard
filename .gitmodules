@@ -151,6 +151,9 @@
 [submodule "generators/vexiiriscv"]
 	path = generators/vexiiriscv
 	url = https://github.com/ucb-bar/vexiiriscv-tile.git
+[submodule "software/zephyrproject/zephyr"]
+	path = software/zephyrproject/zephyr
+	url = https://github.com/ucb-bar/zephyr.git
 [submodule "software/tacit_decoder"]
 	path = software/tacit_decoder
 	url = https://github.com/ucb-bar/tacit_decoder.git

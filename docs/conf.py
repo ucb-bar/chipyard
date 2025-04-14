@@ -22,6 +22,7 @@
 
 import os
 import subprocess
+import sys
 
 # -- General configuration ------------------------------------------------
 
@@ -91,6 +92,57 @@ def get_git_branch_name():
     if process.returncode == 0:
         return branchname
     else:
+        return None
+
+def get_git_remote_url():
+    """Get the remote URL of the git repository.
+    
+    Returns:
+        str: The HTTPS GitHub URL of the repository, or None if not found/not a GitHub repo.
+    """
+    try:
+        # Try to get the 'origin' remote URL first
+        process = subprocess.Popen(["git", "config", "--get", "remote.origin.url"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        url = process.communicate()[0].decode("utf-8").strip()
+        
+        # If origin doesn't exist, try to get any remote
+        if process.returncode != 0 or not url:
+            process = subprocess.Popen(["git", "remote", "-v"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            remotes = process.communicate()[0].decode("utf-8").strip()
+            if remotes:
+                # Take the first remote found
+                first_remote = remotes.split('\n')[0]
+                remote_name = first_remote.split()[0]
+                process = subprocess.Popen(["git", "config", "--get", f"remote.{remote_name}.url"], stdout=subprocess.PIPE)
+                url = process.communicate()[0].decode("utf-8").strip()
+        
+        # Convert SSH URL to HTTPS URL if necessary
+        if url.startswith("git@github.com:"):
+            # Transform git@github.com:username/repo.git to https://github.com/username/repo
+            url = "https://github.com/" + url[15:]
+        
+        # Remove .git suffix if present
+        if url.endswith(".git"):
+            url = url[:-4]
+            
+        # Handle other GitHub URL formats
+        if "github.com" in url:
+            # Extract username/repo part for any GitHub URL format
+            if "https://github.com/" in url:
+                repo_path = url.split("https://github.com/")[1]
+            elif "http://github.com/" in url:
+                repo_path = url.split("http://github.com/")[1]
+            else:
+                # For other GitHub URL formats
+                return None
+                
+            # Handle potential trailing slashes
+            repo_path = repo_path.strip("/")
+            return f"https://github.com/{repo_path}"
+            
+        return None
+    except Exception as e:
+        print(f"Error getting git remote URL: {e}")
         return None
 
 # Come up with a short version string for the build. This is doing a bunch of lifting:
@@ -300,30 +352,42 @@ def gh_file_ref_role(name, rawtext, text, lineno, inliner, options={}, content=[
     :gh-file-ref:`my/path`
 
     Produces a hyperlink with the text "my/path" that refers the url:
-    https://www.github.com/ucb-bar/chipyard/blob/<version>/my/path.
+    https://www.github.com/repo-owner/repo/blob/<version>/my/path.
 
     Where version is the same as would be substituted by using |version| in
     html text, and is resolved in conf.py.
-
-    This is based off custom role sphinx plugins like
-    https://github.com/tdi/sphinxcontrib-manpage. I've inlined this here for
-    now, but we could just as well make it a module and register it under
-    `extensions` in conf.py
     """
 
     import docutils
     import requests
 
-    # Note GitHub permits referring to a tree as a 'blob' in these URLs without returning a 404.
-    # So I've unconditionally chosen to use blob.
-    url = f"https://www.github.com/ucb-bar/chipyard/blob/{version}/{text}"
+    # Get the repository URL dynamically
+    repo_url = get_git_remote_url()
+    
+    # Default fallback for safety
+    if not repo_url:
+        repo_url = "https://github.com/ucb-bar/chipyard"
+        print(f"Warning: Could not determine repository URL, using default: {repo_url}")
+    
+    url = f"{repo_url}/blob/{version}/{text}"
 
     print(f"Testing GitHub URL {url} exists...")
-    status_code = requests.get(url).status_code
-    if status_code != 200:
-        message = f"[Line {lineno}] :{name}:`{text}` produces URL {url} returning status code {status_code}. " \
-                  "Ensure your path is correct and all commits that may have moved or renamed files have been pushed to github.com."
-        print(message)
+    try:
+        status_code = requests.get(url).status_code
+        if status_code != 200:
+            message = f"[Line {lineno}] :{name}:`{text}` produces URL {url} returning status code {status_code}. " \
+                    "Ensure your path is correct and all commits that may have moved or renamed files have been pushed to github.com."
+            print(message)
+            sys.exit(1)  # Exit with error in all environments to catch dead links
+    except requests.exceptions.ConnectionError as e:
+        print(f"Warning: Network error when verifying URL {url}: {e}")
+        print("If you're working offline, you can set the SKIP_URL_CHECK=1 environment variable to bypass URL checks.")
+        if os.environ.get("SKIP_URL_CHECK") != "1":
+            sys.exit(1)
+        else:
+            print("Continuing build with SKIP_URL_CHECK=1")
+    except Exception as e:
+        print(f"Warning: Failed to verify URL {url}: {e}")
         sys.exit(1)
 
     docutils.parsers.rst.roles.set_classes(options)

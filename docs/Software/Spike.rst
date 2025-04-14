@@ -43,7 +43,7 @@ Spike-as-a-Tile can be configured with custom IPC, commit logging, and other beh
 
 ..  code-block:: shell
 
-    make CONFIG=SpikeUltraFastConfig run-binary BINARY=hello.riscv EXTRA_SPIKE_FLAGS="+spike-ipc=10000 +spike-fast-clint +spike-debug" LOADMEM=1
+    make CONFIG=SpikeUltraFastConfig run-binary BINARY=hello.riscv EXTRA_SIM_FLAGS="+spike-ipc=10000 +spike-fast-clint +spike-debug" LOADMEM=1
 
 
 * ``+spike-ipc=``: Sets the maximum number of instructions Spike can retire in a single "tick", or cycle of the uncore simulation.
