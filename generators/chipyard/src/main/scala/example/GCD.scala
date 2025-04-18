@@ -372,7 +372,7 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
         busy
       }
       // Return the busy signal (always needed if GCD exists) and the optional external clock input.
-      // The Option[Clock] allows the IOBinder (WithGCDBusyPunchthrough) to conditionally
+      // The Option[Clock] allows the IOBinder (WithGCDIOPunchthrough) to conditionally
       // create the top-level clock input only when `externallyClocked` is true.
       // The busy signal is Some(busy) because the entire GCD peripheral itself is optional based on GCDKey.
       (Some(gcd_busy), gcd_clock)

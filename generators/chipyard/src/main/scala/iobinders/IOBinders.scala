@@ -563,7 +563,7 @@ class WithNMITiedOff extends ComposeIOBinder({
 // This IOBinder connects the signals exposed by the CanHavePeripheryGCD trait
 // to the top-level ports of the chip. It handles both the 'busy' signal and
 // the optional external clock signal.
-class WithGCDBusyPunchthrough extends OverrideIOBinder({
+class WithGCDIOPunchthrough extends OverrideIOBinder({
   // The input `system` is expected to mix-in CanHavePeripheryGCD.
   (system: CanHavePeripheryGCD) => {
     // `system.gcd_busy` is an Option[Bool] coming from CanHavePeripheryGCD.
