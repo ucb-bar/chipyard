@@ -294,60 +294,90 @@ trait CanHavePeripheryGCD { this: BaseSubsystem =>
   val (gcd_busy, gcd_clock) = p(GCDKey) match {
     case Some(params) => {
 
+      // If externallyClocked is true, create an input port for the GCD clock.
+      // This clock is distinct from the pbus clock or other internal clocks.
+      // It's defined within InModuleBody as it's a hardware port.
       val gcd_clock = Option.when(params.externallyClocked) {
         InModuleBody { IO(Input(Clock())).suggestName("gcd_clock_in") }
       }
+      // Define the clock source node for the GCD module.
       val gcdClockNode = if (params.externallyClocked) {
+        // If externally clocked, create a new ClockSourceNode. 
+        // This node acts as the root of the GCD's independent clock domain.
         val gcdSourceClockNode = ClockSourceNode(Seq(ClockSourceParameters()))
         InModuleBody {
+          // Connect the ClockSourceNode's output clock to the external gcd_clock input.
           gcdSourceClockNode.out(0)._1.clock := gcd_clock.get
+          // The reset signal for the GCD's clock domain must be synchronous to the gcd_clock.
+          // ResetCatchAndSync synchronizes the asynchronous pbus reset to the gcd_clock domain.
           gcdSourceClockNode.out(0)._1.reset := ResetCatchAndSync(gcd_clock.get, pbus.module.reset.asBool)
         }
         gcdSourceClockNode
       } else {
+        // If not externally clocked, the GCD runs on the same clock as the pbus.
         pbus.fixedClockNode
       }
+      // Define the type of clock crossing required between the pbus and the GCD module.
       val gcdCrossing = if (params.externallyClocked) {
+        // If the GCD has its own clock, an AsynchronousCrossing is necessary
+        // to safely transfer data between the pbus clock domain and the GCD clock domain.
         AsynchronousCrossing()
       } else {
+        // If the GCD uses the pbus clock, a SynchronousCrossing can be used.
         SynchronousCrossing()
       }
 
+      // Instantiate the GCD module (either TL, AXI4, or HLS variant)
       val gcd = if (params.useAXI4) {
         val gcd = LazyModule(new GCDAXI4(params, pbus.beatBytes)(p))
+        // Connect the GCD's clock input to our determined gcdClockNode.
         gcd.clockNode := gcdClockNode
+        // Couple the GCD to the pbus, inserting the necessary clock crossing logic.
         pbus.coupleTo(portName) {
+          // AXI4InwardClockCrossingHelper handles crossing details for AXI4.
           AXI4InwardClockCrossingHelper("gcd_crossing", gcd, gcd.node)(gcdCrossing) :=
           AXI4Buffer () :=
           TLToAXI4 () :=
-          // toVariableWidthSlave doesn't use holdFirstDeny, which TLToAXI4() needsx
+          // toVariableWidthSlave doesn't use holdFirstDeny, which TLToAXI4() needs
           TLFragmenter(pbus.beatBytes, pbus.blockBytes, holdFirstDeny = true) := _
         }
         gcd
       } else if (params.useHLS) {
         val gcd = LazyModule(new HLSGCDAccel(params, pbus.beatBytes)(p))
+        // Connect the GCD's clock input to our determined gcdClockNode.
         gcd.clockNode := gcdClockNode
+        // Couple the GCD to the pbus, inserting the necessary clock crossing logic.
         pbus.coupleTo(portName) {
+          // TLInwardClockCrossingHelper handles crossing details for TileLink.
           TLInwardClockCrossingHelper("gcd_crossing", gcd, gcd.node)(gcdCrossing) :=
           TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _
         }
         gcd
       } else {
         val gcd = LazyModule(new GCDTL(params, pbus.beatBytes)(p))
+        // Connect the GCD's clock input to our determined gcdClockNode.
         gcd.clockNode := gcdClockNode
+        // Couple the GCD to the pbus, inserting the necessary clock crossing logic.
         pbus.coupleTo(portName) {
+          // TLInwardClockCrossingHelper handles crossing details for TileLink.
           TLInwardClockCrossingHelper("gcd_crossing", gcd, gcd.node)(gcdCrossing) :=
           TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _
         }
         gcd
       }
+      // Expose the GCD's busy signal.
       val gcd_busy = InModuleBody {
         val busy = IO(Output(Bool())).suggestName("gcd_busy")
         busy := gcd.module.io.gcd_busy
         busy
       }
+      // Return the busy signal (always needed if GCD exists) and the optional external clock input.
+      // The Option[Clock] allows the IOBinder (WithGCDBusyPunchthrough) to conditionally
+      // create the top-level clock input only when `externallyClocked` is true.
+      // The busy signal is Some(busy) because the entire GCD peripheral itself is optional based on GCDKey.
       (Some(gcd_busy), gcd_clock)
     }
+    // If GCDKey is None, the GCD peripheral is not instantiated. Return None for both signals.
     case None => (None, None)
   }
 }

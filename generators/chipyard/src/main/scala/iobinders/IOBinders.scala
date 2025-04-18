@@ -560,18 +560,40 @@ class WithNMITiedOff extends ComposeIOBinder({
   }
 })
 
+// This IOBinder connects the signals exposed by the CanHavePeripheryGCD trait
+// to the top-level ports of the chip. It handles both the 'busy' signal and
+// the optional external clock signal.
 class WithGCDBusyPunchthrough extends OverrideIOBinder({
+  // The input `system` is expected to mix-in CanHavePeripheryGCD.
   (system: CanHavePeripheryGCD) => {
+    // `system.gcd_busy` is an Option[Bool] coming from CanHavePeripheryGCD.
+    // It is Some[Bool] if the GCD peripheral is present (GCDKey is Some), and None otherwise.
     val gcdBusyPort = system.gcd_busy.map { busy =>
-      val io_gcd_busy = IO(Output(Bool()))
+      // If `system.gcd_busy` is Some, create a ChipTop port named "gcd_busy".
+      val io_gcd_busy = IO(Output(Bool())).suggestName("gcd_busy")
+      // Connect the internal busy signal from the GCD module to this ChipTop port.
       io_gcd_busy := busy
+      // Create a GCDBusyPort entry, (primarily for bookkeeping/reflection in the TestHarness)
       GCDBusyPort(() => io_gcd_busy)
-    }.toSeq
+    }.toSeq // Convert Option[GCDBusyPort] to Seq[GCDBusyPort] (empty if None)
+
+    // `system.gcd_clock` is an Option[Clock] coming from CanHavePeripheryGCD.
+    // It is Some[Clock] if the GCD peripheral is present AND params.externallyClocked was true.
+    // It is None if the GCD is not present OR if it's configured to use an internal clock.
     val gcdClockPort = system.gcd_clock.map { clock =>
-      val io_gcd_clock = IO(Input(Clock()))
+      // If `system.gcd_clock` is Some, create a ChipTop port named "gcd_clock_in".
+      // This port will be driven by the external clock source in the test harness or board.
+      val io_gcd_clock = IO(Input(Clock())).suggestName("gcd_clock_in")
+      // Connect this ChipTop input clock port to the internal clock input wire
+      // defined within CanHavePeripheryGCD. 
+      // This is what ultimately drives the GCD's ClockSourceNode.
       clock := io_gcd_clock
-      ClockPort(() => io_gcd_clock, freqMHz = 60.0) // freqMHz used in sims
-    }.toSeq
+      // Create a ClockPort entry for bookkeeping/reflection.
+      ClockPort(() => io_gcd_clock, freqMHz = 60.0) // freqMHz used in sims & in the TestHarness
+    }.toSeq // Convert Option[ClockPort] to Seq[ClockPort] (empty if None)
+
+    // Return the sequence of created top-level ports (busy port, and optionally clock port).
+    // No IOCells are generated here.
     (gcdBusyPort ++ gcdClockPort, Nil)
   }
 })
