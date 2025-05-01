@@ -125,3 +125,13 @@ class TacitRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
+
+// Rocket with asynchronous reset for all domains **except for the Rocket Tile itself**.
+class AsyncResetRocketConfig extends Config(
+  new chipyard.clocking.WithAsyncClockGroups("uncore") ++ // use async reset for the bus clock group
+  new chipyard.config.WithAsyncResetRocketSubsystem ++    // use async reset for Rocket Chip's Debug Module
+  new chipyard.clocking.WithClockGroupsCombinedByName(    // place the tile in a separate clock group from the buses
+    ("tile", Seq("tile"), Nil),
+    ("uncore", Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit", "clock_tap"), Seq("tile")),
+  ) ++
+  new MulticlockRocketConfig)

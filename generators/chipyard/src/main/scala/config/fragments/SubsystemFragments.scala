@@ -31,3 +31,8 @@ class WithInclusiveCacheInteriorBuffer(buffer: InclusiveCachePortParameters = In
 class WithInclusiveCacheExteriorBuffer(buffer: InclusiveCachePortParameters = InclusiveCachePortParameters.full) extends Config((site, here, up) => {
   case InclusiveCacheKey => up(InclusiveCacheKey).copy(bufInnerExterior=buffer, bufOuterExterior=buffer)
 })
+
+/** Use asynchronous reset for Rocket Chip's Debug Module. */
+class WithAsyncResetRocketSubsystem extends Config((_, _, _) => {
+  case SubsystemResetSchemeKey => ResetAsynchronous
+})
