@@ -21,6 +21,7 @@ import testchipip.uart.{UARTAdapter, UARTToSerial}
 import testchipip.serdes._
 import testchipip.iceblk.{SimBlockDevice, BlockDeviceModel}
 import testchipip.cosim.{SpikeCosim}
+import testchipip.ctc.{CTCBridgeIO}
 import icenet.{NicLoopback, SimNetwork}
 import chipyard._
 import chipyard.clocking.{HasChipyardPRCI}
@@ -341,3 +342,37 @@ class WithOffchipBusSelPlusArg extends HarnessBinder({
   }
 })
 
+class WithCTCTiedOff extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: CTCPort, chipId: Int) => {
+    port.io match {
+      case io: CreditedSourceSyncPhitIO => {
+        io.clock_in := false.B.asClock
+        io.reset_in := false.B.asAsyncReset
+        io.in := DontCare
+      }
+      case io: CTCBridgeIO => {
+        io.manager_flit := DontCare
+        io.manager_flit.in.valid := false.B
+        io.manager_flit.out.ready := false.B
+        io.client_flit := DontCare
+        io.client_flit.in.valid := false.B
+        io.client_flit.out.ready := false.B
+      }
+    }
+  }
+})
+
+class WithCTCLoopback extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: CTCPort, chipId: Int) => {
+    port.io match {
+      case io: CreditedSourceSyncPhitIO => {
+        io.clock_in := io.clock_out
+        io.reset_in := io.reset_out
+        io.in := io.out
+      }
+      case io: CTCBridgeIO => {
+        io.client_flit <> io.manager_flit
+      }
+    }
+  }
+})

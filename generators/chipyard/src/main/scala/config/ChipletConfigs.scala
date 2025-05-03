@@ -142,3 +142,21 @@ class MultiSimLLCChipletRocketConfig extends Config(
   new chipyard.harness.WithMultiChip(0, new RocketCoreChipletConfig) ++
   new chipyard.harness.WithMultiChip(1, new LLCChipletConfig)
 )
+
+class CTCRocketConfig extends Config(
+  new testchipip.ctc.WithCTC(new testchipip.ctc.CTCParams(address = 0x0L, size = 1L << 32, managerBus = Some(OBUS))) ++ // use OBUS for addr translation becuz i dont want to write a new chiptop
+  new testchipip.soc.WithOffchipBusClient(SBUS,
+    blockRange = Seq(AddressSet(0, (1L << 32) - 1)),
+    replicationBase = Some(1L << 32) 
+  ) ++
+  new testchipip.soc.WithOffchipBus ++
+  new chipyard.iobinders.WithCTCPunchthrough ++ // Adding here to not destroy the abstract config, this should be IOCells tho
+  new RocketConfig
+)
+
+class MultiCTCRocketConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  new chipyard.harness.WithMultiChipCTC(chip0=0, chip1=1) ++
+  new chipyard.harness.WithMultiChip(0, new CTCRocketConfig) ++
+  new chipyard.harness.WithMultiChip(1, new CTCRocketConfig)
+)
