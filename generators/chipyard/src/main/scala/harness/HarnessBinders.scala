@@ -371,7 +371,8 @@ class WithCTCLoopback extends HarnessBinder({
         io.in := io.out
       }
       case io: CTCBridgeIO => {
-        io.client_flit <> io.manager_flit
+        io.client_flit.in <> io.manager_flit.out
+        io.manager_flit.in <> io.client_flit.out
       }
     }
   }

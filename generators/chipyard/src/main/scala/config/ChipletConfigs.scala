@@ -144,7 +144,8 @@ class MultiSimLLCChipletRocketConfig extends Config(
 )
 
 class CTCRocketConfig extends Config(
-  new testchipip.ctc.WithCTC(new testchipip.ctc.CTCParams(address = 0x0L, size = 1L << 32, managerBus = Some(OBUS))) ++ // use OBUS for addr translation becuz i dont want to write a new chiptop
+  new chipyard.harness.WithCTCLoopback ++
+  new testchipip.ctc.WithCTC(new testchipip.ctc.CTCParams(address = 0x0L, size = 1L << 32, managerBus = Some(OBUS), noPhy=true)) ++ // use OBUS for addr translation becuz i dont want to write a new chiptop
   new testchipip.soc.WithOffchipBusClient(SBUS,
     blockRange = Seq(AddressSet(0, (1L << 32) - 1)),
     replicationBase = Some(1L << 32) 

@@ -95,8 +95,13 @@ class WithMultiChipCTC(chip0: Int, chip1: Int) extends MultiHarnessBinder(
         io1.in := io0.out
       }
       case(io0: CTCBridgeIO, io1: CTCBridgeIO) => {
-        io0.client_flit <> io1.manager_flit
-        io1.client_flit <> io0.manager_flit
+        // io0 client to io1 manager
+        io0.client_flit.in <> io1.manager_flit.out
+        io1.manager_flit.in <> io0.client_flit.out
+
+        // io1 client to io0 manager
+        io1.client_flit.in <> io0.manager_flit.out
+        io0.manager_flit.in <> io1.client_flit.out
       }
     }
   }
