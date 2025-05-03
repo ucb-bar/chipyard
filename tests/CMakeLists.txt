@@ -85,6 +85,7 @@ add_executable(gcd gcd.c)
 add_executable(hello hello.c)
 add_executable(mt-hello mt-hello.c)
 add_executable(symmetric symmetric.c)
+add_executable(ctc-test ctc-test.c)
 
 #################################
 # Disassembly
@@ -123,6 +124,7 @@ add_dump_target(gcd)
 add_dump_target(hello)
 add_dump_target(mt-hello)
 add_dump_target(symmetric)
+add_dump_target(ctc-test)
 
 
 # Add custom command to generate spiflash.img from spiflash.py

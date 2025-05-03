@@ -115,3 +115,6 @@ case class GCDBusyPort     (val getIO: () => Bool)
 case class OffchipSelPort  (val getIO: () => UInt)
     extends Port[UInt]
 
+case class CTCPort (val getIO: () => Data) 
+    extends Port[Data]
+

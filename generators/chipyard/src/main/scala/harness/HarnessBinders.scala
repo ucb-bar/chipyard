@@ -341,3 +341,26 @@ class WithOffchipBusSelPlusArg extends HarnessBinder({
   }
 })
 
+class WithCTCTiedOff extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: CTCPort, chipId: Int) => {
+    port.io match {
+      case io: CreditedSourceSyncPhitIO => {
+        io.clock_in := false.B.asClock
+        io.reset_in := false.B.asAsyncReset
+        io.in := DontCare
+      }
+    }
+  }
+})
+
+class WithCTCLoopback extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: CTCPort, chipId: Int) => {
+    port.io match {
+      case io: CreditedSourceSyncPhitIO => {
+        io.clock_in := io.clock_out
+        io.reset_in := io.reset_out
+        io.in := io.out
+      }
+    }
+  }
+})
