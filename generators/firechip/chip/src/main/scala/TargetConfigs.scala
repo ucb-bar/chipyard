@@ -247,6 +247,13 @@ class FireSimDmiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.dmiRocketConfig)
 
+class FireSimDmiCheckpointingRocketConfig  extends Config(
+  new chipyard.config.WithNoUART ++           // (must be at top) only use htif prints w/ checkpointing
+  new chipyard.harness.WithSerialTLTiedOff ++ // (must be at top) tieoff any bridges that connect to serialTL so only DMI port is connected
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.dmiCheckpointingRocketConfig)
+
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomV3Config
 //*****************************************************************
