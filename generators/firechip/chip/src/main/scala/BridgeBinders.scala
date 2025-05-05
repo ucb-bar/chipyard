@@ -76,6 +76,34 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
   }
 })
 
+// I assume passing args is alright?
+class WithCTCBridge extends HarnessBinder({
+  case (th: FireSim, port: CTCPort, chipId: Int) => {
+    port.io match {
+      case io: testchipip.ctc.CTCBridgeIO => {
+        // val bridge_io = Wire(new testchipip.ctc.CTCBridgeIO)
+        // bridge_io.client_flit.in.valid := io.client_flit.in.valid
+        // bridge_io.client_flit.in.bits := io.client_flit.in.bits
+        // io.client_flit.in.ready := bridge_io.client_flit.in.ready
+
+        // bridge_io.client_flit.out.ready := io.client_flit.out.ready
+        // io.client_flit.out.valid := bridge_io.client_flit.out.valid
+        // io.client_flit.out.bits := bridge_io.client_flit.out.bits
+
+        // bridge_io.manager_flit.in.valid := io.manager_flit.in.valid
+        // bridge_io.manager_flit.in.bits := io.manager_flit.in.bits
+        // io.manager_flit.in.ready := bridge_io.manager_flit.in.ready
+
+        // bridge_io.manager_flit.out.ready := io.manager_flit.out.ready
+        // io.manager_flit.out.valid := bridge_io.manager_flit.out.valid
+        // io.manager_flit.out.bits := bridge_io.manager_flit.out.bits
+
+        CTCBridge(th.harnessBinderClock, io, th.harnessBinderReset.asBool)(th.p)
+      }
+    }
+  }
+})
+
 class WithDMIBridge extends HarnessBinder({
   case (th: FireSim, port: DMIPort, chipId: Int) => {
     // This assumes that:

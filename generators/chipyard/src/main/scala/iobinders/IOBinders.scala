@@ -619,3 +619,23 @@ class WithCTCPunchthrough extends OverrideIOBinder({
     (ports.toSeq, Nil)
   }
 })
+
+// class WithCTCPunchthrough extends OverrideIOBinder({
+//   (system: CanHavePeripheryCTC) => {
+//     val ports = system.ctc_io.map { p =>
+//       p match {
+//         case io: CTCBridgeIO => {
+//           val port = IO(new CTCBridgeIO) // Since CTC IO varies depending on params
+//           port <> p.getWrappedValue
+//           CTCPort(() => port)
+//         }
+//         case _ => {
+//           val port = IO(chiselTypeOf(p.getWrappedValue)) // Since CTC IO varies depending on params
+//           port <> p.getWrappedValue
+//           CTCPort(() => port)
+//         }
+//       }
+//     }
+//     (ports.toSeq, Nil)
+//   }
+// })

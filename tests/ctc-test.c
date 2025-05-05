@@ -5,7 +5,7 @@
 #include <riscv-pk/encoding.h>
 #include "marchid.h"
 
-#define OBUS_OFFSET (0x1L << 32)
+#define OBUS_OFFSET (0x10L << 32)
 
 // char src[] = "This is a test string. It will be written into the off-chip memory address, then copied back.";
 // char dest[4096];
