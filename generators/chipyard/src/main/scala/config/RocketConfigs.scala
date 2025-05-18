@@ -3,6 +3,7 @@ package chipyard
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.prci.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem.{InCluster}
+import freechips.rocketchip.util.ElaborationArtefacts.add
 
 // --------------
 // Rocket Configs
@@ -125,3 +126,11 @@ class TacitRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
+  
+class TacitRocketConfigOhYeah extends Config(
+  new testchipip.soc.WithAxi4Periphery(address=0x11000000) ++
+  // new testchipip.soc.WithNoScratchpads ++                         // All memory is the Rocket TCMs
+  // new freechips.rocketchip.subsystem.WithIncoherentBusTopology ++ // use incoherent bus topology
+  new freechips.rocketchip.subsystem.WithExtMemSbusBypass ++
+  new chipyard.config.WithBroadcastManager ++ // no l2      // remove L2$
+  new TacitRocketConfig)

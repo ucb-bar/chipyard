@@ -34,6 +34,7 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithClockFromHarness ++                     /** all Clock I/O in ChipTop should be driven by harnessClockInstantiator */
   new chipyard.harness.WithResetFromHarness ++                     /** reset controlled by harness */
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ /** generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz */
+  new chipyard.harness.WithPeripheralAxi4Harness ++
 
 
   // ================================================
@@ -55,6 +56,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithSPIIOPunchthrough ++
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
   new chipyard.iobinders.WithAXI4MMIOPunchthrough ++
+  new chipyard.iobinders.WithAxi4PeriphPunchthrough ++
   new chipyard.iobinders.WithTLMemPunchthrough ++
   new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
   new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++

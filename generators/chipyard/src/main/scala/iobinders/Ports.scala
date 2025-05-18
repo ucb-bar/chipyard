@@ -8,6 +8,7 @@ import sifive.blocks.devices.gpio.{GPIOPortIO}
 import testchipip.util.{ClockedIO}
 import testchipip.serdes.{TLSerdesser, SerialIO, SerialTLParams}
 import testchipip.spi.{SPIChipIO}
+import testchipip.soc.{Axi4Bundle}
 import testchipip.cosim.{TraceOutputTop, SpikeCosimConfig}
 import testchipip.iceblk.{BlockDeviceIO, BlockDeviceConfig}
 import testchipip.tsi.{UARTTSIIO}
@@ -115,3 +116,5 @@ case class GCDBusyPort     (val getIO: () => Bool)
 case class OffchipSelPort  (val getIO: () => UInt)
     extends Port[UInt]
 
+case class PeripheralAxi4Port   (val getIO: () => Axi4Bundle)
+    extends Port[Axi4Bundle]

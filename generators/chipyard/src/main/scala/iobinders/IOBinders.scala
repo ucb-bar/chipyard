@@ -32,7 +32,7 @@ import chipyard.iocell._
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 import testchipip.spi.{SPIChipIO}
 import testchipip.boot.{CanHavePeripheryCustomBootPin}
-import testchipip.soc.{CanHavePeripheryChipIdPin, CanHaveSwitchableOffchipBus}
+import testchipip.soc.{CanHavePeripheryChipIdPin, CanHaveSwitchableOffchipBus, CanHavePeripheryAxi4, Axi4Bundle}
 import testchipip.util.{ClockedIO}
 import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
 import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
@@ -606,4 +606,12 @@ class WithOffchipBusSel extends OverrideIOBinder({
       (Seq(OffchipSelPort(() => port)), cells)
     }.getOrElse(Nil, Nil)
   }
+})
+
+class WithAxi4PeriphPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryAxi4) => system.peripheral_top.map({ p =>
+    val periphery = IO(new Axi4Bundle).suggestName("periph_axi4")
+    periphery <> p
+    (Seq(PeripheralAxi4Port(() => periphery)), Nil)
+  }).getOrElse((Nil, Nil))
 })

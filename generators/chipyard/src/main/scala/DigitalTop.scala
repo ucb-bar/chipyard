@@ -19,6 +19,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with testchipip.cosim.CanHaveTraceIO // Enables optionally adding trace IO
   with testchipip.soc.CanHaveSubsystemInjectors // Enables the subsystem injector API
   with testchipip.soc.CanHaveSwitchableOffchipBus // Enables optional off-chip-bus with interface-switch
+  with testchipip.soc.CanHavePeripheryAxi4 // Enables optionally adding the AXI4 peripheral bus
   with testchipip.iceblk.CanHavePeripheryBlockDevice // Enables optionally adding the block device
   with testchipip.serdes.CanHavePeripheryTLSerial // Enables optionally adding the tl-serial interface
   with testchipip.serdes.old.CanHavePeripheryTLSerial // Enables optionally adding the DEPRECATED tl-serial interface

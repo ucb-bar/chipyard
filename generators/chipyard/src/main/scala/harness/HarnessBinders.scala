@@ -341,3 +341,8 @@ class WithOffchipBusSelPlusArg extends HarnessBinder({
   }
 })
 
+class WithPeripheralAxi4Harness extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: PeripheralAxi4Port, chipId: Int) => {
+    port.io := DontCare
+  }
+})
