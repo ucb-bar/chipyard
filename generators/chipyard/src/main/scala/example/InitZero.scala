@@ -2,10 +2,11 @@ package chipyard.example
 
 import chisel3._
 import chisel3.util._
-import freechips.rocketchip.subsystem.{BaseSubsystem, CacheBlockBytes, FBUS}
+import freechips.rocketchip.subsystem._
 import org.chipsalliance.cde.config.{Parameters, Field, Config}
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp, IdRange}
 import freechips.rocketchip.tilelink._
+import testchipip.soc.{SubsystemInjector, SubsystemInjectorKey}
 
 case class InitZeroConfig(base: BigInt, size: BigInt)
 case object InitZeroKey extends Field[Option[InitZeroConfig]](None)
@@ -57,19 +58,19 @@ class InitZeroModuleImp(outer: InitZero) extends LazyModuleImp(outer) {
   }
 }
 
-trait CanHavePeripheryInitZero { this: BaseSubsystem =>
-  implicit val p: Parameters
-
+case object InitZeroInjector extends SubsystemInjector((p, baseSubsystem) => {
   p(InitZeroKey) .map { k =>
-    val fbus = locateTLBusWrapper(FBUS)
+    implicit val q: Parameters = p
+    val fbus = baseSubsystem.locateTLBusWrapper(FBUS)
     val initZero = fbus { LazyModule(new InitZero()(p)) }
     fbus.coupleFrom("init-zero") { _ := initZero.node }
   }
-}
+})
 
 
 // DOC include start: WithInitZero
 class WithInitZero(base: BigInt, size: BigInt) extends Config((site, here, up) => {
   case InitZeroKey => Some(InitZeroConfig(base, size))
+  case SubsystemInjectorKey => up(SubsystemInjectorKey) + InitZeroInjector
 })
 // DOC include end: WithInitZero

@@ -194,7 +194,7 @@ lazy val constellation = (project in file("generators/constellation"))
   .settings(commonSettings)
 
 lazy val fft_generator = (project in file("generators/fft-generator"))
-  .dependsOn(rocketchip, rocket_dsp_utils)
+  .dependsOn(rocketchip, rocket_dsp_utils, testchipip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -244,7 +244,7 @@ lazy val sodor = (project in file("generators/riscv-sodor"))
   .settings(commonSettings)
 
 lazy val radiance = (project in file("generators/radiance"))
-  .dependsOn(rocketchip, gemmini)
+  .dependsOn(rocketchip, gemmini, testchipip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(libraryDependencies ++= Seq(
       "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
@@ -260,12 +260,12 @@ lazy val gemmini = freshProject("gemmini", file("generators/gemmini"))
   .settings(commonSettings)
 
 lazy val nvdla = (project in file("generators/nvdla"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, testchipip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
 lazy val tacit = (project in file("generators/tacit"))
-  .dependsOn(rocketchip, shuttle)
+  .dependsOn(rocketchip, shuttle, testchipip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
