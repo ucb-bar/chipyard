@@ -11,6 +11,22 @@ source $RDIR/scripts/utils.sh
 
 common_setup
 
+# Custom error handler function
+error_handler() {
+    local exit_code=$?
+    local line_number=$1
+    local submodule_name=$2
+    echo "Error occurred at line $line_number with exit code $exit_code in \`init-submodules-no-riscv-tools-nolog.sh\`."
+    if [ -n "$submodule_name" ]; then
+        echo "Submodule $submodule_name failed to update."
+    fi
+    echo "Exiting script."
+    exit $exit_code
+}
+
+# Set the trap for catching errors - call the error_handler and pass in the line number on any non-zero exit status
+trap 'error_handler $LINENO "$submodule_name"' ERR
+
 function usage
 {
     echo "Usage: $0"
@@ -99,57 +115,69 @@ cd "$RDIR"
     (
         set -x
         git_submodule_exclude _skip
-        git submodule update --init --recursive #--jobs 8
+        git submodule update --init --recursive || exit 1 # Force exit on error #--jobs 8
     )
 )
 
 (
     # Non-recursive clone to exclude cva6 submods
-    git submodule update --init generators/cva6
-    git -C generators/cva6 submodule update --init src/main/resources/cva6/vsrc/cva6
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi_riscv_atomics
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/common_cells
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/fpga-support
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/riscv-dbg
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/register_interface
-    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init --recursive src/fpu
+    submodule_name="generators/cva6"
+    git submodule update --init generators/cva6 || exit 1
+    git -C generators/cva6 submodule update --init src/main/resources/cva6/vsrc/cva6 || exit 1
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi || exit 1
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/axi_riscv_atomics || exit 1
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/common_cells || exit 1
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/fpga-support || exit 1
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/riscv-dbg || exit 1
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init src/register_interface || exit 1
+    git -C generators/cva6/src/main/resources/cva6/vsrc/cva6 submodule update --init --recursive src/fpu || exit 1
+    
     # Non-recursive clone to exclude nvdla submods
-    git submodule update --init generators/nvdla
-    git -C generators/nvdla submodule update --init src/main/resources/hw
+    submodule_name="generators/nvdla"
+    git submodule update --init generators/nvdla || exit 1
+    git -C generators/nvdla submodule update --init src/main/resources/hw || exit 1
 
     # Non-recursive clone to exclude ara submods
-    git submodule update --init generators/ara
-    git -C generators/ara submodule update --init ara
+    submodule_name="generators/ara"
+    git submodule update --init generators/ara || exit 1
+    git -C generators/ara submodule update --init ara || exit 1
 
     # Non-recursive clone to exclude gemmini-software
-    git submodule update --init generators/gemmini
-    git -C generators/gemmini/ submodule update --init --recursive software/gemmini-rocc-tests
+    submodule_name="generators/gemmini"
+    git submodule update --init generators/gemmini || exit 1
+    git -C generators/gemmini/ submodule update --init --recursive software/gemmini-rocc-tests || exit 1
 
     # Non-recursive clone
-    git submodule update --init generators/rocket-chip
+    submodule_name="generators/rocket-chip"
+    git submodule update --init generators/rocket-chip || exit 1
 
     # Non-recursive clone
-    git submodule update --init generators/compress-acc
+    submodule_name="generators/compress-acc"
+    git submodule update --init generators/compress-acc || exit 1
 
     # Non-recursive clone
-    git submodule update --init generators/vexiiriscv
-    git -C generators/vexiiriscv submodule update --init VexiiRiscv
-    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/SpinalHDL
-    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/rvls
+    submodule_name="generators/vexiiriscv"
+    git submodule update --init generators/vexiiriscv || exit 1
+    git -C generators/vexiiriscv submodule update --init VexiiRiscv || exit 1
+    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/SpinalHDL || exit 1
+    git -C generators/vexiiriscv/VexiiRiscv submodule update --init ext/rvls || exit 1
 
     # Minimal non-recursive clone to initialize sbt dependencies
-    git submodule update --init sims/firesim
+    submodule_name="sims/firesim"
+    git submodule update --init sims/firesim || exit 1
     git config --local submodule.sims/firesim.update none
 
     # Non-recursive clone
-    git submodule update --init tools/rocket-dsp-utils
+    submodule_name="tools/rocket-dsp-utils"
+    git submodule update --init tools/rocket-dsp-utils || exit 1
 
     # Non-recursive clone
-    git submodule update --init tools/dsptools
+    submodule_name="tools/dsptools"
+    git submodule update --init tools/dsptools || exit 1
 
     # Only shallow clone needed for basic SW tests
-    git submodule update --init software/firemarshal
+    submodule_name="software/firemarshal"
+    git submodule update --init software/firemarshal || exit 1
 )
 
 # Configure firemarshal to know where our firesim installation is
@@ -158,5 +186,5 @@ if [ ! -f ./software/firemarshal/marshal-config.yaml ]; then
 fi
 
 replace_content env.sh init-submodules "# line auto-generated by init-submodules-no-riscv-tools.sh
-__DIR="$RDIR"
+__DIR=\"$RDIR\"
 PATH=\$__DIR/software/firemarshal:\$PATH"
