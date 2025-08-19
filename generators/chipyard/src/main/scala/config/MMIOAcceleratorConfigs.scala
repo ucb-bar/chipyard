@@ -8,7 +8,6 @@ import org.chipsalliance.cde.config.{Config}
 
 // DOC include start: FFTRocketConfig
 class FFTRocketConfig extends Config(
-  new chipyard.harness.WithDontTouchChipTopPorts(false) ++              // TODO: hack around dontTouch not working in SFC
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
@@ -30,6 +29,11 @@ class GCDAXI4BlackBoxRocketConfig extends Config(
 
 class GCDHLSRocketConfig extends Config(
   new chipyard.example.WithGCD(useAXI4=false, useBlackBox=false, useHLS=true) ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class GCDExternallyClockedRocketConfig extends Config(
+  new chipyard.example.WithGCD(externallyClocked=true)++
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 
@@ -64,7 +68,6 @@ class LargeNVDLARocketConfig extends Config(
 
 class ManyMMIOAcceleratorRocketConfig extends Config(
   new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero
-  new chipyard.harness.WithDontTouchChipTopPorts(false) ++   // TODO: hack around dontTouch not working in SFC
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
   new chipyard.example.WithStreamingPassthrough ++          // use top with tilelink-controlled streaming passthrough
   new chipyard.example.WithStreamingFIR ++                  // use top with tilelink-controlled streaming FIR

@@ -60,12 +60,14 @@ trait HasChipyardPRCI { this: BaseSubsystem with InstantiatesHierarchicalElement
   // 1. Assign frequencies to any clock groups which did not specify a frequency.
   // 2. Combine duplicated clock groups (clock groups which physically should be in the same clock domain)
   // 3. Synchronize reset to each clock group
-  // 4. Clock gate the clock groups corresponding to Tiles (if desired).
-  // 5. Add reset control registers to the tiles (if desired)
+  // 4. Coerce clock groups to use asynchronous reset (if desired)
+  // 5. Clock gate the clock groups corresponding to Tiles (if desired).
+  // 6. Add reset control registers to the tiles (if desired)
   // The final clock group here contains physically distinct clock domains, which some PRCI node in a
   // diplomatic IOBinder should drive
   val frequencySpecifier = ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey))
   val clockGroupCombiner = ClockGroupCombiner()
+  val asyncResetCoercer = ClockGroupAsyncResetCoercer()
   val resetSynchronizer  = prci_ctrl_domain {
     if (prciParams.enableResetSynchronizers) ClockGroupResetSynchronizer() else ClockGroupFakeResetSynchronizer()
   }
@@ -106,6 +108,7 @@ RTL SIMULATORS, NAMELY VERILATOR.
   (aggregator
     := frequencySpecifier
     := clockGroupCombiner
+    := asyncResetCoercer
     := resetSynchronizer
     := tileClockGater.map(_.clockNode).getOrElse(ClockGroupEphemeralNode()(ValName("temp")))
     := tileResetSetter.map(_.clockNode).getOrElse(ClockGroupEphemeralNode()(ValName("temp")))
