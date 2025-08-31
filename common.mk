@@ -1,4 +1,3 @@
-SED ?= sed
 
 # Note: Individual rules that use RISCV or external tools perform local checks to avoid
 # blocking unrelated targets. Use $(require_riscv) and $(call require_cmd,<tool>) inside recipes.
@@ -212,7 +211,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 			--split-verilog \
 			-o $(GEN_COLLATERAL_DIR) \
 			$(FIRRTL_FILE) |& tee $(FIRTOOL_LOG_FILE))
-	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
+	$(SED) $(SED_INPLACE) 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler
 
@@ -230,9 +229,9 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 		--out-model-hier-json $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) \
 		--gcpath $(GEN_COLLATERAL_DIR)
 	$(SED) -e 's;^;$(GEN_COLLATERAL_DIR)/;' $(MFC_BB_MODS_FILELIST) > $(BB_MODS_FILELIST)
-	$(SED) -i 's/\.\///' $(TOP_MODS_FILELIST)
-	$(SED) -i 's/\.\///' $(MODEL_MODS_FILELIST)
-	$(SED) -i 's/\.\///' $(BB_MODS_FILELIST)
+	$(SED) $(SED_INPLACE) 's/\.\///' $(TOP_MODS_FILELIST)
+	$(SED) $(SED_INPLACE) 's/\.\///' $(MODEL_MODS_FILELIST)
+	$(SED) $(SED_INPLACE) 's/\.\///' $(BB_MODS_FILELIST)
 	sort -u $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST) > $(ALL_MODS_FILELIST)
 
 $(TOP_SMEMS_CONF) $(MODEL_SMEMS_CONF) &:  $(MFC_SMEMS_CONF) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED)
