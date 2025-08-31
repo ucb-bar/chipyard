@@ -7,6 +7,15 @@ SHELL := $(shell \
   elif command -v bash >/dev/null 2>&1; then command -v bash; \
   else printf /bin/bash; fi)
 
+# Portable sed in-place flag (GNU vs BSD/macOS)
+SED ?= sed
+SED_IS_GNU := $(shell sed --version >/dev/null 2>&1 && echo yes || echo no)
+ifeq ($(SED_IS_GNU),yes)
+SED_INPLACE := -i
+else
+SED_INPLACE := -i ''
+endif
+
 #########################################################################################
 # makefile variables shared across multiple makefiles
 # - to use the help text, your Makefile should have a 'help' target that just
