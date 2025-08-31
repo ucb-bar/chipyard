@@ -1,8 +1,8 @@
-SHELL=/bin/bash
 SED ?= sed
 
 # Note: Individual rules that use RISCV or external tools perform local checks to avoid
 # blocking unrelated targets. Use $(require_riscv) and $(call require_cmd,<tool>) inside recipes.
+
 
 define require_riscv
 	@if [ -z "$(RISCV)" ]; then \

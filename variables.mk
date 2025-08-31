@@ -1,3 +1,12 @@
+# Ensure GNU Make uses a modern bash for recipes
+# - Set early (before other includes) so old make versions honor it.
+# - Prefer Homebrew or /usr/local bash, else fall back to /bin/bash.
+SHELL := $(shell \
+  if [ -x /opt/homebrew/bin/bash ]; then printf /opt/homebrew/bin/bash; \
+  elif [ -x /usr/local/bin/bash ]; then printf /usr/local/bin/bash; \
+  elif command -v bash >/dev/null 2>&1; then command -v bash; \
+  else printf /bin/bash; fi)
+
 #########################################################################################
 # makefile variables shared across multiple makefiles
 # - to use the help text, your Makefile should have a 'help' target that just
