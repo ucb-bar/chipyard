@@ -78,10 +78,6 @@ HELP_COMMANDS += \
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/tools/torture.mk
 # Optional generator make fragments should not fail build if absent
--include $(base_dir)/generators/cva6/cva6.mk
--include $(base_dir)/generators/ibex/ibex.mk
--include $(base_dir)/generators/nvdla/nvdla.mk
--include $(base_dir)/generators/radiance/radiance.mk
 # Wildcard include for standardized per-generator make fragments
 -include $(wildcard $(base_dir)/generators/*/chipyard.mk)
 
@@ -99,8 +95,6 @@ endif
 
 # Returns a list of files in directories $1 with *any* of the file extensions in $2
 lookup_srcs_by_multiple_type = $(foreach type,$(2),$(call lookup_srcs,$(1),$(type)))
-
-CHECK_SUBMODULES_COMMAND = echo "Checking required submodules in generators/ are initialized. Uninitialized submodules will be displayed" ; ! git submodule status $(base_dir)/generators | grep '^-.*' | grep -vE "(ara|caliptra|compress|mempress|saturn)"
 
 SCALA_EXT = scala
 VLOG_EXT = sv v
@@ -124,7 +118,6 @@ $(build_dir):
 # compile scala jars
 #########################################################################################
 $(GENERATOR_CLASSPATH) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(CHIPYARD_VLOG_SOURCES)
-	$(CHECK_SUBMODULES_COMMAND)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,$(SBT_PROJECT),$(GENERATOR_CLASSPATH))
 
@@ -459,14 +452,6 @@ find-configs:
 .PHONY: help
 help:
 	@for line in $(HELP_LINES); do echo "$$line"; done
-
-#########################################################################################
-# Check submodule status
-#########################################################################################
-
-.PHONY: check-submodule-status
-check-submodule-status:
-	$(CHECK_SUBMODULES_COMMAND)
 
 #########################################################################################
 # Implicit rule handling
