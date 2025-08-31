@@ -9,6 +9,7 @@ HELP_COMPILATION_VARIABLES = \
 "   SBT_OPTS          = set additional sbt command line options (these take the form -Dsbt.<option>=<setting>) " \
 "                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
 "   SBT               = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
+"   FIRTOOL_BIN       = path to CIRCT firtool (default: 'firtool' in PATH)" \
 
 HELP_PROJECT_VARIABLES = \
 "   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \
@@ -179,6 +180,9 @@ FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 FIRTOOL_LOG_FILE ?= $(build_dir)/$(long_name).firtool.log
+
+# Allow users to override the CIRCT FIRRTL compiler binary
+FIRTOOL_BIN ?= firtool
 
 # chisel anno modification output
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json

@@ -195,9 +195,9 @@ else
 endif
 
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
-	$(call require_cmd,firtool)
+	$(call require_cmd,$(FIRTOOL_BIN))
 	rm -rf $(GEN_COLLATERAL_DIR)
-	(set -o pipefail && firtool \
+	(set -o pipefail && $(FIRTOOL_BIN) \
 			--format=fir \
 			--export-module-hierarchy \
 			--verify-each=true \
