@@ -1,11 +1,21 @@
 SHELL=/bin/bash
 SED ?= sed
 
-ifndef RISCV
-$(error RISCV is unset. Did you source the Chipyard auto-generated env file (which activates the default conda environment)?)
-else
-$(info Running with RISCV=$(RISCV))
-endif
+# Note: Individual rules that use RISCV or external tools perform local checks to avoid
+# blocking unrelated targets. Use $(require_riscv) and $(call require_cmd,<tool>) inside recipes.
+
+define require_riscv
+	@if [ -z "$(RISCV)" ]; then \
+	  echo "RISCV is unset. Source env.sh (which activates the default conda env) before building sims." 1>&2; \
+	  exit 1; \
+	fi
+endef
+
+# Verify a tool is present in PATH; usage: $(call require_cmd,verilator)
+define require_cmd
+	@command -v $(1) >/dev/null 2>&1 \
+		|| { echo "Error: $(1) not found in PATH. Set up your tool environment before building this target." >&2; exit 1; }
+endef
 
 #########################################################################################
 # specify user-interface variables
@@ -184,27 +194,23 @@ else
 endif
 
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
-	@# Ensure firtool is available before invoking CIRCT to emit Verilog
-	@command -v firtool >/dev/null 2>&1 || { \
-		echo "Error: firtool (CIRCT) not found in PATH. Install/activate CIRCT before running this target." >&2; \
-		exit 1; \
-	}
+	$(call require_cmd,firtool)
 	rm -rf $(GEN_COLLATERAL_DIR)
 	(set -o pipefail && firtool \
-		--format=fir \
-		--export-module-hierarchy \
-		--verify-each=true \
-		--warn-on-unprocessed-annotations \
-		--disable-annotation-classless \
-		--disable-annotation-unknown \
-		--mlir-timing \
-		--lowering-options=$(shell cat $(MFC_LOWERING_OPTIONS)) \
-		--repl-seq-mem \
-		--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
-		--annotation-file=$(FINAL_ANNO_FILE) \
-		--split-verilog \
-		-o $(GEN_COLLATERAL_DIR) \
-		$(FIRRTL_FILE) |& tee $(FIRTOOL_LOG_FILE))
+			--format=fir \
+			--export-module-hierarchy \
+			--verify-each=true \
+			--warn-on-unprocessed-annotations \
+			--disable-annotation-classless \
+			--disable-annotation-unknown \
+			--mlir-timing \
+			--lowering-options=$(shell cat $(MFC_LOWERING_OPTIONS)) \
+			--repl-seq-mem \
+			--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
+			--annotation-file=$(FINAL_ANNO_FILE) \
+			--split-verilog \
+			-o $(GEN_COLLATERAL_DIR) \
+			$(FIRRTL_FILE) |& tee $(FIRTOOL_LOG_FILE))
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler
@@ -395,8 +401,10 @@ run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 $(output_dir):
 	mkdir -p $@
 
+ifdef RISCV
 $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/% | $(output_dir)
 	ln -sf $< $@
+endif
 
 $(output_dir)/%.run: $(output_dir)/% $(SIM_PREREQ)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$<) $(PERMISSIVE_OFF)  $< </dev/null | tee $<.log) && touch $@

@@ -80,12 +80,10 @@ model_dir_debug = $(build_dir)/$(long_name).debug
 #########################################################################################
 # xcelium simulator rules
 #########################################################################################
-.PHONY: check-xcelium
-check-xcelium:
-	@command -v xrun >/dev/null 2>&1 \
-		|| { echo "Error: Cadence Xcelium (xrun) not found in PATH. Set up your tool environment before building Xcelium sims." >&2; exit 1; }
 
-$(sim_workdir): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS) | check-xcelium
+$(sim_workdir): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
+	$(call require_cmd,xrun)
+	$(require_riscv)
 	rm -rf $(model_dir)
 	$(XCELIUM) -elaborate $(XCELIUM_OPTS) $(EXTRA_SIM_SOURCES) $(XCELIUM_COMMON_ARGS)
 

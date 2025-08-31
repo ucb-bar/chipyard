@@ -67,16 +67,17 @@ model_dir_debug = $(build_dir)/$(long_name).debug
 #########################################################################################
 # vcs simulator rules
 #########################################################################################
-.PHONY: check-vcs
-check-vcs:
-	@command -v vcs >/dev/null 2>&1 \
-		|| { echo "Error: Synopsys VCS not found in PATH. Set up your tool environment before building VCS sims." >&2; exit 1; }
 
-$(sim): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS) | check-vcs
+
+$(sim): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
+	$(call require_cmd,vcs)
+	$(require_riscv)
 	rm -rf $(model_dir)
 	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir)
 
-$(sim_debug): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS) | check-vcs
+$(sim_debug): $(sim_common_files) $(dramsim_lib) $(EXTRA_SIM_REQS)
+	$(call require_cmd,vcs)
+	$(require_riscv)
 	rm -rf $(model_dir_debug)
 	$(VCS) $(VCS_OPTS) $(EXTRA_SIM_SOURCES) -o $@ -Mdir=$(model_dir_debug)  \
 	+define+DEBUG -debug_access+all -kdb -lca

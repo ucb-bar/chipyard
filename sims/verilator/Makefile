@@ -190,16 +190,14 @@ model_mk_debug = $(model_dir_debug)/V$(TB).mk
 #########################################################################################
 
 $(model_mk): $(sim_common_files) $(EXTRA_SIM_REQS)
-	@command -v verilator >/dev/null 2>&1 \
-		|| { echo "Error: Verilator not found in PATH. Install or load it before building Verilator sims." >&2; exit 1; }
+	$(call require_cmd,verilator)
 	rm -rf $(model_dir)
 	mkdir -p $(model_dir)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir)
 	touch $@
 
 $(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS)
-	@command -v verilator >/dev/null 2>&1 \
-		|| { echo "Error: Verilator not found in PATH. Install or load it before building Verilator sims." >&2; exit 1; }
+	$(call require_cmd,verilator)
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
 	$(VERILATOR) $(VERILATOR_OPTS) +define+DEBUG $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug)
@@ -209,9 +207,11 @@ $(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS)
 # invoke make to make verilator sim rules
 #########################################################################################
 $(sim): $(model_mk) $(dramsim_lib)
+	$(require_riscv)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir) -f V$(TB).mk
 
 $(sim_debug): $(model_mk_debug) $(dramsim_lib)
+	$(require_riscv)
 	$(MAKE) VM_PARALLEL_BUILDS=1 -C $(model_dir_debug) -f V$(TB).mk
 
 #########################################################################################
