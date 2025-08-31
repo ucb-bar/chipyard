@@ -106,6 +106,7 @@ jobs:
           source env.sh
           cd sims/verilator
           make find-config-fragments
+          make find-configs
       - name: Run smoke test
         run: |
           cd ${{ env.REMOTE_WORK_DIR }}
