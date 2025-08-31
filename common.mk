@@ -184,6 +184,11 @@ else
 endif
 
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
+	@# Ensure firtool is available before invoking CIRCT to emit Verilog
+	@command -v firtool >/dev/null 2>&1 || { \
+		echo "Error: firtool (CIRCT) not found in PATH. Install/activate CIRCT before running this target." >&2; \
+		exit 1; \
+	}
 	rm -rf $(GEN_COLLATERAL_DIR)
 	(set -o pipefail && firtool \
 		--format=fir \
