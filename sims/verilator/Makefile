@@ -1,11 +1,6 @@
 #########################################################################################
 # verilator makefile
 #########################################################################################
-# Only error if a target actually needs Verilator. Non-Verilator targets (e.g., verilog/help) should not fail.
-.PHONY: check-verilator
-check-verilator:
-	@command -v verilator >/dev/null 2>&1 \
-		|| { echo "Error: Verilator not found in PATH. Install or load it before building Verilator sims." >&2; exit 1; }
 
 #########################################################################################
 # general path variables
@@ -193,13 +188,18 @@ model_mk_debug = $(model_dir_debug)/V$(TB).mk
 #########################################################################################
 # build makefile fragment that builds the verilator sim rules
 #########################################################################################
-$(model_mk): $(sim_common_files) $(EXTRA_SIM_REQS) | check-verilator
+
+$(model_mk): $(sim_common_files) $(EXTRA_SIM_REQS)
+	@command -v verilator >/dev/null 2>&1 \
+		|| { echo "Error: Verilator not found in PATH. Install or load it before building Verilator sims." >&2; exit 1; }
 	rm -rf $(model_dir)
 	mkdir -p $(model_dir)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir)
 	touch $@
 
-$(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS) | check-verilator
+$(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS)
+	@command -v verilator >/dev/null 2>&1 \
+		|| { echo "Error: Verilator not found in PATH. Install or load it before building Verilator sims." >&2; exit 1; }
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
 	$(VERILATOR) $(VERILATOR_OPTS) +define+DEBUG $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug)
