@@ -58,6 +58,7 @@ HELP_COMMANDS += \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
+"   find-configs                = list Chipyard Config classes (eligible CONFIG=)" \
 "   find-config-fragments       = list all config. fragments" \
 "   check-submodule-status      = check that all submodules in generators/ have been initialized"
 
@@ -440,6 +441,10 @@ endef
 .PHONY: find-config-fragments
 find-config-fragments:
 	$(call run_scala_main,chipyard,chipyard.ConfigFinder,)
+
+.PHONY: find-configs
+find-configs:
+	$(call run_scala_main,chipyard,chipyard.ChipyardConfigFinder,)
 
 .PHONY: help
 help:
