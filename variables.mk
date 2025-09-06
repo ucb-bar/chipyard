@@ -28,6 +28,7 @@ HELP_COMPILATION_VARIABLES = \
 "                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
 "   SBT               = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
 "   FIRTOOL_BIN       = path to CIRCT firtool (default: 'firtool' in PATH)" \
+"   USE_CHISEL7       = EXPERIMENTAL: set to '1' to build with Chisel 7" \
 
 HELP_PROJECT_VARIABLES = \
 "   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \

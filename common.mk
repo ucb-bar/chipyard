@@ -16,6 +16,21 @@ define require_cmd
 		|| { echo "Error: $(1) not found in PATH. Set up your tool environment before building this target." >&2; exit 1; }
 endef
 
+# Require minimum firtool version when building with Chisel 7
+define require_firtool_version
+	@if [ -n "$(USE_CHISEL7)" ]; then \
+	  vline=`$(FIRTOOL_BIN) --version 2>/dev/null | grep -E 'CIRCT firtool-[0-9]+\.[0-9]+\.[0-9]+' | head -1`; \
+	  vstr=$${vline##*firtool-}; \
+	  if [ -z "$$vstr" ]; then \
+	    echo "Error: Unable to parse firtool version. Ensure '$(FIRTOOL_BIN) --version' prints 'CIRCT firtool-X.Y.Z'." >&2; exit 1; \
+	  fi; \
+	  maj=$${vstr%%.*}; rest=$${vstr#*.}; min=$${rest%%.*}; pat=$${rest#*.}; \
+	  if [ "$$maj" -lt 1 ] || { [ "$$maj" -eq 1 ] && [ "$$min" -lt 129 ]; }; then \
+	    echo "Error: USE_CHISEL7 requires firtool >= 1.129.0, found $$vstr. Please update CIRCT firtool." >&2; exit 1; \
+	  fi; \
+	fi
+endef
+
 #########################################################################################
 # specify user-interface variables
 #########################################################################################
@@ -69,7 +84,9 @@ HELP_COMMANDS += \
 "   launch-sbt                  = start sbt terminal" \
 "   find-configs                = list Chipyard Config classes (eligible CONFIG=)" \
 "   find-config-fragments       = list all config. fragments" \
-"   check-submodule-status      = check that all submodules in generators/ have been initialized"
+"   check-submodule-status      = check that all submodules in generators/ have been initialized" \
+"   run-firtool                 = run CIRCT firtool to emit Verilog/JSON/mem conf" \
+"   run-uniquify                = run uniquify-module-names on current elaboration outputs"
 
 #########################################################################################
 # include additional subproject make fragments
@@ -78,10 +95,6 @@ HELP_COMMANDS += \
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/tools/torture.mk
 # Optional generator make fragments should not fail build if absent
--include $(base_dir)/generators/cva6/cva6.mk
--include $(base_dir)/generators/ibex/ibex.mk
--include $(base_dir)/generators/nvdla/nvdla.mk
--include $(base_dir)/generators/radiance/radiance.mk
 # Wildcard include for standardized per-generator make fragments
 -include $(wildcard $(base_dir)/generators/*/chipyard.mk)
 
@@ -99,8 +112,6 @@ endif
 
 # Returns a list of files in directories $1 with *any* of the file extensions in $2
 lookup_srcs_by_multiple_type = $(foreach type,$(2),$(call lookup_srcs,$(1),$(type)))
-
-CHECK_SUBMODULES_COMMAND = echo "Checking required submodules in generators/ are initialized. Uninitialized submodules will be displayed" ; ! git submodule status $(base_dir)/generators | grep '^-.*' | grep -vE "(ara|caliptra|compress|mempress|saturn)"
 
 SCALA_EXT = scala
 VLOG_EXT = sv v
@@ -124,7 +135,6 @@ $(build_dir):
 # compile scala jars
 #########################################################################################
 $(GENERATOR_CLASSPATH) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(CHIPYARD_VLOG_SOURCES)
-	$(CHECK_SUBMODULES_COMMAND)
 	mkdir -p $(dir $@)
 	$(call run_sbt_assembly,$(SBT_PROJECT),$(GENERATOR_CLASSPATH))
 
@@ -167,6 +177,9 @@ export mfc_extra_anno_contents
 export sfc_extra_low_transforms_anno_contents
 $(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
 	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
+ifdef USE_CHISEL7
+	jq '. + [{"class":"firrtl.transforms.BlackBoxTargetDirAnno","targetDir":"$(GEN_COLLATERAL_DIR)/blackboxes"}]' $(MFC_EXTRA_ANNO_FILE) > $(MFC_EXTRA_ANNO_FILE).tmp && mv $(MFC_EXTRA_ANNO_FILE).tmp $(MFC_EXTRA_ANNO_FILE)
+endif
 	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
 
 .PHONY: firrtl
@@ -187,6 +200,12 @@ SFC_MFC_TARGETS = \
 
 MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
+# Extra firtool flags are only applied when building with Chisel 7
+FIRTOOL_EXTRA_FLAGS ?=
+ifdef USE_CHISEL7
+FIRTOOL_EXTRA_FLAGS += --verification-flavor=if-else-fatal --disable-layers=Verification.Assume,Verification.Cover
+endif
+
 # DOC include start: FirrtlCompiler
 $(MFC_LOWERING_OPTIONS):
 	mkdir -p $(dir $@)
@@ -198,6 +217,7 @@ endif
 
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	$(call require_cmd,$(FIRTOOL_BIN))
+	$(require_firtool_version)
 	rm -rf $(GEN_COLLATERAL_DIR)
 	(set -o pipefail && $(FIRTOOL_BIN) \
 			--format=fir \
@@ -212,11 +232,33 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 			--repl-seq-mem-file=$(MFC_SMEMS_CONF) \
 			--annotation-file=$(FINAL_ANNO_FILE) \
 			--split-verilog \
+			$(FIRTOOL_EXTRA_FLAGS) \
 			-o $(GEN_COLLATERAL_DIR) \
 			$(FIRRTL_FILE) |& tee $(FIRTOOL_LOG_FILE))
 	$(SED) $(SED_INPLACE) 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
-	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
+ifdef USE_CHISEL7
+	# Construct blackbox file list from files emitted into gen-collateral/blackboxes
+	@if [ -d "$(GEN_COLLATERAL_DIR)/blackboxes" ]; then \
+	  find "$(GEN_COLLATERAL_DIR)/blackboxes" -type f \( -name '*.v' -o -name '*.sv' -o -name '*.cc' \) | \
+	    sed -e 's;^$(GEN_COLLATERAL_DIR)/;;' > "$(MFC_BB_MODS_FILELIST)"; \
+	else \
+	  : > "$(MFC_BB_MODS_FILELIST)"; \
+	fi
+else
+	# If there are no BB's then the file might not be generated; ensure it exists
+	touch $(MFC_BB_MODS_FILELIST)
+endif
 # DOC include end: FirrtlCompiler
+
+.PHONY: run-firtool
+run-firtool: $(SFC_MFC_TARGETS)
+	@echo "[run-firtool] Generated: $(SFC_MFC_TARGETS)"
+
+# Convenience alias to re-run the uniquify step (module/filelist splitting)
+.PHONY: run-uniquify
+run-uniquify: $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED)
+	@echo "[run-uniquify] Updated filelists under $(GEN_COLLATERAL_DIR)"
+
 
 $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILELIST) $(MFC_MODEL_HRCHY_JSON_UNIQUIFIED) &: $(MFC_MODEL_HRCHY_JSON) $(MFC_TOP_HRCHY_JSON) $(MFC_FILELIST) $(MFC_BB_MODS_FILELIST)
 	$(base_dir)/scripts/uniquify-module-names.py \
@@ -459,14 +501,6 @@ find-configs:
 .PHONY: help
 help:
 	@for line in $(HELP_LINES); do echo "$$line"; done
-
-#########################################################################################
-# Check submodule status
-#########################################################################################
-
-.PHONY: check-submodule-status
-check-submodule-status:
-	$(CHECK_SUBMODULES_COMMAND)
 
 #########################################################################################
 # Implicit rule handling
