@@ -15,3 +15,9 @@ The five available cores and their corresponding generator configuration are:
 * "bus"-based micro-coded implementation - ``SodorUCodeConfig``
 
 For more information, please refer to the `GitHub repository <https://github.com/ucb-bar/riscv-sodor>`__.
+
+Configuration classes and Chipyard glue for Sodor live under ``generators/riscv-sodor/chipyard`` and are compiled directly from the Sodor repository sources. After running the standard setup (``./build-setup.sh``), build a config (e.g., 3-stage) with:
+
+::
+
+  cd sims/vcs && make CONFIG=Sodor3StageConfig
