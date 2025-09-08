@@ -16,7 +16,7 @@ dependencies:
     #   documentation on package_spec syntax for constraining versions
     - gcc=8.5
     - gxx=8.5
-    - sysroot_linux-64=2.28
+    - sysroot_linux-64=2.34 # so the fix in the build-setup.sh works
     - conda-gcc-specs
     - binutils
 
