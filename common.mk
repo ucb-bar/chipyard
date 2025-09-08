@@ -68,8 +68,7 @@ HELP_COMMANDS += \
 "   run-tests                   = run all assembly and benchmark tests" \
 "   launch-sbt                  = start sbt terminal" \
 "   find-configs                = list Chipyard Config classes (eligible CONFIG=)" \
-"   find-config-fragments       = list all config. fragments" \
-"   check-submodule-status      = check that all submodules in generators/ have been initialized"
+"   find-config-fragments       = list all config. fragments"
 
 #########################################################################################
 # include additional subproject make fragments
