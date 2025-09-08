@@ -68,6 +68,32 @@ HELP_LINES = "" \
 #########################################################################################
 SUB_PROJECT ?= chipyard
 
+
+ifeq ($(SUB_PROJECT),chipyard_smallboom)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.harness
+	CONFIG            ?= SmallBoomV3Config
+	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+	TB                ?= TestDriver
+	TOP               ?= ChipTop
+endif
+
+
+ifeq ($(SUB_PROJECT),chipyard_megaboom)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.harness
+	CONFIG            ?= MegaBoomV3Config
+	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+	TB                ?= TestDriver
+	TOP               ?= ChipTop
+endif
+
 ifeq ($(SUB_PROJECT),chipyard)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
@@ -239,7 +265,7 @@ export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(JAVA
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-export SBT_OPTS ?= -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/ -Dsbt.color=always -Dsbt.supershell=false -Dsbt.server.forcestart=true
+export SBT_OPTS ?= -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/ -Dsbt.color=always -Dsbt.supershell=false -Dsbt.server.forcestart=true -Dhttp.proxyHost=192.168.42.1 -Dhttp.proxyPort=3128 -Dhttps.proxyHost=192.168.42.1 -Dhttps.proxyPort=3128
 SBT ?= java -jar $(base_dir)/scripts/sbt-launch.jar $(SBT_OPTS)
 
 # (1) - classpath of the fat jar
@@ -253,13 +279,13 @@ endef
 # (2) - main class
 # (3) - main class arguments
 define run_scala_main
-	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
+	cd $(base_dir) && $(SBT) -Dhttp.proxyHost=192.168.42.1 -Dhttp.proxyPort=3128 -Dhttps.proxyHost=192.168.42.1 -Dhttps.proxyPort=3128 ";project $(1); runMain $(2) $(3)"
 endef
 
 # (1) - sbt project to assemble
 # (2) - classpath file(s) to create
 define run_sbt_assembly
-	cd $(base_dir) && $(SBT) ";project $(1); set assembly / assemblyOutputPath := file(\"$(2)\"); assembly" && touch $(2)
+	cd $(base_dir) && $(SBT) -Dhttp.proxyHost=192.168.42.1 -Dhttp.proxyPort=3128 -Dhttps.proxyHost=192.168.42.1 -Dhttps.proxyPort=3128 ";project $(1); set assembly / assemblyOutputPath := file(\"$(2)\"); assembly" && touch $(2)
 endef
 
 #########################################################################################
