@@ -1,5 +1,8 @@
 ![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/main/docs/_static/images/chipyard-logo-full.png)
 
+<h1><span style="color:red;">Please see <a href="/README_cad.md">README_cad.md</a></span></h1>
+
+
 # Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
 
 ## Quick Links
