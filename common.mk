@@ -421,7 +421,7 @@ $(dramsim_lib):
 SBT_COMMAND ?= shell
 .PHONY: launch-sbt
 launch-sbt:
-	cd $(base_dir) && $(SBT) "$(SBT_COMMAND)"
+	cd $(base_dir) && $(SBT) -Dhttp.proxyHost=192.168.42.1 -Dhttp.proxyPort=3128 -Dhttps.proxyHost=192.168.42.1 -Dhttps.proxyPort=3128 "$(SBT_COMMAND)"
 
 #########################################################################################
 # print help text (and other help)
