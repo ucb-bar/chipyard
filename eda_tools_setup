@@ -1,0 +1,6 @@
+#!/bin/bash
+module load license/default
+module load synopsys/vcs/2023.03-SP2
+module load synopsys/syn/2022.12
+module load synopsys/tmax/2022.12
+module load cadence/innovus/19.11_000
