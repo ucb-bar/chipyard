@@ -14,9 +14,9 @@ dependencies:
     #   instructions on adding a recipe
     # https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
     #   documentation on package_spec syntax for constraining versions
-    - gcc=13.2
-    - gxx=13.2
-    - sysroot_linux-64=2.34 # need to be close to system glibc for VCS compatibility
+    - gcc=8.5
+    - gxx=8.5
+    - sysroot_linux-64=2.28
     - conda-gcc-specs
     - binutils
 
