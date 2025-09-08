@@ -15,10 +15,15 @@ if [[ $1 == "calibre" ]]; then
     git clone git@github.com:ucb-bar/hammer-mentor-plugins.git vlsi/hammer-mentor-plugins
     pip install -e vlsi/hammer-mentor-plugins
 fi
-
+# Explicitly install synopsys plugins 
+if [[ $1 == "synopsys" ]]; then 
+    #git clone git@github.com:ucb-bar/hammer-synopsys-plugins.git vlsi/hammer-synopsys-plugins
+    # TODO waiting for the PR to be accepted, for now:
+    git clone git@github.com:franout/hammer-synopsys-plugins.git vlsi/hammer-synopsys-plugins
+    pip install -e vlsi/hammer-synopsys-plugins
+elif [[ $1 != *asap7* ]] && [[ $1 != *sky130* ]]; then
 # Initialize HAMMER tech plugin
 # And add tech plugin to conda dependencies
-if [[ $1 != *asap7* ]] && [[ $1 != *sky130* ]]; then
     git submodule update --init --recursive vlsi/hammer-$1-plugin
     pip install -e vlsi/hammer-$1-plugin
 fi
