@@ -1,0 +1,24 @@
+# Override configurations in ../example-sky130.yml
+
+# Specify clock signals
+vlsi.inputs.clocks: [
+  {name: "clock_uncore", period: "30ns", uncertainty: "2ns"}
+]
+
+vlsi.inputs.resets: [
+  {name: "reset_io", active_negated: "false", "synchronous" : "false"}
+]
+# Placement Constraints
+# If overriding the placement constraints in example-sky130.yml,
+# ensure one of the toplevel margin sides corresponding with the power pin metal layers
+# is set to 0 so that Innovus actually creates those pins (otherwise LVS will fail).
+# For example, in example-sky130.yml we set
+#   par.generate_power_straps_options.by_tracks.pin_layers: 'met5'  # horizontal layer
+# therefore we must also set:
+#   vlsi.inputs.placement_constraints:
+#     - path: "ChipTop"
+#       ...
+#       margins:
+#         right: 0  # or left: 0
+
+synthesis.dc.enable_congestion_map : true

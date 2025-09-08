@@ -1,0 +1,7 @@
+# Technology Setup
+vlsi.core.technology: "hammer.technology.nangate45"
+
+# technology files installation directory
+technology.nangate45.install_dir: "/data/libraries/NangateOpenCellLibrary_PDKv1_3_v2010_12/"
+
+ 

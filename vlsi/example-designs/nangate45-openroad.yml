@@ -1,0 +1,90 @@
+# Override configurations in ../example-sky130.yml
+
+# Specify clock signals
+# Relax the clock period for OpenROAD to meet timing
+vlsi.inputs.clocks: [
+  {name: "clock_uncore", period: "50ns", uncertainty: "2ns"}
+]
+
+# Flow parameters that yield a routable design with reasonable timing
+par.openroad:
+  timing_driven: true  # set to false to drastically speed up runs
+  create_archive_mode: none
+
+  write_reports: true  # set to false to slightly speed up runs
+
+  floorplan_mode: generate
+
+  macro_placement.halo: [50, 50]
+
+  global_placement.timing_driven: true
+  global_placement.routability_driven: true
+
+  global_placement.placement_padding: 6
+  detailed_placement.placement_padding: 4
+  clock_tree.placement_padding: 2
+  clock_tree_resize.placement_padding: 0
+
+  clock_tree_resize.setup_margin: 0.0
+  clock_tree_resize.hold_margin: 0.20
+  global_route_resize.hold_margin: 0.60
+  clock_tree_resize.hold_max_buffer_percent: 80
+
+  global_placement.routing_adjustment: 0.5
+  global_route.routing_adjustment: 0.3
+  global_route_resize.routing_adjustment: 0.2
+
+  openrcx_techfiles: [""]
+  ## TODO very bad hack for checking if the flow works
+  klayout_techfile_source: ~/.conda-sky130/share/pdk/sky130A/libs.tech/klayout/tech/sky130A.lyt
+# DRC/LVS configuration
+drc.magic.generate_only: true
+lvs.netgen.generate_only: true
+
+  
+
+# Placement Constraints
+vlsi.inputs.placement_constraints:
+  - path: "ChipTop"
+    type: toplevel
+    x: 0
+    y: 0
+    width: 3588
+    height: 2992
+    margins:
+      left: 10.12
+      right: 10.12
+      top: 10.88
+      bottom: 10.88
+
+  # Place SRAM memory instances
+  # data cache
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/rockettile_dcache_data_arrays_0/rockettile_dcache_data_arrays_0_ext/mem_0_0"
+    type: hardmacro
+    x: 49.68
+    y: 149.6
+    orientation: r90
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/rockettile_dcache_data_arrays_1/rockettile_dcache_data_arrays_0_ext/mem_0_0"
+    type: hardmacro
+    x: 49.68
+    y: 748
+    orientation: r90
+
+  # tag array
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_tag_array_0/rockettile_icache_tag_array_0_ext/mem_0_0"
+    type: hardmacro
+    x: 2612.8
+    y: 1033.6
+    orientation: mx90
+
+  # instruction cache
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_data_arrays_0_0/rockettile_icache_data_arrays_0_0_ext/mem_0_0"
+    type: hardmacro
+    x: 2612.8
+    y: 149.6
+    orientation: mx90
+  - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_data_arrays_1_0/rockettile_icache_data_arrays_0_0_ext/mem_0_0"
+    type: hardmacro
+    x: 2612.8
+    y: 598.4
+    orientation: mx90
