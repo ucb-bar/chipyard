@@ -17,7 +17,11 @@ par.inputs.gds_merge: true
 #lvs.calibre.version: "2022.2_24.16"
 # VCS options
 vlsi.core.sim_tool: "hammer.sim.vcs"
-sim.vcs.version: "U-2023.03-SP2"
+sim.vcs.version: "2022.06-SP2"
+sim.vcs.vcs_bin: "${synopsys.synopsys_home}/VCS_${sim.vcs.version}/bin/vcs"
+sim.vcs.vcs_home: "${synopsys.synopsys_home}/VCS_${sim.vcs.version}"
+sim.vcs.verdi_home: "${synopsys.synopsys_home}/VERDI_${sim.vcs.version}"
+
 # Voltus options
 #vlsi.core.power_tool: "hammer.power.voltus"
 #power.joules.version: "211"
