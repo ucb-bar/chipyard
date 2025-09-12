@@ -17,7 +17,7 @@ In order to setup the environment for running chipyard (simulation and synthesis
     bash Miniconda3-latest-Linux-x86_64.sh  
     rm -f Miniconda3-latest-Linux-x86_64.sh  
     ``` 
-    You may need to export the binaries path
+    You may need to export the binaries path (you can add the following line in your ``.bashrc``)
     ```bash
     export PATH=${PATH}:${HOME}/miniconda3/bin/                                    
     ```
@@ -32,8 +32,11 @@ In order to setup the environment for running chipyard (simulation and synthesis
     $ ./scripts/build-setup.sh riscv-tools -s 6 -s 7 -s 8 -s 9 
     ```
     You do not need all the tools, just the basic ones and converters from chisel to verilog.
-    ** It may take a while ** 
-    ** Now you can activate your conda environment by sourcing the env.sh file **
+
+    **It may take a while** 
+
+    **Now you can activate your conda environment by sourcing the env.sh file**
+
 5. Install the necessary plugins for hammer 
     ```bash 
     $ ./scripts/init-vlsi.sh synopsys
@@ -41,6 +44,15 @@ In order to setup the environment for running chipyard (simulation and synthesis
     ```
     This set the environemnt pointing to the python sourcee code of hammer and its synopsys plugin (in case you need to modify them)
 
+6. Download the OpenRoad repository for generating technology-related rams 
+    ```bash 
+    cd ~
+    git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git 
+    echo "export OPENROAD=~/OpenROAD" >> ~/chipyard/env.sh
+    ```
+    **Note the APPEND to the ``env.sh`` file !**
+
+    **This is a hard hack for the moment**
 
 Please also refer to:
 -   [Hammer Docs](https://hammer-vlsi.readthedocs.io/)
@@ -50,14 +62,32 @@ Please also refer to:
 # Compile the tests
 For compiling a set of hello world applications:
 
-```bash 
+```bash /home/f.angione/chipyard/vlsi/generated-src/chipyard.harness.TestHarnes
 $ cd tests
 $ cmake .
 $ make 
 ```
 
+
+## Compiling additional tests (SBSTs)
+For compiling custom SBSTs you can:
+- Add an additional folder named sbst1
+- Add in the ``tests/CMakeLists.txt`` the libe ``add_subdirectory(sbst1)``
+- Add/Modify the ``tests/sbst1/CMakeLists.txt`` accordingly.
+- Add/Modify source files.
+
+You can see an example in the ``tests/sbst`` folder.
+
+For example:
+```bash 
+$ cd tests
+$ cmake .
+$ make sbst1
+```
+You will find the executable in ``tests/sbst1/`` named ``sbst1.riscv``
+
 # Simulating the RTL 
-For running a simulation for a given configuration in variables.mk:
+For running a simulation for a given configuration in variables.mk and a specified program (BINARY var points to the compiled program) from tests folder:
 ```bash 
 $ cd sims/vcs
 $ make SUB_PROJECT=chipyard_smallboom
@@ -67,7 +97,7 @@ It generates the verilog file and run the binary
 
 # Synthesis 
 
-For genereting the files for the synthesis using the technology and deesign files defined in tutorial.mk file:
+For generating the files for the synthesis using the technology and deesign files defined in tutorial.mk file:
 ```bash 
 $ cd vlsi
 $ make buildfile tutorial=nangate45-commercial
@@ -82,3 +112,4 @@ For modifying the synthesis script see ```chipyard/vlsi/hammer-synopsys-plugins/
 
 # Simulating the Gate-level
 TODO WIP
+TODO FIND THE CORRECT SIMULATED RAMS 
