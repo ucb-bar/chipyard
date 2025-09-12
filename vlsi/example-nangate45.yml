@@ -4,4 +4,5 @@ vlsi.core.technology: "hammer.technology.nangate45"
 # technology files installation directory
 technology.nangate45.install_dir: "/data/libraries/NangateOpenCellLibrary_PDKv1_3_v2010_12/"
 
- 
+# For generating fake srams
+vlsi.core.sram_generator_tool: "hammer.technology.nangate45.sram_compiler"
