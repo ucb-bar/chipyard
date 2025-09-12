@@ -137,3 +137,9 @@ add_custom_command(
 add_custom_target(spiflash_img ALL
     DEPENDS ${CMAKE_BINARY_DIR}/spiflash.img
 )
+
+#################################
+# Build SBST project
+#################################
+
+add_subdirectory(sbst)
