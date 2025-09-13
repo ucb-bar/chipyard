@@ -54,6 +54,11 @@ In order to setup the environment for running chipyard (simulation and synthesis
 
     **This is a hard hack for the moment**
 
+    Install the prebuilt openroad package:
+   ```bash
+    conda create -c litex-hub --prefix ~/.conda-openroad openroad=2.0_7070_g0264023b6
+    echo "export PATH=${PATH}:~/.conda-openroad/bin" >> ~/chipyard/env.sh
+   ```
 Please also refer to:
 -   [Hammer Docs](https://hammer-vlsi.readthedocs.io/)
 -   [Chipyard setup docs](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html)
