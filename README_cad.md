@@ -55,9 +55,28 @@ In order to setup the environment for running chipyard (simulation and synthesis
     **This is a hard hack for the moment**
 
     Install the prebuilt openroad package:
-   ```bash
+    ```bash
     conda create -c litex-hub --prefix ~/.conda-openroad openroad=2.0_7070_g0264023b6
+    conda create -c litex-hub --prefix ~/.conda-klayout klayout=0.28.5_98_g87e2def28
+    conda create -c litex-hub --prefix ~/.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
+    conda create -c litex-hub --prefix ~/.conda-yosys yosys=0.27_4_gb58664d44
+
     echo "export PATH=${PATH}:~/.conda-openroad/bin" >> ~/chipyard/env.sh
+    echo "export PATH=${PATH}:~/.conda-klayout/bin" >> ~/chipyard/env.sh
+    echo "export PATH=${PATH}:~/.conda-signoff/bin" >> ~/chipyard/env.sh
+    echo "export PATH=${PATH}:~/.conda-yosys/bin" >> ~/chipyard/env.sh
+    ```
+
+    Add the following YAML keys to the top of this file to specify the locations of the tool binaries. Note that this is not required if the tools are already on your PATH.
+   ```yaml
+    # all ~ should be replaced with absolute paths to these directories
+    # tool binary paths
+    synthesis.yosys.yosys_bin: ~/.conda-yosys/bin/yosys
+    par.openroad.openroad_bin: ~/.conda-openroad/bin/openroad
+    par.openroad.klayout_bin: ~/.conda-klayout/bin/klayout  # binary that OpenROAD calls for final GDS writeout
+    drc.klayout.klayout_bin: ~/.conda-klayout/bin/klayout   # binary that runs for DRC step
+    drc.magic.magic_bin: ~/.conda-signoff/bin/magic
+    lvs.netgen.netgen_bin: ~/.conda-signoff/bin/netgen
    ```
 Please also refer to:
 -   [Hammer Docs](https://hammer-vlsi.readthedocs.io/)
