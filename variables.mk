@@ -1,3 +1,21 @@
+# Ensure GNU Make uses a modern bash for recipes
+# - Set early (before other includes) so old make versions honor it.
+# - Prefer Homebrew or /usr/local bash, else fall back to /bin/bash.
+SHELL := $(shell \
+  if [ -x /opt/homebrew/bin/bash ]; then printf /opt/homebrew/bin/bash; \
+  elif [ -x /usr/local/bin/bash ]; then printf /usr/local/bin/bash; \
+  elif command -v bash >/dev/null 2>&1; then command -v bash; \
+  else printf /bin/bash; fi)
+
+# Portable sed in-place flag (GNU vs BSD/macOS)
+SED ?= sed
+SED_IS_GNU := $(shell sed --version >/dev/null 2>&1 && echo yes || echo no)
+ifeq ($(SED_IS_GNU),yes)
+SED_INPLACE := -i
+else
+SED_INPLACE := -i ''
+endif
+
 #########################################################################################
 # makefile variables shared across multiple makefiles
 # - to use the help text, your Makefile should have a 'help' target that just
@@ -9,6 +27,8 @@ HELP_COMPILATION_VARIABLES = \
 "   SBT_OPTS          = set additional sbt command line options (these take the form -Dsbt.<option>=<setting>) " \
 "                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
 "   SBT               = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
+"   FIRTOOL_BIN       = path to CIRCT firtool (default: 'firtool' in PATH)" \
+"   USE_CHISEL7       = EXPERIMENTAL: set to '1' to build with Chisel 7" \
 
 HELP_PROJECT_VARIABLES = \
 "   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \
@@ -179,6 +199,9 @@ FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
 FIRTOOL_LOG_FILE ?= $(build_dir)/$(long_name).firtool.log
+
+# Allow users to override the CIRCT FIRRTL compiler binary
+FIRTOOL_BIN ?= firtool
 
 # chisel anno modification output
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
