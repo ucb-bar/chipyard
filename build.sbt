@@ -141,7 +141,7 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 lazy val midasTargetUtils = ProjectRef(firesimDir, "targetutils")
 
 lazy val testchipip = (project in file("generators/testchipip"))
-  .dependsOn(rocketchip, rocketchip_blocks)
+  .dependsOn(rocketchip, rocketchip_blocks, memorysim)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -150,7 +150,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, rocket_dsp_utils,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-    constellation, mempress, barf, shuttle, caliptra_aes)
+    constellation, mempress, barf, shuttle, caliptra_aes, memorysim)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
     libraryDependencies ++= Seq(
@@ -197,6 +197,17 @@ lazy val hwacha = (project in file("generators/hwacha"))
 lazy val boom = freshProject("boom", file("generators/boom"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val memorysim = freshProject("memorysim", file("generators/memorysim"))
+  .dependsOn(rocketchip)
+  .settings(
+    libraryDependencies ++= rocketLibDeps.value ++ Seq(
+      "io.circe" %% "circe-core" % "0.14.7",
+      "io.circe" %% "circe-generic" % "0.14.7",
+      "io.circe" %% "circe-parser" % "0.14.7"
+    )
+  )
   .settings(commonSettings)
 
 lazy val shuttle = (project in file("generators/shuttle"))
