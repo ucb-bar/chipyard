@@ -1,0 +1,195 @@
+name: Pre-Elaboration Build Time
+
+on:
+  pull_request:      
+    branches: ['*']
+  workflow_dispatch:    
+
+permissions:
+  contents: read
+  pull-requests: write 
+
+jobs:
+  pre-elab-time:
+    runs-on: ubuntu-latest
+    env:
+      SBT_OPTS: "-Dsbt.task.timings=true -Dsbt.task.timings.on.shutdown=false"
+      FIRESIM_STANDALONE: "1"
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up JDK 11 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Build-Setup (skip pre-elaboration steps)
+        env:
+          CI: "true"
+        run: |
+          chmod +x scripts/build-setup.sh
+          ./scripts/build-setup.sh riscv-tools -s 1 -s 3 -s 5 -s 6 -s 7
+
+      - name: Print SBT and Scala versions
+        id: sbt-version
+        run: |
+          sbt -Dsbt.supershell=false -no-colors --error "print sbtVersion" > sbt.ver
+          sbt -Dsbt.supershell=false -no-colors --error "print scalaVersion" > scala.ver
+          echo "SBT_VERSION=$(cat sbt.ver)" >> $GITHUB_ENV
+          echo "SCALA_VERSION=$(cat scala.ver)" >> $GITHUB_ENV
+
+      - name: Cold Run - Compile all projects (no cache)
+        id: cold-run
+        run: |
+          echo "Starting cold compile at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          start_time=$(date -u +%s)
+          sbt -batch "clean" || true  
+          sbt -batch "update" "compile" 2>&1 | tee cold_build.log
+          end_time=$(date -u +%s)
+          duration=$(( end_time - start_time ))
+          echo "Cold run wall time: $duration seconds"
+          echo "COLD_START=$start_time" >> $GITHUB_ENV
+          echo "COLD_END=$end_time" >> $GITHUB_ENV
+
+      - name: Warm Run - Compile all projects (with cache)
+        id: warm-run
+        run: |
+          echo "Starting warm compile at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          start_time=$(date -u +%s)
+          sbt -batch "update" "compile" 2>&1 | tee warm_build.log
+          end_time=$(date -u +%s)
+          duration=$(( end_time - start_time ))
+          echo "Warm run wall time: $duration seconds"
+          echo "WARM_START=$start_time" >> $GITHUB_ENV
+          echo "WARM_END=$end_time" >> $GITHUB_ENV
+
+      - name: Parse Timing Logs and Generate JSON/CSV
+        id: parse-logs
+        run: |
+          python - <<'PYCODE'
+          import re, json, os, csv
+          # Patterns to extract lines like:
+          # {file:/path/to/}projectName/Config/compile: 12345.678 ms
+          timing_pattern = re.compile(r'\{.*\}(?P<proj>[^/]+)/(?P<conf>[^:]+):(?P<task>[^:]+):\s+(?P<ms>\d+(\.\d+)?) ms')
+          def parse_log(file_path):
+              data = {}  # nested dict: proj -> {conf -> {task -> time_ms}}
+              with open(file_path, 'r') as f:
+                  for line in f:
+                      m = timing_pattern.search(line)
+                      if m:
+                          proj = m.group('proj').strip()
+                          conf = m.group('conf').strip()
+                          task = m.group('task').strip()
+                          ms = float(m.group('ms'))
+                          data.setdefault(proj, {}).setdefault(conf, {})[task] = ms
+              return data
+          cold_data = parse_log('cold_build.log')
+          warm_data = parse_log('warm_build.log')
+          # Prepare JSON structures
+          commit = os.getenv('GITHUB_SHA', '')
+          java_version = "temurin-11"
+          sbt_version = os.getenv('SBT_VERSION', '').strip()
+          scala_version = os.getenv('SCALA_VERSION', '').strip()
+          cold_start = int(os.getenv('COLD_START', '0'))
+          cold_end = int(os.getenv('COLD_END', '0'))
+          warm_start = int(os.getenv('WARM_START', '0'))
+          warm_end = int(os.getenv('WARM_END', '0'))
+          import datetime
+          def iso(ts): 
+              return datetime.datetime.fromtimestamp(ts, tz=datetime.timezone.utc).isoformat() if ts else ""
+          cold_json = {
+              "repo": "ucb-bar/chipyard",
+              "commit": commit,
+              "java_version": java_version,
+              "sbt_version": sbt_version,
+              "scala_version": scala_version,
+              "run_mode": "cold",
+              "start_time_utc": iso(cold_start),
+              "end_time_utc": iso(cold_end),
+              "wall_seconds_total": round(cold_end - cold_start, 2) if cold_end and cold_start else None,
+              "modules": []
+          }
+          warm_json = {
+              "repo": "ucb-bar/chipyard",
+              "commit": commit,
+              "java_version": java_version,
+              "sbt_version": sbt_version,
+              "scala_version": scala_version,
+              "run_mode": "warm",
+              "start_time_utc": iso(warm_start),
+              "end_time_utc": iso(warm_end),
+              "wall_seconds_total": round(warm_end - warm_start, 2) if warm_end and warm_start else None,
+              "modules": []
+          }
+          # Fill module data
+          projects = set(list(cold_data.keys()) + list(warm_data.keys()))
+          for proj in sorted(projects):
+              conf = "Compile"
+              cold_tasks = cold_data.get(proj, {}).get(conf, {})
+              warm_tasks = warm_data.get(proj, {}).get(conf, {})
+              if not cold_tasks and not warm_tasks:
+                  continue
+              mod_entry_cold = {
+                  "name": proj,
+                  "configuration": conf,
+                  "tasks": [],
+                  "wall_seconds_total": 0.0
+              }
+              mod_entry_warm = {
+                  "name": proj,
+                  "configuration": conf,
+                  "tasks": [],
+                  "wall_seconds_total": 0.0
+              }
+              for task in ["update", "compile"]:
+                  if task in cold_tasks:
+                      sec = round(cold_tasks[task] / 1000.0, 3)
+                      mod_entry_cold["tasks"].append({"task": task, "wall_seconds": sec})
+                      mod_entry_cold["wall_seconds_total"] += sec
+                  if task in warm_tasks:
+                      sec = round(warm_tasks[task] / 1000.0, 3)
+                      mod_entry_warm["tasks"].append({"task": task, "wall_seconds": sec})
+                      mod_entry_warm["wall_seconds_total"] += sec
+              cold_json["modules"].append(mod_entry_cold)
+              warm_json["modules"].append(mod_entry_warm)
+          with open("chipyard_preelab_cold.json", "w") as f:
+              json.dump(cold_json, f, indent=2)
+          with open("chipyard_preelab_warm.json", "w") as f:
+              json.dump(warm_json, f, indent=2)
+          csv_rows = []
+          header = ["Module", "Cold_Update(s)", "Cold_Compile(s)", "Warm_Update(s)", "Warm_Compile(s)"]
+          for cold_mod in cold_json["modules"]:
+              proj = cold_mod["name"]
+              warm_mod = next((m for m in warm_json["modules"] if m["name"] == proj), {"tasks":[]})
+              def get_task_time(mod, task):
+                  for t in mod.get("tasks", []):
+                      if t["task"] == task:
+                          return t["wall_seconds"]
+                  return 0.0
+              row = [
+                  proj,
+                  f'{get_task_time(cold_mod, "update"):.3f}',
+                  f'{get_task_time(cold_mod, "compile"):.3f}',
+                  f'{get_task_time(warm_mod, "update"):.3f}',
+                  f'{get_task_time(warm_mod, "compile"):.3f}'
+              ]
+              csv_rows.append(row)
+          with open("chipyard_preelab_times.csv", "w") as cf:
+              writer = csv.writer(cf)
+              writer.writerow(header)
+              writer.writerows(csv_rows)
+          PYCODE
+
+      - name: Upload Timing Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: chipyard-preelaboration-times
+          path: |
+            chipyard_preelab_cold.json
+            chipyard_preelab_warm.json
+            chipyard_preelab_times.csv
