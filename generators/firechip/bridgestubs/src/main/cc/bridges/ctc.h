@@ -28,6 +28,7 @@ struct CTCBRIDGEMODULE_struct {
   uint64_t manager_out_bits;
   uint64_t manager_out_valid;
   uint64_t manager_out_ready;
+  uint64_t tick_done;
 };
 
 class ctc_t final : public bridge_driver_t {

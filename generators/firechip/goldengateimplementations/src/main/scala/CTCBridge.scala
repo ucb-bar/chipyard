@@ -18,13 +18,18 @@ class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CT
     val io = IO(new WidgetIO)
     val hPort = IO(HostPort(new CTCBridgeTargetIO))
 
-    val clientInBuf  = Module(new Queue(UInt(CTC.WIDTH.W), 16))
-    val clientOutBuf = Module(new Queue(UInt(CTC.WIDTH.W), 16))
-    val managerInBuf  = Module(new Queue(UInt(CTC.WIDTH.W), 16))
-    val managerOutBuf = Module(new Queue(UInt(CTC.WIDTH.W), 16))
+    val clientTokensToEnqueue = RegInit(0.U(32.W))
+    val managerTokensToEnqueue = RegInit(0.U(32.W))
+
+    val clientInBuf  = Module(new Queue(UInt(CTC.WIDTH.W), 1))
+    val clientOutBuf = Module(new Queue(UInt(CTC.WIDTH.W), 1))
+    val managerInBuf  = Module(new Queue(UInt(CTC.WIDTH.W), 1))
+    val managerOutBuf = Module(new Queue(UInt(CTC.WIDTH.W), 1))
+
+    val tick_done = Wire(Bool())
 
     val target = hPort.hBits.ctc_io
-    val tFire = hPort.toHost.hValid && hPort.fromHost.hReady
+    val tFire = hPort.toHost.hValid && hPort.fromHost.hReady && (clientOutBuf.io.enq.ready && managerOutBuf.io.enq.ready) && tick_done //&& (clientInBuf.io.deq.valid && managerInBuf.io.deq.valid)
     val targetReset = tFire & hPort.hBits.reset
     clientInBuf.reset  := reset.asBool || targetReset
     clientOutBuf.reset := reset.asBool || targetReset
@@ -35,14 +40,16 @@ class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CT
     hPort.fromHost.hValid := tFire
 
     // Connect client flit to buffer
-    target.client_flit.in <> clientInBuf.io.deq
+    target.client_flit.in.valid := clientInBuf.io.deq.valid
+    target.client_flit.in.bits := clientInBuf.io.deq.bits
     clientInBuf.io.deq.ready := target.client_flit.in.ready && tFire
 
     clientOutBuf.io.enq <> target.client_flit.out
     clientOutBuf.io.enq.valid := target.client_flit.out.valid && tFire
 
     // Connect manager flit to buffer
-    target.manager_flit.in <> managerInBuf.io.deq
+    target.manager_flit.in.valid := managerInBuf.io.deq.valid
+    target.manager_flit.in.bits := managerInBuf.io.deq.bits
     managerInBuf.io.deq.ready := target.manager_flit.in.ready && tFire
 
     managerOutBuf.io.enq <> target.manager_flit.out
@@ -65,6 +72,19 @@ class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CT
     // target.manager_flit.out.ready := managerOutBuf.io.enq.ready
     // managerOutBuf.io.enq.valid := target.manager_flit.out.valid && tFire
 
+    // DO NOT NEED THIS
+    // when (clientInBuf.io.enq.valid) { // If this doesn't work, add a separate "client_start" mmio reg
+    //   clientTokensToEnqueue := 5.U
+    // }.elsewhen (tFire) {
+    //   clientTokensToEnqueue := clientTokensToEnqueue - 1.U
+    // }
+
+    // when (managerInBuf.io.enq.valid) {
+    //   managerTokensToEnqueue := 3.U
+    // }.elsewhen (tFire) {
+    //   managerTokensToEnqueue := managerTokensToEnqueue - 1.U
+    // }
+
     // CLIENT MMIO
     genWOReg(clientInBuf.io.enq.bits, "client_in_bits")
     Pulsify(genWORegInit(clientInBuf.io.enq.valid, "client_in_valid", false.B), pulseLength = 1)
@@ -80,6 +100,8 @@ class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CT
     genROReg(managerOutBuf.io.deq.bits, "manager_out_bits")
     genROReg(managerOutBuf.io.deq.valid, "manager_out_valid")
     Pulsify(genWORegInit(managerOutBuf.io.deq.ready, "manager_out_ready", false.B), pulseLength = 1)
+
+    Pulsify(genWORegInit(tick_done, "tick_done", false.B), pulseLength = 1)
 
     genCRFile()
 

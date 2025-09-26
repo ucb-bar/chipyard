@@ -119,11 +119,15 @@ void ctc_t::init() {
 
   assert(fifo0_fd != -1 && "fifofile0 couldn't be opened\n");
   assert(fifo1_fd != -1 && "fifofile1 couldn't be opened\n");
+
+  // Indicate to the RTL bridge that init is complete
+  bridge_driver_t::write(mmio_addrs.tick_done, 1);
+
 }
 
 void ctc_t::tick() {
 
-  printf("[CTC] Inside tick\n");
+  //printf("[CTC] Inside tick\n");
 
   // NEW IMPLEMENTATION
   // Pulsify is super nice and makes my life EZ
@@ -228,7 +232,10 @@ void ctc_t::tick() {
   // bridge_driver_t::write(mmio_addrs.manager_out_ready, buf_in[4]);
   // bridge_driver_t::write(mmio_addrs.manager_in_bits,   buf_in[5]);
 
-  printf("[CTC] leaving tick\n");
+  // Tell the bridge RTL that this tick is complete, it may progress
+  bridge_driver_t::write(mmio_addrs.tick_done, 1);
+
+  //printf("[CTC] leaving tick\n");
 }
 
 void ctc_t::finish() {
