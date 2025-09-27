@@ -7,6 +7,8 @@ import freechips.rocketchip.system._
 import org.chipsalliance.cde.config.Parameters
 import freechips.rocketchip.devices.tilelink._
 
+import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import cordic.WithCORDIC
 // ------------------------------------
 // BOOM and/or Rocket Top Level Systems
 // ------------------------------------
@@ -37,6 +39,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with chipyard.clocking.CanHaveClockTap // Enables optionally adding a clock tap output port
   with fftgenerator.CanHavePeripheryFFT // Enables optionally having an MMIO-based FFT block
   with constellation.soc.CanHaveGlobalNoC // Support instantiating a global NoC interconnect
+  with cordic.CanHavePeripheryCORDIC // Enables optionally having an MMIO-based CORDIC block
 {
   override lazy val module = new DigitalTopModule(this)
 }

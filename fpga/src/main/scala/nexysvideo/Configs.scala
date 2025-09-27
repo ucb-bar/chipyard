@@ -5,7 +5,7 @@ import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.diplomacy._
+import org.chipsalliance.diplomacy.lazymodule._
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
@@ -22,18 +22,23 @@ class WithNoDesignKey extends Config((site, here, up) => {
 })
 
 // DOC include start: WithNexysVideoTweaks and Rocket
+
 class WithNexysVideoTweaks extends Config(
+ new freechips.rocketchip.subsystem.WithRoccExample ++
+  new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
+  new cordic.WithCORDIC(useAXI4=false, useBlackBox=true) ++         
   new WithNexysVideoUARTTSI ++
   new WithNexysVideoDDRTL ++
   new WithNoDesignKey ++
   new testchipip.tsi.WithUARTTSIClient ++
   new chipyard.harness.WithSerialTLTiedOff ++
-  new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
-  new chipyard.config.WithMemoryBusFrequency(50.0) ++
-  new chipyard.config.WithFrontBusFrequency(50.0) ++
-  new chipyard.config.WithSystemBusFrequency(50.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(50.0) ++
-  new chipyard.config.WithControlBusFrequency(50.0) ++
+
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(10) ++
+  new chipyard.config.WithMemoryBusFrequency(10.0) ++
+  new chipyard.config.WithFrontBusFrequency(10.0) ++
+  new chipyard.config.WithSystemBusFrequency(10.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(10.0) ++
+  new chipyard.config.WithControlBusFrequency(10.0) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithNoDebug ++ // no jtag
@@ -72,3 +77,9 @@ class TinyRocketNexysVideoConfig extends Config(
   new chipyard.config.WithBroadcastManager ++ // no l2
   new chipyard.TinyRocketConfig)
   // DOC include end: WithTinyNexysVideoTweaks and Rocket
+
+class BringupNexysVideoConfig extends Config(
+  new WithNexysVideoSerialTLToGPIO ++
+  new WithNexysVideoTweaks(freqMHz = 75) ++
+  new chipyard.ChipBringupHostConfig)
+

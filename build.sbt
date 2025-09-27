@@ -149,7 +149,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(testchipip, rocketchip, boom, hwacha, rocketchip_blocks, rocketchip_inclusive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, rocket_dsp_utils,
-    gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
+    gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,cordic,
     constellation, mempress, barf, shuttle, caliptra_aes)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
@@ -310,4 +310,9 @@ lazy val fpga_shells = (project in file("./fpga/fpga-shells"))
 
 lazy val fpga_platforms = (project in file("./fpga"))
   .dependsOn(chipyard, fpga_shells)
+  .settings(commonSettings)
+
+lazy val cordic = (project in file("generators/cordic"))
+  .dependsOn(rocketchip, rocket_dsp_utils)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)

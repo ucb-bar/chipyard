@@ -58,10 +58,17 @@ class LargeNVDLARocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 
+
 class ManyMMIOAcceleratorRocketConfig extends Config(
+ 
+  new freechips.rocketchip.subsystem.WithRoccExample ++
   new chipyard.harness.WithDontTouchChipTopPorts(false) ++   // TODO: hack around dontTouch not working in SFC
+
   new fftgenerator.WithFFTGenerator(numPoints=8, width=16, decPt=8) ++ // add 8-point mmio fft at the default addr (0x2400) with 16bit fixed-point numbers.
+  new cordic.WithCORDIC(useAXI4=false, useBlackBox=true) ++         
   new chipyard.example.WithStreamingPassthrough ++          // use top with tilelink-controlled streaming passthrough
   new chipyard.example.WithStreamingFIR ++                  // use top with tilelink-controlled streaming FIR
+
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractConfig)
+  new chipyard.config.AbstractConfig
+  )
