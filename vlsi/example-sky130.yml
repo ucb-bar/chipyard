@@ -5,12 +5,13 @@ vlsi.core.technology: "hammer.technology.sky130"
 vlsi.core.max_threads: 12
 
 # Technology paths
-technology.sky130:
-  sky130A: "/path/to/sky130A"
-  sram22_sky130_macros: "/path/to/sram22_sky130_macros"
+# NEED TO BE ABSOLUTE PATH
+technology.sky130.sky130A: /home/f.angione/.conda-sky130/share/pdk/sky130A
+technology.sky130.sram22_sky130_macros: /home/f.angione/sram22_sky130_macros
+
 
   # this key is OPTIONAL, no NDA files will be used if it does not point to a valid path
-  sky130_nda: "/path/to/skywater-src-nda"
+  #sky130_nda: "/path/to/skywater-src-nda"
 
 # General Hammer Inputs
 
