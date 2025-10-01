@@ -5,6 +5,9 @@ vlsi.inputs.clocks: [
   {name: "clock_uncore", period: "30ns", uncertainty: "2ns"}
 ]
 
+vlsi.inputs.resets: [
+  {name: "reset_io", active_negated: "false", "synchronous" : "false"}
+]
 # Placement Constraints
 # If overriding the placement constraints in example-sky130.yml,
 # ensure one of the toplevel margin sides corresponding with the power pin metal layers
