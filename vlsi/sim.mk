@@ -1,12 +1,14 @@
 SIM_CONF = $(OBJ_DIR)/sim-inputs.yml
 SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
+SIM_USE_GUI ?= false 
 
 .PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF)
 
 $(SIM_CONF): $(sim_common_files) check-binary
 	mkdir -p $(dir $@)
-	echo "sim.inputs:" > $@
+	echo "sim.gui: $(SIM_USE_GUI)" > $@
+	echo "sim.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
