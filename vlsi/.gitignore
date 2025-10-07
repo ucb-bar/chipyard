@@ -6,3 +6,7 @@ build-*
 src/test/output-*.json
 generated-src
 output.json
+
+# From verdi 
+novas.conf
+verdiLog
