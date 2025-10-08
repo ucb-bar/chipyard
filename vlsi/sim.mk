@@ -9,6 +9,15 @@ $(SIM_CONF): $(sim_common_files) check-binary
 	mkdir -p $(dir $@)
 	echo "sim.gui: $(SIM_USE_GUI)" > $@
 	echo "sim.inputs:" >> $@
+ifndef FSIM
+	echo "  sim_type: 'fsim'" >> $@
+	echo "  campaign_tb_dut: '$(FSIM_CAMPAIGN_DUT)'" >> $@
+	echo "  strobe_file_name: '$(FSIM_STROBE_FILE)'" >> $@
+	echo "  campaign_tcl: '$(FSIM_CAMPAIGN_TCL)'" >> $@
+	echo "  campaign_simv_daidir: 'simv.daidir'" >> $@
+else
+	echo "  sim_type: 'sim'" >> $@
+endif
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
