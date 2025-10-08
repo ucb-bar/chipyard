@@ -18,6 +18,7 @@ import freechips.rocketchip.subsystem.{MemoryPortParams, MasterPortParams, Slave
 import freechips.rocketchip.devices.debug.{ClockedDMIIO}
 import freechips.rocketchip.tilelink.{TLBundle}
 import org.chipsalliance.diplomacy.nodes.{HeterogeneousBag}
+import tacit.TraceSinkRawByteBundle
 
 trait Port[T <: Data] {
   val getIO: () => T
@@ -111,6 +112,9 @@ case class TLMemPort       (val getIO: () => HeterogeneousBag[TLBundle])
 
 case class GCDBusyPort     (val getIO: () => Bool)
     extends Port[Bool]
+
+case class TraceSinkRawBytePort(val getIO: () => TraceSinkRawByteBundle)
+    extends Port[TraceSinkRawByteBundle]
 
 case class OffchipSelPort  (val getIO: () => UInt)
     extends Port[UInt]

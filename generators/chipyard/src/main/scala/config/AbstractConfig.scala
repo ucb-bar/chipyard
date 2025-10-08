@@ -15,6 +15,7 @@ class AbstractConfig extends Config(
   //   Set up TestHarness
   // ================================================
   // The HarnessBinders control generation of hardware in the TestHarness
+  new chipyard.harness.WithTraceSinkRawByteHarnessTieOff ++        /** tie-off trace-sink-raw-byte port, if present */
   new chipyard.harness.WithUARTAdapter ++                          /** add UART adapter to display UART on stdout, if uart is present */
   new chipyard.harness.WithBlackBoxSimMem ++                       /** add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled */
   new chipyard.harness.WithSimTSIOverSerialTL ++                   /** add external serial-adapter and RAM */
@@ -62,6 +63,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithUARTTSIPunchthrough ++
   new chipyard.iobinders.WithGCDIOPunchthrough ++
+  new chipyard.iobinders.WithTraceSinkRawBytePunchthrough ++
   new chipyard.iobinders.WithNMITiedOff ++
   new chipyard.iobinders.WithOffchipBusSel ++
 

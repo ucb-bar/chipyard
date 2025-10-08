@@ -141,6 +141,12 @@ class WithSuccessBridge extends HarnessBinder({
   }
 })
 
+class WithTacitBridge extends HarnessBinder({
+  case (th: FireSim, port: TraceSinkRawBytePort, chipId: Int) => {
+    TacitBridge(th.harnessBinderClock, port.io, th.harnessBinderReset.asBool)
+  }
+})
+
 // Shorthand to register all of the provided bridges above
 class WithDefaultFireSimBridges extends Config(
   new WithTSIBridgeAndHarnessRAMOverSerialTL ++
