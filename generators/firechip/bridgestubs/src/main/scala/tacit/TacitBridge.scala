@@ -11,7 +11,7 @@ import firesim.lib.bridgeutils._
 
 import firechip.bridgeinterfaces._
 
-class TacitBridge(implicit p: Parameters) extends BlackBox 
+class TacitBridge() extends BlackBox 
     with Bridge[HostPortIO[TraceRawByteBridgeTargetIO]] {
   
 
@@ -20,15 +20,15 @@ class TacitBridge(implicit p: Parameters) extends BlackBox
   val io = IO(new TraceRawByteBridgeTargetIO)
   val bridgeIO = HostPort(io)
 
-  val constructorArg = Some(ByteKey())
+  val constructorArg = Some(TraceRawByteKey())
 
   generateAnnotations()
 }
 
 object TacitBridge {
-  def apply(clock: Clock, byte: TraceRawBytePortIO, reset: Bool)(implicit p: Parameters): TacitBridge = {
+  def apply(clock: Clock, byte: tacit.TraceSinkRawByteBundle, reset: Bool): TacitBridge = {
     val ep = Module(new TacitBridge)
-    ep.io.byte := byte
+    ep.io.byte.out <> byte.out
     ep.io.reset := reset
     ep.io.clock := clock
     ep
