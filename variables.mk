@@ -147,7 +147,19 @@ ifeq ($(SUB_PROJECT),constellation)
 	TB                ?= TestDriver
 	TOP               ?= NoC
 endif
-# For graphics developers
+# For Radiance developers
+ifeq ($(SUB_PROJECT),muon)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.unittest
+	CONFIG            ?= MuonTestConfig
+	CONFIG_PACKAGE    ?= radiance.unittest
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= UnitTestSuite
+endif
+
 ifeq ($(SUB_PROJECT),coalescer)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
