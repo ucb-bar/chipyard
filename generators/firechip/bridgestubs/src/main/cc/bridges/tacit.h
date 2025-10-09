@@ -53,6 +53,7 @@ private:
   serial_data_t<uint8_t> data;
 
   void recv();
+  void send();
 };
 
 #endif // __TACITBRIDGE_H

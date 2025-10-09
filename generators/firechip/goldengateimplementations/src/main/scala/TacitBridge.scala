@@ -32,7 +32,9 @@ class TacitBridgeModule(key: TraceRawByteKey)(implicit p: Parameters) extends Br
     hPort.toHost.hReady := fire
     hPort.fromHost.hValid := fire
 
-    txfifo.io.enq <> target.out
+    txfifo.io.enq.bits := target.out.bits
+    txfifo.io.enq.valid := target.out.valid && fire
+    target.out.ready := txfifo.io.enq.ready && fire
 
     genROReg(txfifo.io.deq.bits, "out_bits")
     genROReg(txfifo.io.deq.valid, "out_valid")

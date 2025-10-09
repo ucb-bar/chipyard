@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// #define DEBUG
+
 char tacit_t::KIND;
 
 class tacit_handler_impl final : public tacit_handler {
@@ -24,13 +26,17 @@ protected:
 
 void tacit_handler_impl::put(uint8_t data) {
   write(tacitlogfd, &data, 1);
+  #ifdef DEBUG
+    fprintf(stderr, "TACIT%d: %02x\n", tacitlogfd, data);
+  #endif
 }
 
 static std::unique_ptr<tacit_handler>
 create_handler(const std::vector<std::string> &args, int tacitno) {
   // open a new file for dumping the bytes
   std::string tacitlogname = std::string("tacit") + std::to_string(tacitno) + ".out";
-  int tacitlogfd = open(tacitlogname.c_str(), O_WRONLY | O_CREAT, 0644);
+  // create if non-existent, truncate if exists
+  int tacitlogfd = open(tacitlogname.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (tacitlogfd == -1) {
     fprintf(stderr, "Failed to open TACIT%d log file: %s\n", tacitno, tacitlogname.c_str());
     return nullptr;
@@ -54,13 +60,21 @@ void tacit_t::recv() {
   }
 }
 
+void tacit_t::send() {
+  if (data.out.fire()) {
+    write(mmio_addrs.out_ready, data.out.ready);
+  }
+}
+
 void tacit_t::tick() {
   data.out.ready = true;
   do {
     this->recv();
-
+    // data serves as an intermediate buffer 
+    // between the bridge and the handler
     if (data.out.fire()) {
       handler->put(data.out.bits);
     }
+    this->send();
   } while (data.out.fire());
 }
