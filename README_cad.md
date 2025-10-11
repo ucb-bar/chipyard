@@ -50,8 +50,27 @@ In order to setup the environment for running chipyard (simulation and synthesis
     cd ~
     git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git 
     echo "export OPENROAD=~/OpenROAD" >> ~/chipyard/env.sh
+    conda create -c litex-hub --prefix ~/.conda-openroad openroad=2.0_7070_g0264023b6
+    conda create -c litex-hub --prefix ~/.conda-klayout klayout=0.28.5_98_g87e2def28
+    conda create -c litex-hub --prefix ~/.conda-signoff magic=8.3.376_0_g5e5879c netgen=1.5.250_0_g178b172
     ```
     **Note the APPEND to the ``env.sh`` file !**
+
+    **Add the conda environments to the PATH**
+    ```bash 
+    export PATH=${PATH}:~/.conda-openroad/bin:~/.conda-klayout/bin:~/.conda-signoff/bin
+    ```
+   OR Add the following YAML keys to the top of env.yml to specify the locations of the tool binaries. Note that this is not required if the tools are already on your PATH.
+   ```yaml
+    # all ~ should be replaced with absolute paths to these directories
+    # tool binary paths
+    synthesis.yosys.yosys_bin: ~/.conda-yosys/bin/yosys
+    par.openroad.openroad_bin: ~/.conda-openroad/bin/openroad
+    par.openroad.klayout_bin: ~/.conda-klayout/bin/klayout  # binary that OpenROAD calls for final GDS writeout
+    drc.klayout.klayout_bin: ~/.conda-klayout/bin/klayout   # binary that runs for DRC step
+    drc.magic.magic_bin: ~/.conda-signoff/bin/magic
+    lvs.netgen.netgen_bin: ~/.conda-signoff/bin/netgen
+   ```
 
     **This is a hard hack for the moment**
 
