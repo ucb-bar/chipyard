@@ -42,7 +42,7 @@ HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
                         ./example-vlsi-sky130,\
                         ./example-vlsi)
 VLSI_TOP           ?= $(TOP)
-VLSI_MODEL_DUT_NAME ?= chiptop_$(CONFIG)
+VLSI_MODEL_DUT_NAME ?= chiptop0
 # If overriding, this should be relative to $(vlsi_dir)
 VLSI_OBJ_DIR       ?= build
 export USE_CHISEL6        = 1
@@ -76,7 +76,6 @@ else
 	RTL_DEPS = $(TOP_MODS_FILELIST) $(TOP_SMEMS_FILE) $(EXT_FILELISTS)
 endif
 
-# FIXME need uniquified names asshole
 $(VLSI_RTL): $(RTL_DEPS)
 ifneq ($(CUSTOM_VLOG), )
 	> $(VLSI_RTL)
