@@ -24,6 +24,7 @@ In order to setup the environment for running chipyard (simulation and synthesis
 3. Download the chipyard repository  
     ```bash 
     $ git clone git@github.com:cad-polito-it/chipyard.git
+    $ git checkout working/cad_servers
     ```
 
 4. Install the neeeded tools for chipard by running 
@@ -91,7 +92,7 @@ For running a simulation for a given configuration in variables.mk and a specifi
 ```bash 
 $ cd sims/vcs
 $ make SUB_PROJECT=chipyard_smallboom
-$ make run-binary BINARY=../../tests/hello.riscv SUB_PROJECT=chipyard_smallboom
+$ make run-binary BINARY=../../tests/hello.riscv SUB_PROJECT=chipyard_smallboom LOADMEM=1
 ```
 It generates the verilog file and run the binary 
 
@@ -111,5 +112,22 @@ $ make syn tutorial=nangate45-commercial
 For modifying the synthesis script see ```chipyard/vlsi/hammer-synopsys-plugins/hammer/synthesis/dc/__init__.py ``
 
 # Simulating the Gate-level
-TODO WIP
-TODO FIND THE CORRECT SIMULATED RAMS 
+For running post synthesis simulation:
+```bash 
+$ cd vlsi
+$ make sim-syn tutorial=nangate45-commercial BINARY=../../tests/hello.riscv LOADMEM=1
+```
+**Note: You need the absolute path for the BINARY!**
+
+For running post synthesis simulation and dumping the FSBD/EVCD:
+```bash 
+$ cd vlsi
+$ make sim-syn-debug tutorial=nangate45-commercial BINARY=../../tests/hello.riscv LOADMEM=1
+```
+
+If you want to use a GUI for visualizing the waveforms, you must export the following variable:
+
+```bash 
+export SIM_USE_GUI=true
+```
+
