@@ -134,17 +134,19 @@ For modifying the synthesis script see ```chipyard/vlsi/hammer-synopsys-plugins/
 For running post synthesis simulation:
 ```bash 
 $ cd vlsi
-$ make sim-syn tutorial=nangate45-commercial BINARY=../../tests/hello.riscv LOADMEM=1
+$ export TEST_PATH=absolute_path/tests/hello.riscv
+$ make sim-syn tutorial=nangate45-commercial SBT_PROJECT=chipyard BINARY=${TEST_PATH}$ LOADMEM=${TEST_PATH}
 ```
 **Note: You need the absolute path for the BINARY!**
 
 For running post synthesis simulation and dumping the FSBD/EVCD:
 ```bash 
 $ cd vlsi
-$ make sim-syn-debug tutorial=nangate45-commercial BINARY=../../tests/hello.riscv LOADMEM=1
+$ export TEST_PATH=absolute_path/tests/hello.riscv
+$ make sim-syn-debug tutorial=nangate45-commercial SBT_PROJECT=chipyard BINARY=${TEST_PATH}$ LOADMEM=${TEST_PATH}
 ```
 
-If you want to use a GUI for visualizing the waveforms, you must export the following variable:
+If you want to use a GUI for visualizing the waveforms (espeecially in debug mode), you must export the following variable:
 
 ```bash 
 export SIM_USE_GUI=true
