@@ -135,7 +135,7 @@ For running post synthesis simulation:
 ```bash 
 $ cd vlsi
 $ export TEST_PATH=absolute_path/tests/hello.riscv
-$ make sim-syn tutorial=nangate45-commercial SBT_PROJECT=chipyard BINARY=${TEST_PATH}$ LOADMEM=${TEST_PATH}
+$ make sim-syn tutorial=nangate45-commercial SUB_PROJECT=chipyard BINARY=${TEST_PATH}$ LOADMEM=${TEST_PATH}
 ```
 **Note: You need the absolute path for the BINARY!**
 
@@ -143,7 +143,7 @@ For running post synthesis simulation and dumping the FSBD/EVCD:
 ```bash 
 $ cd vlsi
 $ export TEST_PATH=absolute_path/tests/hello.riscv
-$ make sim-syn-debug tutorial=nangate45-commercial SBT_PROJECT=chipyard BINARY=${TEST_PATH}$ LOADMEM=${TEST_PATH}
+$ make sim-syn-debug tutorial=nangate45-commercial SUB_PROJECT=chipyard BINARY=${TEST_PATH}$ LOADMEM=${TEST_PATH}
 ```
 
 If you want to use a GUI for visualizing the waveforms (espeecially in debug mode), you must export the following variable:
@@ -152,3 +152,8 @@ If you want to use a GUI for visualizing the waveforms (espeecially in debug mod
 export SIM_USE_GUI=true
 ```
 
+# Useful information
+The core unit is at the followwing hierarchy:
+```verilog 
+TestDriver.TestHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.core
+```
