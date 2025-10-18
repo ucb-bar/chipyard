@@ -18,6 +18,7 @@ ifndef FSIM
 else
 	echo "  sim_type: 'sim'" >> $@
 endif
+	echo "  saif.mode: \"none\" "
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
@@ -54,7 +55,7 @@ endif
 	echo "  execution_flags_prepend: ['$(PERMISSIVE_ON)']" >> $@
 	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
 	echo "  execution_flags:" >> $@
-	for x in $(SIM_FLAGS); do \
+	for x in $(SIM_FLAGS) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS); do \
 	  echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  execution_flags_meta: 'append'" >> $@
@@ -78,7 +79,7 @@ endif
 	  echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  execution_flags_meta: 'append'" >> $@
-	echo "  saif.mode: 'time'" >> $@
+	echo "  saif.mode: 'none'" >> $@
 	echo "  saif.start_time: '0ns'" >> $@
 	echo "  saif.end_time: '`bc <<< $(TIMEOUT_CYCLES)*$(CLOCK_PERIOD)`ns'" >> $@
 ifndef USE_VPD
