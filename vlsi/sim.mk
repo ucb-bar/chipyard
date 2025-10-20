@@ -9,7 +9,7 @@ $(SIM_CONF): $(sim_common_files) check-binary
 	mkdir -p $(dir $@)
 	echo "sim.gui: $(SIM_USE_GUI)" > $@
 	echo "sim.inputs:" >> $@
-ifndef FSIM
+ifdef FSIM
 	echo "  sim_type: 'fsim'" >> $@
 	echo "  campaign_tb_dut: '$(FSIM_CAMPAIGN_DUT)'" >> $@
 	echo "  strobe_file_name: '$(FSIM_STROBE_FILE)'" >> $@
