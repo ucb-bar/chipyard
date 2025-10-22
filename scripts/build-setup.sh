@@ -53,6 +53,8 @@ usage() {
     echo "  --skip-circt            : Skip CIRCT install (step 10)"
     echo "  --skip-clean            : Skip repository clean-up (step 11)"
 
+    echo "  --time-everything       : Generate per-step timing report"
+
     exit "$1"
 }
 
@@ -65,6 +67,7 @@ SKIP_LIST=()
 BUILD_CIRCT=false
 GLOBAL_ENV_NAME=""
 GITHUB_TOKEN="null"
+TIME_EVERYTHING=false
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -111,6 +114,8 @@ do
             SKIP_LIST+=(10) ;;
         --skip-clean)
             SKIP_LIST+=(11) ;;
+        --time-everything)
+            TIME_EVERYTHING=true ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -133,17 +138,31 @@ run_step() {
 # In order to run code on error, we must handle errors manually
 set +e;
 
+STEP_IDS=()
+STEP_DESCS=()
+STEP_WALL=()
+__STEP_START=0
+
 function begin_step
 {
     thisStepNum=$1;
     thisStepDesc=$2;
     echo " ========== BEGINNING STEP $thisStepNum: $thisStepDesc =========="
+    if [ "$TIME_EVERYTHING" = true ]; then __STEP_START=$(date +%s); fi
 }
 function exit_if_last_command_failed
 {
     local exitcode=$?;
     if [ $exitcode -ne 0 ]; then
         die "Build script failed with exit code $exitcode at step $thisStepNum: $thisStepDesc" $exitcode;
+    fi
+}
+record_step_time() {
+    if [ "$TIME_EVERYTHING" = true ]; then
+        local __end=$(date +%s)
+        STEP_IDS+=("$thisStepNum")
+        STEP_DESCS+=("$thisStepDesc")
+        STEP_WALL+=("$((__end-__STEP_START))")
     fi
 }
 
@@ -204,6 +223,7 @@ conda environment or \`source env.sh\` and skip this step with \`-s 1\`." >&2
     source $(conda info --base)/etc/profile.d/conda.sh &&
     conda activate $CONDA_ENV_NAME
     exit_if_last_command_failed
+    record_step_time
 
     # Conda Setup
     # Provide a sourceable snippet that can be used in subshells that may not have
@@ -234,6 +254,7 @@ if run_step "2"; then
     begin_step "2" "Initializing Chipyard submodules"
     $CYDIR/scripts/init-submodules-no-riscv-tools.sh --full
     exit_if_last_command_failed
+    record_step_time
 fi
 
 # build extra toolchain collateral (i.e. spike, pk, riscv-tests, libgloss)
@@ -250,6 +271,7 @@ if run_step "3"; then
     fi
     $CYDIR/scripts/build-toolchain-extra.sh $TOOLCHAIN_TYPE -p $PREFIX
     exit_if_last_command_failed
+    record_step_time
 fi
 
 # run ctags for code navigation
@@ -257,6 +279,7 @@ if run_step "4"; then
     begin_step "4" "Running ctags for code navigation"
     $CYDIR/scripts/gen-tags.sh
     exit_if_last_command_failed
+    record_step_time
 fi
 
 # precompile chipyard scala sources
@@ -267,6 +290,7 @@ if run_step "5"; then
     make launch-sbt SBT_COMMAND=";project tapeout; compile" &&
     popd
     exit_if_last_command_failed
+    record_step_time
 fi
 
 # setup firesim
@@ -275,21 +299,22 @@ if run_step "6"; then
     $CYDIR/scripts/firesim-setup.sh &&
     $CYDIR/sims/firesim/gen-tags.sh
     exit_if_last_command_failed
+    record_step_time
 
     # precompile firesim scala sources
     if run_step "7"; then
         begin_step "7" "Pre-compiling Firesim Scala sources"
         pushd $CYDIR/sims/firesim &&
         (
-            set -e # Subshells un-set "set -e" so it must be re enabled
+            set -e
             source sourceme-manager.sh --skip-ssh-setup
             pushd sim
-            # avoid directly building classpath s.t. target-injected files can be recompiled
             make sbt SBT_COMMAND="compile"
             popd
         )
         exit_if_last_command_failed
         popd
+        record_step_time
     fi
 fi
 
@@ -299,6 +324,7 @@ if run_step "8"; then
     pushd $CYDIR/software/firemarshal &&
     ./init-submodules.sh
     exit_if_last_command_failed
+    record_step_time
 
     # precompile firemarshal buildroot sources
     if run_step "9"; then
@@ -307,6 +333,7 @@ if run_step "8"; then
         ./marshal $VERBOSE_FLAG build br-base.json &&
         ./marshal $VERBOSE_FLAG build bare-base.json
         exit_if_last_command_failed
+        record_step_time
     fi
     popd
     # Ensure FireMarshal CLI is on PATH in env.sh (idempotent)
@@ -341,6 +368,7 @@ if run_step "10"; then
 		-g $GITHUB_TOKEN
     fi
     exit_if_last_command_failed
+    record_step_time
 fi
 
 
@@ -349,8 +377,21 @@ if run_step "11"; then
     begin_step "11" "Cleaning up repository"
     $CYDIR/scripts/repo-clean.sh
     exit_if_last_command_failed
+    record_step_time
 fi
 
 echo "Setup complete!"
+
+if [ "$TIME_EVERYTHING" = true ] && [ "${#STEP_IDS[@]}" -gt 0 ]; then
+    echo ""
+    printf "Per-step timing (wall seconds)\n"
+    printf "%-6s  %-8s  %s\n" "Step" "Seconds" "Description"
+    total=0
+    for i in "${!STEP_IDS[@]}"; do
+        printf "%-6s  %-8s  %s\n" "${STEP_IDS[$i]}" "${STEP_WALL[$i]}" "${STEP_DESCS[$i]}"
+        total=$((total + ${STEP_WALL[$i]}))
+    done
+    printf "%-6s  %-8s  %s\n" "Total" "$total" ""
+fi
 
 } 2>&1 | tee build-setup.log
