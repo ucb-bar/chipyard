@@ -10,8 +10,6 @@ if [[ `basename $CONDA_PREFIX` != .conda-env ]]; then
     exit
 fi
 
-pip install -e vlsi/hammer-synopsys-plugins
-
 hammer_root_dir=$1
 if [[ ! -d "$hammer_root_dir" ]] ; then 
 echo "Hammer root dir does not exist, please provide a valid path to your Hammer installation"

@@ -38,14 +38,8 @@ In order to setup the environment for running chipyard (simulation and synthesis
 
     **Now you can activate your conda environment by sourcing the env.sh file**
 
-5. Install the necessary plugins for hammer 
-    ```bash 
-    $ ./scripts/init-vlsi.sh synopsys
-    $ ./vlsi/install_plugins.sh <path to you hammer download dir>
-    ```
-    This set the environemnt pointing to the python sourcee code of hammer and its synopsys plugin (in case you need to modify them)
 
-6. Download the OpenRoad repository for generating technology-related rams 
+5. Download the OpenRoad repository for generating technology-related rams 
     ```bash 
     cd ~
     git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git 
