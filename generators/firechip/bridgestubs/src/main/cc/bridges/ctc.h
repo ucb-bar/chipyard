@@ -5,6 +5,7 @@
 
 #include "bridges/serial_data.h"
 #include "core/bridge_driver.h"
+#include "core/stream_engine.h"
 
 #include <cstdint>
 #include <memory>
@@ -16,30 +17,25 @@
 // Using TSI to make my life easier
 // TODO: FIXME
 struct CTCBRIDGEMODULE_struct {
-  uint64_t client_in_bits;
-  uint64_t client_in_valid;
-  uint64_t client_in_ready;
-  uint64_t client_out_bits;
-  uint64_t client_out_valid;
-  uint64_t client_out_ready;
-  uint64_t manager_in_bits;
-  uint64_t manager_in_valid;
-  uint64_t manager_in_ready;
-  uint64_t manager_out_bits;
-  uint64_t manager_out_valid;
-  uint64_t manager_out_ready;
-  uint64_t tick_done;
+  uint64_t done;
 };
 
-class ctc_t final : public bridge_driver_t {
+class ctc_t final : public streaming_bridge_driver_t {
 public:
   /// The identifier for the bridge type used for casts.
   static char KIND;
   ctc_t(simif_t &simif,
-                    const CTCBRIDGEMODULE_struct &mmio_addrs,
-                    int chipno, // YOU
-                    const std::vector<std::string> &args
-                  ); 
+        StreamEngine &stream,
+        const CTCBRIDGEMODULE_struct &mmio_addrs,
+        int chipno, // YOU
+        const std::vector<std::string> &args,
+        int stream_to_cpu_idx,
+        int stream_to_cpu_depth,
+        int stream_from_cpu_idx,
+        int stream_from_cpu_depth
+      ); 
+  ~ctc_t() override;
+                  
   void init() override;
   void tick() override;
   void finish() override;
@@ -52,6 +48,13 @@ private:
   int fifo1_fd;
   int chip_id;
   int chip1_id;
+  char *buf;
+
+  int LINKLATENCY;
+
+  // Idk what these do
+  const int stream_to_cpu_idx;
+  const int stream_from_cpu_idx;
 };
 
 #endif // __CTC_H

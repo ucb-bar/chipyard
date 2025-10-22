@@ -15,13 +15,29 @@
 
 char ctc_t::KIND;
 
+// THIEVERY!!
+#define TOKENS_PER_BIGTOKEN 7
+
+#define SIMLATENCY_BT (this->LINKLATENCY / TOKENS_PER_BIGTOKEN)
+
+#define BUFWIDTH streaming_bridge_driver_t::STREAM_WIDTH_BYTES
+#define BUFBYTES (SIMLATENCY_BT * BUFWIDTH)
+#define EXTRABYTES 1
+
 // "Serial" tilelink
 
 ctc_t::ctc_t(simif_t &simif,
-                    const CTCBRIDGEMODULE_struct &mmio_addrs,
-                    int chipno, // maybe this is a stupid naming scheme
-                    const std::vector<std::string> &args)
-    : bridge_driver_t(simif, &KIND), mmio_addrs(mmio_addrs) {
+              StreamEngine &stream,
+              const CTCBRIDGEMODULE_struct &mmio_addrs,
+              int chipno, // maybe this is a stupid naming scheme
+              const std::vector<std::string> &args,
+              int stream_to_cpu_idx,
+              int stream_to_cpu_depth,
+              int stream_from_cpu_idx,
+              int stream_from_cpu_depth)
+    : streaming_bridge_driver_t(simif, stream, &KIND), mmio_addrs(mmio_addrs),
+      stream_to_cpu_idx(stream_to_cpu_idx),
+      stream_from_cpu_idx(stream_from_cpu_idx) {
 
   // Read plusargs
   std::string macaddr_arg = std::string("+macaddr") + std::to_string(chipno) + std::string("=");
@@ -68,11 +84,14 @@ ctc_t::ctc_t(simif_t &simif,
 
   const std::string chip0fifo_arg = std::string("+fifofile") + num_equals;
   const std::string chip1fifo_arg = std::string("+fifofile") + chip1no + std::string("=");
+  const std::string latency_arg = std::string("+ctclatency") + num_equals;
 
   fifo0_path = "";
   fifo1_path = "";
   // fifo0_fd = 0
   // fifo1_fd = 0
+
+  //this->LINKLATENCY = 28; //hardcode for now, TODO: add argument
 
   for (auto &arg : args) {
     if(arg.find(chip0fifo_arg) == 0) {
@@ -81,10 +100,16 @@ ctc_t::ctc_t(simif_t &simif,
     if(arg.find(chip1fifo_arg) == 0) {
       fifo1_path = const_cast<char *>(arg.c_str()) + chip1fifo_arg.length();
     }
+    if(arg.find(latency_arg) == 0) {
+      char *str = const_cast<char *>(arg.c_str()) + latency_arg.length();
+      this->LINKLATENCY = atoi(str);
+    }
   }
 
   printf("CHIP%d: got fifo0 path %s\n", chip_id, fifo0_path.c_str());
   printf("CHIP%d: got fifo1 path %s\n", chip_id, fifo1_path.c_str());
+
+  printf("Link latency = %d\n", this->LINKLATENCY);
 
   fifo0_path = fifo0_path + std::string("fifo") + std::to_string(chip_id);
   fifo1_path = fifo1_path + std::string("fifo") + chip1no;
@@ -93,149 +118,111 @@ ctc_t::ctc_t(simif_t &simif,
   printf("CHIP%d: got fifo1 file %s\n", chip_id, fifo1_path.c_str());
 
   mkfifo(fifo0_path.c_str(), 0666);
+
+  // For storing data that is pushed/pulled from the stream
+  buf = static_cast<char*>(aligned_alloc(64, BUFBYTES + EXTRABYTES));
+  memset(buf, 0, BUFBYTES + EXTRABYTES);
+
 }
 
-// Uh idk if I need this anymore...
-void ctc_t::init() {
-  // Open my fifo as RO
-  // fifo0_fd = open(fifo0_path.c_str(), O_RDONLY);
-  // printf("CHIP%d: opened fifo0", chip_id);
-  // // Open the other chip's fifo as WO
-  // fifo1_fd = open(fifo1_path.c_str(), O_WRONLY);
-  // printf("CHIP%d: opened fifo1", chip_id);
+ctc_t::~ctc_t() {
+  free(buf);
+}
 
+void ctc_t::init() {
   // Switch order to prevent deadlock?
   if (chip_id > chip1_id) {
     fifo0_fd = open(fifo0_path.c_str(), O_RDONLY);
-    printf("CHIP%d: opened rd fifo0", chip_id);
+    printf("CHIP%d: opened rd fifo0\n", chip_id);
     fifo1_fd = open(fifo1_path.c_str(), O_WRONLY);
-    printf("CHIP%d: opened wr fifo1", chip_id);
+    printf("CHIP%d: opened wr fifo1\n", chip_id);
   } else {
     fifo1_fd = open(fifo1_path.c_str(), O_WRONLY);
-    printf("CHIP%d: opened wr fifo1", chip_id);
+    printf("CHIP%d: opened wr fifo1\n", chip_id);
     fifo0_fd = open(fifo0_path.c_str(), O_RDONLY);
-    printf("CHIP%d: opened rd fifo0", chip_id);
+    printf("CHIP%d: opened rd fifo0\n", chip_id);
   }
 
   assert(fifo0_fd != -1 && "fifofile0 couldn't be opened\n");
   assert(fifo1_fd != -1 && "fifofile1 couldn't be opened\n");
 
-  // Indicate to the RTL bridge that init is complete
-  bridge_driver_t::write(mmio_addrs.tick_done, 1);
+  // Stolen from simplenic.cc
+  auto token_bytes_to_send = SIMLATENCY_BT * BUFWIDTH;
+  auto token_bytes_produced = this->push(
+      stream_from_cpu_idx, buf, token_bytes_to_send, 0);
+
+  printf("[CTC] init push 1\n");
+
+  if (token_bytes_produced != token_bytes_to_send) {
+    printf("FAIL. Could not enqueue big tokens to support the desired sim "
+           "latency on init. Required %d, enqueued %lu\n",
+           SIMLATENCY_BT,
+           token_bytes_produced / BUFWIDTH);
+    exit(1);
+  }
+
+  printf("[CTC] init push 2\n");
 
 }
 
 void ctc_t::tick() {
+  while(true) {
 
-  //printf("[CTC] Inside tick\n");
+    // Pull from the stream
+    uint32_t token_bytes_from_target = 0;
+    auto requested_token_bytes = BUFWIDTH * SIMLATENCY_BT; //Number of concatenated tokens * bytes per token
+    token_bytes_from_target =
+      pull(stream_to_cpu_idx,
+        buf,
+        requested_token_bytes,
+        requested_token_bytes // Copy only if the stream can provide
+                              // exactly as many bytes as we want
+      );
 
-  // NEW IMPLEMENTATION
-  // Pulsify is super nice and makes my life EZ
-
-  // MMIO READING (ex. client_out, manager_out)
-  // Check if client_out_valid is high. 
-    // If so, read client_out_bits
-    //        set client_out_ready
-    // ELSE set the buf to 0, or whatever
-  // Write to the out fifo
-  // MMIO WRITING (ex. client_in, manager_in)
-  // Read everything out of the in fifo
-  // If valid is high
-    // If ready is low
-      // PANIC!!! THIS IS SUPER BAD, but you just have to die
-    // Write bits to in_bits MMIO
-  
-  // NOTE: We do not need to send any ready signals because the bridge handles this :)
-
-  // Read RO (or "output") mmios and cast everything into a char array, should be 12 chars total
-  // ALWAYS write to because the other chip must read from my fifo. This is the easiest way to synchronize.
-  uint32_t buf_out[4]; // 0: cl_valid, 1: cl_ready, 2: cl_bits, 3: man_valid, 4: man_ready, 5: man_bits
-
-  // If valid is high, read bits to send and assert ready
-  buf_out[0] = bridge_driver_t::read(mmio_addrs.client_out_valid);
-  if (buf_out[0]) {
-    buf_out[1] = bridge_driver_t::read(mmio_addrs.client_out_bits);
-    printf("[CTC] client_out valid - read mmio bits = %d\n", buf_out[1]);
-    bridge_driver_t::write(mmio_addrs.client_out_ready, 1);
-  } else {
-    buf_out[1] = 0; // Send nothing
-  }
-
-  // Check valid high for manager
-  buf_out[2] = bridge_driver_t::read(mmio_addrs.manager_out_valid);
-  if (buf_out[2]) {
-    buf_out[3] = bridge_driver_t::read(mmio_addrs.manager_out_bits);
-    printf("[CTC] manager_out valid - read mmio bits = %d\n", buf_out[3]);
-    bridge_driver_t::write(mmio_addrs.manager_out_ready, 1);
-  } else {
-    buf_out[3] = 0;
-  }
-
-  //buf_out[1] = bridge_driver_t::read(mmio_addrs.client_in_ready);
-  //buf_out[2] = bridge_driver_t::read(mmio_addrs.client_out_bits);
-  //buf_out[4] = bridge_driver_t::read(mmio_addrs.manager_in_ready);
-  //buf_out[5] = bridge_driver_t::read(mmio_addrs.manager_out_bits);
-
-  // printf("[CTC] read mmio\n");
-
-  // Write entire "out" char array to the other chips's fifo
-  int bytes_written = ::write(fifo1_fd, buf_out, sizeof(buf_out));
-  if (bytes_written != sizeof(buf_out)) {
-    printf("[CTC] Writing to fifo failed.\n");
-    exit(1);
-  }
-
-  printf("[CTC] Wrote fifo\n");
-
-  // Read my own fifo until I read all the "in" chars
-  uint32_t buf_in[4];
-  int bytes_read = ::read(fifo0_fd, buf_in, sizeof(buf_in));
-  if (bytes_read != sizeof(buf_in)) {
-    printf("[CTC] Reading from fifo failed.\n");
-    for (int i=0; i<4; i++) {
-      printf("Buf[%d] got: %d", i, buf_in[i]);
+    if (token_bytes_from_target == 0) {
+      return;
     }
-    exit(1); // HOW DO I DO THIS FOR REAL
-  }
-
-  printf("[CTC] Read fifo\n");
-
-  // Other client writes to my manager
-  uint32_t manager_in_ready = bridge_driver_t::read(mmio_addrs.manager_in_ready);
-  if (buf_in[0]) { // If client_in valid
-    if (manager_in_ready) {
-      printf("[CTC] manager_in valid - write mmio bits = %d\n", buf_in[1]);
-      bridge_driver_t::write(mmio_addrs.manager_in_bits,  buf_in[1]);
-      bridge_driver_t::write(mmio_addrs.manager_in_valid, 1);
-    } else {
-      printf("ERROR: manager_in_ready is LOW");
+    if (token_bytes_from_target != requested_token_bytes) {
+      printf("[CTC] Pulling from stream failed. Read %d bytes, expected %d bytes.\n", token_bytes_from_target, requested_token_bytes);
+      exit(1);
     }
-  }
 
-  // Other manager writes to my client
-  uint32_t client_in_ready = bridge_driver_t::read(mmio_addrs.client_in_ready);
-  if (buf_in[2]) { // If client_in valid
-    if (client_in_ready) {
-      printf("[CTC] client_in valid - write mmio bits = %d\n", buf_in[3]);
-      bridge_driver_t::write(mmio_addrs.client_in_bits,  buf_in[3]);
-      bridge_driver_t::write(mmio_addrs.client_in_valid, 1);
-    } else {
-      printf("ERROR: client_in_ready is LOW");
+    // Write entire out buffer to the other chips's fifo
+    int bytes_written = ::write(fifo1_fd, buf, BUFBYTES + EXTRABYTES);
+    if (bytes_written != BUFBYTES + EXTRABYTES) {
+      printf("[CTC] Writing to fifo failed.\n");
+      exit(1);
     }
+
+    // printf("[CTC] Wrote fifo\n");
+
+    // Read my own fifo until I read all the "in" chars
+    int bytes_read = ::read(fifo0_fd, buf, BUFBYTES + EXTRABYTES);
+    if (bytes_read != BUFBYTES + EXTRABYTES) {
+      printf("[CTC] Reading from fifo failed.\n");
+      // for (int i=0; i<4; i++) {
+      //   printf("Buf[%d] got: %d", i, buf[i]);
+      // }
+      exit(1); // HOW DO I DO THIS FOR REAL
+    }
+
+    // Push to the stream
+    uint32_t token_bytes_to_target = 0;
+    token_bytes_to_target =
+      push(stream_from_cpu_idx,
+        buf,
+        BUFWIDTH * SIMLATENCY_BT,
+        BUFWIDTH * SIMLATENCY_BT);
+
+    if (token_bytes_to_target != BUFWIDTH * SIMLATENCY_BT) {
+      printf("[CTC] Pushing to stream failed. Wrote %d bytes, expected %d bytes.\n", token_bytes_to_target, BUFWIDTH * SIMLATENCY_BT);
+      exit(1);
+    }
+
+    // printf("[CTC] Read fifo\n");
+
+    //printf("[CTC] leaving tick\n");
   }
-
-  // Write "in" chars to mmio
-  // bridge_driver_t::write(mmio_addrs.client_in_valid,   buf_in[0]);
-  // bridge_driver_t::write(mmio_addrs.client_out_ready,  buf_in[1]);
-  // bridge_driver_t::write(mmio_addrs.client_in_bits,    buf_in[2]);
-  // bridge_driver_t::write(mmio_addrs.manager_in_valid,  buf_in[3]);
-  // bridge_driver_t::write(mmio_addrs.manager_out_ready, buf_in[4]);
-  // bridge_driver_t::write(mmio_addrs.manager_in_bits,   buf_in[5]);
-
-  // Tell the bridge RTL that this tick is complete, it may progress
-  bridge_driver_t::write(mmio_addrs.tick_done, 1);
-
-  //printf("[CTC] leaving tick\n");
 }
 
 void ctc_t::finish() {
