@@ -82,6 +82,19 @@ ifeq ($(SUB_PROJECT),chipyard_smallboom)
 endif
 
 
+ifeq ($(SUB_PROJECT),chipyard_mediumboom)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= $(MODEL)
+	MODEL_PACKAGE     ?= chipyard.harness
+	CONFIG            ?= MediumBoomV3Config
+	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+	TB                ?= TestDriver
+	TOP               ?= ChipTop
+endif
+
+
 ifeq ($(SUB_PROJECT),chipyard_megaboom)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
