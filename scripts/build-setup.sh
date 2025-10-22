@@ -53,8 +53,6 @@ usage() {
     echo "  --skip-circt            : Skip CIRCT install (step 10)"
     echo "  --skip-clean            : Skip repository clean-up (step 11)"
 
-    echo "  --time-everything       : Generate per-step timing report"
-
     exit "$1"
 }
 
@@ -67,7 +65,6 @@ SKIP_LIST=()
 BUILD_CIRCT=false
 GLOBAL_ENV_NAME=""
 GITHUB_TOKEN="null"
-TIME_EVERYTHING=false
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -114,8 +111,6 @@ do
             SKIP_LIST+=(10) ;;
         --skip-clean)
             SKIP_LIST+=(11) ;;
-        --time-everything)
-            TIME_EVERYTHING=true ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -148,7 +143,7 @@ function begin_step
     thisStepNum=$1;
     thisStepDesc=$2;
     echo " ========== BEGINNING STEP $thisStepNum: $thisStepDesc =========="
-    if [ "$TIME_EVERYTHING" = true ]; then __STEP_START=$(date +%s); fi
+    __STEP_START=$(date +%s)
 }
 function exit_if_last_command_failed
 {
@@ -158,12 +153,10 @@ function exit_if_last_command_failed
     fi
 }
 record_step_time() {
-    if [ "$TIME_EVERYTHING" = true ]; then
-        local __end=$(date +%s)
-        STEP_IDS+=("$thisStepNum")
-        STEP_DESCS+=("$thisStepDesc")
-        STEP_WALL+=("$((__end-__STEP_START))")
-    fi
+    local __end=$(date +%s)
+    STEP_IDS+=("$thisStepNum")
+    STEP_DESCS+=("$thisStepDesc")
+    STEP_WALL+=("$((__end-__STEP_START))")
 }
 
 # add helper variable pointing to current chipyard top-level dir
@@ -382,7 +375,7 @@ fi
 
 echo "Setup complete!"
 
-if [ "$TIME_EVERYTHING" = true ] && [ "${#STEP_IDS[@]}" -gt 0 ]; then
+if [ "${#STEP_IDS[@]}" -gt 0 ]; then
     echo ""
     printf "Per-step timing (wall seconds)\n"
     printf "%-6s  %-8s  %s\n" "Step" "Seconds" "Description"
