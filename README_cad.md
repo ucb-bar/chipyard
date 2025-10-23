@@ -101,7 +101,7 @@ $ make sbst1
 You will find the executable in ``tests/sbst1/`` named ``sbst1.riscv``
 
 # Simulating the RTL 
-For running a simulation for a given configuration in variables.mk and a specified program (BINARY var points to the compiled program) from tests folder:
+For running a simulation for a given configuration in [``variables.mk``](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/variables.mk) and a specified program (BINARY var points to the compiled program) from tests folder:
 ```bash 
 $ cd sims/vcs
 $ make SUB_PROJECT=chipyard_smallboom
@@ -114,13 +114,13 @@ It generates the verilog file and run the binary
 For generating the files for the synthesis using the technology and deesign files defined in tutorial.mk file:
 ```bash 
 $ cd vlsi
-$ make buildfile tutorial=nangate45-commercial
+$ make buildfile tutorial=nangate45-commercial-rocket
 ```
 
 For running the synthesis:
 ```bash 
 $ cd vlsi
-$ make syn tutorial=nangate45-commercial
+$ make syn tutorial=nangate45-commercial-rocket
 ```
 For modifying the synthesis script see ```chipyard/vlsi/hammer-synopsys-plugins/hammer/synthesis/dc/__init__.py ``
 
@@ -129,7 +129,7 @@ For running post synthesis simulation:
 ```bash 
 $ cd vlsi
 $ export TEST_PATH=absolute_path/tests/hello.riscv
-$ make sim-syn tutorial=nangate45-commercial SUB_PROJECT=chipyard BINARY=${TEST_PATH} LOADMEM=${TEST_PATH}
+$ make sim-syn tutorial=nangate45-commercial-rocket SUB_PROJECT=chipyard BINARY=${TEST_PATH} LOADMEM=${TEST_PATH}
 ```
 **Note: You need the absolute path for the BINARY!**
 
@@ -137,7 +137,7 @@ For running post synthesis simulation and dumping the FSBD/EVCD:
 ```bash 
 $ cd vlsi
 $ export TEST_PATH=absolute_path/tests/hello.riscv
-$ make sim-syn-debug tutorial=nangate45-commercial SUB_PROJECT=chipyard BINARY=${TEST_PATH} LOADMEM=${TEST_PATH}
+$ make sim-syn-debug tutorial=nangate45-commercial-rocket SUB_PROJECT=chipyard BINARY=${TEST_PATH} LOADMEM=${TEST_PATH}
 ```
 
 If you want to use a GUI for visualizing the waveforms (espeecially in debug mode), you must export the following variable:
@@ -151,3 +151,7 @@ The core unit is at the followwing hierarchy:
 ```verilog 
 TestDriver.TestHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.core
 ```
+
+For different tutorial and subprojects please see:
+- [./vlsi/tutorial.mk](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/vlsi/Makefile)
+- [./variables.mk](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/variables.mk)
