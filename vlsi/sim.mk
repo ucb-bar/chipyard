@@ -1,7 +1,13 @@
 SIM_CONF = $(OBJ_DIR)/sim-inputs.yml
+FSIM_CONF = $(OBJ_DIR)/fsim-inputs.yml
 SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 SIM_USE_GUI ?= false 
+FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
+FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../strobe.sv
+FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim.tcl
+FAULT_TYPE ?= saf
+SFF_FILE ?= $(OBJ_DIR)/../../gen_$(FAULT_TYPE)_$(VLSI_MODEL_DUT_NAME).sff
 
 .PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF)
 
@@ -9,15 +15,7 @@ $(SIM_CONF): $(sim_common_files) check-binary
 	mkdir -p $(dir $@)
 	echo "sim.gui: $(SIM_USE_GUI)" > $@
 	echo "sim.inputs:" >> $@
-ifdef FSIM
-	echo "  sim_type: 'fsim'" >> $@
-	echo "  campaign_tb_dut: '$(FSIM_CAMPAIGN_DUT)'" >> $@
-	echo "  strobe_file_name: '$(FSIM_STROBE_FILE)'" >> $@
-	echo "  campaign_tcl: '$(FSIM_CAMPAIGN_TCL)'" >> $@
-	echo "  campaign_simv_daidir: 'simv.daidir'" >> $@
-else
 	echo "  sim_type: 'sim'" >> $@
-endif
 	echo "  saif.mode: \"none\" "
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
@@ -35,6 +33,67 @@ endif
 	echo "  options:" >> $@
 	for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \
 		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  options_meta: 'append'" >> $@
+	echo "  defines:" >> $@
+	for x in $(subst +define+,,$(SIM_PREPROC_DEFINES)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  defines_meta: 'append'" >> $@
+	echo "  compiler_cc_opts:" >> $@
+	for x in $(filter-out "",$(VCS_CXXFLAGS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  compiler_cc_opts_meta: 'append'" >> $@
+	echo "  compiler_ld_opts:" >> $@
+	for x in $(filter-out "",$(VCS_LDFLAGS)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  compiler_ld_opts_meta: 'append'" >> $@
+	echo "  execution_flags_prepend: ['$(PERMISSIVE_ON)']" >> $@
+	echo "  execution_flags_append: ['$(PERMISSIVE_OFF)']" >> $@
+	echo "  execution_flags:" >> $@
+	for x in $(SIM_FLAGS) $(call get_common_sim_flags,$*) $(VERBOSE_FLAGS); do \
+	  echo '    - "'$$x'"' >> $@; \
+	done
+	echo "  execution_flags_meta: 'append'" >> $@
+ifneq ($(BINARY), )
+	echo "  benchmarks: ['$(BINARY)']" >> $@
+endif
+	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)'" >> $@
+
+
+$(FSIM_CONF): $(sim_common_files) check-binary
+	mkdir -p $(dir $@)
+	echo "fsim.gui: $(SIM_USE_GUI)" > $@
+	echo "fsim.inputs:" >> $@
+	echo "  campaign_tb_dut: '$(FSIM_CAMPAIGN_DUT)'" >> $@
+	echo "  strobe_file_name: '$(FSIM_STROBE_FILE)'" >> $@
+	echo "  campaign_tcl: '$(FSIM_CAMPAIGN_TCL)'" >> $@
+	echo "  sff_file: '$(SFF_FILE)'" >> $@
+	echo "  campaign_simv_daidir: 'simv.daidir'" >> $@
+	echo "  fault_type: '$(FAULT_TYPE)'" >> $@
+	echo "  saif.mode: \"none\" "
+	echo "  top_module: $(VLSI_TOP)" >> $@
+	echo "  tb_name: '$(FSIM_CAMPAIGN_DUT)'" >> $@  
+	echo "  input_files:" >> $@
+	for x in $$(cat $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST)| uniq | sort -u) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
+		if echo "$$x" | grep -q "_TestHarness_UNIQUIFIED\.sv$$"; then \
+			x_mod=$$(echo "$$x" | sed 's/_TestHarness_UNIQUIFIED\.sv$$/.sv/'); \
+		else \
+			x_mod="$$x"; \
+		fi; \
+		echo '    - "'$$x_mod'"' >> $@; \
+	done
+	echo "  input_files_meta: 'append'" >> $@
+	echo "  timescale: '1ns/10ps'" >> $@
+	echo "  options:" >> $@
+	for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \
+		if echo "$$x" | grep -q "+rad$$"; then \
+			echo ''; \
+		else \
+			echo '    - "'$$x'"' >> $@; \
+		fi \
 	done
 	echo "  options_meta: 'append'" >> $@
 	echo "  defines:" >> $@
@@ -166,6 +225,13 @@ sim-syn-timing-debug-$(VLSI_TOP): $(SIM_TIMING_CONF) sim-syn-debug-$(VLSI_TOP)
 sim-syn-timing-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
 sim-syn-timing-debug-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
 
+fsim-syn: $(FSIM_CONF)
+fsim-syn-$(VLSI_TOP): $(FSIM_CONF)
+fsim-syn: override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
+fsim-syn-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
+fsim-syn: override HAMMER_SIM_RUN_DIR = fsim-syn-rundir
+fsim-syn-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-syn-$(VLSI_TOP)
+
 sim-par: $(SIM_CONF)
 sim-par-$(VLSI_TOP): $(SIM_CONF)
 sim-par: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_CONF)
@@ -182,3 +248,4 @@ sim-par-timing-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
 sim-par-timing-debug-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
 
 $(OBJ_DIR)/sim-%/sim-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_SIM_EXTRA_ARGS)
+$(OBJ_DIR)/fsim-%/fsim-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_SIM_EXTRA_ARGS)

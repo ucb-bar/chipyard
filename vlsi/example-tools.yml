@@ -17,6 +17,8 @@ par.inputs.gds_merge: true
 #lvs.calibre.version: "2022.2_24.16"
 # VCS options
 vlsi.core.sim_tool: "hammer.sim.vcs"
+vlsi.core.fsim_tool: "hammer.fsim.vc-zoix"
+fsim.vcs.version: "2023.12-SP1"
 sim.vcs.version: "2023.12-SP1"
 sim.vcs.vcs_bin: "${synopsys.synopsys_home}/vcs/V-${sim.vcs.version}/bin/vcs"
 sim.vcs.vcs_home: "${synopsys.synopsys_home}/vcs/V-${sim.vcs.version}"
