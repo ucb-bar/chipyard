@@ -13,6 +13,8 @@ novas.conf
 verdiLog
 
 # For FSIM
-strobe.sv
-fsim.tcl
-*.sff
+# strobe.sv
+# fsim.tcl
+# *.sff
+*.fsdb
+*.key
