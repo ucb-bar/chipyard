@@ -149,7 +149,7 @@ export SIM_USE_GUI=true
 # Useful information
 The core unit is at the followwing hierarchy:
 ```verilog 
-TestDriver.TestHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.core
+TestDriver.testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.core
 ```
 
 For different tutorial and subprojects please see:
