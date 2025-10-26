@@ -4,10 +4,10 @@ SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 SIM_USE_GUI ?= false 
 FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
-FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../strobe.sv
-FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim.tcl
+FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../fsim-utilities/strobe.sv
+FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim-utilities/fsim.tcl
 FAULT_TYPE ?= saf
-SFF_FILE ?= $(OBJ_DIR)/../../gen_$(FAULT_TYPE)_$(VLSI_MODEL_DUT_NAME).sff
+SFF_FILE ?= $(OBJ_DIR)/../../fsim-utilities/gen_$(FAULT_TYPE)_$(VLSI_MODEL_DUT_NAME).sff
 
 .PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF)
 
