@@ -171,6 +171,13 @@ redo-sim-rtl-debug-$(VLSI_TOP): $(SIM_DEBUG_CONF) redo-sim-rtl-$(VLSI_TOP)
 redo-sim-rtl-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
 redo-sim-rtl-debug-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
 
+redo-fsim-rtl: $(FSIM_CONF)
+redo-fsim-rtl-$(VLSI_TOP): $(FSIM_CONF)
+redo-fsim-rtl: override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF)
+redo-fsim-rtl-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF)
+redo-fsim-rtl: override HAMMER_SIM_RUN_DIR = fsim-rtl-rundir
+redo-fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-rtl-$(VLSI_TOP)
+
 redo-sim-syn: $(SIM_CONF)
 redo-sim-syn-$(VLSI_TOP): $(SIM_CONF)
 redo-sim-syn: override HAMMER_EXTRA_ARGS += -p $(SIM_CONF)
@@ -185,6 +192,13 @@ redo-sim-syn-timing-debug: $(SIM_TIMING_CONF) redo-sim-syn-debug
 redo-sim-syn-timing-debug-$(VLSI_TOP): $(SIM_TIMING_CONF) redo-sim-syn-debug-$(VLSI_TOP)
 redo-sim-syn-timing-debug: override HAMMER_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
 redo-sim-syn-timing-debug-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
+
+redo-fsim-syn: $(FSIM_CONF)
+redo-fsim-syn-$(VLSI_TOP): $(FSIM_CONF)
+redo-fsim-syn: override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF)
+redo-fsim-syn-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF)
+redo-fsim-syn: override HAMMER_SIM_RUN_DIR = fsim-syn-rundir
+redo-fsim-syn-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-syn-$(VLSI_TOP)
 
 redo-sim-par: $(SIM_CONF)
 redo-sim-par-$(VLSI_TOP): $(SIM_CONF)
@@ -212,6 +226,13 @@ sim-rtl-debug-$(VLSI_TOP): $(SIM_DEBUG_CONF) sim-rtl-$(VLSI_TOP)
 sim-rtl-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
 sim-rtl-debug-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_DEBUG_CONF)
 
+fsim-rtl: $(FSIM_CONF)
+fsim-rtl-$(VLSI_TOP): $(FSIM_CONF)
+fsim-rtl: override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
+fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
+fsim-rtl: override HAMMER_SIM_RUN_DIR = fsim-rtl-rundir
+fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-rtl-$(VLSI_TOP)
+
 sim-syn: $(SIM_CONF)
 sim-syn-$(VLSI_TOP): $(SIM_CONF)
 sim-syn: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_CONF)
@@ -226,13 +247,6 @@ sim-syn-timing-debug: $(SIM_TIMING_CONF) sim-syn-debug
 sim-syn-timing-debug-$(VLSI_TOP): $(SIM_TIMING_CONF) sim-syn-debug-$(VLSI_TOP)
 sim-syn-timing-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
 sim-syn-timing-debug-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
-
-fsim-rtl: $(FSIM_CONF)
-fsim-rtl-$(VLSI_TOP): $(FSIM_CONF)
-fsim-rtl: override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
-fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
-fsim-rtl: override HAMMER_SIM_RUN_DIR = fsim-rtl-rundir
-fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-rtl-$(VLSI_TOP)
 
 fsim-syn: $(FSIM_CONF)
 fsim-syn-$(VLSI_TOP): $(FSIM_CONF)
