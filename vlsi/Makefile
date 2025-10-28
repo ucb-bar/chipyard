@@ -127,6 +127,11 @@ $(SYN_CONF): $(VLSI_RTL)
 	for x in $$(cat $(VLSI_RTL)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
+	echo "fsim.inputs:" >> $@
+	echo "  input_files:" >> $@
+	for x in $$(cat $(VLSI_RTL)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
 	echo "  input_files_meta: 'append'" >> $@
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
@@ -145,6 +150,15 @@ SIM_FILE_REQS += \
 
 # copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
 $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(build_dir)
+	cp -f $(SIM_FILE_REQS) $(build_dir)
+	$(foreach file,\
+		$(SIM_FILE_REQS),\
+		$(if $(filter %.h,$(file)),\
+			,\
+			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+
+# copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
+$(fsim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(build_dir)
 	cp -f $(SIM_FILE_REQS) $(build_dir)
 	$(foreach file,\
 		$(SIM_FILE_REQS),\

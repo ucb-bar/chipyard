@@ -3,10 +3,12 @@ FSIM_CONF = $(OBJ_DIR)/fsim-inputs.yml
 SIM_DEBUG_CONF = $(OBJ_DIR)/sim-debug-inputs.yml
 SIM_TIMING_CONF = $(OBJ_DIR)/sim-timing-inputs.yml
 SIM_USE_GUI ?= false 
+# ToDo: Move all fsim info into fsim.mk & output of FSIM in defined folder
+# ToDo: Add fsim-rtl for tf
 FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../fsim-utilities/strobe.sv
 FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim-utilities/fsim.tcl
-FAULT_TYPE ?= saf
+FAULT_TYPE ?= tf
 SFF_FILE ?= $(OBJ_DIR)/../../fsim-utilities/gen_$(FAULT_TYPE)_$(VLSI_MODEL_DUT_NAME).sff
 
 .PHONY: $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF)
@@ -224,6 +226,13 @@ sim-syn-timing-debug: $(SIM_TIMING_CONF) sim-syn-debug
 sim-syn-timing-debug-$(VLSI_TOP): $(SIM_TIMING_CONF) sim-syn-debug-$(VLSI_TOP)
 sim-syn-timing-debug: override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
 sim-syn-timing-debug-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(SIM_TIMING_CONF)
+
+fsim-rtl: $(FSIM_CONF)
+fsim-rtl-$(VLSI_TOP): $(FSIM_CONF)
+fsim-rtl: override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
+fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
+fsim-rtl: override HAMMER_SIM_RUN_DIR = fsim-rtl-rundir
+fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-rtl-$(VLSI_TOP)
 
 fsim-syn: $(FSIM_CONF)
 fsim-syn-$(VLSI_TOP): $(FSIM_CONF)
