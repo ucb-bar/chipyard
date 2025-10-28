@@ -168,6 +168,8 @@ $(fsim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(build_dir)
 
 include $(vlsi_dir)/sim.mk
 
+include $(vlsi_dir)/fsim.mk
+
 include $(vlsi_dir)/power.mk
 
 #########################################################################################
