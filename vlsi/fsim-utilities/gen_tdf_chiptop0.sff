@@ -10,5 +10,6 @@
 # Set fault generation constraints
 FaultGenerate
 {
-    NA [0,1] {PORT "TestDriver.testHarness.chiptop0.system_tile_prci_domain_element_reset_domain_rockettile_core.**" }  
+    NA [R,F] {PORT "TestDriver.testHarness.chiptop0.system_tile_prci_domain_element_reset_domain_rockettile_core.**" }  
 }
+
