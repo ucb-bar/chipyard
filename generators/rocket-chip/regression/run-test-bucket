@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+# Run Helper script for running test buckets across different CI systems.
+#
+# The CI tests for rocket-chip are split up into a number of different buckets
+# in order to parallelize the test suite. The buckets are each assigned a
+# number, starting with 1. To edit the buckets, simply edit the main `case`
+# statement below.
+
+set -euo pipefail
+
+print_usage() {
+  echo "Usage: ${0} bucket-number"
+}
+
+if [[ $# -ne 1 ]]; then
+  echo "Missing required argument: test bucket number" >&2
+  print_usage
+  exit 1
+fi
+
+regression_dir=$(cd "$(dirname "$0")" ; pwd -P)
+rocketchip_dir=$(dirname "${regression_dir}")
+
+# Always run from the root rocket-chip directory.
+cd "${rocketchip_dir}"
+
+# Test bucket definitions
+bucket_number=$1
+set -x
+case "${bucket_number}" in
+  1)
+    # Temporarily disable this bucket, which is hitting OOM on Actions
+    #make emulator-ndebug -C regression SUITE=UnittestSuite JVM_MEMORY=3G VERILATOR_THREADS=1
+    #make emulator-regression-tests -C regression SUITE=UnittestSuite JVM_MEMORY=3G VERILATOR_THREADS=1
+    ;;
+
+  2)
+    make emulator-ndebug -C regression SUITE=JtagDtmSuite JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=DebugTest JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=DebugTest JVM_MEMORY=3G
+    ;;
+
+  3)
+    make emulator-ndebug -C regression SUITE=JtagDtmSuite JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest64 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest64 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest32 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-64 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest32 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+    make emulator-jtag-dtm-tests-32 -C regression SUITE=JtagDtmSuite JTAG_DTM_TEST=MemTest8 JTAG_DTM_ENABLE_SBA=on JVM_MEMORY=3G
+    ;;
+
+  4)
+    make emulator-ndebug -C regression SUITE=RocketSuiteB JVM_MEMORY=3G
+    make emulator-regression-tests -C regression SUITE=RocketSuiteB JVM_MEMORY=3G
+    ;;
+
+  5)
+    make emulator-ndebug -C regression SUITE=RocketSuiteA JVM_MEMORY=3G
+    make emulator-regression-tests -C regression SUITE=RocketSuiteA JVM_MEMORY=3G
+    ;;
+
+  6)
+    make emulator-ndebug -C regression SUITE=RocketSuiteC JVM_MEMORY=3G
+    make emulator-regression-tests -C regression SUITE=RocketSuiteC JVM_MEMORY=3G
+    ;;
+
+  7)
+    make emulator-ndebug -C regression SUITE=Miscellaneous JVM_MEMORY=3G
+    ;;
+
+  -h|--help)
+    print_usage
+    ;;
+
+  *)
+    echo "Error: Invalid bucket number: ${bucket_number}"
+    exit 2;
+esac

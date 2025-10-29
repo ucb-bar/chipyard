@@ -1,0 +1,86 @@
+
+bootrom.radiance.rv32.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.start:
+
+00010000 <_start>:
+   10000:	00000013          	nop
+   10004:	00000013          	nop
+   10008:	00000013          	nop
+   1000c:	00000013          	nop
+   10010:	00000263          	beqz	zero,10014 <b_target_0>
+
+00010014 <b_target_0>:
+   10014:	00001263          	bnez	zero,10018 <b_target_1>
+
+00010018 <b_target_1>:
+   10018:	00000263          	beqz	zero,1001c <b_target_2>
+
+0001001c <b_target_2>:
+   1001c:	00001263          	bnez	zero,10020 <b_target_3>
+
+00010020 <b_target_3>:
+   10020:	00000263          	beqz	zero,10024 <b_target_4>
+
+00010024 <b_target_4>:
+   10024:	00001263          	bnez	zero,10028 <b_target_5>
+
+00010028 <b_target_5>:
+   10028:	00000263          	beqz	zero,1002c <b_target_6>
+
+0001002c <b_target_6>:
+   1002c:	00001263          	bnez	zero,10030 <b_target_7>
+
+00010030 <b_target_7>:
+   10030:	00000013          	nop
+   10034:	0cc0006f          	j	10100 <_hang100>
+
+00010038 <wake_other_cores>:
+   10038:	00458613          	addi	a2,a1,4
+   1003c:	00100693          	li	a3,1
+
+00010040 <interrupt_loop>:
+   10040:	00d62023          	sw	a3,0(a2)
+   10044:	00460613          	addi	a2,a2,4
+   10048:	ffc62683          	lw	a3,-4(a2)
+   1004c:	fe069ae3          	bnez	a3,10040 <interrupt_loop>
+   10050:	0e40006f          	j	10134 <start_exec>
+
+Disassembly of section .text.hang100:
+
+00010100 <_hang100>:
+   10100:	020005b7          	lui	a1,0x2000
+   10104:	cc502573          	csrr	a0,0xcc5
+   10108:	00251513          	slli	a0,a0,0x2
+   1010c:	00b505b3          	add	a1,a0,a1
+
+00010110 <wfi_loop>:
+   10110:	0005a283          	lw	t0,0(a1) # 2000000 <_dtb+0x1fefea8>
+   10114:	00029463          	bnez	t0,1011c <loop_exit>
+   10118:	ff9ff06f          	j	10110 <wfi_loop>
+
+0001011c <loop_exit>:
+   1011c:	00051c63          	bnez	a0,10134 <start_exec>
+   10120:	f19ff06f          	j	10038 <wake_other_cores>
+
+00010124 <boot_core>:
+   10124:	0005a283          	lw	t0,0(a1)
+   10128:	fe029ee3          	bnez	t0,10124 <boot_core>
+   1012c:	00251513          	slli	a0,a0,0x2
+   10130:	00b505b3          	add	a1,a0,a1
+
+00010134 <start_exec>:
+   10134:	0005a023          	sw	zero,0(a1)
+   10138:	00000513          	li	a0,0
+   1013c:	00000593          	li	a1,0
+   10140:	00000613          	li	a2,0
+   10144:	00000693          	li	a3,0
+   10148:	00000313          	li	t1,0
+   1014c:	00000413          	li	s0,0
+   10150:	800002b7          	lui	t0,0x80000
+   10154:	00028067          	jr	t0 # 80000000 <_dtb+0x7ffefea8>
+
+00010158 <_dtb>:
+   10158:	0000                	.2byte	0x0
+	...

@@ -1,0 +1,42 @@
+name: Test
+
+on:
+   push:
+     branches:
+     - master
+   pull_request:
+     branches:
+     - master
+
+jobs:
+  test:
+    name: Wake scala compile
+    runs-on: ubuntu-latest
+
+    steps:
+     - name: Wit Init
+       uses: sifive/wit/actions/init@v0.13.2
+       with:
+         additional_packages: git@github.com:sifive/environment-blockci-sifive.git::0.7.0
+
+     - name: Run wake scala compile
+       uses: sifive/environment-blockci-sifive/actions/wake@0.7.0
+       with:
+         command: -x 'compileScalaModule inclusiveCacheScalaModule | getPathResult'
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run lint check
+      run: |
+        set +e  # GitHub defaults to -e, but we want to do our own error handling
+        if matching_files=$(grep --files-with-matches '\s\+$' *); then
+          echo "Trailing whitespace detected. Please remove trailing whitespace in the following files:"
+          echo
+          echo "$matching_files"
+          exit 1
+        fi

@@ -1,0 +1,11 @@
+bootrom_img = $(testchip_dir)/bootrom/bootrom.rv64.img $(testchip_dir)/bootrom/bootrom.rv32.img
+
+testchip_vsrcs = \
+	$(testchip_dir)/vsrc/ClockUtil.v \
+	$(testchip_dir)/vsrc/SimSerial.v \
+	$(testchip_dir)/vsrc/SimBlockDevice.v \
+
+testchip_csrcs = \
+	$(testchip_dir)/csrc/SimSerial.cc \
+	$(testchip_dir)/csrc/SimBlockDevice.cc \
+	$(testchip_dir)/csrc/blkdev.cc \

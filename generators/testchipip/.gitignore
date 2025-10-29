@@ -1,0 +1,6 @@
+target
+/lib
+project/
+*.swp
+.#*
+*#

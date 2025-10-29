@@ -1,0 +1,23 @@
+{
+  "name": "sifive-blocks",
+  "version": "1.0.0",
+  "description": "Common RTL blocks used in SiFive's projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sifive/sifive-blocks.git"
+  },
+  "keywords": [
+    "RTL",
+    "Chisel"
+  ],
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/sifive/sifive-blocks/issues"
+  },
+  "homepage": "https://github.com/sifive/sifive-blocks#readme"
+}

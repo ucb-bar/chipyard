@@ -1,12 +1,6 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/chipsalliance/rocket-chip-fpga-shells.git
-[submodule "generators/bar-fetchers"]
-	path = generators/bar-fetchers
-	url = https://github.com/ucb-bar/bar-fetchers.git
-[submodule "generators/boom"]
-	path = generators/boom
-	url = https://github.com/riscv-boom/riscv-boom.git
 [submodule "generators/constellation"]
 	path = generators/constellation
 	url = https://github.com/ucb-bar/constellation.git
@@ -28,21 +22,6 @@
 [submodule "generators/rocc-acc-utils"]
 	path = generators/rocc-acc-utils
 	url = https://github.com/ucb-bar/rocc-acc-utils.git
-[submodule "generators/rocket-chip"]
-	path = generators/rocket-chip
-	url = https://github.com/chipsalliance/rocket-chip.git
-[submodule "generators/rocket-chip-blocks"]
-	path = generators/rocket-chip-blocks
-	url = https://github.com/chipsalliance/rocket-chip-blocks.git
-[submodule "generators/rocket-chip-inclusive-cache"]
-	path = generators/rocket-chip-inclusive-cache
-	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
-[submodule "generators/shuttle"]
-	path = generators/shuttle
-	url = https://github.com/ucb-bar/shuttle.git
-[submodule "generators/testchipip"]
-	path = generators/testchipip
-	url = https://github.com/ucb-bar/testchipip.git
 [submodule "sims/firesim"]
 	path = sims/firesim
 	url = https://github.com/firesim/firesim.git

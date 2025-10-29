@@ -1,0 +1,14 @@
+*.swp
+*.dump
+target
+*.out
+lib
+*#
+*~
+.nfs*
+.#*
+/.bloop/
+/.metals/
+/out/
+util/csmith/output/
+util/csmith/csmith/

@@ -1,0 +1,65 @@
+
+bootrom.rv32.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.hang:
+
+00010000 <_hang>:
+   10000:	00000517          	auipc	a0,0x0
+   10004:	04050513          	addi	a0,a0,64 # 10040 <_start>
+   10008:	30551073          	csrw	mtvec,a0
+   1000c:	301022f3          	csrr	t0,misa
+   10010:	4122d293          	srai	t0,t0,0x12
+   10014:	0012f293          	andi	t0,t0,1
+   10018:	00028863          	beqz	t0,10028 <_hang+0x28>
+   1001c:	30301073          	csrw	mideleg,zero
+   10020:	22200513          	li	a0,546
+   10024:	34453073          	csrc	mip,a0
+   10028:	00800513          	li	a0,8
+   1002c:	30451073          	csrw	mie,a0
+   10030:	30052073          	csrs	mstatus,a0
+
+00010034 <wfi_loop>:
+   10034:	10500073          	wfi
+   10038:	ffdff06f          	j	10034 <wfi_loop>
+
+Disassembly of section .text.start:
+
+00010040 <_start>:
+   10040:	020005b7          	lui	a1,0x2000
+   10044:	f1402573          	csrr	a0,mhartid
+   10048:	00050463          	beqz	a0,10050 <_start+0x10>
+   1004c:	0380006f          	j	10084 <boot_core>
+   10050:	00458613          	addi	a2,a1,4 # 2000004 <_dtb+0x1feff44>
+   10054:	00100693          	li	a3,1
+
+00010058 <interrupt_loop>:
+   10058:	00d62023          	sw	a3,0(a2)
+   1005c:	00460613          	addi	a2,a2,4
+   10060:	ffc62683          	lw	a3,-4(a2)
+   10064:	fe069ae3          	bnez	a3,10058 <interrupt_loop>
+   10068:	02c0006f          	j	10094 <boot_core_hart0>
+
+Disassembly of section .text.hang80:
+
+00010080 <_hang80>:
+   10080:	f81ff06f          	j	10000 <ROM_BASE>
+
+00010084 <boot_core>:
+   10084:	0005a283          	lw	t0,0(a1)
+   10088:	fe029ee3          	bnez	t0,10084 <boot_core>
+   1008c:	00251513          	slli	a0,a0,0x2
+   10090:	00b505b3          	add	a1,a0,a1
+
+00010094 <boot_core_hart0>:
+   10094:	0005a023          	sw	zero,0(a1)
+   10098:	00001537          	lui	a0,0x1
+   1009c:	00052503          	lw	a0,0(a0) # 1000 <ROM_BASE-0xf000>
+   100a0:	34151073          	csrw	mepc,a0
+   100a4:	f1402573          	csrr	a0,mhartid
+   100a8:	00000597          	auipc	a1,0x0
+   100ac:	01858593          	addi	a1,a1,24 # 100c0 <_dtb>
+   100b0:	08000613          	li	a2,128
+   100b4:	30063073          	csrc	mstatus,a2
+   100b8:	30200073          	mret
+   100bc:	00000013          	nop

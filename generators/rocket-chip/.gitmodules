@@ -1,0 +1,13 @@
+[submodule "dependencies/hardfloat"]
+	path = dependencies/hardfloat
+	url = https://github.com/ucb-bar/berkeley-hardfloat.git
+[submodule "dependencies/cde"]
+	path = dependencies/cde
+	url = https://github.com/chipsalliance/cde.git
+[submodule "dependencies/chisel"]
+	path = dependencies/chisel
+	url = https://github.com/chipsalliance/chisel.git
+[submodule "dependencies/diplomacy"]
+	path = dependencies/diplomacy
+	url = https://github.com/chipsalliance/diplomacy.git
+	branch = master
