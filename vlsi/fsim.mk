@@ -1,5 +1,4 @@
 FSIM_CONF = $(OBJ_DIR)/fsim-inputs.yml
-# ToDo: output of FSIM in defined folder
 FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../fsim-utilities/strobe.sv
 FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim-utilities/fsim.tcl

@@ -146,10 +146,37 @@ If you want to use a GUI for visualizing the waveforms (espeecially in debug mod
 export SIM_USE_GUI=true
 ```
 
+# Fault simulation
+
+For fault simulation, vc-zoix is used. Under vlsi/fsim-utilities the sff files, strobe and tcl for fault simulation are present. Modify only the SystemVerilog strobe file and the sff files. Modify the ```FAULT_TYPE``` in the fsim.mk file to choose between the 3 available fault types.
+
+## Fault Simulating the RTL-level
+For running RTL-Level fault simulation:
+```bash 
+$ cd vlsi
+$ export TEST_PATH=absolute_path/tests/hello.riscv
+$ make fsim-rtl tutorial=nangate45-commercial-rocket SUB_PROJECT=chipyard BINARY=${TEST_PATH} LOADMEM=${TEST_PATH}
+```
+
+## Fault Simulating the RTL-level
+For running post synthesis fault simulation:
+```bash 
+$ cd vlsi
+$ export TEST_PATH=absolute_path/tests/hello.riscv
+$ make fsim-syn tutorial=nangate45-commercial-rocket SUB_PROJECT=chipyard BINARY=${TEST_PATH} LOADMEM=${TEST_PATH}
+```
+
 # Useful information
-The core unit is at the followwing hierarchy:
+The core unit is at the following hierarchy:
+
+For RTL-Level:
 ```verilog 
 TestDriver.testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.core
+```
+
+For Gate-Level:
+```verilog 
+TestDriver.testHarness.chiptop0.system_tile_prci_domain_element_reset_domain_rockettile_core
 ```
 
 For different tutorial and subprojects please see:
