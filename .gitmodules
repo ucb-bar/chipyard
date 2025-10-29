@@ -61,9 +61,6 @@
 [submodule "toolchains/riscv-tools/riscv-tools-feedstock"]
 	path = toolchains/riscv-tools/riscv-tools-feedstock
 	url = https://github.com/ucb-bar/riscv-tools-feedstock.git
-[submodule "tools/DRAMSim2"]
-	path = tools/DRAMSim2
-	url = https://github.com/firesim/DRAMSim2.git
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git

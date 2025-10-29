@@ -1,0 +1,5 @@
+Before running these traces in DRAMSim, run the preprocessor: 
+
+./traceParse.py trace.tar.gz
+
+The resulting .trc file should be used with DRAMSim
