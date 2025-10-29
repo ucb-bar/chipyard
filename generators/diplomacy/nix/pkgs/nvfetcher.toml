@@ -1,0 +1,9 @@
+[chisel]
+src.git = "https://github.com/chipsalliance/chisel"
+src.branch = "main"
+fetch.github = "chipsalliance/chisel"
+
+[cde]
+src.git = "https://github.com/chipsalliance/cde"
+src.branch = "master"
+fetch.github = "chipsalliance/cde"

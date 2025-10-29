@@ -4,9 +4,6 @@
 [submodule "generators/constellation"]
 	path = generators/constellation
 	url = https://github.com/ucb-bar/constellation.git
-[submodule "generators/diplomacy"]
-	path = generators/diplomacy
-	url = https://github.com/chipsalliance/diplomacy.git
 [submodule "generators/gemmini"]
 	path = generators/gemmini
 	url = https://github.com/ucb-bar/gemmini.git
@@ -85,9 +82,6 @@
 [submodule "tools/fixedpoint"]
 	path = tools/fixedpoint
 	url = https://github.com/ucb-bar/fixedpoint.git
-[submodule "generators/rerocc"]
-	path = generators/rerocc
-	url = https://github.com/ucb-bar/rerocc.git
 [submodule "generators/compress-acc"]
 	path = generators/compress-acc
 	url = https://github.com/ucb-bar/compress-acc.git
