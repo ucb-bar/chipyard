@@ -313,7 +313,8 @@ def withInitCheck(p: Project, genDirName: String): Project = {
   val checkTask = Def.task {
     val root = (ThisBuild / baseDirectory).value
     val dir = root / s"generators/$genDirName"
-    val looksInitialized = (dir / ".git").exists
+    // Check if directory exists and has either .git (submodule) or src/ or design/ (flattened)
+    val looksInitialized = (dir / ".git").exists || (dir / "src").exists || (dir / "design").exists
     if (!dir.exists || !looksInitialized) {
       sys.error(
         s"Generator '$genDirName' is not initialized at '" + dir.getAbsolutePath +
