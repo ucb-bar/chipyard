@@ -18,4 +18,4 @@ verdiLog
 # *.sff
 *.fsdb
 *.key
-fsim_output
+fsim-output

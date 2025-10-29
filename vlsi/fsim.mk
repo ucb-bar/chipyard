@@ -1,11 +1,11 @@
 FSIM_CONF = $(OBJ_DIR)/fsim-inputs.yml
-SIM_USE_GUI ?= false 
 # ToDo: output of FSIM in defined folder
 FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../fsim-utilities/strobe.sv
 FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim-utilities/fsim.tcl
 FAULT_TYPE ?= tf
 SFF_FILE ?= $(OBJ_DIR)/../../fsim-utilities/gen_$(FAULT_TYPE)_$(VLSI_MODEL_DUT_NAME).sff
+FSIM_OUTPUT_FOLDER ?= $(OBJ_DIR)/../../fsim-output/
 
 .PHONY: $(FSIM_CONF)
 
@@ -16,6 +16,7 @@ $(FSIM_CONF): $(sim_common_files) check-binary
 	echo "  campaign_tb_dut: '$(FSIM_CAMPAIGN_DUT)'" >> $@
 	echo "  strobe_file_name: '$(FSIM_STROBE_FILE)'" >> $@
 	echo "  campaign_tcl: '$(FSIM_CAMPAIGN_TCL)'" >> $@
+	echo "  output_folder: '$(FSIM_OUTPUT_FOLDER)'" >> $@
 	echo "  sff_file: '$(SFF_FILE)'" >> $@
 	echo "  campaign_simv_daidir: 'simv.daidir'" >> $@
 	echo "  fault_type: '$(FAULT_TYPE)'" >> $@
@@ -68,6 +69,7 @@ ifneq ($(BINARY), )
 	echo "  benchmarks: ['$(BINARY)']" >> $@
 endif
 	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)'" >> $@
+	echo "  core: '$(CONFIG)'" >> $@
 
 redo-fsim-rtl: $(FSIM_CONF)
 redo-fsim-rtl-$(VLSI_TOP): $(FSIM_CONF)
