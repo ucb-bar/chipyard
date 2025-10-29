@@ -7,42 +7,24 @@
 [submodule "generators/boom"]
 	path = generators/boom
 	url = https://github.com/riscv-boom/riscv-boom.git
-[submodule "generators/caliptra-aes-acc"]
-	path = generators/caliptra-aes-acc
-	url = https://github.com/ucb-bar/caliptra-aes-acc.git
 [submodule "generators/constellation"]
 	path = generators/constellation
 	url = https://github.com/ucb-bar/constellation.git
-[submodule "generators/cva6"]
-	path = generators/cva6
-	url = https://github.com/ucb-bar/cva6-wrapper.git
 [submodule "generators/diplomacy"]
 	path = generators/diplomacy
 	url = https://github.com/chipsalliance/diplomacy.git
-[submodule "generators/fft-generator"]
-	path = generators/fft-generator
-	url = https://github.com/ucb-bar/FFTGenerator.git
 [submodule "generators/gemmini"]
 	path = generators/gemmini
 	url = https://github.com/ucb-bar/gemmini.git
 [submodule "generators/hardfloat"]
 	path = generators/hardfloat
 	url = https://github.com/ucb-bar/berkeley-hardfloat.git
-[submodule "generators/ibex"]
-	path = generators/ibex
-	url = https://github.com/ucb-bar/ibex-wrapper.git
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
 [submodule "generators/mempress"]
 	path = generators/mempress
 	url = https://github.com/ucb-bar/mempress.git
-[submodule "generators/nvdla"]
-	path = generators/nvdla
-	url = https://github.com/ucb-bar/nvdla-wrapper.git
-[submodule "generators/riscv-sodor"]
-	path = generators/riscv-sodor
-	url = https://github.com/ucb-bar/riscv-sodor.git
 [submodule "generators/rocc-acc-utils"]
 	path = generators/rocc-acc-utils
 	url = https://github.com/ucb-bar/rocc-acc-utils.git
@@ -142,24 +124,12 @@
 [submodule "software/firesim-paper-workloads"]
 	path = software/firesim-paper-workloads
 	url = https://github.com/firesim/firesim-paper-workloads.git
-[submodule "generators/ara"]
-	path = generators/ara
-	url = https://github.com/ucb-bar/ara-wrapper.git
 [submodule "tools/firrtl2"]
 	path = tools/firrtl2
 	url = https://github.com/ucb-bar/firrtl2.git
-[submodule "generators/vexiiriscv"]
-	path = generators/vexiiriscv
-	url = https://github.com/ucb-bar/vexiiriscv-tile.git
 [submodule "software/zephyrproject/zephyr"]
 	path = software/zephyrproject/zephyr
 	url = https://github.com/ucb-bar/zephyr.git
 [submodule "software/tacit_decoder"]
 	path = software/tacit_decoder
 	url = https://github.com/riscv-tacit/tacit_decoder.git
-[submodule "generators/tacit"]
-	path = generators/tacit
-	url = https://github.com/riscv-tacit/tacit.git
-[submodule "generators/radiance"]
-	path = generators/radiance
-	url = https://github.com/ucb-bar/radiance.git
