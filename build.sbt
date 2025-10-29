@@ -173,7 +173,7 @@ lazy val chipyard = {
     Seq(
       testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
       icenet, tracegen,
-      constellation, barf, shuttle, rerocc,
+      constellation, barf, shuttle,
     ).map(sbt.Project.projectToRef) ++
     (if (useChisel7) Seq() else Seq(sbt.Project.projectToRef(firrtl2_bridge))) ++
     (if (useChisel7) Seq() else Seq(sbt.Project.projectToRef(dsptools), sbt.Project.projectToRef(rocket_dsp_utils)))
@@ -382,11 +382,6 @@ lazy val tacit = withInitCheck((project in file("generators/tacit")), "tacit")
 
 lazy val caliptra_aes = withInitCheck((project in file("generators/caliptra-aes-acc")), "caliptra-aes-acc")
   .dependsOn(rocketchip, rocc_acc_utils, testchipip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val rerocc = withInitCheck((project in file("generators/rerocc")), "rerocc")
-  .dependsOn(rocketchip, constellation, boom, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
