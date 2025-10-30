@@ -144,7 +144,7 @@ echo '==>  Installing DRAMSim2 Shared Library'
 cd $RDIR/tools/DRAMSim2
 make clean
 make libdramsim.so
-cp libdramsim.so $RISCV/lib/
+cp libdramsim.so $RDIR/sims/verilator
 
 # echo '==>  Installing uart_tsi bringup utility'
 # cd $RDIR
