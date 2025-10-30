@@ -104,6 +104,7 @@ echo '==>  Installing libgloss'
     # This fixes CSR instruction compilation errors on newer toolchains where zicsr
     # is no longer implicitly included with base ISAs
     SRCDIR="$(pwd)/toolchains"
+# git submodule update --init "${SRCDIR}/libgloss"
     cd "${SRCDIR}/libgloss"
 
     # Clean and prepare
