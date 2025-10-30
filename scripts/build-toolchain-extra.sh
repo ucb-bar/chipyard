@@ -99,31 +99,58 @@ echo '==> Installing espresso logic minimizer'
 # Common tools (not in any particular toolchain dir)
 
 echo '==>  Installing libgloss'
-CC= CXX= SRCDIR="$(pwd)/toolchains" module_all libgloss --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --host=riscv${XLEN}-unknown-elf
+(
+    # Build libgloss with custom multilib configuration that includes _zicsr extension
+    # This fixes CSR instruction compilation errors on newer toolchains where zicsr
+    # is no longer implicitly included with base ISAs
+    SRCDIR="$(pwd)/toolchains"
+    cd "${SRCDIR}/libgloss"
 
-cd $RDIR
-if [ $TOOLCHAIN == "riscv-tools" ]; then
-    echo '==> Installing gemmini spike extensions'
-    git submodule update --init generators/gemmini
-    cd generators/gemmini
-    git submodule update --init software/libgemmini
-    make -C $RDIR/generators/gemmini/software/libgemmini install
-fi
+    # Clean and prepare
+    if [ -e build ] ; then
+        rm -rf build
+    fi
+    mkdir -p build
+
+    # Configure with explicit multilib settings including _zicsr extension
+    cd build
+    CC= CXX= ../configure \
+        --prefix="${RISCV}/riscv${XLEN}-unknown-elf" \
+        --host=riscv${XLEN}-unknown-elf \
+        --enable-multilib="rv32i_zicsr/ilp32 rv32iac_zicsr/ilp32 rv32im_zicsr/ilp32 rv32imac_zicsr/ilp32 rv32imafc_zicsr/ilp32f rv64imac_zicsr/lp64 rv64imafdc_zicsr/lp64d"
+
+    # Patch the generated Makefile to fix BSD install compatibility on macOS
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # Replace GNU install flags (-D -t) with BSD-compatible version
+        perl -i.bak -pe 's/(\tinstall -m 644 -p -D -t \$\$\(libdir\)\/\$\(1\)\/ \$\$\^)/\tmkdir -p \$\$(libdir)\/\$(1)\/ \&\& install -m 644 -p \$\$\^ \$\$(libdir)\/\$(1)\//' Makefile
+    fi
+
+    # Build and install
+    "${MAKE}"
+    "${MAKE}" install
+) 2>&1 | tee toolchains/libgloss/build.log
+
+# cd $RDIR
+# if [ $TOOLCHAIN == "riscv-tools" ]; then
+# echo '==> Installing gemmini spike extensions'
+# git submodule update --init generators/gemmini
+# cd generators/gemmini
+# git submodule update --init software/libgemmini
+# make -C $RDIR/generators/gemmini/software/libgemmini install
+# fi
 
 echo '==>  Installing DRAMSim2 Shared Library'
-cd $RDIR
-git submodule update --init tools/DRAMSim2
-cd tools/DRAMSim2
+cd $RDIR/tools/DRAMSim2
 make clean
 make libdramsim.so
 cp libdramsim.so $RISCV/lib/
 
-echo '==>  Installing uart_tsi bringup utility'
-cd $RDIR
-git submodule update --init generators/testchipip
-cd generators/testchipip/uart_tsi
-make
-cp uart_tsi $RISCV/bin
+# echo '==>  Installing uart_tsi bringup utility'
+# cd $RDIR
+# git submodule update --init generators/testchipip
+# cd generators/testchipip/uart_tsi
+# make
+# cp uart_tsi $RISCV/bin
 
 echo '==>  Installing spike-devices'
 cd $RDIR
