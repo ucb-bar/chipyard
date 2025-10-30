@@ -3,6 +3,7 @@ FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../fsim-utilities/strobe.sv
 FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim-utilities/fsim.tcl
 FAULT_TYPE ?= tf
+IS_FGEN ?= false
 SFF_FILE ?= $(OBJ_DIR)/../../fsim-utilities/gen_$(FAULT_TYPE)_$(VLSI_MODEL_DUT_NAME).sff
 FSIM_OUTPUT_FOLDER ?= $(OBJ_DIR)/../../fsim-output/
 
@@ -16,6 +17,7 @@ $(FSIM_CONF): $(sim_common_files) check-binary
 	echo "  strobe_file_name: '$(FSIM_STROBE_FILE)'" >> $@
 	echo "  campaign_tcl: '$(FSIM_CAMPAIGN_TCL)'" >> $@
 	echo "  output_folder: '$(FSIM_OUTPUT_FOLDER)'" >> $@
+	echo "  is_fgen: '$(IS_FGEN)'" >> $@
 	echo "  sff_file: '$(SFF_FILE)'" >> $@
 	echo "  campaign_simv_daidir: 'simv.daidir'" >> $@
 	echo "  fault_type: '$(FAULT_TYPE)'" >> $@
