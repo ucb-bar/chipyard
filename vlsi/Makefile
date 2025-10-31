@@ -153,7 +153,7 @@ $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(build_dir)
 			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
 
 include $(vlsi_dir)/sim.mk
-
+include $(vlsi_dir)/atpg.mk
 include $(vlsi_dir)/power.mk
 
 #########################################################################################
@@ -175,4 +175,4 @@ $(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(CLASSPATH_CACHE) $(gen_dir) $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF) $(POWER_CONF)
+	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(CLASSPATH_CACHE) $(gen_dir) $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF) $(POWER_CONF) $(ATPG_CONF)

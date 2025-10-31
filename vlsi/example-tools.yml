@@ -21,7 +21,8 @@ sim.vcs.version: "2023.12-SP1"
 sim.vcs.vcs_bin: "${synopsys.synopsys_home}/vcs/V-${sim.vcs.version}/bin/vcs"
 sim.vcs.vcs_home: "${synopsys.synopsys_home}/vcs/V-${sim.vcs.version}"
 sim.vcs.verdi_home: "${synopsys.synopsys_home}/verdi/V-${sim.vcs.version}"
-
+vlsi.core.atpg_tool: "hammer.atpg.testmax"
+atpg.testmax.testmax_bin: "/eda/synopsys/2022-23/RHELx86/TMAX_2022.12/bin/tmax"
 # Voltus options
 #vlsi.core.power_tool: "hammer.power.voltus"
 #power.joules.version: "211"
