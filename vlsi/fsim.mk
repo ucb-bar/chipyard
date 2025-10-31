@@ -2,8 +2,8 @@ FSIM_CONF = $(OBJ_DIR)/fsim-inputs.yml
 FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../fsim-utilities/strobe.sv
 FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim-utilities/fsim.tcl
-FAULT_TYPE ?= tf
-IS_FGEN ?= false
+FAULT_TYPE ?= saf
+IS_FGEN ?= true
 SFF_FILE ?= $(OBJ_DIR)/../../fsim-utilities/gen_$(FAULT_TYPE)_$(VLSI_MODEL_DUT_NAME).sff
 FSIM_OUTPUT_FOLDER ?= $(OBJ_DIR)/../../fsim-output/
 
@@ -21,9 +21,8 @@ $(FSIM_CONF): $(sim_common_files) check-binary
 	echo "  sff_file: '$(SFF_FILE)'" >> $@
 	echo "  campaign_simv_daidir: 'simv.daidir'" >> $@
 	echo "  fault_type: '$(FAULT_TYPE)'" >> $@
-	echo "  saif.mode: \"none\" "
 	echo "  top_module: $(VLSI_TOP)" >> $@
-	echo "  tb_name: '$(FSIM_CAMPAIGN_DUT)'" >> $@  
+	echo "  tb_name: '$(FSIM_CAMPAIGN_DUT)'" >> $@
 	echo "  input_files:" >> $@
 	for x in $$(cat $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST)| uniq | sort -u) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
 		if echo "$$x" | grep -q "_TestHarness_UNIQUIFIED\.sv$$"; then \

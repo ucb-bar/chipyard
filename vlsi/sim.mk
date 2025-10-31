@@ -10,7 +10,7 @@ $(SIM_CONF): $(sim_common_files) check-binary
 	echo "sim.gui: $(SIM_USE_GUI)" > $@
 	echo "sim.inputs:" >> $@
 	echo "  sim_type: 'sim'" >> $@
-	echo "  saif.mode: \"none\" "
+	echo "  saif.mode: \"none\" " >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
