@@ -3,7 +3,7 @@ FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../fsim-utilities/strobe.sv
 FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim-utilities/fsim.tcl
 FAULT_TYPE ?= saf
-IS_FGEN ?= true
+IS_FGEN ?= 1
 SFF_FILE ?= $(OBJ_DIR)/../../fsim-utilities/gen_$(FAULT_TYPE)_$(VLSI_MODEL_DUT_NAME).sff
 FSIM_OUTPUT_FOLDER ?= $(OBJ_DIR)/../../fsim-output/
 

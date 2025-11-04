@@ -15,7 +15,7 @@ end
 
 
 always @(negedge `TOPLEVEL.clock_uncore) begin
-  cmp = $fs_compare(`TOPLEVEL.axi4_mem_0_bits_ar_bits_addr);
+  $fs_strobe(`TOPLEVEL.system.tile_prci_domain.element_reset_domain_rockettile.core);
 end
 
 endmodule

@@ -10,7 +10,7 @@
 # Set fault generation constraints
 FaultGenerate
 {
-    Timing ("clock", CycleTime 30ns) 
+    Timing ("clock", CycleTime 2ns) 
     UseTiming("clock") 
     NA ~ (1000) {PORT "TestDriver.testHarness.chiptop0.**"}
 }
