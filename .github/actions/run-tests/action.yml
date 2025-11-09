@@ -20,7 +20,7 @@ runs:
       run: |
         conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
         git submodule sync
-        ./scripts/init-submodules-no-riscv-tools.sh
+        ./scripts/init-submodules-no-riscv-tools.sh --full
       shell: bash -leo pipefail {0}
 
     # Note: You shouldn't need the other inputs since it shouldn't build RTL from scratch
