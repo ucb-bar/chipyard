@@ -9,19 +9,23 @@ import org.chipsalliance.cde.config.{Config}
 
 class SmallBoomV3Config extends Config(
   new boom.v3.common.WithNSmallBooms(1) ++                          // small boom config
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.AbstractConfig)
 
 class MediumBoomV3Config extends Config(
   new boom.v3.common.WithNMediumBooms(1) ++                         // medium boom config
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.AbstractConfig)
 
 class LargeBoomV3Config extends Config(
   new boom.v3.common.WithNLargeBooms(1) ++                          // large boom config
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
 class MegaBoomV3Config extends Config(
   new boom.v3.common.WithNMegaBooms(1) ++                           // mega boom config
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)
 
