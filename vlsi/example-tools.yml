@@ -3,7 +3,7 @@ vlsi.core.build_system: make
 # Genus options
 vlsi.core.synthesis_tool: "hammer.synthesis.dc"
 synthesis.dc.version: "SYN_2022.12"
-vlsi.core.synthesis_tool.compile_args : ["-scan", "-incremental"]
+vlsi.core.synthesis_tool.compile_args : ["-scan", "-incremental", "-spg", "-no_autoungroup" ]
 vlsi.core.max_threads: 16
 # Innovus options
 vlsi.core.par_tool: "hammer.par.innovus"
