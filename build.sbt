@@ -367,6 +367,12 @@ lazy val radiance = withInitCheck((project in file("generators/radiance")), "rad
 lazy val gemmini = withInitCheck(freshProject("gemmini", file("generators/gemmini")), "gemmini")
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= Seq(
+      "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
+      "org.scalatest" %% "scalatest" % "3.2.+" % "test",
+      "junit" % "junit" % "4.13" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
+  ))
   .settings(commonSettings)
 
 lazy val nvdla = withInitCheck((project in file("generators/nvdla")), "nvdla")
