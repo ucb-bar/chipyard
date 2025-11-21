@@ -1,57 +1,29 @@
 ATPG_CONF = $(OBJ_DIR)/atpg-inputs.yml
 ATPG_DEBUG_CONF = $(OBJ_DIR)/atpg-debug-inputs.yml
 
-ATPG_USE_SYN ?= 1
-ATPG_SYN_NETLISTS ?= $(OBJ_DIR)/syn-rundir/results/ChipTop.mapped.v
-ATPG_LIB ?= /data/libraries/NangateOpenCellLibrary_PDKv1_3_v2010_12/Front_End/Verilog/NangateOpenCellLibrary_fixed.v
-ATPG_SYN_SPF ?= $(OBJ_DIR)/syn-rundir/results/ChipTop_test_protocol.spf
-ATPG_SYN_DEPS := $(ATPG_SYN_NETLISTS)
-
-.PHONY: ensure-syn
-# ensure-syn will run synthesis only if one or more synthesized netlist files are missing
-ensure-syn:
-	@set -e; \
-	files="$(ATPG_SYN_NETLISTS)"; \
-	if [ -z "$$files" ]; then \
-		echo "ATPG: no synthesized netlists configured (ATPG_SYN_NETLISTS empty), running synthesis (sim-syn)"; \
-		$(MAKE) sim-syn; \
-	else \
-		missing=0; \
-		for f in $$files; do \
-			if [ ! -f "$$f" ]; then missing=1; break; fi; \
-		done; \
-		if [ $$missing -eq 1 ]; then \
-			echo "ATPG: synthesized netlists missing, running synthesis (sim-syn)"; \
-			$(MAKE) sim-syn; \
-		else \
-			echo "ATPG: synthesized netlists present, skipping synthesis"; \
-		fi; \
-	fi
-
 .PHONY: $(ATPG_CONF) $(ATPG_DEBUG_CONF)
 
-$(ATPG_CONF): $(sim_common_files) ensure-syn $(ATPG_SYN_DEPS)
-	mkdir -p $(dir $@)
-	echo "atpg.inputs:" > $@
-	echo "  top_module: $(VLSI_TOP)" >> $@
-	echo "  tb_name: ''" >> $@  # don't specify -top
-	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)'" >> $@
-	echo "  input_files:" >> $@
-	echo "    - '$(ATPG_LIB)' " >> $@
-	echo "  input_files_meta: 'append'" >> $@
-	echo "  spf_file : '$(ATPG_SYN_SPF)'" >> $@
-	echo "  options:" >> $@
-	for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \
+$(ATPG_CONF):
+	@mkdir -p $(dir $@)
+	@echo "atpg.inputs:" > $@
+	@echo "  top_module: $(VLSI_TOP)" >> $@
+	@echo "  tb_name: ''" >> $@  # don't specify -top
+	@echo "  tb_dut: ''" >> $@
+	@echo "  input_files:" >> $@
+	@echo "    - '' " >> $@
+	@echo "  input_files_meta: 'append'" >> $@
+	@echo "  options: " >> $@
+	@for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
-	echo "  options_meta: 'append'" >> $@
-	echo "  defines:" >> $@
-	for x in $(subst +define+,,$(SIM_PREPROC_DEFINES)); do \
+	@echo "  options_meta: 'append'" >> $@
+	@echo "  defines:" >> $@
+	@for x in $(subst +define+,,$(SIM_PREPROC_DEFINES)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
-	echo "  defines_meta: 'append'" >> $@
+	@echo "  defines_meta: 'append'" >> $@
 
-$(ATPG_DEBUG_CONF): $(sim_common_files)
+$(ATPG_DEBUG_CONF):
 	mkdir -p $(dir $@)
 	mkdir -p $(output_dir)
 	echo "atpg.inputs:" > $@
