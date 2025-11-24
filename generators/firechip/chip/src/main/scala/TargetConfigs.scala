@@ -363,9 +363,4 @@ class CTCFireSimConfig extends Config(
   new FireSimRocketConfig
 )
 
-// Trusting that harness clocks will work here
-class MultiChipCTCFireSimConfig extends Config(
-  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
-  new chipyard.harness.WithMultiChip(0, new CTCFireSimConfig) ++
-  new chipyard.harness.WithMultiChip(1, new CTCFireSimConfig)
-)
+
