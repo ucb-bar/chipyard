@@ -611,12 +611,12 @@ class WithOffchipBusSel extends OverrideIOBinder({
 
 class WithCTCPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryCTC) => {
-    val ports = system.ctc_io.map { p =>
-      val port = IO(chiselTypeOf(p.getWrappedValue)) // Since CTC IO varies depending on params
-      port <> p.getWrappedValue
-      CTCPort(() => port)
-    }
-    (ports.toSeq, Nil)
+    val (ports, cells) = system.ctc_ios.zipWithIndex.map ({ case (c, id) =>
+      val port = IO(chiselTypeOf(c.getWrappedValue)).suggestName(s"ctc${id}_port") // Since CTC IO varies depending on params
+      port <> c.getWrappedValue
+      (CTCPort(() => port, id), Nil)
+    }).unzip
+    (ports.toSeq, cells.flatten.toSeq)
   }
 })
 

@@ -80,10 +80,10 @@ class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1p
   }
 )
 
-class WithMultiChipCTC(chip0: Int, chip1: Int) extends MultiHarnessBinder(
+class WithMultiChipCTC(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1portId: Int = 0) extends MultiHarnessBinder(
   chip0, chip1,
-  (p0: CTCPort) => true,
-  (p1: CTCPort) => true,
+  (p0: CTCPort) => p0.portId == chip0portId,
+  (p1: CTCPort) => p1.portId == chip1portId,
   (th: HasHarnessInstantiators, p0: CTCPort, p1: CTCPort) => {
     (p0.io, p1.io) match {
       case(io0: CreditedSourceSyncPhitIO, io1: CreditedSourceSyncPhitIO) => {

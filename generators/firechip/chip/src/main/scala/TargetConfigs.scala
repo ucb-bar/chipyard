@@ -358,14 +358,8 @@ class FireSimLargeBoomSV39CospikeConfig extends Config(
 
 class CTCFireSimConfig extends Config(
   new WithCTCBridge ++
-  //new chipyard.harness.WithCTCLoopback ++
-  new testchipip.ctc.WithCTC(new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true)) ++ 
-  // new testchipip.soc.WithOffchipBusClient(SBUS,
-  //   blockRange = Seq(AddressSet(0, (1L << 32) - 1)),
-  //   replicationBase = Some(1L << 32) 
-  // ) ++
-  // new testchipip.soc.WithOffchipBus ++
-  new chipyard.iobinders.WithCTCPunchthrough ++ // Adding here to not destroy the abstract config, this should be IOCells tho
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true))) ++ 
+  new chipyard.iobinders.WithCTCPunchthrough ++ 
   new FireSimRocketConfig
 )
 
