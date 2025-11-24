@@ -1,11 +1,11 @@
 FSIM_CONF = $(OBJ_DIR)/fsim-inputs.yml
 FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
-FSIM_STROBE_FILE ?= $(OBJ_DIR)/../../fsim-utilities/strobe.sv
-FSIM_CAMPAIGN_TCL ?= $(OBJ_DIR)/../../fsim-utilities/fsim.tcl
+FSIM_STROBE_FILE ?= $(vlsi_dir)/fsim-utilities/strobe.sv
+FSIM_CAMPAIGN_TCL ?= $(vlsi_dir)/fsim-utilities/fsim.tcl
 FAULT_MODEL ?= saf
 FSIM_GENERATE_FAULTS ?= 1
-STANDARD_FAULT_FORMAT ?= $(OBJ_DIR)/../../fsim-utilities/gen_$(FAULT_MODEL)_$(VLSI_MODEL_DUT_NAME).sff
-FSIM_OUTPUT_FOLDER ?= $(OBJ_DIR)/../../fsim-output/
+STANDARD_FAULT_FORMAT ?= $(vlsi_dir)fsim-utilities/gen_$(FAULT_MODEL)_$(VLSI_MODEL_DUT_NAME).sff
+FSIM_OUTPUT_FOLDER ?= $(vlsi_dir)/fsim-output/
 
 .PHONY: $(FSIM_CONF)
 
@@ -17,10 +17,10 @@ $(FSIM_CONF): $(sim_common_files) check-binary
 	echo "  strobe_file_name: '$(FSIM_STROBE_FILE)'" >> $@
 	echo "  campaign_tcl: '$(FSIM_CAMPAIGN_TCL)'" >> $@
 	echo "  output_folder: '$(FSIM_OUTPUT_FOLDER)'" >> $@
-	echo "  is_fgen: '$(IS_FGEN)'" >> $@
-	echo "  sff_file: '$(SFF_FILE)'" >> $@
+	echo "  fsim_generate_faults: '$(FSIM_GENERATE_FAULTS)'" >> $@
+	echo "  standard_fault_format: '$(STANDARD_FAULT_FORMAT)'" >> $@
 	echo "  campaign_simv_daidir: 'simv.daidir'" >> $@
-	echo "  fault_type: '$(FAULT_TYPE)'" >> $@
+	echo "  fault_model: '$(FAULT_MODEL)'" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: '$(FSIM_CAMPAIGN_DUT)'" >> $@
 	echo "  input_files:" >> $@
