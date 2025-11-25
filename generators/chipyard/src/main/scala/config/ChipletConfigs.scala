@@ -146,7 +146,6 @@ class MultiSimLLCChipletRocketConfig extends Config(
 class CTCRocketConfig extends Config(
   new chipyard.harness.WithCTCLoopback ++
   new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true))) ++ 
-  new chipyard.iobinders.WithCTCPunchthrough ++ 
   new RocketConfig
 )
 
@@ -156,7 +155,6 @@ class DoubleCTCRocketConfig extends Config(
     new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=false),
     new testchipip.ctc.CTCParams(onchipAddr = 0x2000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true)
   )) ++ 
-  new chipyard.iobinders.WithCTCPunchthrough ++ 
   new RocketConfig
 )
 

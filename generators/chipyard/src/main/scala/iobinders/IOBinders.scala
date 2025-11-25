@@ -609,6 +609,17 @@ class WithOffchipBusSel extends OverrideIOBinder({
   }
 })
 
+class WithCTCIOCells extends OverrideIOBinder({
+  (system: CanHavePeripheryCTC) => {
+    val (ports, cells) = system.ctc_ios.zipWithIndex.map ({ case (c, id) =>
+      val sys = system.asInstanceOf[BaseSubsystem]
+      val (port, cells) = IOCell.generateIOFromSignal(c.getWrappedValue, s"ctc${id}_port", sys.p(IOCellKey), abstractResetAsAsync = true)
+      (CTCPort(() => port, id), cells)
+    }).unzip
+    (ports.toSeq, cells.flatten.toSeq)
+  }
+})
+
 class WithCTCPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryCTC) => {
     val (ports, cells) = system.ctc_ios.zipWithIndex.map ({ case (c, id) =>
@@ -619,23 +630,3 @@ class WithCTCPunchthrough extends OverrideIOBinder({
     (ports.toSeq, cells.flatten.toSeq)
   }
 })
-
-// class WithCTCPunchthrough extends OverrideIOBinder({
-//   (system: CanHavePeripheryCTC) => {
-//     val ports = system.ctc_io.map { p =>
-//       p match {
-//         case io: CTCBridgeIO => {
-//           val port = IO(new CTCBridgeIO) // Since CTC IO varies depending on params
-//           port <> p.getWrappedValue
-//           CTCPort(() => port)
-//         }
-//         case _ => {
-//           val port = IO(chiselTypeOf(p.getWrappedValue)) // Since CTC IO varies depending on params
-//           port <> p.getWrappedValue
-//           CTCPort(() => port)
-//         }
-//       }
-//     }
-//     (ports.toSeq, Nil)
-//   }
-// })
