@@ -158,7 +158,7 @@ $ export TEST_PATH=absolute_path/tests/hello.riscv
 $ make fsim-rtl tutorial=nangate45-commercial-rocket SUB_PROJECT=chipyard BINARY=${TEST_PATH} LOADMEM=${TEST_PATH}
 ```
 
-## Fault Simulating the RTL-level
+## Fault Simulating the Gate-level
 For running post synthesis fault simulation:
 ```bash 
 $ cd vlsi
