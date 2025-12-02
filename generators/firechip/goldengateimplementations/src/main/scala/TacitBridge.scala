@@ -12,13 +12,42 @@ import firesim.lib.bridgeutils._
 
 import firechip.bridgeinterfaces._
 
-class TacitBridgeModule(key: TraceRawByteKey)(implicit p: Parameters) extends BridgeModule[HostPortIO[TraceRawByteBridgeTargetIO]]()(p) {
+// copied from testchipip.serdes.SerialWidthAggregator
+class SerialWidthAggregator(narrowW: Int, wideW: Int) extends Module {
+  require(wideW > narrowW)
+  require(wideW % narrowW == 0)
+  val io = IO(new Bundle {
+    val narrow = Flipped(Decoupled(UInt(narrowW.W)))
+    val wide   = Decoupled(UInt(wideW.W))
+  })
+
+  val beats = wideW / narrowW
+
+  val narrow_beats = RegInit(0.U(log2Ceil(beats).W))
+  val narrow_last_beat = narrow_beats === (beats-1).U
+  val narrow_data = Reg(Vec(beats-1, UInt(narrowW.W)))
+
+  io.narrow.ready := Mux(narrow_last_beat, io.wide.ready, true.B)
+  when (io.narrow.fire) {
+    narrow_beats := Mux(narrow_last_beat, 0.U, narrow_beats + 1.U)
+    when (!narrow_last_beat) { narrow_data(narrow_beats) := io.narrow.bits }
+  }
+  io.wide.valid := narrow_last_beat && io.narrow.valid
+  io.wide.bits := Cat(io.narrow.bits, narrow_data.asUInt)
+}
+
+class TacitBridgeModule(key: TraceRawByteKey)(implicit p: Parameters) 
+  extends BridgeModule[HostPortIO[TraceRawByteBridgeTargetIO]]()(p) 
+    with StreamToHostCPU {
+
+  val toHostCPUQueueDepth = 6144
   lazy val module = new BridgeModuleImp(this) {
     val io = IO(new WidgetIO())
 
     val hPort = IO(HostPort(new TraceRawByteBridgeTargetIO))
 
-    val txfifo = Module(new Queue(UInt(8.W), 128))
+    val aggregator = Module(new SerialWidthAggregator(8, BridgeStreamConstants.streamWidthBits))
+    val txfifo = Module(new Queue(UInt(BridgeStreamConstants.streamWidthBits.W), 3072))
 
     val target = hPort.hBits.byte
 
@@ -32,19 +61,25 @@ class TacitBridgeModule(key: TraceRawByteKey)(implicit p: Parameters) extends Br
     hPort.toHost.hReady := fire
     hPort.fromHost.hValid := fire
 
-    txfifo.io.enq.bits := target.out.bits
-    txfifo.io.enq.valid := target.out.valid && fire
-    target.out.ready := txfifo.io.enq.ready && fire
+    aggregator.io.narrow.bits := target.out.bits
+    aggregator.io.narrow.valid := target.out.valid && fire
+    target.out.ready := aggregator.io.narrow.ready && fire
 
-    genROReg(txfifo.io.deq.bits, "out_bits")
-    genROReg(txfifo.io.deq.valid, "out_valid")
-
-    Pulsify(genWORegInit(txfifo.io.deq.ready, "out_ready", false.B), pulseLength = 1)
+    txfifo.io.enq <> aggregator.io.wide
+    streamEnq <> txfifo.io.deq
 
     genCRFile()
     
     override def genHeader(base: BigInt, memoryRegions: Map[String, BigInt], sb: StringBuilder): Unit = {
-      genConstructor(base, sb, "tacit_t", "tacit")
+      genConstructor(
+          base, 
+          sb, 
+          "tacit_t", 
+          "tacit", Seq(
+            UInt32(toHostStreamIdx),
+            UInt32(toHostCPUQueueDepth),
+          ),
+          hasStreams = true)
     }
   }
 }
