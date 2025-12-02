@@ -118,7 +118,3 @@ case class OffchipSelPort  (val getIO: () => UInt)
 
 case class CTCPort (val getIO: () => Data, val portId: Int) 
     extends Port[Data]
-
-// case class CTCBridgePort (val getIO: () => Data) 
-//     extends Port[CTCBridgeIO]
-

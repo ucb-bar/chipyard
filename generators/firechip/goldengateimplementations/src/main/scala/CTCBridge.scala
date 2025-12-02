@@ -101,24 +101,19 @@ class HostToCTCAdapter extends Module {
 class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CTCBridgeTargetIO]]()(p) 
     with StreamToHostCPU
     with StreamFromHostCPU {
-  // Stream mixin parameters, stealing value from NIC
+  // Stream mixin parameters, value from NIC
   val fromHostCPUQueueDepth = 3072
   val toHostCPUQueueDepth   = 3072
   
   lazy val module = new BridgeModuleImp(this) {
-    // Copied from TSIBridge thank youuuu tsi bridge
     val io = IO(new WidgetIO)
     val hPort = IO(HostPort(new CTCBridgeTargetIO))
 
     val inBuf  = Module(new Queue(new CTCToken, 10))
     val outBuf = Module(new Queue(new CTCToken, 10))
-    // val clientInBuf  = Module(new Queue(new CTCToken, 10))
-    // val clientOutBuf = Module(new Queue(new CTCToken, 10))
-    // val managerInBuf  = Module(new Queue(new CTCToken, 10))
-    // val managerOutBuf = Module(new Queue(new CTCToken, 10))
 
     val target = hPort.hBits.ctc_io
-    val tFire = hPort.toHost.hValid && hPort.fromHost.hReady //&& outBuf.io.enq.ready && inBuf.io.deq.valid // my buffers can receive a token and I can provide a token
+    val tFire = hPort.toHost.hValid && hPort.fromHost.hReady
     val targetReset = tFire & hPort.hBits.reset
 
     hPort.toHost.hReady := outBuf.io.enq.ready
@@ -128,12 +123,10 @@ class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CT
     outBuf.io.enq.bits.client_data := target.client_flit.out.bits
     outBuf.io.enq.bits.client_valid := target.client_flit.out.valid
     outBuf.io.enq.bits.client_ready := target.client_flit.in.ready
-    //target.client_flit.out.ready := tFire // I think EDIT: NO!!!!!
 
     outBuf.io.enq.bits.manager_data := target.manager_flit.out.bits
     outBuf.io.enq.bits.manager_valid := target.manager_flit.out.valid
     outBuf.io.enq.bits.manager_ready := target.manager_flit.in.ready
-    //target.manager_flit.out.ready := tFire // I think
 
     outBuf.io.enq.valid := hPort.toHost.hValid
 
@@ -159,7 +152,7 @@ class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CT
 
     inBuf.io.deq.ready := hPort.fromHost.hReady
 
-    genROReg(!tFire, "done") // dummy MMIO reg
+    genROReg(!tFire, "done") // placeholder MMIO reg
 
     genCRFile()
 

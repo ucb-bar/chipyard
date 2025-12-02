@@ -5,11 +5,7 @@
 #include <riscv-pk/encoding.h>
 #include "marchid.h"
 
-#define OBUS_OFFSET (0x10L << 32)
-
-// char src[] = "This is a test string. It will be written into the off-chip memory address, then copied back.";
-// char dest[4096];
-// char test[4096];
+#define CHIP_OFFSET (0x10L << 32)
 
 uint32_t src[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 uint32_t dest[10];
@@ -18,7 +14,7 @@ uint32_t test[10];
 int main(void) {
   size_t write_start = rdcycle();
 
-  uint32_t* offchip_addr = (uint32_t*)((uintptr_t)dest + offset);
+  uint32_t* offchip_addr = (uint32_t*)((uintptr_t)dest + CHIP_OFFSET);
 
   // Using inline ASM because CTC requires 32b transactions
   for (int i = 0; i < 10; i++) {
@@ -53,7 +49,7 @@ int main(void) {
 
   for (int i = 0; i < sizeof(src) / 4; i++) {
     if (src[i] != test[i]) {
-      printf("Remote write/read failed at index %d %p %p %p %x %x\n", i, src+i, test+i, dest + OBUS_OFFSET + i, src[i], test[i]);
+      printf("Remote write/read failed at index %d %p %p %p %x %x\n", i, src+i, test+i, dest + CHIP_OFFSET + i, src[i], test[i]);
       exit(1);
     }
   }

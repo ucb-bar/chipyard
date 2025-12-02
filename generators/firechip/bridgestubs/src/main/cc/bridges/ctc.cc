@@ -15,21 +15,18 @@
 
 char ctc_t::KIND;
 
-// THIEVERY!!
 #define TOKENS_PER_BIGTOKEN 7
 
 #define SIMLATENCY_BT (this->LINKLATENCY / TOKENS_PER_BIGTOKEN)
 
 #define BUFWIDTH streaming_bridge_driver_t::STREAM_WIDTH_BYTES
 #define BUFBYTES (SIMLATENCY_BT * BUFWIDTH)
-#define EXTRABYTES 1
-
-// "Serial" tilelink
+#define EXTRABYTES 1 // Taken from NIC, leaving for future error checking
 
 ctc_t::ctc_t(simif_t &simif,
               StreamEngine &stream,
               const CTCBRIDGEMODULE_struct &mmio_addrs,
-              int chipno, // maybe this is a stupid naming scheme
+              int chipno, 
               const std::vector<std::string> &args,
               int stream_to_cpu_idx,
               int stream_to_cpu_depth,
@@ -42,7 +39,7 @@ ctc_t::ctc_t(simif_t &simif,
   // Read plusargs
   std::string macaddr_arg = std::string("+macaddr") + std::to_string(chipno) + std::string("=");
 
-  // Borrowed from simplenic.cc
+  // Use macaddr as chip id for now
   for (auto &arg : args) {
     if (arg.find(macaddr_arg) == 0) {
       int mac_octets[6];
@@ -69,15 +66,14 @@ ctc_t::ctc_t(simif_t &simif,
   }
 
   const std::string num_equals = std::to_string(chip_id) + std::string("=");
-  //const std::string num_equals1 = std::to_string(chip1no) + std::string("=");
   const std::string chip1_arg = std::string("+connectid") + num_equals;
   std::string chip1no = "";
 
   for (auto &arg : args) {
     if(arg.find(chip1_arg) == 0) {
-      printf("CHIP%d: got connectid argstr%s\n", chip_id, arg.c_str());
+      printf("[CTC] CHIP%d: got connectid argstr%s\n", chip_id, arg.c_str());
       chip1no = const_cast<char *>(arg.c_str()) + chip1_arg.length();
-      printf("CHIP%d: got connectid %s\n", chip_id, chip1no.c_str());
+      printf("[CTC] CHIP%d: got connectid %s\n", chip_id, chip1no.c_str());
       chip1_id = std::stoi(chip1no, nullptr, 0);
     }
   }
@@ -88,10 +84,6 @@ ctc_t::ctc_t(simif_t &simif,
 
   fifo0_path = "";
   fifo1_path = "";
-  // fifo0_fd = 0
-  // fifo1_fd = 0
-
-  //this->LINKLATENCY = 28; //hardcode for now, TODO: add argument
 
   for (auto &arg : args) {
     if(arg.find(chip0fifo_arg) == 0) {
@@ -106,23 +98,22 @@ ctc_t::ctc_t(simif_t &simif,
     }
   }
 
-  printf("CHIP%d: got fifo0 path %s\n", chip_id, fifo0_path.c_str());
-  printf("CHIP%d: got fifo1 path %s\n", chip_id, fifo1_path.c_str());
+  printf("[CTC] CHIP%d: got fifo0 path %s\n", chip_id, fifo0_path.c_str());
+  printf("[CTC] CHIP%d: got fifo1 path %s\n", chip_id, fifo1_path.c_str());
 
-  printf("Link latency = %d\n", this->LINKLATENCY);
+  printf("[CTC] Link latency = %d\n", this->LINKLATENCY);
 
   fifo0_path = fifo0_path + std::string("fifo") + std::to_string(chip_id);
   fifo1_path = fifo1_path + std::string("fifo") + chip1no;
 
-  printf("CHIP%d: got fifo0 file %s\n", chip_id, fifo0_path.c_str());
-  printf("CHIP%d: got fifo1 file %s\n", chip_id, fifo1_path.c_str());
+  printf("[CTC] CHIP%d: got fifo0 file %s\n", chip_id, fifo0_path.c_str());
+  printf("[CTC] CHIP%d: got fifo1 file %s\n", chip_id, fifo1_path.c_str());
 
   mkfifo(fifo0_path.c_str(), 0666);
 
   // For storing data that is pushed/pulled from the stream
   buf = static_cast<char*>(aligned_alloc(64, BUFBYTES + EXTRABYTES));
   memset(buf, 0, BUFBYTES + EXTRABYTES);
-
 }
 
 ctc_t::~ctc_t() {
@@ -130,28 +121,26 @@ ctc_t::~ctc_t() {
 }
 
 void ctc_t::init() {
-  // Switch order to prevent deadlock?
+  // Switch order between chips to prevent deadlock
   if (chip_id > chip1_id) {
     fifo0_fd = open(fifo0_path.c_str(), O_RDONLY);
-    printf("CHIP%d: opened rd fifo0\n", chip_id);
+    printf("[CTC] CHIP%d: opened rd fifo0\n", chip_id);
     fifo1_fd = open(fifo1_path.c_str(), O_WRONLY);
-    printf("CHIP%d: opened wr fifo1\n", chip_id);
+    printf("[CTC] CHIP%d: opened wr fifo1\n", chip_id);
   } else {
     fifo1_fd = open(fifo1_path.c_str(), O_WRONLY);
-    printf("CHIP%d: opened wr fifo1\n", chip_id);
+    printf("[CTC] CHIP%d: opened wr fifo1\n", chip_id);
     fifo0_fd = open(fifo0_path.c_str(), O_RDONLY);
-    printf("CHIP%d: opened rd fifo0\n", chip_id);
+    printf("[CTC] CHIP%d: opened rd fifo0\n", chip_id);
   }
 
   assert(fifo0_fd != -1 && "fifofile0 couldn't be opened\n");
   assert(fifo1_fd != -1 && "fifofile1 couldn't be opened\n");
 
-  // Stolen from simplenic.cc
+  // Taken from NIC
   auto token_bytes_to_send = SIMLATENCY_BT * BUFWIDTH;
   auto token_bytes_produced = this->push(
       stream_from_cpu_idx, buf, token_bytes_to_send, 0);
-
-  printf("[CTC] init push 1\n");
 
   if (token_bytes_produced != token_bytes_to_send) {
     printf("FAIL. Could not enqueue big tokens to support the desired sim "
@@ -161,13 +150,12 @@ void ctc_t::init() {
     exit(1);
   }
 
-  printf("[CTC] init push 2\n");
+  printf("[CTC] init complete\n");
 
 }
 
 void ctc_t::tick() {
   while(true) {
-
     // Pull from the stream
     uint32_t token_bytes_from_target = 0;
     auto requested_token_bytes = BUFWIDTH * SIMLATENCY_BT; //Number of concatenated tokens * bytes per token
@@ -194,16 +182,11 @@ void ctc_t::tick() {
       exit(1);
     }
 
-    // printf("[CTC] Wrote fifo\n");
-
     // Read my own fifo until I read all the "in" chars
     int bytes_read = ::read(fifo0_fd, buf, BUFBYTES + EXTRABYTES);
     if (bytes_read != BUFBYTES + EXTRABYTES) {
       printf("[CTC] Reading from fifo failed.\n");
-      // for (int i=0; i<4; i++) {
-      //   printf("Buf[%d] got: %d", i, buf[i]);
-      // }
-      exit(1); // HOW DO I DO THIS FOR REAL
+      exit(1); 
     }
 
     // Push to the stream
@@ -218,10 +201,6 @@ void ctc_t::tick() {
       printf("[CTC] Pushing to stream failed. Wrote %d bytes, expected %d bytes.\n", token_bytes_to_target, BUFWIDTH * SIMLATENCY_BT);
       exit(1);
     }
-
-    // printf("[CTC] Read fifo\n");
-
-    //printf("[CTC] leaving tick\n");
   }
 }
 

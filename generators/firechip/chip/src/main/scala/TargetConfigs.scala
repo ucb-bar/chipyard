@@ -21,8 +21,6 @@ import icenet._
 import chipyard.clocking.{ChipyardPRCIControlKey}
 import chipyard.harness.{HarnessClockInstantiatorKey}
 
-import testchipip.soc.{OBUS}
-
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey).map(_.copy(clockGate = false))

@@ -14,20 +14,18 @@
 #include <string>
 #include <vector>
 
-// Using TSI to make my life easier
-// TODO: FIXME
+// Placeholder MMIO register
 struct CTCBRIDGEMODULE_struct {
   uint64_t done;
 };
 
 class ctc_t final : public streaming_bridge_driver_t {
 public:
-  /// The identifier for the bridge type used for casts.
   static char KIND;
   ctc_t(simif_t &simif,
         StreamEngine &stream,
         const CTCBRIDGEMODULE_struct &mmio_addrs,
-        int chipno, // YOU
+        int chipno,
         const std::vector<std::string> &args,
         int stream_to_cpu_idx,
         int stream_to_cpu_depth,
@@ -52,7 +50,6 @@ private:
 
   int LINKLATENCY;
 
-  // Idk what these do
   const int stream_to_cpu_idx;
   const int stream_from_cpu_idx;
 };

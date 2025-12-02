@@ -11,9 +11,6 @@ import firesim.lib.bridgeutils._
 
 import firechip.bridgeinterfaces._
 
-// This is the id of the chip we want to connect to (for args passing)
-case class CTCKey(otherChipId: Int)
-
 class CTCBridge(implicit p: Parameters) extends BlackBox
     with Bridge[HostPortIO[CTCBridgeTargetIO]] {
 
@@ -23,7 +20,7 @@ class CTCBridge(implicit p: Parameters) extends BlackBox
 
   val bridgeIO = HostPort(io)
 
-  val constructorArg = None //Some(CTCKey(otherChipId))
+  val constructorArg = None 
 
   generateAnnotations()
 }
@@ -31,11 +28,6 @@ class CTCBridge(implicit p: Parameters) extends BlackBox
 object CTCBridge {
   def apply(clock: Clock, port: testchipip.ctc.CTCBridgeIO, reset: Bool)(implicit p: Parameters): CTCBridge = {
     val ep = Module(new CTCBridge)
-    // ep.io.ctc_io.client_flit.in.valid <> port.client_flit.in
-    // ep.io.ctc_io.client_flit.out <> port.client_flit.out
-    // ep.io.ctc_io.manager_flit.in <> port.manager_flit.in
-    // ep.io.ctc_io.manager_flit.out <> port.manager_flit.out
-    //ep.io.ctc_io <> port
     
     port.client_flit.in.valid := ep.io.ctc_io.client_flit.in.valid
     port.client_flit.in.bits.flit := ep.io.ctc_io.client_flit.in.bits
