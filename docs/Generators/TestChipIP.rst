@@ -118,4 +118,4 @@ for examples of configs with CTC.
 By default, CTC uses the credited PHY provided with the Serial TileLink interface (see 
 :ref:`Generators/TestChipIP:TileLink SERDES`). CTC can also be instantiated without a PHY. The 
 intended use for this mode is for multi-chiplet FireSim simulations using the CTC bridge. For 
-more information on FireSim, see :ref:`Simulation/FPGA-Accelerated Simulation:FireSim`.
+more information on FireSim, see :ref:`Simulation/FPGA-Accelerated-Simulation:FireSim`.
