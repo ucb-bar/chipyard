@@ -76,6 +76,16 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
   }
 })
 
+class WithCTCBridge extends HarnessBinder({
+  case (th: FireSim, port: CTCPort, chipId: Int) => {
+    port.io match {
+      case io: testchipip.ctc.CTCBridgeIO => {
+        CTCBridge(th.harnessBinderClock, io, th.harnessBinderReset.asBool)(th.p)
+      }
+    }
+  }
+})
+
 class WithDMIBridge extends HarnessBinder({
   case (th: FireSim, port: DMIPort, chipId: Int) => {
     // This assumes that:

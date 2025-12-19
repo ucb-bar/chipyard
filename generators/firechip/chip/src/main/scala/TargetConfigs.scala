@@ -13,6 +13,7 @@ import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated}
 import freechips.rocketchip.devices.debug.{DebugModuleKey}
+import freechips.rocketchip.diplomacy.{AddressSet}
 import freechips.rocketchip.prci.{AsynchronousCrossing}
 import testchipip.cosim.{TracePortKey}
 import icenet._
@@ -352,3 +353,12 @@ class FireSimLargeBoomSV39CospikeConfig extends Config(
   new WithFireSimConfigTweaks++
   new freechips.rocketchip.rocket.WithSV39 ++
   new chipyard.LargeBoomV3Config)
+
+class CTCFireSimConfig extends Config(
+  new WithCTCBridge ++
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true))) ++ 
+  new chipyard.iobinders.WithCTCPunchthrough ++ 
+  new FireSimRocketConfig
+)
+
+
