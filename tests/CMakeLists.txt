@@ -11,7 +11,7 @@
 ########################################################################################################################
 cmake_minimum_required(VERSION 3.10)
 
-project(chipyard-tests LANGUAGES C CXX)
+project(chipyard-tests LANGUAGES C CXX ASM)
 
 
 #################################
