@@ -352,3 +352,31 @@ class FireSimLargeBoomSV39CospikeConfig extends Config(
   new WithFireSimConfigTweaks++
   new freechips.rocketchip.rocket.WithSV39 ++
   new chipyard.LargeBoomV3Config)
+
+//**********************************************************************************
+// Tacit Configurations
+//*********************************************************************************/
+class FireSimRocketTacitConfig extends Config(
+  new WithTacitBridge ++
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks++
+  new chipyard.TacitRocketRawByteConfig)
+
+class FireSimDualRocketTacitConfig extends Config(
+  new WithTacitBridge ++
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks++
+  new chipyard.TacitDualRocketRawByteConfig)
+
+class FireSimRocketTacitNICConfig extends Config(
+  new WithNIC ++
+  new WithTacitBridge ++
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks++
+  new chipyard.TacitRocketRawByteConfig)
+
+class FireSimRocketTacitPrefetchConfig extends Config(
+  new WithTacitBridge ++
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks++
+  new chipyard.TacitRocketRawBytePrefetchConfig)

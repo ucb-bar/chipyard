@@ -170,3 +170,14 @@ class WithSV48 extends Config((site, here, up) => {
       tp.tileParams.core.copy(pgLevels = 4)))
   }
 })
+
+class WithAsidLen(n: Int = 0) extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: RocketTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core =
+      tp.tileParams.core.copy(asidLen = n)))
+    // case tp: boom.v3.common.BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core =
+      // tp.tileParams.core.copy(nAsidBits = n)))
+    // case tp: boom.v4.common.BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core =
+      // tp.tileParams.core.copy(nAsidBits = n)))
+  }
+})

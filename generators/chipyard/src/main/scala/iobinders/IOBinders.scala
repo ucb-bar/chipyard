@@ -40,6 +40,7 @@ import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
 import chipyard.example.{CanHavePeripheryGCD}
+import tacit.{CanHaveTraceSinkRawByte, TraceSinkRawByteBundle}
 
 import scala.reflect.{ClassTag}
 
@@ -595,6 +596,18 @@ class WithGCDIOPunchthrough extends OverrideIOBinder({
     // Return the sequence of created top-level ports (busy port, and optionally clock port).
     // No IOCells are generated here.
     (gcdBusyPort ++ gcdClockPort, Nil)
+  }
+})
+
+class WithTraceSinkRawBytePunchthrough extends OverrideIOBinder({
+  (system: CanHaveTraceSinkRawByte) => {
+    val tacit_byte_ports = system.tacit_bytes.zipWithIndex.map { case (s, i) => 
+      // a seq of decoupled bytes
+      val tacit_byte = IO(new TraceSinkRawByteBundle).suggestName(s"tacit_byte_${i}")
+      tacit_byte <> s
+      TraceSinkRawBytePort(() => tacit_byte)
+    }
+    (tacit_byte_ports, Nil)
   }
 })
 
