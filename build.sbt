@@ -160,7 +160,7 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 
 // -- Chipyard-managed External Projects --
 
-lazy val testchipip = withInitCheck((project in file("generators/testchipip")), "testchipip")
+lazy val testchipip = withInitCheck(freshProject("testchipip", file("generators/testchipip")), "testchipip")
   .dependsOn(rocketchip, rocketchip_blocks)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
