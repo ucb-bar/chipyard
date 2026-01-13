@@ -1,15 +1,36 @@
-#*******************************************************************************
-# (c) 2017 Synopsys, Inc.
-#
-# This file and its contents are proprietary to Synopsys, Inc. and may 
-# only be used pursuant to the terms and conditions of a written license 
-# agreement with Synopsys, Inc. All other use, reproduction, modification, 
-# or distribution of this file is strictly prohibited.
-#*******************************************************************************
-
-# Set fault generation constraints
-FaultGenerate
+# Weights 
+Coverage
 {
-    NA [R,F] {PORT "TestDriver.testHarness.chiptop0.system_tile_prci_domain_element_reset_domain_rockettile_core.**" }  
+        Weights
+        {
+                PD=1.0;
+                PT=1.0;
+        }
 }
 
+FaultGenerate {
+        # xbar master port 
+        NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.tlMasterXbar.**" }
+        # The frontend 
+        NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.frontend.**" }
+        # Let's exclude the icache
+        Exclude {
+              NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.frontend.icache.**" }  
+        }
+        # The FPU
+        NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.fpuOpt.**" }
+        # data cache
+        NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcacheArb.**" }
+        
+        # Let's  exclude the data cache 
+        # NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcache.**" }
+        
+        # The page table walker
+        NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.pwt.**" }
+        # The core
+        NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.**" }
+        
+        Exclude {
+                NA [R,F] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.csr.**" }
+        }
+}

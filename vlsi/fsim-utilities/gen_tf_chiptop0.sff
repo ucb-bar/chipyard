@@ -10,7 +10,46 @@
 # Set fault generation constraints
 FaultGenerate
 {
-    Timing ("clock", CycleTime 2ns) 
-    UseTiming("clock") 
-    NA ~ (1000) {PORT "TestDriver.testHarness.chiptop0.**"}
+    Timing ("clock_uncore", CycleTime 2ns) 
+    UseTiming("clock_uncore") 
+    NA ~ (212987) {PORT "TestDriver.testHarness.chiptop0.system_tile_prci_domain_element_reset_domain_rockettile_core.**"}
+}
+# Weights 
+Coverage
+{
+        Weights
+        {
+                PD=1.0;
+                PT=1.0;
+        }
+}
+
+FaultGenerate {
+    Timing ("clock_uncore", CycleTime 2ns) 
+    UseTiming("clock_uncore") 
+
+    # xbar master port 
+    NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.tlMasterXbar.**" }
+    # The frontend 
+    NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.frontend.**" }
+    # Let's exclude the icache
+    Exclude {
+            NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.frontend.icache.**" }  
+    }
+    # The FPU
+    NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.fpuOpt.**" }
+    # data cache
+    NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcacheArb.**" }
+    
+    # Let's  exclude the data cache 
+    # NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcache.**" }
+    
+    # The page table walker
+    NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.pwt.**" }
+    # The core
+    NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.**" }
+    
+    Exclude {
+            NA ~ (212987) { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.csr.**" }
+    }
 }
