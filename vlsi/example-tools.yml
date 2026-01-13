@@ -3,7 +3,7 @@ vlsi.core.build_system: make
 # Genus options
 vlsi.core.synthesis_tool: "hammer.synthesis.dc"
 synthesis.dc.version: "SYN_2022.12"
-vlsi.core.synthesis_tool.compile_args : ["-scan", "-incremental"]
+vlsi.core.synthesis_tool.compile_args : ["-scan", "-incremental", " -no_autoungroup" , "-no_boundary_optimization"]
 vlsi.core.max_threads: 16
 # Innovus options
 vlsi.core.par_tool: "hammer.par.innovus"
@@ -24,7 +24,9 @@ sim.vcs.version: "2023.12-SP1"
 sim.vcs.vcs_bin: "${synopsys.synopsys_home}/vcs/V-${sim.vcs.version}/bin/vcs"
 sim.vcs.vcs_home: "${synopsys.synopsys_home}/vcs/V-${sim.vcs.version}"
 sim.vcs.verdi_home: "${synopsys.synopsys_home}/verdi/V-${sim.vcs.version}"
-
+vlsi.core.atpg_tool: "hammer.atpg.testmax"
+atpg.testmax.version: "TMAX_2022.12"
+atpg.testmax.testmax_bin: "${synopsys.testmax_home}/${atpg.testmax.version}/bin/tmax2"
 # Voltus options
 #vlsi.core.power_tool: "hammer.power.voltus"
 #power.joules.version: "211"

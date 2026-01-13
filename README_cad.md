@@ -67,7 +67,13 @@ In order to setup the environment for running chipyard (simulation and synthesis
    ```
 
     **This is a hard hack for the moment**
-
+6. Install and use the specific patched hammer version (**IMPORTANT**):
+   ```bash 
+    cd chipyard/vlsi/
+    ./install_plugins.sh hammer_root_dir
+    ```
+    
+   
 Please also refer to:
 -   [Hammer Docs](https://hammer-vlsi.readthedocs.io/)
 -   [Chipyard setup docs](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html)
