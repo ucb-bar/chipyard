@@ -160,10 +160,9 @@ $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(build_dir)
 # copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
 $(fsim_files): $(sim_files)
 include $(vlsi_dir)/sim.mk
-
-include $(vlsi_dir)/fsim.mk
-
+include $(vlsi_dir)/atpg.mk
 include $(vlsi_dir)/power.mk
+include $(vlsi_dir)/fsim.mk
 
 #########################################################################################
 # AUTO BUILD FLOW
@@ -171,7 +170,7 @@ include $(vlsi_dir)/power.mk
 
 .PHONY: buildfile
 buildfile: $(OBJ_DIR)/hammer.d
-# Tip: Set HAMMER_D_DEPS to an empty string to avoid unnecessary RTL rebuilds
+	# Tip: Set HAMMER_D_DEPS to an empty string to avoid unnecessary RTL rebuilds
 # TODO: make this dependency smarter so that we don't need this at all
 HAMMER_D_DEPS ?= $(GENERATED_CONFS)
 $(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
