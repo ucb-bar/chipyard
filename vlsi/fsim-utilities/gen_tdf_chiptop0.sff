@@ -6,6 +6,8 @@ Coverage
                 PD=1.0;
                 PT=1.0;
         }
+        "Test Coverage" = "(DD * DD_weight + DT * DT_weight + DE * DE_weight + DF * DF_weight + PD * PD_weight + PT * PT_weight)/(Total)"; 
+        "Fault Coverage" = "(DD * DD_weight + DT * DT_weight + DE * DE_weight + DF * DF_weight + PD * PD_weight + PT * PT_weight)/(Total + UB + UI + UR + UT + UU + UO)"; 
 }
 
 FaultGenerate {
