@@ -623,10 +623,16 @@ class MacroCompilerPass(
               groups
                 .filter(g => g.family == sram.family && groupMatchesMask(g, sram))
                 .map(g => {
-                  for {
-                    w <- g.width
-                    d <- g.depth if (sram.width % w == 0) && (sram.depth % d == 0)
-                  } yield Seq(new Macro(buildSRAMMacro(g, d, w, g.vt.head)))
+                  g.triples match {
+                    case Some(triples) =>
+                      for {(d, w, _) <- triples}
+                        yield Seq(new Macro(buildSRAMMacro(g, d, w, g.vt.head)))
+                    case None =>
+                      for {
+                        w <- g.width
+                        d <- g.depth if (sram.width % w == 0) && (sram.depth % d == 0)
+                      } yield Seq(new Macro(buildSRAMMacro(g, d, w, g.vt.head)))
+                  }
                 })
             case None => Seq()
           }

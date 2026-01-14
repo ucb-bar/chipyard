@@ -12,3 +12,9 @@ The core exposes a custom memory interface, interrupt ports, and other misc. por
 While the core itself is not a generator, we expose the same parameterization that the Ibex core provides so that all supported Ibex configurations are available.
 
 For more information, see the `GitHub repository for Ibex <https://github.com/lowRISC/ibex>`__.
+
+Configuration classes and Chipyard glue for Ibex live under ``generators/ibex/chipyard`` and are compiled directly from the Ibex repository sources. After running the standard setup (``./build-setup.sh``), build the example config with:
+
+::
+
+  cd sims/vcs && make CONFIG=IbexConfig
