@@ -22,3 +22,35 @@ vlsi.inputs.resets: [
 #         right: 0  # or left: 0
 
 synthesis.dc.enable_congestion_map : true
+
+# Design Compiler DFT insertion option
+synthesis.dc.dft_insertion : true 
+# Scan configuration 
+synthesis.dc.insert_dft.scan : true 
+synthesis.dc.dft.scan.style : "multiplexed_flip_flop" 
+synthesis.dc.dft.scan.chain_count : 1
+synthesis.dc.dft.scan.ports : [
+  {"name" : "jtag_TDI" , "direction" : "in" , "type": "ScanDataIn"  ,"exist" : true },
+  {"name" : "jtag_TDO" , "direction" : "out" , "type": "ScanDataOut"  ,"exist" : true }
+]
+synthesis.dc.dft.scan.clock_ports: [
+  {"name" : "jtag_TCK", "active_state" : "1", "timings" : ["45" , "95"] },
+  {"name" : "clock_uncore", "active_state" : "1", "timings" : ["45" , "95"] },
+  {"name" : "serial_tl_0_clock_in", "active_state" : "1", "timings" : ["45" , "95"] }
+]
+
+synthesis.dc.dft.reset_ports : [
+  {"name" : "reset_io", "active_state" : "1"},
+  {"name" : "jtag_reset", "active_state" : "1"},
+]
+# BSD and JTAG
+synthesis.dc.insert_dft.bsd : false # TODO implement boundary scan insertion during the synthesis 
+synthesis.dc.dft.jtag.clk : "jtag_TCK"
+synthesis.dc.dft.jtag.tdi : "jtag_TDI"
+synthesis.dc.dft.jtag.tdo : "jtag_TDO"
+synthesis.dc.dft.jtag.tms : "jtag_TMS"
+synthesis.dc.dft.jtag.reset : "jtag_reset"
+# Memory Collar configuration 
+synthesis.dc.insert_dft.memory_wrapper : true 
+# Scan compression configuration
+synthesis.dc.insert_dft.scan_compression : false # TODO implement scan compression insertion during the synthesis 
