@@ -1,8 +1,0 @@
-SECTIONS {
-
-  .sbst : 
-  {
-    *(.sbst*)
-  } >ram
-
-}

@@ -67,7 +67,17 @@ ifeq ($(tutorial),nangate45-commercial-rocket)
     DESIGN_CONFS      ?= example-designs/nangate45-commercial.yml \
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
-    VLSI_OBJ_DIR      ?= build-nangate45-commercial
+    VLSI_OBJ_DIR      ?= build-nangate45-commercial-rocket
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
+endif
+
+ifeq ($(tutorial),nangate45-commercial-sodor)
+    tech_name         ?= nangate45
+    CONFIG            ?= Sodor3StageConfig
+    TOOLS_CONF        ?= example-tools.yml
+    TECH_CONF         ?= example-nangate45.yml
+    DESIGN_CONFS      ?= example-designs/nangate45-commercial.yml
+    VLSI_OBJ_DIR      ?= build-nangate45-commercial-sodor
     INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 

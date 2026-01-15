@@ -7,7 +7,7 @@ Configuration
 --------------------------
 The following configuration creates an 8-point FFT:
 
-.. literalinclude:: ../../generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala
+.. literalinclude:: ../../generators/fft-generator/chipyard/FFTConfigs.scala
    :language: scala
    :start-after: DOC include start: FFTRocketConfig
    :end-before: DOC include end: FFTRocketConfig
