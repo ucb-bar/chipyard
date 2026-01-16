@@ -104,3 +104,18 @@ The pin can be added to a system with the ``testchipip.soc.WithChipIdPin`` confi
 width and MMIO address are parameterizable and can be set by passing ``ChipIdPinParams`` as an 
 argument to the config. The width can additionally be set using the ``testchipip.soc.WithChipIdPinWidth``
 config. 
+
+CTC
+---------------
+
+The CTC (Chip-To-Chip) link converts TileLink requests to a simple 32-bit protocol, 
+similar to TSI. This link is intended to connect chiplets in a Chipyard design, and can be 
+added to a multichip config using ``chipyard.harness.WithMultiChipCTC``. To add CTC ports to 
+a single SoC, use ``testchipip.ctc.WithCTC``. Refer to 
+`ChipletConfigs.scala <https://github.com/ucb-bar/chipyard/blob/main/generators/chipyard/src/main/scala/config/ChipletConfigs.scala>`_ 
+for examples of configs with CTC.
+
+By default, CTC uses the credited PHY provided with the Serial TileLink interface (see 
+:ref:`Generators/TestChipIP:TileLink SERDES`). CTC can also be instantiated without a PHY. The 
+intended use for this mode is for multi-chiplet FireSim simulations using the CTC bridge. For 
+more information on FireSim, see :ref:`Simulation/FPGA-Accelerated-Simulation:FireSim`.

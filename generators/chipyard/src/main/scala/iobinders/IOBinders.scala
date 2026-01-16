@@ -37,6 +37,7 @@ import testchipip.util.{ClockedIO}
 import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
 import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
 import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
+import testchipip.ctc.{CanHavePeripheryCTC}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
 import chipyard.example.{CanHavePeripheryGCD}
@@ -605,5 +606,27 @@ class WithOffchipBusSel extends OverrideIOBinder({
       val (port, cells) = IOCell.generateIOFromSignal(sel, "obus_sel", sys.p(IOCellKey))
       (Seq(OffchipSelPort(() => port)), cells)
     }.getOrElse(Nil, Nil)
+  }
+})
+
+class WithCTCIOCells extends OverrideIOBinder({
+  (system: CanHavePeripheryCTC) => {
+    val (ports, cells) = system.ctc_ios.zipWithIndex.map ({ case (c, id) =>
+      val sys = system.asInstanceOf[BaseSubsystem]
+      val (port, cells) = IOCell.generateIOFromSignal(c.getWrappedValue, s"ctc${id}_port", sys.p(IOCellKey), abstractResetAsAsync = true)
+      (CTCPort(() => port, id), cells)
+    }).unzip
+    (ports.toSeq, cells.flatten.toSeq)
+  }
+})
+
+class WithCTCPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryCTC) => {
+    val (ports, cells) = system.ctc_ios.zipWithIndex.map ({ case (c, id) =>
+      val port = IO(chiselTypeOf(c.getWrappedValue)).suggestName(s"ctc${id}_port") // Since CTC IO varies depending on params
+      port <> c.getWrappedValue
+      (CTCPort(() => port, id), Nil)
+    }).unzip
+    (ports.toSeq, cells.flatten.toSeq)
   }
 })
