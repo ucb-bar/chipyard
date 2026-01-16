@@ -22,7 +22,7 @@ endif
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
-	for x in $$(cat $(MODEL_MODS_FILELIST) | sort -u) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
+	for x in $$(cat $(MODEL_MODS_FILELIST) | sort -u) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
