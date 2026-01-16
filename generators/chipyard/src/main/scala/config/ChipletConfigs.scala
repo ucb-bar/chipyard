@@ -3,7 +3,7 @@ package chipyard
 import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AddressSet}
 import freechips.rocketchip.subsystem.{SBUS}
-import testchipip.soc.{OBUS}
+import testchipip.soc.{OBUS, InwardAddressTranslatorParams, OutwardAddressTranslatorParams}
 
 // ------------------------------------------------
 // Configs demonstrating chip-to-chip communication
@@ -145,15 +145,15 @@ class MultiSimLLCChipletRocketConfig extends Config(
 
 class CTCRocketConfig extends Config(
   new chipyard.harness.WithCTCLoopback ++
-  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true))) ++ 
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1)), noPhy=true))) ++ 
   new RocketConfig
 )
 
 class DoubleCTCRocketConfig extends Config(
   new chipyard.harness.WithCTCLoopback ++
   new testchipip.ctc.WithCTC(Seq(
-    new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=false),
-    new testchipip.ctc.CTCParams(onchipAddr = 0x2000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true)
+    new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1)), noPhy=false),
+    new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x2000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1)), noPhy=true)
   )) ++ 
   new RocketConfig
 )
@@ -173,3 +173,47 @@ class MultiDoubleCTCRocketConfig extends Config(
   new chipyard.harness.WithMultiChip(1, new DoubleCTCRocketConfig)
 )
 
+class ComputeChiplet1Config extends Config(
+  new chipyard.harness.WithCTCLoopback ++
+  new testchipip.soc.WithChipIdPin ++
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(
+    translationParams = InwardAddressTranslatorParams(chipID=1, offset=0x100000000L), 
+    offchip=Some(AddressSet(0x100000000L, 0x300000000L - 1)), 
+    noPhy=true))) ++ 
+  new chipyard.RocketConfig
+)
+
+class ComputeChiplet2Config extends Config(
+  new chipyard.harness.WithCTCLoopback ++
+  new testchipip.soc.WithChipIdPin ++
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(
+    translationParams = InwardAddressTranslatorParams(chipID=2, offset=0x100000000L), 
+    offchip=Some(AddressSet(0x100000000L, 0x300000000L - 1)), 
+    noPhy=true))) ++ 
+  new chipyard.RocketConfig
+)
+
+class IOChipletConfig extends Config(
+  new chipyard.harness.WithCTCLoopback ++
+  new testchipip.soc.WithChipIdPin ++
+  new testchipip.ctc.WithCTC(Seq(
+    new testchipip.ctc.CTCParams(
+      translationParams = InwardAddressTranslatorParams(chipID=0, offset=0x100000000L), 
+      offchip=Some(AddressSet(0x200000000L, 0x100000000L - 1)), 
+      noPhy=true), 
+    new testchipip.ctc.CTCParams(
+      translationParams = InwardAddressTranslatorParams(chipID=0, offset=0x100000000L), 
+      offchip=Some(AddressSet(0x300000000L, 0x100000000L - 1)), 
+      noPhy=true)
+    )) ++ 
+  new chipyard.NoCoresConfig
+)
+
+class TripleChipletConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  new chipyard.harness.WithMultiChipCTC(chip0=1, chip1=0, chip0portId=0, chip1portId=0) ++ // C1 to IO port 0
+  new chipyard.harness.WithMultiChipCTC(chip0=2, chip1=0, chip0portId=0, chip1portId=1) ++ // C2 to IO port 1
+  new chipyard.harness.WithMultiChip(0, new IOChipletConfig) ++
+  new chipyard.harness.WithMultiChip(1, new ComputeChiplet1Config) ++
+  new chipyard.harness.WithMultiChip(2, new ComputeChiplet2Config) 
+)
