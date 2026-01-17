@@ -1,7 +1,6 @@
 ATPG_CONF = $(OBJ_DIR)/atpg-inputs.yml
-ATPG_DEBUG_CONF = $(OBJ_DIR)/atpg-debug-inputs.yml
 
-.PHONY: $(ATPG_CONF) $(ATPG_DEBUG_CONF)
+.PHONY: $(ATPG_CONF)
 
 $(ATPG_CONF):
 	@mkdir -p $(dir $@)
@@ -12,30 +11,12 @@ $(ATPG_CONF):
 	@echo "  input_files:" >> $@
 	@echo "    - '' " >> $@
 	@echo "  input_files_meta: 'append'" >> $@
-	@echo "  options: " >> $@
-	@for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \
-		echo '    - "'$$x'"' >> $@; \
-	done
-	@echo "  options_meta: 'append'" >> $@
-	@echo "  defines:" >> $@
-	@for x in $(subst +define+,,$(SIM_PREPROC_DEFINES)); do \
-		echo '    - "'$$x'"' >> $@; \
-	done
-	@echo "  defines_meta: 'append'" >> $@
-
-$(ATPG_DEBUG_CONF):
-	mkdir -p $(dir $@)
-	mkdir -p $(output_dir)
-	echo "atpg.inputs:" > $@
-	echo "  defines:" >> $@
-	echo "    - 'DEBUG'" >> $@;
-ifndef USE_VPD
-	echo "    - 'FSDB=1'" >> $@;
+ifdef FAULT_MODEL
+	@echo "  fault_model: '$(FAULT_MODEL)'" >> $@
 endif
-	echo "  defines_meta: 'append'" >> $@
-	echo "  options:" >> $@
-	echo '    - "-kdb"' >> $@
-	echo "  options_meta: 'append'" >> $@
+ifdef PATTERNS_FILE
+	@echo "  patterns_file: '$(PATTERNS_FILE)'" >> $@
+endif
 
 # ATPG targets that forward generated config to hammer
 # Ensure synthesis (sim-syn) runs before ATPG so ATPG only runs when synth exists.
