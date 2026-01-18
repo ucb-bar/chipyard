@@ -25,6 +25,16 @@ sim.vcs.verdi_home: "${synopsys.synopsys_home}/verdi/V-${sim.vcs.version}"
 vlsi.core.atpg_tool: "hammer.atpg.testmax"
 atpg.testmax.version: "TMAX_2022.12"
 atpg.testmax.testmax_bin: "${synopsys.testmax_home}/${atpg.testmax.version}/bin/tmax2"
+# Args for the "set_drc" command in TestMAX
+atpg.testmax.set_drc_args: [""]
+# Args for the "run_drc" command in TestMAX, the spf file is automatically taken after the synthesis step
+atpg.testmax.run_drc_args: [""]
+# Args for the "set_atpg" command in TestMAX, the spf file is automatically taken after the synthesis step
+atpg.testmax.set_atpg_args: [""]
+# Args for the "run_atpg" command in TestMAX, the spf file is automatically taken after the synthesis step
+atpg.testmax.run_atpg_args: ["-auto_compression"]
+# Args for the "run_fault_sim" command in TestMAX, the spf file is automatically taken after the synthesis step
+atpg.testmax.run_fault_sim_args: [""]
 # Voltus options
 #vlsi.core.power_tool: "hammer.power.voltus"
 #power.joules.version: "211"
