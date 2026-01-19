@@ -26,6 +26,10 @@ endif
 		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
+	echo "  syn_input_files:" >> $@
+	for x in $$(cat $(VLSI_RTL)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
 	echo "  timescale: '1ns/10ps'" >> $@
 	echo "  options:" >> $@
 	for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \
