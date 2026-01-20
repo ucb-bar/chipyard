@@ -17,6 +17,9 @@ endif
 ifdef PATTERNS_FILE
 	@echo "  patterns_file: '$(PATTERNS_FILE)'" >> $@
 endif
+ifdef FAULTS_FILE
+	@echo "  faults_file: '$(FAULTS_FILE)'" >> $@
+endif
 
 # ATPG targets that forward generated config to hammer
 # Ensure synthesis (sim-syn) runs before ATPG so ATPG only runs when synth exists.
