@@ -22,15 +22,14 @@ endif
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: ''" >> $@  # don't specify -top
 	echo "  input_files:" >> $@
-	for x in $$(cat $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST)| uniq | sort -u) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
-		if echo "$$x" | grep -q "_TestHarness_UNIQUIFIED\.sv$$"; then \
-			x_mod=$$(echo "$$x" | sed 's/_TestHarness_UNIQUIFIED\.sv$$/.sv/'); \
-		else \
-			x_mod="$$x"; \
-		fi; \
-		echo '    - "'$$x_mod'"' >> $@; \
+	for x in $$(cat $(MODEL_MODS_FILELIST) | sort -u) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
+		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
+	echo "  syn_input_files:" >> $@
+	for x in $$(cat $(VLSI_RTL)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
 	echo "  timescale: '1ns/10ps'" >> $@
 	echo "  options:" >> $@
 	for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \

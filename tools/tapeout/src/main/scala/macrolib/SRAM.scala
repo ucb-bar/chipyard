@@ -105,8 +105,9 @@ case class SRAMGroup(
   family:     String,
   vt:         Seq[String],
   mux:        Int,
-  depth:      Range,
-  width:      Range,
+  depth:      Iterable[Int],
+  width:      Iterable[Int],
+  triples:    Option[Seq[(Int, Int, Int)]],
   ports:      Seq[MacroPort],
   extraPorts: Seq[MacroExtraPort] = List()) {
   def toJSON: JsObject = {
@@ -116,8 +117,18 @@ case class SRAMGroup(
         "name" -> JsArray(name.map(Json.toJson(_))),
         "vt" -> JsArray(vt.map(Json.toJson(_))),
         "mux" -> Json.toJson(mux),
-        "depth" -> JsArray(Seq(depth.start, depth.end, depth.step).map { x => Json.toJson(x) }),
-        "width" -> JsArray(Seq(width.start, width.end, width.step).map { x => Json.toJson(x) }),
+        "depth" -> (depth match {
+          case list: List[Int] =>
+            JsArray(list.map { x => Json.toJson(x) })
+          case range: Range =>
+            JsArray(Seq(range.start, range.end, range.step).map { x => Json.toJson(x) })
+        }),
+        "width" -> (width match {
+          case list: List[Int] =>
+            JsArray(list.map { x => Json.toJson(x) })
+          case range: Range =>
+            JsArray(Seq(range.start, range.end, range.step).map { x => Json.toJson(x) })
+        }),
         "ports" -> JsArray(ports.map { _.toJSON })
       )
     )
@@ -148,17 +159,35 @@ object SRAMGroup {
       case Some(x: JsNumber) => x.value.intValue
       case _ => return None
     }
-    val depth: Range = json.get("depth") match {
+    val triples: Option[Seq[(Int, Int, Int)]] = json.get("triples") match {
       case Some(x: JsArray) =>
-        val seq = x.as[List[JsNumber]].map(_.value.intValue)
-        Range.inclusive(seq(0), seq(1), seq(2))
-      case _ => return None
+        val seq = x.as[List[JsArray]].map(_.as[List[JsNumber]].map(_.value.intValue))
+        Some(seq.map(y => (y(0), y(1), y(2))).sorted)
+      case _ => None
     }
-    val width: Range = json.get("width") match {
+    val depth: Iterable[Int] = json.get("depth list") match {
       case Some(x: JsArray) =>
         val seq = x.as[List[JsNumber]].map(_.value.intValue)
-        Range.inclusive(seq(0), seq(1), seq(2))
-      case _ => return None
+        seq.sorted
+      case _ => json.get("depth") match {
+        case Some(x: JsArray) =>
+          val seq = x.as[List[JsNumber]].map(_.value.intValue)
+          Range.inclusive(seq(0), seq(1), seq(2))
+        case _ =>
+          if (triples.isDefined) Seq() else return None
+      }
+    }
+    val width: Iterable[Int] = json.get("width list") match {
+      case Some(x: JsArray) =>
+        val seq = x.as[List[JsNumber]].map(_.value.intValue)
+        seq.sorted
+      case _ => json.get("width") match {
+        case Some(x: JsArray) =>
+          val seq = x.as[List[JsNumber]].map(_.value.intValue)
+          Range.inclusive(seq(0), seq(1), seq(2))
+        case _ =>
+          if (triples.isDefined) Seq() else return None
+      }
     }
     val ports: Seq[MacroPort] = json.get("ports") match {
       case Some(x: JsArray) =>
@@ -188,7 +217,7 @@ object SRAMGroup {
         }
       case _ => List()
     }
-    Some(SRAMGroup(name, family, vt, mux, depth, width, ports, extraPorts))
+    Some(SRAMGroup(name, family, vt, mux, depth, width, triples, ports, extraPorts))
   }
 }
 

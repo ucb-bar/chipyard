@@ -7,3 +7,8 @@ VexiiRiscv implements cache-coherent TileLink L1 data caches and is integrated a
 The example VexiiRiscv config is ``VexiiRiscvConfig``.
 When building this Config, Chipyard will call VexiiRiscv's SpinalHDL RTL generator to generate the core's SystemVerilog, before integrating it as a Chisel blackbox.
 
+Configuration classes and Chipyard glue for VexiiRiscv live under ``generators/vexiiriscv/chipyard`` and are compiled directly from the VexiiRiscv repository sources. After running the standard setup (``./build-setup.sh``), build the example config with:
+
+::
+
+  cd sims/vcs && make CONFIG=VexiiRiscvConfig
