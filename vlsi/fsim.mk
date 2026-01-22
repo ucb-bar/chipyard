@@ -24,8 +24,8 @@ $(FSIM_CONF): $(sim_common_files) check-binary
 	echo "  fault_model: '$(FAULT_MODEL)'" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
 	echo "  tb_name: '$(FSIM_CAMPAIGN_DUT)'" >> $@
-	echo "  input_files:" >> $@
 	echo "  strobe_module: '$(STROBE_MODULE) "
+	echo "  input_files:" >> $@
 	for x in $$(cat $(MODEL_MODS_FILELIST) | sort -u) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
