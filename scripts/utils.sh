@@ -1,19 +1,63 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 #######################################
 # Common setup. Init MacOS compatibility
 # variables.
 # Globals:
-#   READLINK
+#   READLINK (best-effort; no GNU requirement)
 #######################################
 function common_setup
 {
-    # On macOS, use GNU readlink from 'coreutils' package in Homebrew/MacPorts
-    if [ "$(uname -s)" = "Darwin" ] ; then
-        READLINK=greadlink
-    else
+    # Prefer system readlink if present; do not require GNU variant
+    if command -v readlink >/dev/null 2>&1 ; then
         READLINK=readlink
+    else
+        READLINK=:
     fi
+}
+
+#######################################
+# Portable realpath implementation.
+# Resolves to an absolute, canonical path without requiring GNU readlink.
+# Arguments:
+#   $1: path to resolve
+#######################################
+function realpath_portable
+{
+    # Prefer python3 if available
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$1" <<'PY'
+import os, sys
+print(os.path.realpath(sys.argv[1]))
+PY
+        return
+    fi
+
+    # Fallback to perl, commonly available on macOS
+    if command -v perl >/dev/null 2>&1; then
+        perl -MCwd -e 'print Cwd::abs_path(shift), "\n"' "$1"
+        return
+    fi
+
+    # Pure shell fallback using readlink (no -f) and cd -P
+    target="$1"
+    dir="$(dirname -- "$target")"
+    base="$(basename -- "$target")"
+    [ -d "$target" ] && { dir="$target"; base=""; }
+
+    # Resolve symlinks
+    while [ -n "$base" ] && [ -L "$dir/$base" ]; do
+        link="$($READLINK "$dir/$base" 2>/dev/null)" || break
+        case "$link" in
+            /*) target="$link" ;;
+             *) target="$dir/$link" ;;
+        esac
+        dir="$(dirname -- "$target")"
+        base="$(basename -- "$target")"
+    done
+
+    dir="$(cd -P "$dir" >/dev/null 2>&1 && pwd)"
+    [ -n "$base" ] && echo "$dir/$base" || echo "$dir"
 }
 
 #######################################
@@ -61,16 +105,9 @@ function restore_bash_options
 #######################################
 function replace_content
 {
-    # On macOS, use GNU readlink from 'coreutils' package in Homebrew/MacPorts
-    if [ "$(uname -s)" = "Darwin" ] ; then
-        READLINK=greadlink
-    else
-        READLINK=readlink
-    fi
-
     # If BASH_SOURCE is undefined, we may be running under zsh, in that case
     # provide a zsh-compatible alternative
-    DIR="$(dirname "$($READLINK -f "${BASH_SOURCE[0]:-${(%):-%x}}")")"
+    DIR="$(dirname "$(realpath_portable "${BASH_SOURCE[0]:-${(%):-%x}}")")"
     file="$1"
     shift
     key="$1"

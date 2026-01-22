@@ -1,0 +1,44 @@
+name: chipyard-chisel7
+
+on:
+  pull_request:
+    branches:
+      - main
+      - '1.[0-9]*.x'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  chisel7-firrtl:
+    name: chisel7-firrtl
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install DTC (device-tree-compiler)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y device-tree-compiler
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'sbt'
+
+      - name: Init submodules (saturn only)
+        run: |
+          scripts/init-submodules-no-riscv-tools-nolog.sh --saturn
+
+      - name: Run firrtl target with Chisel 7
+        env:
+          USE_CHISEL7: "1"
+        run: |
+          cd sims/verilator
+          make firrtl
+

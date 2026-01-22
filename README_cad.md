@@ -182,9 +182,12 @@ TestDriver.testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_roc
 
 For Gate-Level:
 ```verilog 
-TestDriver.testHarness.chiptop0.system_tile_prci_domain_element_reset_domain_rockettile_core
+TestDriver.TestHarness.chiptop0.system.tile_prci_domain.element_reset_domain_${CORE_NAME}tile.core
 ```
-
+The entire CPU (with branch prediction, fetch unit etc.) is at:
+```verilog 
+TestDriver.TestHarness.chiptop0.system.tile_prci_domain.element_reset_domain_${CORE_NAME}tile
+```
 For different tutorial and subprojects please see:
 - [./vlsi/tutorial.mk](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/vlsi/Makefile)
 - [./variables.mk](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/variables.mk)
