@@ -4,8 +4,9 @@ FSIM_STROBE_FILE ?= $(vlsi_dir)/fsim-utilities/strobe.sv
 FSIM_CAMPAIGN_TCL ?= $(vlsi_dir)/fsim-utilities/fsim.tcl
 FAULT_MODEL ?= saf
 FSIM_GENERATE_FAULTS ?= 1
-STANDARD_FAULT_FORMAT ?= $(vlsi_dir)fsim-utilities/gen_$(FAULT_MODEL)_$(VLSI_MODEL_DUT_NAME).sff
+STANDARD_FAULT_FORMAT ?= $(vlsi_dir)/fsim-utilities/gen_$(FAULT_MODEL)_$(VLSI_MODEL_DUT_NAME).sff
 FSIM_OUTPUT_FOLDER ?= $(vlsi_dir)/fsim-output/
+STROBE_MODULE ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 
 .PHONY: $(FSIM_CONF)
 
@@ -21,26 +22,22 @@ $(FSIM_CONF): $(sim_common_files) check-binary
 	echo "  standard_fault_format: '$(STANDARD_FAULT_FORMAT)'" >> $@
 	echo "  campaign_simv_daidir: 'simv.daidir'" >> $@
 	echo "  fault_model: '$(FAULT_MODEL)'" >> $@
-	echo "  top_module: $(VLSI_TOP)" >> $@
+	echo "  top_module: '$(VLSI_TOP)" >> $@
 	echo "  tb_name: '$(FSIM_CAMPAIGN_DUT)'" >> $@
 	echo "  input_files:" >> $@
-	for x in $$(cat $(MODEL_MODS_FILELIST) $(BB_MODS_FILELIST)| uniq | sort -u) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
-		if echo "$$x" | grep -q "_TestHarness_UNIQUIFIED\.sv$$"; then \
-			x_mod=$$(echo "$$x" | sed 's/_TestHarness_UNIQUIFIED\.sv$$/.sv/'); \
-		else \
-			x_mod="$$x"; \
-		fi; \
-		echo '    - "'$$x_mod'"' >> $@; \
+	echo "  strobe_module: '$(STROBE_MODULE) "
+	for x in $$(cat $(MODEL_MODS_FILELIST) | sort -u) $(TOP_SMEMS_FILE) $(MODEL_SMEMS_FILE) $(SIM_FILE_REQS); do \
+		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  input_files_meta: 'append'" >> $@
+	echo "  syn_input_files:" >> $@
+	for x in $$(cat $(VLSI_RTL)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
 	echo "  timescale: '1ns/10ps'" >> $@
 	echo "  options:" >> $@
 	for x in $(filter-out -f $(sim_common_files),$(VCS_NONCC_OPTS)); do \
-		if echo "$$x" | grep -q "+rad$$"; then \
-			echo ''; \
-		else \
-			echo '    - "'$$x'"' >> $@; \
-		fi \
+		echo '    - "'$$x'"' >> $@; \
 	done
 	echo "  options_meta: 'append'" >> $@
 	echo "  defines:" >> $@
