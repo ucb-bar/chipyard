@@ -21,7 +21,7 @@ import testchipip.uart.{UARTAdapter, UARTToSerial}
 import testchipip.serdes._
 import testchipip.iceblk.{SimBlockDevice, BlockDeviceModel}
 import testchipip.cosim.{SpikeCosim}
-import testchipip.ctc.{CTCBridgeIO}
+import testchipip.ctc.{CTCBridgeIO, CTCMem}
 import icenet.{NicLoopback, SimNetwork}
 import chipyard._
 import chipyard.clocking.{HasChipyardPRCI}
@@ -342,8 +342,8 @@ class WithOffchipBusSelPlusArg extends HarnessBinder({
   }
 })
 
-class WithCTCTiedOff extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: CTCPort, chipId: Int) => {
+class WithCTCTiedOff(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: CTCPort, chipId: Int) if (port_ids.map(_.contains(port.portId)).getOrElse(true)) => {
     port.io match {
       case io: CreditedSourceSyncPhitIO => {
         io.clock_in := false.B.asClock
@@ -373,6 +373,34 @@ class WithCTCLoopback extends HarnessBinder({
       case io: CTCBridgeIO => {
         io.client_flit.in <> io.manager_flit.out
         io.manager_flit.in <> io.client_flit.out
+      }
+    }
+  }
+})
+
+class WithCTCTestRAM(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: CTCPort, chipId: Int) if (port_ids.map(_.contains(port.portId)).getOrElse(true)) => {  
+    port.io match {
+      case io: CreditedSourceSyncPhitIO => io.clock_in := th.harnessBinderClock; io.reset_in := th.harnessBinderReset
+      case io: CTCBridgeIO => {
+        // Unsupported, tie off
+        io.manager_flit := DontCare
+        io.manager_flit.in.valid := false.B
+        io.manager_flit.out.ready := false.B
+        io.client_flit := DontCare
+        io.client_flit.in.valid := false.B
+        io.client_flit.out.ready := false.B
+      }
+      case io: DecoupledPhitIO => {
+        val clock = port.io match {
+          case io: HasClockOut => io.clock_out
+          case io: HasClockIn => th.harnessBinderClock
+        }
+        withClock(clock) {
+          val ram = Module(LazyModule(new CTCMem(port.params)(port.p)).module)
+          ram.io.ser.in <> io.out
+          io.in <> ram.io.ser.out
+        }
       }
     }
   }

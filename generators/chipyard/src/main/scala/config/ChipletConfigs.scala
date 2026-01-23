@@ -145,15 +145,15 @@ class MultiSimLLCChipletRocketConfig extends Config(
 
 class CTCRocketConfig extends Config(
   new chipyard.harness.WithCTCLoopback ++
-  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1)), noPhy=true))) ++ 
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1)), phyParams = None))) ++ 
   new RocketConfig
 )
 
 class DoubleCTCRocketConfig extends Config(
   new chipyard.harness.WithCTCLoopback ++
   new testchipip.ctc.WithCTC(Seq(
-    new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1)), noPhy=false),
-    new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x2000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1)), noPhy=true)
+    new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1))),
+    new testchipip.ctc.CTCParams(translationParams = OutwardAddressTranslatorParams(onchipAddr = 0x2000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1)), phyParams = None)
   )) ++ 
   new RocketConfig
 )
@@ -179,7 +179,32 @@ class ComputeChiplet1Config extends Config(
   new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(
     translationParams = InwardAddressTranslatorParams(chipID=1, offset=0x100000000L), 
     offchip=Seq.tabulate(3)(i => AddressSet(0x100000000L * (i+1), 0x100000000L - 1)), 
-    noPhy=true))) ++ 
+    phyParams = None))) ++ 
+  new chipyard.RocketConfig
+)
+
+class ComputeChiplet2Config extends Config(
+  new chipyard.harness.WithCTCLoopback ++
+  new testchipip.soc.WithChipIdPin ++
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(
+    translationParams = InwardAddressTranslatorParams(chipID=2, offset=0x100000000L), 
+    offchip=Seq.tabulate(3)(i => AddressSet(0x100000000L * (i+1), 0x100000000L - 1)), 
+    phyParams = None))) ++ 
+  new chipyard.RocketConfig
+)
+
+class DoubleSidedChipletConfig extends Config(
+  new chipyard.harness.WithCTCTestRAM ++
+  new testchipip.ctc.WithCTCDecoupledPhy ++
+  new testchipip.soc.WithChipIdPin ++
+  new testchipip.ctc.WithCTC(Seq(
+    new testchipip.ctc.CTCParams(
+      translationParams = InwardAddressTranslatorParams(chipID=0, offset=0x100000000L), 
+      offchip=Seq(AddressSet(0x200000000L, 0x100000000L - 1))), 
+    new testchipip.ctc.CTCParams(
+      translationParams = InwardAddressTranslatorParams(chipID=0, offset=0x100000000L), 
+      offchip=Seq(AddressSet(0x300000000L, 0x100000000L - 1)))
+    )) ++ 
   new chipyard.RocketConfig
 )
 
