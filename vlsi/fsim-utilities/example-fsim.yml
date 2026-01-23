@@ -1,0 +1,33 @@
+fsim.inputs:
+
+  # Optional execution flags for the fault simulator
+  optional_execution_flags: ["+vcs+fsdbon"]
+
+
+  # Determine the weights of all the parameters in the test and fault coverage
+  weights: [
+    {fault_class: "DC", weight: "1.0"},
+    {fault_class: "PT", weight: "1.0"}
+  ]
+
+  # Determines the fault locations and types
+  fault_locations: [
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: False},
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.csr.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: True},
+  ]
+
+  # Strobe position if strobe file is not provided
+  strobe_modules: [
+    "`TOPLEVEL.system.tile_prci_domain.element_reset_domain_rockettile.core", 
+    "`TOPLEVEL.system.tile_prci_domain.element_reset_domain_rockettile.fpuOpt"
+  ]
+
+  # Contraints for the sff file
+  constraints: [
+    {name: "one", entries:
+          [{type: "U*", signal: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.csr.large_9_reg_5_", value: "1"},
+          {type: "U*", signal: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.csr.large_5_reg_5_", value: "0"}]},
+    {name: "safe", entries: [{type: "U*", signal: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.csr.large_8_reg_5_", value: "0"}]}
+  ]
