@@ -68,7 +68,7 @@ ifeq ($(tutorial),nangate45-commercial-rocket)
     CONFIG            ?= RocketConfig
     TOOLS_CONF        ?= example-tools.yml
     TECH_CONF         ?= example-nangate45.yml
-    FSIM_CONF_FILE    ?= fsim-utilities/example-fsim.yml
+    FSIM_CONF_FILE    ?= fsim-utilities/example-fsim-rocket.yml
     DESIGN_CONFS      ?= example-designs/nangate45-commercial.yml \
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
@@ -118,7 +118,7 @@ ifeq ($(tutorial),nangate45-commercial-boom-medium)
     CONFIG            ?= MediumBoomV3Config
     TOOLS_CONF        ?= example-tools.yml
     TECH_CONF         ?= example-nangate45.yml
-    FSIM_CONF_FILE    ?= fsim-utilities/example-fsim.yml
+    FSIM_CONF_FILE    ?= fsim-utilities/example-fsim-boom.yml
     DESIGN_CONFS      ?= example-designs/nangate45-commercial.yml \
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
@@ -132,7 +132,7 @@ ifeq ($(tutorial),nangate45-commercial-boom-small)
     CONFIG            ?= SmallBoomV3Config
     TOOLS_CONF        ?= example-tools.yml
     TECH_CONF         ?= example-nangate45.yml
-    FSIM_CONF_FILE    ?= fsim-utilities/example-fsim.yml
+    FSIM_CONF_FILE    ?= fsim-utilities/example-fsim-boom.yml
     DESIGN_CONFS      ?= example-designs/nangate45-commercial.yml \
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
@@ -146,7 +146,7 @@ ifeq ($(tutorial),nangate45-commercial-boom-mega)
     CONFIG            ?= MegaBoomV3Config
     TOOLS_CONF        ?= example-tools.yml
     TECH_CONF         ?= example-nangate45.yml
-    FSIM_CONF_FILE    ?= fsim-utilities/example-fsim.yml
+    FSIM_CONF_FILE    ?= fsim-utilities/example-fsim-boom.yml
     DESIGN_CONFS      ?= example-designs/nangate45-commercial.yml \
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )

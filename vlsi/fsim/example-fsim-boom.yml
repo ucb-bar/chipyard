@@ -1,0 +1,40 @@
+fsim.inputs:
+
+  # Optional execution flags for the fault simulator
+  optional_execution_flags: ["+vcs+fsdbon"]
+
+
+  # Determine the weights of all the parameters in the test and fault coverage
+  weights: [
+    {fault_class: "DC", weight: "1.0"},
+    {fault_class: "PT", weight: "1.0"}
+  ]
+
+  test_coverage: "(DD * DD_weight + DT * DT_weight + DE * DE_weight + DF * DF_weight + PD * PD_weight + PT * PT_weight)/(Total)"
+  fault_coverage: "(DD * DD_weight + DT * DT_weight + DE * DE_weight + DF * DF_weight + PD * PD_weight + PT * PT_weight)/(Total + UB + UI + UR + UT + UU + UO)"
+
+  custom_coverage_functions: [
+    {name: "Franout Coverage", function: "(DD * DD_weight)/(Total + UB + UI + UR + UT + UU + UO)"}
+  ]
+
+  # Determines the fault locations and types
+  fault_locations: [
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.tlMasterXbar.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: False},
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.ftq.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: True},
+  ]
+
+  # Strobe position if strobe file is not provided
+  strobe_modules: [
+    "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.core", 
+    "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.dcache"
+  ]
+
+  # Contraints for the sff file - Example on how to use
+  # constraints: [
+  #  {name: "one", entries:
+  #        [{type: "U*", signal: "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.core.*", value: "1"},
+  #        {type: "U*", signal: "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.core.*", value: "0"}]},
+  #  {name: "safe", entries: [{type: "U*", signal: "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.core.*", value: "0"}]}
+  # ]

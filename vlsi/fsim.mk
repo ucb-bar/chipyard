@@ -1,10 +1,10 @@
 FSIM_CONF = $(OBJ_DIR)/fsim-inputs.yml
 FSIM_CAMPAIGN_DUT ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
-FSIM_STROBE_FILE ?= $(vlsi_dir)/fsim-utilities/strobe.sv
-FSIM_CAMPAIGN_TCL ?= $(vlsi_dir)/fsim-utilities/fsim.tcl
+FSIM_STROBE_FILE ?= $(vlsi_dir)/fsim/strobe/strobe_rocket.sv
+FSIM_CAMPAIGN_TCL ?= $(vlsi_dir)/fsim/script/fsim.tcl
 FAULT_MODEL ?= saf
 FSIM_GENERATE_FAULTS ?= 1
-STANDARD_FAULT_FORMAT ?= $(vlsi_dir)/fsim-utilities/gen_$(FAULT_MODEL)_$(VLSI_MODEL_DUT_NAME).sff
+STANDARD_FAULT_FORMAT ?= $(vlsi_dir)/fsim/fault_list/gen_$(FAULT_MODEL)_$(VLSI_MODEL_DUT_NAME).sff
 FSIM_OUTPUT_FOLDER ?= $(vlsi_dir)/fsim-output/
 STROBE_MODULE ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 
