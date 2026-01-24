@@ -37,7 +37,7 @@ endif
 ENV_YML            ?= $(vlsi_dir)/env.yml
 TECH_CONF          ?= example-$(tech_name).yml
 TOOLS_CONF         ?= example-tools.yml
-FSIM_CONF_FILE	   ?= fsim-utilities/example-fsim.yml
+FSIM_CONF_FILE	   ?= fsim/example-fsim.yml
 INPUT_CONFS        ?= $(TOOLS_CONF) $(TECH_CONF)
 HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
                         ./example-vlsi-sky130,\
