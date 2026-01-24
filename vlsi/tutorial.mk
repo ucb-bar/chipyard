@@ -13,7 +13,7 @@ ifeq ($(tutorial),asap7)
     FSIM_CONF_FILE    ?= fsim-utilities/example-fsim.yml
     DESIGN_CONFS      ?=
     VLSI_OBJ_DIR      ?= build-asap7-commercial
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),sky130-commercial)
@@ -26,7 +26,7 @@ ifeq ($(tutorial),sky130-commercial)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/sky130-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-sky130-commercial
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),sky130-openroad)
@@ -41,7 +41,7 @@ ifeq ($(tutorial),sky130-openroad)
                         $(if $(filter $(VLSI_TOP),RocketTile), \
                             example-designs/sky130-openroad-rockettile.yml, )
     VLSI_OBJ_DIR      ?= build-sky130-openroad
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
     # Yosys compatibility for CIRCT-generated Verilog
     ENABLE_YOSYS_FLOW  = 1
 endif
@@ -58,7 +58,7 @@ ifeq ($(tutorial),nangate45-openroad)
                         $(if $(filter $(VLSI_TOP),RocketTile), \
                             example-designs/nangate45-openroad-rockettile.yml, )
     VLSI_OBJ_DIR      ?= build-nangate45-openroad
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
     # Yosys compatibility for CIRCT-generated Verilog
     ENABLE_YOSYS_FLOW  = 1
 endif
@@ -73,7 +73,7 @@ ifeq ($(tutorial),nangate45-commercial-rocket)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-nangate45-commercial-rocket
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),nangate45-commercial-sodor)
@@ -96,7 +96,7 @@ ifeq ($(tutorial),nangate45-commercial-perfc)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-nangate45-commercial-perfcnt
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),nangate45-commercial-rocket-many-peripherals)
@@ -109,7 +109,7 @@ ifeq ($(tutorial),nangate45-commercial-rocket-many-peripherals)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-nangate45-commercial-rocket-many-peripherals
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),nangate45-commercial-boom-medium)
@@ -123,7 +123,7 @@ ifeq ($(tutorial),nangate45-commercial-boom-medium)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-nangate45-commercial-boom
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),nangate45-commercial-boom-small)
@@ -137,7 +137,7 @@ ifeq ($(tutorial),nangate45-commercial-boom-small)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-nangate45-commercial-boom
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),nangate45-commercial-boom-mega)
@@ -151,7 +151,7 @@ ifeq ($(tutorial),nangate45-commercial-boom-mega)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-nangate45-commercial-boom
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif
 
 ifeq ($(tutorial),nangate45-commercial-gemmini)
@@ -165,5 +165,5 @@ ifeq ($(tutorial),nangate45-commercial-gemmini)
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
     VLSI_OBJ_DIR      ?= build-nangate45-commercial-gemmini
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS) $(FSIM_CONF_FILE)
+    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
 endif

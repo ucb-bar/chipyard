@@ -19,6 +19,7 @@ par.inputs.gds_merge: true
 # VCS options
 vlsi.core.sim_tool: "hammer.sim.vcs"
 vlsi.core.fsim_tool: "hammer.fsim.vc_zoix"
+vlsi.core.fsim.max_threads: 16
 fsim.vc_zoix.version: "V-2023.12-SP1"
 fsim.vc_zoix.vc_zoix_bin: "${synopsys.synopsys_home}/vc_zoix/V-${fsim.vc_zoix.version}/bin/vc_zoix"
 sim.vcs.version: "2023.12-SP1"

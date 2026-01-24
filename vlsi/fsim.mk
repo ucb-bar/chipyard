@@ -70,29 +70,29 @@ endif
 
 redo-fsim-rtl: $(FSIM_CONF)
 redo-fsim-rtl-$(VLSI_TOP): $(FSIM_CONF)
-redo-fsim-rtl: override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF)
-redo-fsim-rtl-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF)
+redo-fsim-rtl: override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF) -p $(FSIM_CONF_FILE)
+redo-fsim-rtl-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF) -p $(FSIM_CONF_FILE)
 redo-fsim-rtl: override HAMMER_SIM_RUN_DIR = fsim-rtl-rundir
 redo-fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-rtl-$(VLSI_TOP)
 
 redo-fsim-syn: $(FSIM_CONF)
 redo-fsim-syn-$(VLSI_TOP): $(FSIM_CONF)
-redo-fsim-syn: override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF)
-redo-fsim-syn-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF)
+redo-fsim-syn: override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF) -p $(FSIM_CONF_FILE)
+redo-fsim-syn-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(FSIM_CONF) -p $(FSIM_CONF_FILE)
 redo-fsim-syn: override HAMMER_SIM_RUN_DIR = fsim-syn-rundir
 redo-fsim-syn-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-syn-$(VLSI_TOP)
 
 fsim-rtl: $(FSIM_CONF)
 fsim-rtl-$(VLSI_TOP): $(FSIM_CONF)
-fsim-rtl: override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
-fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
+fsim-rtl: override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF) -p $(FSIM_CONF_FILE)
+fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF) -p $(FSIM_CONF_FILE)
 fsim-rtl: override HAMMER_SIM_RUN_DIR = fsim-rtl-rundir
 fsim-rtl-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-rtl-$(VLSI_TOP)
 
 fsim-syn: $(FSIM_CONF)
 fsim-syn-$(VLSI_TOP): $(FSIM_CONF)
-fsim-syn: override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
-fsim-syn-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF)
+fsim-syn: override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF) -p $(FSIM_CONF_FILE)
+fsim-syn-$(VLSI_TOP): override HAMMER_SIM_EXTRA_ARGS += -p $(FSIM_CONF) -p $(FSIM_CONF_FILE)
 fsim-syn: override HAMMER_SIM_RUN_DIR = fsim-syn-rundir
 fsim-syn-$(VLSI_TOP): override HAMMER_SIM_RUN_DIR = fsim-syn-$(VLSI_TOP)
 
