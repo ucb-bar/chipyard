@@ -19,6 +19,20 @@ fsim.inputs:
 
   # Determines the fault locations and types
   fault_locations: [
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.tlMasterXbar.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: False},
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.frontend.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: False},
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.icache.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: True},
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.fpuOpt.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: False},
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcacheArb.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: False},
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcache.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: True},
+    {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.pwt.**", 
+              fault_type: "0,1", type_of_fault_location: "PORT", exclude: False},
     {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.**", 
               fault_type: "0,1", type_of_fault_location: "PORT", exclude: False},
     {location: "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.csr.**", 

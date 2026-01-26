@@ -26,8 +26,10 @@ FaultGenerate {
         NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcacheArb.**" }
         
         # Let's  exclude the data cache 
-        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcache.**" }
-        
+        Exclude {
+                NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcache.**" }
+        }
+
         # The page table walker
         NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.pwt.**" }
         # The core

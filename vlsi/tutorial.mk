@@ -86,25 +86,12 @@ ifeq ($(tutorial),nangate45-commercial-sodor)
     VLSI_OBJ_DIR      ?= build-nangate45-commercial-sodor
 endif
 
-ifeq ($(tutorial),nangate45-commercial-perfc)
-    tech_name         ?= nangate45
-    CONFIG            ?= RocketHPM16Config
-    TOOLS_CONF        ?= example-tools.yml
-    TECH_CONF         ?= example-nangate45.yml
-    FSIM_CONF_FILE    ?= fsim/example-fsim.yml
-    DESIGN_CONFS      ?= example-designs/nangate45-commercial.yml \
-                        $(if $(filter $(VLSI_TOP),Rocket), \
-                            example-designs/nangate45-rocket.yml, )
-    VLSI_OBJ_DIR      ?= build-nangate45-commercial-perfcnt
-    INPUT_CONFS       ?= $(TOOLS_CONF) $(TECH_CONF) $(DESIGN_CONFS) $(EXTRA_CONFS)
-endif
-
 ifeq ($(tutorial),nangate45-commercial-rocket-many-peripherals)
     tech_name         ?= nangate45
     CONFIG            ?= ManyPeripheralsRocketConfig
     TOOLS_CONF        ?= example-tools.yml
     TECH_CONF         ?= example-nangate45.yml
-    FSIM_CONF_FILE    ?= fsim/example-fsim.yml
+    FSIM_CONF_FILE    ?= fsim/example-fsim-rocket.yml
     DESIGN_CONFS      ?= example-designs/nangate45-commercial.yml \
                         $(if $(filter $(VLSI_TOP),Rocket), \
                             example-designs/nangate45-rocket.yml, )
