@@ -10,5 +10,5 @@ create_testcases -name {"test1"} \
 fsim -verbose 
 
 # Write results report
-report -campaign  chiptop0 -report /home/n.digruttolagiardino/benchmarks/chipyard/vlsi/build-nangate45-commercial-rocket/chipyard.harness.TestHarness.RocketConfig-ChipTop/fsim-syn-rundir/RocketConfig/saf/hello/fsim_out.rpt -overwrite
-report -campaign  chiptop0 -report /home/n.digruttolagiardino/benchmarks/chipyard/vlsi/build-nangate45-commercial-rocket/chipyard.harness.TestHarness.RocketConfig-ChipTop/fsim-syn-rundir/RocketConfig/saf/hello/fsim_out_hier.rpt -overwrite -hierarchical 100
+report -campaign  chiptop0 -report fsim_out.rpt -overwrite
+report -campaign  chiptop0 -report fsim_out_hier.rpt -overwrite -hierarchical 100
