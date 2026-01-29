@@ -25,17 +25,17 @@ endif
 # Ensure synthesis (sim-syn) runs before ATPG so ATPG only runs when synth exists.
 atpg-syn: $(ATPG_CONF)
 atpg-syn-$(VLSI_TOP): $(ATPG_CONF)
-atpg-syn: override HAMMER_ATPG_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF)
-atpg-syn-$(VLSI_TOP): override HAMMER_ATPG_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF)
+atpg-syn: override HAMMER_ATPG_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF) -p $(vlsi_dir)/$(DESIGN_CONFS)
+atpg-syn-$(VLSI_TOP): override HAMMER_ATPG_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF) -p $(vlsi_dir)/$(DESIGN_CONFS)
 atpg-syn: override HAMMER_ATPG_RUN_DIR = atpg-syn-rundir
 atpg-syn-$(VLSI_TOP): override HAMMER_ATPG_RUN_DIR = atpg-syn-$(VLSI_TOP)
 
 redo-atpg-syn: $(ATPG_CONF) syn-to-atpg
 redo-atpg-syn-$(VLSI_TOP): $(ATPG_CONF) syn-to-atpg
-redo-atpg-syn: override HAMMER_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF)
-redo-atpg-syn-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF)
-redo-atpg-syn: override HAMMER_ATPG_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF)
-redo-atpg-syn-$(VLSI_TOP): override HAMMER_ATPG_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF)
+redo-atpg-syn: override HAMMER_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF) -p $(vlsi_dir)/$(DESIGN_CONFS)
+redo-atpg-syn-$(VLSI_TOP): override HAMMER_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF) -p $(vlsi_dir)/$(DESIGN_CONFS)
+redo-atpg-syn: override HAMMER_ATPG_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF) -p $(vlsi_dir)/$(DESIGN_CONFS)
+redo-atpg-syn-$(VLSI_TOP): override HAMMER_ATPG_EXTRA_ARGS += -p $(ATPG_CONF) -p $(vlsi_dir)/$(TOOLS_CONF) -p $(vlsi_dir)/$(DESIGN_CONFS)
 redo-atpg-syn: override HAMMER_ATPG_RUN_DIR = atpg-syn-rundir
 redo-atpg-syn-$(VLSI_TOP): override HAMMER_ATPG_RUN_DIR = atpg-syn-$(VLSI_TOP)
 
