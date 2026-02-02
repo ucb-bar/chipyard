@@ -37,6 +37,7 @@ endif
 ENV_YML            ?= $(vlsi_dir)/env.yml
 TECH_CONF          ?= example-$(tech_name).yml
 TOOLS_CONF         ?= example-tools.yml
+FSIM_CONF_FILE	   ?= fsim/example-fsim.yml
 INPUT_CONFS        ?= $(TOOLS_CONF) $(TECH_CONF)
 HAMMER_EXEC        ?= $(if $(filter $(tech_name),sky130),\
                         ./example-vlsi-sky130,\
@@ -127,6 +128,11 @@ $(SYN_CONF): $(VLSI_RTL)
 	for x in $$(cat $(VLSI_RTL)); do \
 		echo '    - "'$$x'"' >> $@; \
 	done
+	echo "fsim.inputs:" >> $@
+	echo "  input_files:" >> $@
+	for x in $$(cat $(VLSI_RTL)); do \
+		echo '    - "'$$x'"' >> $@; \
+	done
 	echo "  input_files_meta: 'append'" >> $@
 	echo "synthesis.inputs:" >> $@
 	echo "  top_module: $(VLSI_TOP)" >> $@
@@ -152,9 +158,12 @@ $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(build_dir)
 			,\
 			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
 
+# Elaboration files for fsim are the same of (logic) sim
+$(fsim_files): $(sim_files)
 include $(vlsi_dir)/sim.mk
 include $(vlsi_dir)/atpg.mk
 include $(vlsi_dir)/power.mk
+include $(vlsi_dir)/fsim.mk
 
 #########################################################################################
 # AUTO BUILD FLOW

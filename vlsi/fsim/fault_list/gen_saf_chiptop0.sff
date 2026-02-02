@@ -1,0 +1,41 @@
+# Weights 
+Coverage
+{
+        Weights
+        {
+                PD=0.5;
+                PT=1.0;
+                DE=0.5;
+        }
+        "Test Coverage" = "(DD * DD_weight + DT * DT_weight + DE * DE_weight + DF * DF_weight + PD * PD_weight + PT * PT_weight)/(Total)"; 
+        "Fault Coverage" = "(DD * DD_weight + DT * DT_weight + DE * DE_weight + DF * DF_weight + PD * PD_weight + PT * PT_weight)/(Total + UB + UI + UR + UT + UU + UO)"; 
+}
+
+FaultGenerate {
+        # xbar master port 
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.tlMasterXbar.**" }
+        # The frontend 
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.frontend.**" }
+        # Let's exclude the icache
+        Exclude {
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.frontend.icache.**" }  
+        }
+        # The FPU
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.fpuOpt.**" }
+        # data cache
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcacheArb.**" }
+        
+        # Let's  exclude the data cache 
+        Exclude {
+                NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.dcache.**" }
+        }
+
+        # The page table walker
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.pwt.**" }
+        # The core
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.**" }
+        
+        Exclude {
+                NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_rockettile.core.csr.**" }
+        }
+}

@@ -355,6 +355,15 @@ else ifneq ($(LOADMEM),)
 get_loadmem_flag = +loadmem=$(LOADMEM)
 endif
 
+# Function to generate the spiflash0 flag. First arg is the binary
+ifeq ($(SPIFLASH),1)
+# If LOADMEM=1, assume BINARY is the loadmem elf
+get_spiflash_flag = +spiflash0=$(1)
+else ifneq ($(SPIFLASH),)
+# Otherwise, assume the variable points to an elf file
+get_spiflash_flag = +spiflash0=$(SPIFLASH)
+endif
+
 ifneq ($(LOADARCH),)
 get_loadarch_flag = +loadarch=$(subst mem.elf,loadarch,$(1))
 endif
@@ -362,7 +371,7 @@ endif
 # get the output path base name for simulation outputs, First arg is the binary
 get_sim_out_name = $(output_dir)/$(call get_out_name,$(1))$(if $(EXTRA_SIM_OUT_NAME),.$(EXTRA_SIM_OUT_NAME),)
 # sim flags that are common to run-binary/run-binary-fast/run-binary-debug
-get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_loadmem_flag,$(1)) $(call get_loadarch_flag,$(1))
+get_common_sim_flags = $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(call get_loadmem_flag,$(1)) $(call get_loadarch_flag,$(1)) $(call get_spiflash_flag,$(1))
 
 .PHONY: %.run %.run.debug %.run.fast
 

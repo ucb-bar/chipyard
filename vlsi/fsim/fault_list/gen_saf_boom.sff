@@ -1,0 +1,59 @@
+# Weights 
+Coverage
+{
+        Weights
+        {
+                PD=1.0;
+                PT=1.0;
+        }
+        "Test Coverage" = "(DD * DD_weight + DT * DT_weight + DE * DE_weight + DF * DF_weight + PD * PD_weight + PT * PT_weight)/(Total)"; 
+        "Fault Coverage" = "(DD * DD_weight + DT * DT_weight + DE * DE_weight + DF * DF_weight + PD * PD_weight + PT * PT_weight)/(Total + UB + UI + UR + UT + UU + UO)"; 
+}
+
+FaultGenerate {
+        # xbar master port 
+        # NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.tlMasterXbar.**" }
+        # The frontend 
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.**" }
+        # Let's exclude the icache
+        Exclude {
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.ftq.**" }    
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.icache.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_update_arbiter.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.f4_btb_corrections.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder_5.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder_4.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder_3.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder0b.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder1_1.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder_2.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder_1.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder1.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd_decoder0.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.f3_bpd_resp.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.tlb.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.ras.**" }  
+              NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.frontend.bpd.**" }  
+              
+        }
+        # data cache
+        # NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.hellaCacheArb.**" }
+        
+        # Let's  exclude the data cache 
+        # NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.dcache.**" }
+        
+        # The page table walker
+        # NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.pwt.**" }
+        # The core
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.core.**" }
+        
+        Exclude {
+                NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.core.csr.**" }
+        }
+
+        # the Load store unit
+        NA [0,1] { PORT "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.lsu.**" }
+
+
+}

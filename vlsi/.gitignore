@@ -11,3 +11,11 @@ output
 # From verdi 
 novas.conf
 verdiLog
+
+# For FSIM
+# strobe.sv
+# fsim.tcl
+# *.sff
+*.fsdb
+*.key
+fsim-output
