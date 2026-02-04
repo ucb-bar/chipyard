@@ -39,11 +39,14 @@ redo-atpg-syn: override HAMMER_ATPG_RUN_DIR = atpg-syn-rundir
 redo-atpg-syn-$(VLSI_TOP): override HAMMER_ATPG_RUN_DIR = atpg-syn-$(VLSI_TOP)
 
 $(OBJ_DIR)/atpg-syn-input.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_ATPG_EXTRA_ARGS)
-$(OBJ_DIR)/atpg-syn-input.json: $(ATPG_CONF)
-
 $(OBJ_DIR)/atpg-%/atpg-output-full.json: private override HAMMER_EXTRA_ARGS += $(HAMMER_ATPG_EXTRA_ARGS)
 
 # Backwards-compatible aliases: `make atpg` -> `make atpg-syn`
 .PHONY: atpg atpg-$(VLSI_TOP)
 atpg: atpg-syn
 atpg-$(VLSI_TOP): atpg-syn-$(VLSI_TOP)
+
+# Backwards-compatible aliases: `make redo-atpg` -> `make redo-atpg-syn`
+.PHONY: redo-atpg redo-atpg-$(VLSI_TOP)
+redo-atpg: redo-atpg-syn
+redo-atpg-$(VLSI_TOP): redo-atpg-syn-$(VLSI_TOP)
