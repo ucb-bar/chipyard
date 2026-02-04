@@ -71,3 +71,5 @@ atpg.testmax.stil2verilog_options: [""]
 atpg.testmax.build_rules: [
   {"rule_code" : "B5", "severity" : "warning"},
 ]
+# Args for the "add_faults" command in TestMAX
+atpg.testmax.add_faults_args: ["-all"]
