@@ -1,7 +1,7 @@
 fsim.inputs:
 
   # Optional execution flags for the fault simulator
-  optional_execution_flags: ["+vcs+fsdbon"]
+  optional_elaboration_flags: ["+vcs+fsdbon"]
 
 
   # Determine the weights of all the parameters in the test and fault coverage
@@ -75,8 +75,7 @@ fsim.inputs:
 
   # Strobe position if strobe file is not provided
   strobe_modules: [
-    "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.core", 
-    "ChipTop.system.tile_prci_domain.element_reset_domain_boom_tile.dcache"
+    "TestDriver.testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_boom_tile.core", 
   ]
 
   # Contraints for the sff file - Example on how to use

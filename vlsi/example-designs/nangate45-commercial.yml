@@ -60,7 +60,7 @@ atpg.testmax.set_drc_args: [""]
 # Args for the "run_drc" command in TestMAX, the spf file is automatically taken after the synthesis step
 atpg.testmax.run_drc_args: [""]
 # Args for the "set_atpg" command in TestMAX
-atpg.testmax.set_atpg_args: [""]
+atpg.testmax.set_atpg_args: ["-coverage", "98.5"]
 # Args for the "run_atpg" command in TestMAX
 atpg.testmax.run_atpg_args: ["-auto_compression"]
 # Args for the "run_fault_sim" command in TestMAX
