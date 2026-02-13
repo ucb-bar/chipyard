@@ -1,7 +1,7 @@
 fsim.inputs:
 
   # Optional execution flags for the fault simulator
-  optional_execution_flags: ["+vcs+fsdbon"]
+  optional_elaboration_flags: ["+vcs+fsdbon"]
 
 
   # Determine the weights of all the parameters in the test and fault coverage
