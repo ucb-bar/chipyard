@@ -73,3 +73,6 @@ atpg.testmax.build_rules: [
 ]
 # Args for the "add_faults" command in TestMAX
 atpg.testmax.add_faults_args: ["-all"]
+
+# Optional Fault generation options
+fsim.vc_zoix.fcc_additional_args: ["-excludecolloff"]
