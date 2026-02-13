@@ -5,7 +5,11 @@ FSIM_CAMPAIGN_TCL ?= $(vlsi_dir)/fsim/script/fsim.tcl
 FAULT_MODEL ?= saf
 FSIM_GENERATE_FAULTS ?= 1
 STANDARD_FAULT_FORMAT ?= $(vlsi_dir)/fsim/fault_list/gen_$(FAULT_MODEL)_$(VLSI_MODEL_DUT_NAME).sff
-FSIM_OUTPUT_FOLDER ?= $(vlsi_dir)/fsim-output/
+ifneq ($(CUSTOM_VLOG),)
+	FSIM_OUTPUT_FOLDER          ?= $(vlsi_dir)/fsim-output/$(VLSI_TOP)
+else
+	FSIM_OUTPUT_FOLDER          ?= $(vlsi_dir)/fsim-output/$(long_name)-$(TOP)
+endif
 STROBE_MODULE ?= TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)
 
 .PHONY: $(FSIM_CONF)
@@ -66,7 +70,6 @@ ifneq ($(BINARY), )
 	echo "  benchmarks: ['$(BINARY)']" >> $@
 endif
 	echo "  tb_dut: 'TestDriver.testHarness.$(VLSI_MODEL_DUT_NAME)'" >> $@
-	echo "  core: '$(CONFIG)'" >> $@
 
 redo-fsim-rtl: $(FSIM_CONF)
 redo-fsim-rtl-$(VLSI_TOP): $(FSIM_CONF)
