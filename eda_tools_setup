@@ -1,8 +1,9 @@
 #!/bin/bash
 module load license/default
-module load synopsys/vcs/2023.12-SP1
+module load synopsys/vcs/2024.09-SP1
 module load synopsys/syn/2022.12
 module load synopsys/tmax/2022.12
 module load cadence/innovus/19.11_000
-module load synopsys/verdi/2023.12-SP1
+module load synopsys/verdi/2024.09-SP1
 module load synopsys/spyglass/2023.12-SP1
+module load synopsys/zoix/2024.09-SP1
