@@ -1,7 +1,7 @@
 # Setup instruction for chipyard and hammer for the CAD's servers
 This is a guide for using the designs in the chipyard framework and synthesize them using a custom library.
 
-We DO NOT CARE the PAR (Place and Route) since it is not the focus of our research. Thus, those flows may not work (we try our best, as always).
+> **_NOTE:_** We DO NOT CARE  about the PAR (Place and Route) since it is not the focus of our research. Thus, those flows may not work (we try our best, as always).
 
 In order to setup the environment for running chipyard (simulation and synthesis) you need to obseerve the following steps:
 
@@ -188,6 +188,13 @@ The entire CPU (with branch prediction, fetch unit etc.) is at:
 ```verilog 
 TestDriver.TestHarness.chiptop0.system.tile_prci_domain.element_reset_domain_${CORE_NAME}tile
 ```
+
+If you would like to execute a single action without runnign additional steps (e.g, in the following case the normal run would run the synthesis as well), you can run:
+```bash
+make redo-fsim-syn  tutorial=nangate45-commercial-boom-small BINARY=${TEST_PATH} LOADMEM=${TEST_PATH} args="--only_step fsim"
+```
+> **_NOTE:_** The dependancies must be present.
+
 For different tutorial and subprojects please see:
 - [./vlsi/tutorial.mk](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/vlsi/Makefile)
 - [./variables.mk](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/variables.mk)
