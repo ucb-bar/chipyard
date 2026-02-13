@@ -1,7 +1,7 @@
 set_config -global_max_jobs 16 
 set_config -fsim_std_args "-fsim=limit+hyperactive+0"
 
-## DYNAMIC RUNTIME - Do not modify this! The __init__.py checks for the args string to parse the required arguments
+## DYNAMIC RUNTIME - Do not modify from this! The __init__.py checks for the args string to parse the required arguments
 create_testcases -name {"test1"} \
     -exec ./simv \
     -args ""
