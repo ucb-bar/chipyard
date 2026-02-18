@@ -172,6 +172,68 @@ $ export TEST_PATH=absolute_path/tests/hello.riscv
 $ make fsim-syn tutorial=nangate45-commercial-rocket SUB_PROJECT=chipyard BINARY=${TEST_PATH} LOADMEM=${TEST_PATH}
 ```
 
+# ATPG (Automatic Test Pattern Generation)
+
+For ATPG, Synopsys TestMAX is used. The ATPG flow runs on the gate-level netlist produced by synthesis. The configuration is defined in [``atpg.mk``](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/vlsi/atpg.mk) and the tool binary/version in [``example-tools.yml``](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/vlsi/example-tools.yml).
+
+## Running ATPG
+For running ATPG on the post-synthesis netlist:
+```bash 
+$ cd vlsi
+$ make atpg-syn tutorial=nangate45-commercial-rocket
+```
+
+To re-run only the ATPG step (without re-running synthesis):
+```bash 
+$ cd vlsi
+$ make redo-atpg-syn tutorial=nangate45-commercial-rocket
+```
+
+## Fault models
+
+The currently available fault models are:
+- **Stuck-at fault (SAF)**: specify ``FAULT_MODEL=saf``
+- **Transition delay fault (TDF)**: specify ``FAULT_MODEL=tdf``
+
+By default, the fault model is **stuck-at fault (saf)**. To use a different fault model, pass the ``FAULT_MODEL`` variable:
+```bash 
+$ cd vlsi
+$ make atpg-syn tutorial=nangate45-commercial-rocket FAULT_MODEL=tdf
+```
+
+## Custom patterns and faults files
+
+You can provide a custom patterns file or faults file via the ``PATTERNS_FILE`` and ``FAULTS_FILE`` variables:
+```bash 
+$ cd vlsi
+$ make atpg-syn tutorial=nangate45-commercial-rocket PATTERNS_FILE=path/to/patterns_file FAULTS_FILE=path/to/faults_file
+```
+
+## Configuring ATPG
+
+ATPG-related settings can be configured in [```chipyard/vlsi/example-designs/nangate45-commercial.yml```](https://github.com/cad-polito-it/chipyard/blob/working/cad_servers/vlsi/example-designs/nangate45-commercial.yml). The main options are:
+
+```yaml
+# Args for the "set_drc" command in TestMAX
+atpg.testmax.set_drc_args: [""]
+# Args for the "run_drc" command in TestMAX
+atpg.testmax.run_drc_args: [""]
+# Args for the "set_atpg" command in TestMAX (e.g., target coverage)
+atpg.testmax.set_atpg_args: ["-coverage", "98.5"]
+# Args for the "run_atpg" command in TestMAX (e.g., auto compression)
+atpg.testmax.run_atpg_args: ["-auto_compression"]
+# Args for the "run_fault_sim" command in TestMAX
+atpg.testmax.run_fault_sim_args: [""]
+# Options for the "stil2verilog" command (STIL and testbench name are already embedded)
+atpg.testmax.stil2verilog_options: [""]
+# To set the severity of rules during the build in TestMAX
+atpg.testmax.build_rules: [
+  {"rule_code" : "B5", "severity" : "warning"},
+]
+# Args for the "add_faults" command in TestMAX
+atpg.testmax.add_faults_args: ["-all"]
+```
+
 # Useful information
 The core unit is at the following hierarchy:
 
