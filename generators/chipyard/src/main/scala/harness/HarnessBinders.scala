@@ -181,7 +181,7 @@ class WithTieOffL2FBusAXI extends HarnessBinder({
 class WithSimJTAGDebug extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: JTAGPort, chipId: Int) => {
     val dtm_success = WireInit(false.B)
-    when (dtm_success) { th.success := true.B }
+    when (dtm_success) { th.chiptopSuccess(chipId) := true.B }
     val jtag_wire = Wire(new JTAGIO)
     jtag_wire.TDO.data := port.io.TDO
     jtag_wire.TDO.driven := true.B
@@ -197,7 +197,7 @@ class WithSimJTAGDebug extends HarnessBinder({
 class WithSimDMI extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: DMIPort, chipId: Int) => {
     val dtm_success = WireInit(false.B)
-    when (dtm_success) { th.success := true.B }
+    when (dtm_success) { th.chiptopSuccess(chipId) := true.B }
     val dtm = Module(new TestchipSimDTM()(Parameters.empty)).connect(th.harnessBinderClock, th.harnessBinderReset.asBool, port.io, dtm_success)
   }
 })
@@ -264,7 +264,7 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
           io.in <> ram.io.ser.out
 
           val success = SimTSI.connect(ram.io.tsi, clock, th.harnessBinderReset, chipId)
-          when (success) { th.success := true.B }
+          when (success) { th.chiptopSuccess(chipId) := true.B }
         }
       }
     }
@@ -293,7 +293,7 @@ class WithSimTSIToUARTTSI extends HarnessBinder({
     val uart_to_serial = Module(new UARTToSerial(freq, port.io.uart.c))
     val serial_width_adapter = Module(new SerialWidthAdapter(8, TSI.WIDTH))
     val success = SimTSI.connect(Some(TSIIO(serial_width_adapter.io.wide)), th.harnessBinderClock, th.harnessBinderReset)
-    when (success) { th.success := true.B }
+    when (success) { th.chiptopSuccess(chipId) := true.B }
     assert(!uart_to_serial.io.dropped)
     serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
     uart_to_serial.io.uart.rxd := port.io.uart.txd
@@ -303,7 +303,7 @@ class WithSimTSIToUARTTSI extends HarnessBinder({
 
 class WithTraceGenSuccess extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SuccessPort, chipId: Int) => {
-    when (port.io) { th.success := true.B }
+    when (port.io) { th.chiptopSuccess(chipId) := true.B }
   }
 })
 

@@ -76,6 +76,10 @@ trait HasHarnessInstantiators {
     case None => Seq(p)
   }
 
+  // Used to synchronize between chiptops
+  // TODO: make sure this works for non-contiguous chip ids
+  val chiptopSuccess: Vec[Bool] = WireInit(VecInit(Seq.fill(chipParameters.size)(false.B)))
+
   // This shold be called last to build the ChipTops
   def instantiateChipTops(): Seq[LazyModule] = {
     require(p(MultiChipNChips).isEmpty || supportsMultiChip,

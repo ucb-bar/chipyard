@@ -20,7 +20,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessInst
   val io = IO(new Bundle {
     val success = Output(Bool())
   })
-  val success = WireInit(false.B)
+  val success = chiptopSuccess.reduce(_ && _)
   io.success := success
 
   override val supportsMultiChip = true
