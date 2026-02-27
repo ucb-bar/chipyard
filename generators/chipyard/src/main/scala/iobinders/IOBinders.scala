@@ -32,7 +32,7 @@ import chipyard.iocell._
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 import testchipip.spi.{SPIChipIO}
 import testchipip.boot.{CanHavePeripheryCustomBootPin}
-import testchipip.soc.{CanHavePeripheryChipIdPin, CanHaveSwitchableOffchipBus}
+import testchipip.soc.{CanHavePeripheryChipIdPin, CanHaveSwitchableOffchipBus, CanHaveChipletRouting}
 import testchipip.util.{ClockedIO}
 import testchipip.iceblk.{CanHavePeripheryBlockDevice, BlockDeviceKey, BlockDeviceIO}
 import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
@@ -627,6 +627,18 @@ class WithCTCPunchthrough extends OverrideIOBinder({
       val port = IO(chiselTypeOf(c.getWrappedValue)).suggestName(s"ctc${id}_port") // Since CTC IO varies depending on params
       port <> c.getWrappedValue
       (CTCPort(() => port, sys.p(CTCKey)(id), id, sys.p), Nil)
+    }).unzip
+    (ports.toSeq, cells.flatten.toSeq)
+  }
+})
+
+class WithD2DPunchthrough extends OverrideIOBinder({
+  (system: CanHaveChipletRouting) => {
+    val (ports, cells) = system.d2d_port_ios.getOrElse(Nil).zipWithIndex.map ({ case (c, id) =>
+      val sys = system.asInstanceOf[BaseSubsystem]
+      val port = IO(chiselTypeOf(c.getWrappedValue)).suggestName(s"d2d${id}_port")
+      port <> c.getWrappedValue
+      (D2DPort(() => port, id), Nil)
     }).unzip
     (ports.toSeq, cells.flatten.toSeq)
   }

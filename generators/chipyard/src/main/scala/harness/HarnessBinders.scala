@@ -405,3 +405,15 @@ class WithCTCTestRAM(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
     }
   }
 })
+
+class WithD2DTiedOff(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: D2DPort, chipId: Int) if (port_ids.map(_.contains(port.portId)).getOrElse(true)) => {
+    port.io.tieoff
+  }
+})
+
+class WithD2DLoopback(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: D2DPort, chipId: Int) if (port_ids.map(_.contains(port.portId)).getOrElse(true)) => {
+    port.io.loopback
+  }
+})

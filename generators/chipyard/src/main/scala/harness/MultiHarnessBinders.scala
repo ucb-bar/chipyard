@@ -13,7 +13,7 @@ import testchipip.serdes._
 import testchipip.ctc.{CTCBridgeIO}
 
 import chipyard._
-import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasChipyardPorts, Port, SerialTLPort, CTCPort}
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasChipyardPorts, Port, SerialTLPort, CTCPort, D2DPort}
 
 import scala.reflect.{ClassTag}
 
@@ -104,5 +104,14 @@ class WithMultiChipCTC(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1portId
         io0.manager_flit.in <> io1.client_flit.out
       }
     }
+  }
+)
+
+class WithMultiChipD2D(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1portId: Int = 0) extends MultiHarnessBinder(
+  chip0, chip1,
+  (p0: D2DPort) => p0.portId == chip0portId,
+  (p1: D2DPort) => p1.portId == chip1portId,
+  (th: HasHarnessInstantiators, p0: D2DPort, p1: D2DPort) => {
+    p0.io.connect(p1.io)
   }
 )
