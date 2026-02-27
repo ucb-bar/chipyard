@@ -324,7 +324,7 @@ verilog: $(sim_common_files)
 #########################################################################################
 # helper rules to run simulations
 #########################################################################################
-.PHONY: run-binary run-binary-fast run-binary-debug run-fast
+.PHONY: run-binary run-binary-fast run-binary-debug run-binary-fast-debug run-fast
 	%.check-exists check-binary check-binaries
 
 check-binary:
@@ -425,6 +425,22 @@ endif
 		$(BINARY_ARGS) \
 		</dev/null 2> >(spike-dasm > $(call get_sim_out_name,$*).out) >$(call get_sim_out_name,$*).log \
 		& echo "PID=$$!")
+
+run-binary-fast-debug: check-binary $(BINARY).run.fast.debug
+
+%.run.fast.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
+ifeq (1,$(DUMP_BINARY))
+	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
+endif
+	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
+		$(PERMISSIVE_ON) \
+		$(call get_common_sim_flags,$*) \
+		$(VERBOSE_FLAGS) \
+		$(call get_waveform_flag,$(call get_sim_out_name,$*)) \
+		$(PERMISSIVE_OFF) \
+		$* \
+		$(BINARY_ARGS) \
+		</dev/null | tee $(call get_sim_out_name,$*).log)
 
 run-fast: run-asm-tests-fast run-bmark-tests-fast
 
