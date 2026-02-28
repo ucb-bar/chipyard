@@ -25,6 +25,7 @@ case object HarnessClockInstantiatorKey extends Field[() => HarnessClockInstanti
 case object HarnessBinderClockFrequencyKey extends Field[Double](100.0) // MHz
 case object MultiChipIdx extends Field[Int](0)
 case object DontTouchChipTopPorts extends Field[Boolean](true)
+case object SuccessFn extends Field[Vec[Bool] => Bool]((cs: Vec[Bool]) => { cs.reduce(_ || _) })
 
 class WithMultiChip(id: Int, p: Parameters) extends Config((site, here, up) => {
   case MultiChipParameters(`id`) => p
@@ -42,6 +43,14 @@ class WithHarnessBinderClockFreqMHz(freqMHz: Double) extends Config((site, here,
 
 class WithDontTouchChipTopPorts(b: Boolean = true) extends Config((site, here, up) => {
   case DontTouchChipTopPorts => b
+})
+
+class WithCustomSuccessFn(fn: Vec[Bool] => Bool) extends Config((site, here, up) => {
+  case SuccessFn => fn
+})
+
+class WithANDSuccessFn extends Config((site, here, up) => {
+  case SuccessFn => (cs: Vec[Bool]) => { cs.reduce(_ && _) }
 })
 
 // A TestHarness mixing this in will
@@ -78,6 +87,7 @@ trait HasHarnessInstantiators {
 
   // Used to synchronize between chiptops
   val chiptopSuccess: Vec[Bool] = WireInit(VecInit(Seq.fill(chipParameters.size)(false.B)))
+  val successFn: Vec[Bool] => Bool = p(SuccessFn)
 
   // This shold be called last to build the ChipTops
   def instantiateChipTops(): Seq[LazyModule] = {
