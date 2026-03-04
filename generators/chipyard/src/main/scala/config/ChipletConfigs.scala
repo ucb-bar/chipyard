@@ -239,36 +239,16 @@ class TripleChipletConfig extends Config(
 class OffchipRouterConfig extends Config(
   new chipyard.harness.WithD2DLoopback ++
   new chipyard.iobinders.WithD2DPunchthrough ++
-  new testchipip.soc.WithChipletRouting(testchipip.soc.ChipletRoutingParams(
-    routerParams = testchipip.soc.OffchipRouterParams(
-      tableEntries = 4,
-      beatBytes = 8
-    ),
-    translationParams = InwardAddressTranslatorParams(chipID=0, offset=0x100000000L),
-    ports = Seq(new testchipip.ctc.CTCParams(
-      translationParams = None,
-      offchip=AddressSet.misaligned(0x100000000L, 0x400000000L),
-      phyParams = None)
-    )
-  )) ++
+  new testchipip.soc.WithChipletRouting() ++
   new chipyard.RocketConfig
 )
 
 class ComputeChipletRouterConfig extends Config(
-  new chipyard.harness.WithD2DTiedOff ++
+  new chipyard.harness.WithD2DLoopback ++
   new chipyard.iobinders.WithD2DPunchthrough ++
   new testchipip.soc.WithChipletRouting(testchipip.soc.ChipletRoutingParams(
-    routerParams = testchipip.soc.OffchipRouterParams(
-      tableEntries = 4,
-      beatBytes = 8
-    ),
-    translationParams = InwardAddressTranslatorParams(chipID=0, offset=0x100000000L),
-    ports = Seq(
-      new testchipip.ctc.CTCParams(
-        translationParams = None,
-        offchip=AddressSet.misaligned(0x100000000L, 0x400000000L),
-        phyParams = None)
-    )
+    routerParams = testchipip.soc.OffchipRouterParams(tableEntries = 4),
+    ports = Seq(new testchipip.ctc.CTCParams(phyParams = None))
   )) ++
   new chipyard.RocketConfig
 )
@@ -276,22 +256,10 @@ class ComputeChipletRouterConfig extends Config(
 class IOChipletRouterConfig extends Config(
   new chipyard.harness.WithD2DTiedOff ++
   new chipyard.iobinders.WithD2DPunchthrough ++
+  new testchipip.soc.WithND2DPorts(2, new testchipip.ctc.CTCParams(phyParams = None)) ++
   new testchipip.soc.WithChipletRouting(testchipip.soc.ChipletRoutingParams(
-    routerParams = testchipip.soc.OffchipRouterParams(
-      tableEntries = 4,
-      beatBytes = 8
-    ),
-    translationParams = InwardAddressTranslatorParams(chipID=0, offset=0x100000000L),
-    ports = Seq(
-      new testchipip.ctc.CTCParams(
-        translationParams = None,
-        offchip=AddressSet.misaligned(0x100000000L, 0x400000000L),
-        phyParams = None),
-      new testchipip.ctc.CTCParams(
-        translationParams = None,
-        offchip=AddressSet.misaligned(0x100000000L, 0x400000000L),
-        phyParams = None)
-    )
+    routerParams = testchipip.soc.OffchipRouterParams(tableEntries = 4),
+    ports = Nil // Use WithND2DPorts to specify the ports
   )) ++
   new chipyard.RocketConfig
 )
@@ -303,4 +271,11 @@ class TripleRoutingChipletConfig extends Config(
   new chipyard.harness.WithMultiChip(0, new IOChipletRouterConfig) ++
   new chipyard.harness.WithMultiChip(1, new ComputeChipletRouterConfig) ++
   new chipyard.harness.WithMultiChip(2, new ComputeChipletRouterConfig) 
+)
+
+class DoubleRoutingChipletConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  new chipyard.harness.WithMultiChipD2D(chip0=1, chip1=0, chip0portId=0, chip1portId=0) ++ 
+  new chipyard.harness.WithMultiChip(0, new ComputeChipletRouterConfig) ++
+  new chipyard.harness.WithMultiChip(1, new ComputeChipletRouterConfig) 
 )
