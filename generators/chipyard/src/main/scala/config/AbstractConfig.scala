@@ -49,6 +49,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithChipIdIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
+  new chipyard.iobinders.WithCTCIOCells ++
   // The "punchthrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
   // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop
   new chipyard.iobinders.WithI2CPunchthrough ++
