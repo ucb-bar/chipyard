@@ -273,9 +273,29 @@ class TripleRoutingChipletConfig extends Config(
   new chipyard.harness.WithMultiChip(2, new ComputeChipletRouterConfig) 
 )
 
+class TestPhyExtComputeChipletConfig extends Config(
+  new testchipip.soc.WithD2DPorts(Seq(new testchipip.ctc.CTCParams(phyParams = Some(testchipip.serdes.DecoupledExternalSyncSerialPhyParams())))) ++
+  new ComputeChipletRouterConfig
+)
+
+class TestPhyIntComputeChipletConfig extends Config(
+  new testchipip.soc.WithD2DPorts(Seq(new testchipip.ctc.CTCParams(phyParams = Some(testchipip.serdes.DecoupledInternalSyncSerialPhyParams())))) ++
+  new ComputeChipletRouterConfig
+)
+
+class SertlComputeChipletConfig extends Config(
+  new testchipip.soc.WithD2DPorts(Seq(testchipip.serdes.SerialTLParams(
+      client = Some(testchipip.serdes.SerialTLClientParams(masterWhere = SBUS)),
+      manager = Some(testchipip.serdes.SerialTLManagerParams()),
+      phyParams = testchipip.serdes.CreditedSourceSyncSerialPhyParams()
+      //bundleParams = testchipip.serdes.TLSerdesser.STANDARD_TLBUNDLE_PARAMS.copy(sourceBits = 9) // Temp hack
+    ))) ++
+  new ComputeChipletRouterConfig
+)
+
 class DoubleRoutingChipletConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
   new chipyard.harness.WithMultiChipD2D(chip0=1, chip1=0, chip0portId=0, chip1portId=0) ++ 
-  new chipyard.harness.WithMultiChip(0, new ComputeChipletRouterConfig) ++
-  new chipyard.harness.WithMultiChip(1, new ComputeChipletRouterConfig) 
+  new chipyard.harness.WithMultiChip(0, new SertlComputeChipletConfig) ++
+  new chipyard.harness.WithMultiChip(1, new SertlComputeChipletConfig) 
 )
