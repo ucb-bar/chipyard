@@ -3,6 +3,7 @@
 #----------------------------------------------------------------------------------------
 SIM_OPT_CXXFLAGS := -O3
 LRISCV=-lriscv
+NUMA_PATH := $(shell dirname $$(ldconfig -p | grep libnuma.so | head -n1 | awk '{print $$NF}'))
 
 export USE_CHISEL6=1
 
@@ -17,6 +18,7 @@ SIM_CXXFLAGS = \
 
 SIM_LDFLAGS = \
 	$(LDFLAGS) \
+	-L$(NUMA_PATH) \
 	-L$(RISCV)/lib \
 	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \
