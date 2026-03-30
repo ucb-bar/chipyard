@@ -21,7 +21,7 @@ import testchipip.uart.{UARTAdapter, UARTToSerial}
 import testchipip.serdes._
 import testchipip.iceblk.{SimBlockDevice, BlockDeviceModel}
 import testchipip.cosim.{SpikeCosim}
-import testchipip.ctc.{CTCBridgeIO, CTCMem}
+import testchipip.ctc.{CTCBridgeIO, CTCMem, CTCMemIO}
 import icenet.{NicLoopback, SimNetwork}
 import chipyard._
 import chipyard.clocking.{HasChipyardPRCI}
@@ -397,7 +397,7 @@ class WithCTCTestRAM(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
           case io: HasClockIn => th.harnessBinderClock
         }
         withClock(clock) {
-          val ram = Module(LazyModule(new CTCMem(port.params)(port.p)).module)
+          val ram = Module(LazyModule(new CTCMem(port.params.offchip, port.params.phyParams.get)(port.p)).module)
           ram.io.ser.in <> io.out
           io.in <> ram.io.ser.out
         }
@@ -415,5 +415,18 @@ class WithD2DTiedOff(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
 class WithD2DLoopback(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: D2DPort, chipId: Int) if (port_ids.map(_.contains(port.portId)).getOrElse(true)) => {
     port.io.loopback
+  }
+})
+
+// Temp testing hack
+// only use this for CTC
+class WithD2DTestRAM(port_ids: Option[Seq[Int]] = None) extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: D2DPort, chipId: Int) if (port_ids.map(_.contains(port.portId)).getOrElse(true)) => {
+    port.io match {
+      case io: CTCMemIO => {
+        io.connectRAM(port.p)
+      }
+      case _ => assert(false, s"Unsupported port type for WithD2DTestRAM: ${port.io.getClass}")
+    }
   }
 })

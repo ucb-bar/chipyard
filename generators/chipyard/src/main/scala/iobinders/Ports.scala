@@ -120,5 +120,5 @@ case class OffchipSelPort  (val getIO: () => UInt)
 case class CTCPort (val getIO: () => Data, val params: CTCParams, val portId: Int, val p: Parameters)
     extends Port[Data]
 
-case class D2DPort (val getIO: () => ChipletIO, val portId: Int)
+case class D2DPort (val getIO: () => ChipletIO, val portId: Int, val p: Parameters)
     extends Port[ChipletIO]

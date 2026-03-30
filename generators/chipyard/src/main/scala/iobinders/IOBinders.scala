@@ -638,7 +638,7 @@ class WithD2DPunchthrough extends OverrideIOBinder({
       val sys = system.asInstanceOf[BaseSubsystem]
       val port = IO(chiselTypeOf(c.getWrappedValue)).suggestName(s"d2d${id}_port")
       port <> c.getWrappedValue
-      (D2DPort(() => port, id), Nil)
+      (D2DPort(() => port, id, sys.p), Nil)
     }).unzip
     (ports.toSeq, cells.flatten.toSeq)
   }

@@ -284,6 +284,7 @@ class TestPhyIntComputeChipletConfig extends Config(
 )
 
 class SertlComputeChipletConfig extends Config(
+  new testchipip.soc.WithMaxOffchipAddressRange(AddressSet.misaligned(0x200000000L, 0x400000000L)) ++
   new testchipip.soc.WithD2DPorts(Seq(testchipip.serdes.SerialTLParams(
       client = Some(testchipip.serdes.SerialTLClientParams(masterWhere = SBUS)),
       manager = Some(testchipip.serdes.SerialTLManagerParams()),
@@ -298,4 +299,17 @@ class DoubleRoutingChipletConfig extends Config(
   new chipyard.harness.WithMultiChipD2D(chip0=1, chip1=0, chip0portId=0, chip1portId=0) ++ 
   new chipyard.harness.WithMultiChip(0, new SertlComputeChipletConfig) ++
   new chipyard.harness.WithMultiChip(1, new SertlComputeChipletConfig) 
+)
+
+class RouterBypassConfig extends Config(
+  new chipyard.harness.WithD2DTestRAM ++
+  new chipyard.iobinders.WithD2DPunchthrough ++
+  new testchipip.soc.WithChipletRouting(testchipip.soc.ChipletRoutingParams(
+    routerParams = testchipip.soc.OffchipRouterParams(tableEntries = 4),
+    ports = Seq(
+      new testchipip.ctc.CTCParams(offchip = Seq(AddressSet(0x100000000L, 0xFFFFF)), phyParams = Some(testchipip.ctc.CTCMemSerialPhyParams(offchip = Seq(AddressSet(0x100000000L, 0xFFFFF))))),
+      new testchipip.ctc.CTCParams(offchip = Seq(AddressSet(0x200000000L, 0xFFFFF)), phyParams = Some(testchipip.ctc.CTCMemSerialPhyParams(offchip = Seq(AddressSet(0x200000000L, 0xFFFFF)))))
+    )
+  )) ++
+  new chipyard.RocketConfig
 )
