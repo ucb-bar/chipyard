@@ -2,199 +2,199 @@
 
 # Quad-core, Rocket-based recipes
 # REQUIRED FOR TUTORIALS
-firesim_rocket_quadcore_nic_l2_llc4mb_ddr3:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithNIC_WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.QuadRocketConfig
-    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 90
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_rocket_quadcore_nic_l2_llc4mb_ddr3: # rh: ran into some bitstream issue
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: WithNIC_WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.QuadRocketConfig
+#    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 90
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # NB: This has a faster host-clock frequency than the NIC-based design, because
 # its uncore runs at half rate relative to the tile.
 firesim_rocket_quadcore_no_nic_l2_llc4mb_ddr3:
-    PLATFORM: f1
+    PLATFORM: f2
     TARGET_PROJECT: firesim
     TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
     DESIGN: FireSim
     TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimTestChipConfigTweaks_chipyard.QuadRocketConfig
-    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF1Config
+    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF2Config
     deploy_quintuplet: null
     platform_config_args:
         fpga_frequency: 140
         build_strategy: TIMING
     post_build_hook: null
     metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Single-core, BOOM-based recipes
 # REQUIRED FOR TUTORIALS
-firesim_boom_singlecore_nic_l2_llc4mb_ddr3:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithNIC_WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.LargeBoomV3Config
-    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 65
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_boom_singlecore_nic_l2_llc4mb_ddr3: # rh: ran into some bitstream issue
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: WithNIC_WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.LargeBoomV3Config
+#    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 65
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # NB: This has a faster host-clock frequency than the NIC-based design, because
 # its uncore runs at half rate relative to the tile.
 firesim_boom_singlecore_no_nic_l2_llc4mb_ddr3:
-    PLATFORM: f1
+    PLATFORM: f2
     TARGET_PROJECT: firesim
     TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
     DESIGN: FireSim
     TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimTestChipConfigTweaks_chipyard.LargeBoomV3Config
-    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF1Config
+    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF2Config
     deploy_quintuplet: null
     platform_config_args:
         fpga_frequency: 65
         build_strategy: TIMING
     post_build_hook: null
     metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Single-core, CVA6-based recipes
-firesim_cva6_singlecore_no_nic_l2_llc4mb_ddr3:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.CVA6Config
-    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 90
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+# firesim_cva6_singlecore_no_nic_l2_llc4mb_ddr3: # rh: untested for now
+#     PLATFORM: f2
+#     TARGET_PROJECT: firesim
+#     TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#     DESIGN: FireSim
+#     TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.CVA6Config
+#     PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF2Config
+#     deploy_quintuplet: null
+#     platform_config_args:
+#         fpga_frequency: 90
+#         build_strategy: TIMING
+#     post_build_hook: null
+#     metasim_customruntimeconfig: null
+#     bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Single-core, Rocket-based recipes with Gemmini
-firesim_rocket_singlecore_gemmini_no_nic_l2_llc4mb_ddr3:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.GemminiRocketConfig
-    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 110
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_rocket_singlecore_gemmini_no_nic_l2_llc4mb_ddr3: # rh: untested for now
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimConfigTweaks_chipyard.GemminiRocketConfig
+#    PLATFORM_CONFIG: WithAutoILA_FRFCFS16GBQuadRankLLC4MB_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 110
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # RAM Optimizations enabled by adding _MCRams PLATFORM_CONFIG string
-firesim_boom_singlecore_no_nic_l2_llc4mb_ddr3_ramopts:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimTestChipConfigTweaks_chipyard.LargeBoomV3Config
-    PLATFORM_CONFIG: WithAutoILA_MCRams_FRFCFS16GBQuadRankLLC4MB_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 90
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_boom_singlecore_no_nic_l2_llc4mb_ddr3_ramopts: # rh: ran into some bitstream issue
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimTestChipConfigTweaks_chipyard.LargeBoomV3Config
+#    PLATFORM_CONFIG: WithAutoILA_MCRams_FRFCFS16GBQuadRankLLC4MB_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 90
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Supernode configurations -- multiple instances of an SoC in a single simulator
-firesim_supernode_rocket_singlecore_nic_l2_lbp:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithNIC_SupernodeFireSimRocketConfig
-    PLATFORM_CONFIG: WithAutoILA_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 85
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_supernode_rocket_singlecore_nic_l2_lbp: # rh: untested for now
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: WithNIC_SupernodeFireSimRocketConfig
+#    PLATFORM_CONFIG: WithAutoILA_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 85
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Additional Tutorial Config
 firesim_rocket_singlecore_no_nic_l2_lbp:
-    PLATFORM: f1
+    PLATFORM: f2
     TARGET_PROJECT: firesim
     TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
     DESIGN: FireSim
     TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.RocketConfig
-    PLATFORM_CONFIG: BaseF1Config
+    PLATFORM_CONFIG: BaseF2Config
     deploy_quintuplet: null
     platform_config_args:
         fpga_frequency: 90
         build_strategy: TIMING
     post_build_hook: null
     metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Additional Tutorial Config
-firesim_rocket_singlecore_sha3_nic_l2_llc4mb_ddr3:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithNIC_WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.Sha3RocketConfig
-    PLATFORM_CONFIG: FRFCFS16GBQuadRankLLC4MB_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 65
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_rocket_singlecore_sha3_nic_l2_llc4mb_ddr3: # rh: untested for now
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: WithNIC_WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.Sha3RocketConfig
+#    PLATFORM_CONFIG: FRFCFS16GBQuadRankLLC4MB_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 65
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Additional Tutorial Config
-firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.Sha3RocketConfig
-    PLATFORM_CONFIG: FRFCFS16GBQuadRankLLC4MB_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 65
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3: # rh: untested for now
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.Sha3RocketConfig
+#    PLATFORM_CONFIG: FRFCFS16GBQuadRankLLC4MB_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 65
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Additional Tutorial Config
-firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3_printf:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.Sha3RocketPrintfConfig
-    PLATFORM_CONFIG: WithPrintfSynthesis_FRFCFS16GBQuadRankLLC4MB_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 30
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3_printf: # rh: untested for now
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.Sha3RocketPrintfConfig
+#    PLATFORM_CONFIG: WithPrintfSynthesis_FRFCFS16GBQuadRankLLC4MB_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 30
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Additional Xilinx Vitis/XRT-only Config
 vitis_firesim_rocket_singlecore_no_nic:
@@ -213,36 +213,36 @@ vitis_firesim_rocket_singlecore_no_nic:
     bit_builder_recipe: bit-builder-recipes/vitis.yaml
 
 # Additional Tutorial Config
-firesim_gemmini_rocket_singlecore_no_nic:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: FireSimLeanGemminiRocketConfig
-    PLATFORM_CONFIG: BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 30 # AJG: conservative for now, later sweep for higher frequency
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_gemmini_rocket_singlecore_no_nic: # rh: untested for now
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: FireSimLeanGemminiRocketConfig
+#    PLATFORM_CONFIG: BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 30 # AJG: conservative for now, later sweep for higher frequency
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Additional Tutorial Config
-firesim_gemmini_printf_rocket_singlecore_no_nic:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: FireSimLeanGemminiPrintfRocketConfig
-    PLATFORM_CONFIG: WithPrintfSynthesis_BaseF1Config
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 10 # AJG: conservative for now, later sweep for higher frequency
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#firesim_gemmini_printf_rocket_singlecore_no_nic: # rh: untested for now
+#    PLATFORM: f2
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: FireSimLeanGemminiPrintfRocketConfig
+#    PLATFORM_CONFIG: WithPrintfSynthesis_BaseF2Config
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 10 # AJG: conservative for now, later sweep for higher frequency
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f2.yaml
 
 # Additional Xilinx Alveo U250-only Configs
 alveo_u250_firesim_rocket_singlecore_no_nic:
@@ -389,70 +389,70 @@ nitefury_firesim_rocket_singlecore_no_nic:
 ################################################################################################
 # Fast-mode : pull out a RocketTile out from your SoC
 ################################################################################################
-f1_rocket_split_soc_fast:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: FireSimRocketConfig
-    PLATFORM_CONFIG: RocketTileF1PCIMBase
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 90
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
-
-f1_rocket_split_tile_fast:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: FireSimRocketConfig
-    PLATFORM_CONFIG: RocketTileF1PCIMPartition0
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 90
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#f1_rocket_split_soc_fast: # rh: untested for now
+#    PLATFORM: f1
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: FireSimRocketConfig
+#    PLATFORM_CONFIG: RocketTileF1PCIMBase
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 90
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#
+#f1_rocket_split_tile_fast:
+#    PLATFORM: f1
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: FireSimRocketConfig
+#    PLATFORM_CONFIG: RocketTileF1PCIMPartition0
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 90
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f1.yaml
 # DOC include end: F1 Rocket Partition Build Recipe
 
 # DOC include start: F1 Exact Rocket Partition Build Recipe
 ################################################################################################
 # Exact-mode : pull out a RocketTile out from your SoC
 ################################################################################################
-f1_firesim_rocket_soc_exact:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: FireSimRocketConfig
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    PLATFORM_CONFIG: ExactMode_RocketTileF1PCIMBase
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 90
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
-
-f1_firesim_rocket_tile_exact:
-    PLATFORM: f1
-    TARGET_PROJECT: firesim
-    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
-    DESIGN: FireSim
-    TARGET_CONFIG: FireSimRocketConfig
-    PLATFORM_CONFIG: ExactMode_RocketTileF1PCIMPartition0
-    deploy_quintuplet: null
-    platform_config_args:
-        fpga_frequency: 90
-        build_strategy: TIMING
-    post_build_hook: null
-    metasim_customruntimeconfig: null
-    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#f1_firesim_rocket_soc_exact:
+#    PLATFORM: f1
+#    TARGET_PROJECT: firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: FireSimRocketConfig
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    PLATFORM_CONFIG: ExactMode_RocketTileF1PCIMBase
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 90
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f1.yaml
+#
+#f1_firesim_rocket_tile_exact:
+#    PLATFORM: f1
+#    TARGET_PROJECT: firesim
+#    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    DESIGN: FireSim
+#    TARGET_CONFIG: FireSimRocketConfig
+#    PLATFORM_CONFIG: ExactMode_RocketTileF1PCIMPartition0
+#    deploy_quintuplet: null
+#    platform_config_args:
+#        fpga_frequency: 90
+#        build_strategy: TIMING
+#    post_build_hook: null
+#    metasim_customruntimeconfig: null
+#    bit_builder_recipe: bit-builder-recipes/f1.yaml
 # DOC include end: F1 Exact Rocket Partition Build Recipe
 
 ##############################################################################
