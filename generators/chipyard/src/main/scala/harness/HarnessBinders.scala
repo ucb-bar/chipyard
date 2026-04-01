@@ -13,7 +13,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import chipyard.iocell._
-import testchipip.dram.{SimDRAM}
+import testchipip.dram.{SimDRAM, FastRAM}
 import testchipip.tsi.{SimTSI, SerialRAM, TSI, TSIIO}
 import testchipip.soc.{TestchipSimDTM}
 import testchipip.spi.{SimSPIFlashModel}
@@ -242,7 +242,7 @@ class WithSerialTLTiedOff(tieoffs: Option[Seq[Int]] = None) extends HarnessBinde
   }
 })
 
-class WithSimTSIOverSerialTL extends HarnessBinder({
+class WithSimTSIOverSerialTL(fast: Boolean = false) extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SerialTLPort, chipId: Int) if (port.portId == 0) => {
     port.io match {
       case io: HasClockOut =>
@@ -259,12 +259,19 @@ class WithSimTSIOverSerialTL extends HarnessBinder({
           case io: HasClockIn => th.harnessBinderClock
         }
         withClock(clock) {
-          val ram = Module(LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p)).module)
-          ram.io.ser.in <> io.out
-          io.in <> ram.io.ser.out
-
-          val success = SimTSI.connect(ram.io.tsi, clock, th.harnessBinderReset, chipId)
-          when (success) { th.chiptopSuccess(chipId) := true.B }
+          if (fast) {
+            val ram = Module(LazyModule(new FastRAM(port.serdesser, port.params, chipId = chipId)(port.serdesser.p)).module)
+            ram.io.ser.in <> io.out
+            io.in <> ram.io.ser.out
+            val success = SimTSI.connect(ram.io.tsi, clock, th.harnessBinderReset, chipId)
+            when (success) { th.chiptopSuccess(chipId) := true.B }
+          } else {
+            val ram = Module(LazyModule(new SerialRAM(port.serdesser, port.params)(port.serdesser.p)).module)
+            ram.io.ser.in <> io.out
+            io.in <> ram.io.ser.out
+            val success = SimTSI.connect(ram.io.tsi, clock, th.harnessBinderReset, chipId)
+            when (success) { th.chiptopSuccess(chipId) := true.B }
+          }
         }
       }
     }
