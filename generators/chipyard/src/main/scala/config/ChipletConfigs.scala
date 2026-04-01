@@ -144,12 +144,14 @@ class MultiSimLLCChipletRocketConfig extends Config(
 )
 
 class CTCRocketConfig extends Config(
+  new testchipip.soc.WithChipIdPin ++
   new chipyard.harness.WithCTCLoopback ++
   new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true))) ++ 
   new RocketConfig
 )
 
 class DoubleCTCRocketConfig extends Config(
+  new testchipip.soc.WithChipIdPin ++
   new chipyard.harness.WithCTCLoopback ++
   new testchipip.ctc.WithCTC(Seq(
     new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=false),
@@ -160,6 +162,7 @@ class DoubleCTCRocketConfig extends Config(
 
 class MultiCTCRocketConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  new chipyard.harness.WithANDSuccessFn ++
   new chipyard.harness.WithMultiChipCTC(chip0=0, chip1=1, chip0portId=0, chip1portId=0) ++ // connect CTC port 0 of chip 0 and CTC port 0 of chip 1
   new chipyard.harness.WithMultiChip(0, new CTCRocketConfig) ++
   new chipyard.harness.WithMultiChip(1, new CTCRocketConfig)
@@ -167,6 +170,7 @@ class MultiCTCRocketConfig extends Config(
 
 class MultiDoubleCTCRocketConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  new chipyard.harness.WithANDSuccessFn ++
   new chipyard.harness.WithMultiChipCTC(chip0=0, chip1=1, chip0portId=0, chip1portId=0) ++ // connect CTC port 0 of chip 0 and CTC port 0 of chip 1
   new chipyard.harness.WithMultiChipCTC(chip0=0, chip1=1, chip0portId=1, chip1portId=1) ++ // connect CTC port 1 of chip 0 and CTC port 1 of chip 1
   new chipyard.harness.WithMultiChip(0, new DoubleCTCRocketConfig) ++
