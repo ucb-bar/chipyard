@@ -33,7 +33,7 @@ dependencies:
     - bc
     - unzip
     - patch
-    - which
+    - which=2.21=h0b41bf4_1
     - sed
     - diffutils
     - bash

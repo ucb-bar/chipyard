@@ -10,9 +10,10 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.util._
 
 import testchipip.serdes._
+import testchipip.ctc.{CTCBridgeIO}
 
 import chipyard._
-import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasChipyardPorts, Port, SerialTLPort}
+import chipyard.iobinders.{GetSystemParameters, JTAGChipIO, HasChipyardPorts, Port, SerialTLPort, CTCPort}
 
 import scala.reflect.{ClassTag}
 
@@ -75,6 +76,33 @@ class WithMultiChipSerialTL(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1p
       case (io0: DecoupledInternalSyncPhitIO, io1: DecoupledExternalSyncPhitIO) => connectDecoupledSyncPhitIO(io0, io1)
       case (io0: DecoupledExternalSyncPhitIO, io1: DecoupledInternalSyncPhitIO) => connectDecoupledSyncPhitIO(io1, io0)
       case (io0: CreditedSourceSyncPhitIO   , io1: CreditedSourceSyncPhitIO   ) => connectSourceSyncPhitIO   (io0, io1)
+    }
+  }
+)
+
+class WithMultiChipCTC(chip0: Int, chip1: Int, chip0portId: Int = 0, chip1portId: Int = 0) extends MultiHarnessBinder(
+  chip0, chip1,
+  (p0: CTCPort) => p0.portId == chip0portId,
+  (p1: CTCPort) => p1.portId == chip1portId,
+  (th: HasHarnessInstantiators, p0: CTCPort, p1: CTCPort) => {
+    (p0.io, p1.io) match {
+      case(io0: CreditedSourceSyncPhitIO, io1: CreditedSourceSyncPhitIO) => {
+        io0.clock_in := io1.clock_out
+        io1.clock_in := io0.clock_out
+        io0.reset_in := io1.reset_out
+        io1.reset_in := io0.reset_out
+        io0.in := io1.out
+        io1.in := io0.out
+      }
+      case(io0: CTCBridgeIO, io1: CTCBridgeIO) => {
+        // io0 client to io1 manager
+        io0.client_flit.in <> io1.manager_flit.out
+        io1.manager_flit.in <> io0.client_flit.out
+
+        // io1 client to io0 manager
+        io1.client_flit.in <> io0.manager_flit.out
+        io0.manager_flit.in <> io1.client_flit.out
+      }
     }
   }
 )

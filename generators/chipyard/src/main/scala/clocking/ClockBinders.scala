@@ -119,11 +119,42 @@ class WithSingleClockBroadcastClockGenerator(freqMHz: Int = 100) extends Overrid
 
       clockGroupsSourceNode.out.foreach { case (bundle, edge) =>
         bundle.member.data.foreach { b =>
-          b.clock := clock_io
-          b.reset := reset_io
+          b.clock := clock_wire
+          b.reset := reset_wire
         }
       }
       (Seq(ClockPort(() => clock_io, freqMHz), ResetPort(() => reset_io)), clockIOCell ++ resetIOCell)
+    }
+  }
+})
+
+class WithMultiIOCellsClockGenerator extends OverrideLazyIOBinder({
+  (system: HasChipyardPRCI) => {
+    implicit val p = GetSystemParameters(system)
+
+    val clockGroupsSourceNode = ClockGroupSourceNode(Seq(ClockGroupSourceParameters()))
+    system.chiptopClockGroupsNode :*= clockGroupsSourceNode
+
+    InModuleBody {
+      val reset_wire = Wire(Input(AsyncReset()))
+      val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
+
+      require(clockGroupsSourceNode.out.size == 1)
+      val (bundle, edge) = clockGroupsSourceNode.out.head
+
+      val iosAndIOCells = (bundle.member.data zip edge.sink.members).map { case (b, m) =>
+        require(m.take.isDefined, s"""Clock ${m.name.get} has no requested frequency
+                                     |Clocks: ${edge.sink.members.map(_.name.get)}""".stripMargin)
+        val freq = m.take.get.freqMHz
+        val clock_wire = Wire(Input(Clock()))
+        val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, s"clock_${m.name.get}", p(IOCellKey))
+        b.clock := clock_wire
+        b.reset := reset_wire
+        (ClockPort(() => clock_io, freq), clockIOCell)
+      }.toSeq
+      val clock_ios = iosAndIOCells.map(_._1)
+      val clockIOCells = iosAndIOCells.flatMap(_._2)
+      ((clock_ios :+ ResetPort(() => reset_io)), clockIOCells ++ resetIOCell)
     }
   }
 })
