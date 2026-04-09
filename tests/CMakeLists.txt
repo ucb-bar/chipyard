@@ -90,6 +90,7 @@ add_executable(multi-ctc-test multi-ctc-test.c)
 add_executable(compute-chiplet-loopback compute-chiplet-loopback.c)
 add_executable(router router.c)
 add_executable(router-bypass router-bypass.c)
+add_executable(router-translate router-translate.c)
 
 #################################
 # Disassembly
@@ -133,6 +134,7 @@ add_dump_target(multi-ctc-test)
 add_dump_target(compute-chiplet-loopback)
 add_dump_target(router)
 add_dump_target(router-bypass)
+add_dump_target(router-translate)
 
 # Add custom command to generate spiflash.img from spiflash.py
 add_custom_command(

@@ -313,3 +313,31 @@ class RouterBypassConfig extends Config(
   )) ++
   new chipyard.RocketConfig
 )
+
+class Router2xConfig extends Config(
+  new chipyard.iobinders.WithD2DPunchthrough ++
+  new testchipip.soc.WithChipletRouting(testchipip.soc.ChipletRoutingParams(
+    routerParams = testchipip.soc.OffchipRouterParams(tableEntries = 4),
+    ports = Seq(
+      testchipip.serdes.SerialTLParams(
+        client = Some(testchipip.serdes.SerialTLClientParams(masterWhere = SBUS)),
+        manager = Some(testchipip.serdes.SerialTLManagerParams()),
+        phyParams = testchipip.serdes.CreditedSourceSyncSerialPhyParams()
+      ),
+      testchipip.serdes.SerialTLParams(
+        client = Some(testchipip.serdes.SerialTLClientParams(masterWhere = SBUS)),
+        manager = Some(testchipip.serdes.SerialTLManagerParams()),
+        phyParams = testchipip.serdes.CreditedSourceSyncSerialPhyParams()
+      )
+    )
+  )) ++
+  new chipyard.RocketConfig
+)
+
+class RouterTranslationConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  new chipyard.harness.WithMultiChipD2D(chip0=1, chip1=0, chip0portId=0, chip1portId=0) ++ 
+  new chipyard.harness.WithMultiChipD2D(chip0=1, chip1=0, chip0portId=1, chip1portId=1) ++ 
+  new chipyard.harness.WithMultiChip(0, new Router2xConfig) ++
+  new chipyard.harness.WithMultiChip(1, new Router2xConfig) 
+)

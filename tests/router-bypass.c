@@ -2,24 +2,13 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "mmio.h"
-
-#define ROUTER_MMIO       0x4000
-#define CHIP_ID_ADDR      0x4080
-#define ROUTING_MODE_ADDR 0x4088
-#define BYPASS_PORT_ADDR  0x4090
+#include "router.h"
 
 #define PORT0_ADDR 0x100000000L
 #define PORT1_ADDR 0x200000000L
 
 uint32_t src[10]  = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 uint32_t test[10];
-
-void set_bypass_mode(uint8_t port) {
-  reg_write64(ROUTING_MODE_ADDR, 0);   // bypass mode
-  reg_write64(BYPASS_PORT_ADDR, port);
-  printf("Bypass mode: port %d\n", port);
-}
 
 int rw_test(uint64_t addr) {
   volatile uint32_t *remote = (volatile uint32_t *)addr;
