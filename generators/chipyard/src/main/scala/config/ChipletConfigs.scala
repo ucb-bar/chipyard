@@ -1,6 +1,6 @@
 package chipyard
 
-import org.chipsalliance.cde.config.{Config}
+import org.chipsalliance.cde.config.{Config, Parameters}
 import freechips.rocketchip.diplomacy.{AddressSet}
 import freechips.rocketchip.subsystem.{SBUS}
 import testchipip.soc.{OBUS, InwardAddressTranslatorParams, OutwardAddressTranslatorParams}
@@ -340,4 +340,15 @@ class RouterTranslationConfig extends Config(
   new chipyard.harness.WithMultiChipD2D(chip0=1, chip1=0, chip0portId=1, chip1portId=1) ++ 
   new chipyard.harness.WithMultiChip(0, new Router2xConfig) ++
   new chipyard.harness.WithMultiChip(1, new Router2xConfig) 
+)
+
+class ChipletRingConfig extends Config(
+  new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++
+  // Connect 16 chips in a ring: chip i <-> chip (i+1) % 16
+  new Config((0 until 16).map { i =>
+    val j = (i + 1) % 16
+    new chipyard.harness.WithMultiChipD2D(chip0 = i, chip1 = j, chip0portId = 0, chip1portId = 1)
+      .asInstanceOf[Parameters]
+  }.reduce(_ ++ _)) ++
+  new chipyard.harness.WithHomogeneousMultiChip(16, new Router2xConfig)
 )
