@@ -6,9 +6,9 @@
 #include "marchid.h"
 #include "mmio.h"
 
-#define CTC0_OFFSET (0x10L << 32)
-#define CTC1_OFFSET (0x20L << 32)
-#define CHIP_ID_ADDR 0x2000L
+#define CHIP_ID_ADDR 0x2000
+#define COMPUTE1_OFFSET 0x200000000L
+#define COMPUTE2_OFFSET 0x400000000L
 
 uint32_t src[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 uint32_t dest[10];
@@ -65,16 +65,17 @@ int rw_mem(uint64_t offset) {
 int main(void) {
 
   int chip_id = reg_read64(CHIP_ID_ADDR);
-  printf("Got chip id: %d\n", chip_id);
 
-  printf("Testing CTC Port on chip %d with NO PHY\n", chip_id);
-  rw_mem(CTC1_OFFSET);
+  printf("Got chip ID: %d\n", chip_id);
 
-  printf("Testing CTC Port on chip %d with PHY\n", chip_id);
-  rw_mem(CTC0_OFFSET);
-
-  if (chip_id == 0) {
-    printf("Chip 0 has an extra print to make the simulation run longer!\n");
+  if (chip_id == 1) {
+    rw_mem(COMPUTE2_OFFSET);
+    printf("Chip 1 DONE\n");
+  } else if (chip_id == 2) {
+    rw_mem(COMPUTE1_OFFSET);
+    printf("Chip 2 DONE\n");
+  } else {
+    printf("Chip %d DONE\n", chip_id);
   }
 
   return 0;
