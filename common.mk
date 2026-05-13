@@ -463,14 +463,17 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd %.fsdb,$(MAKECMDGOALS)),)
 -include $(build_dir)/$(long_name).d
 endif
 
-#######################################
-# Rules for building DRAMSim2 library
-#######################################
-dramsim_dir = $(base_dir)/tools/DRAMSim2
-dramsim_lib = $(dramsim_dir)/libdramsim.a
 
-$(dramsim_lib):
-	$(MAKE) -C $(dramsim_dir) $(notdir $@)
+
+#######################################
+# Rules for building DRAMSim3 library
+#######################################
+dramsim3_dir = $(base_dir)/tools/DRAMSim3
+dramsim3_lib = $(dramsim3_dir)/libdramsim3.a
+
+$(dramsim3_lib): $(wildcard $(dramsim3_dir)/src/*.cc) $(wildcard $(dramsim3_dir)/src/*.h)
+	$(MAKE) -C $(dramsim3_dir) all
+	$(AR) rcs $@ $(dramsim3_dir)/src/*.o
 
 ################################################
 # Helper to run SBT
