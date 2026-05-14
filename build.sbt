@@ -232,7 +232,8 @@ lazy val chipyard = {
     "caliptra-aes-acc" -> caliptra_aes,
     "compress-acc" -> compressacc,
     "mempress" -> mempress,
-    "fft-generator" -> fft_generator
+    "fft-generator" -> fft_generator,
+    "ucie" -> ucie
   )
 
   // Discover optional modules if their submodule is initialized
@@ -362,6 +363,17 @@ lazy val radiance = withInitCheck((project in file("generators/radiance")), "rad
       "junit" % "junit" % "4.13" % "test",
       "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
   ))
+  .settings(commonSettings)
+
+lazy val ucie = withInitCheck(freshProject("ucie", file("generators/ucie/scala")), "ucie")
+  .dependsOn(rocketchip, testchipip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= Seq(
+      "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
+      "org.scalatest" %% "scalatest" % "3.2.+" % "test",
+  ))
+  .settings(Test / scalaSource := baseDirectory.value / "test" / "scala")
+  .settings(chisel6Settings)
   .settings(commonSettings)
 
 lazy val gemmini = withInitCheck(freshProject("gemmini", file("generators/gemmini")), "gemmini")
