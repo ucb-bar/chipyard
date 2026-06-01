@@ -85,3 +85,113 @@ class WithFPGAFreq25MHz extends WithFPGAFrequency(25)
 class WithFPGAFreq50MHz extends WithFPGAFrequency(50)
 class WithFPGAFreq75MHz extends WithFPGAFrequency(75)
 class WithFPGAFreq100MHz extends WithFPGAFrequency(100)
+
+// ----------------------------------------------------------------------------
+// Area-sweep VCU118 wrappers (ported 2026-05-16).  These wrap the various
+// SoC configs (in chipyard/.../config/{RoCCAcceleratorConfigs,SaturnConfigs}.scala)
+// into the VCU118 harness, so the `synth-only-report` Vivado flow can be run
+// per-config and we can collect LUT/DSP/BRAM utilization side-by-side.
+//
+// FP-stripped Saturn variants (robotMpc / intOnly / FP32-only / FP16-only /
+// noPermute) are NOT yet on the opu-fp8 saturn branch in FreshScheduler --
+// they live as wrappers in chipyard-fsim but their Saturn-side parameter
+// gating still needs to be ported (see freshscheduler_chipyard_port_plan.md,
+// session E).  Once those land, add the corresponding *VCU118Config wrappers
+// here.
+// ----------------------------------------------------------------------------
+
+// Saturn vanilla
+class REFV128D128RocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128RocketConfig)
+
+class REFV256D128RocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV256D128RocketConfig)
+
+// Saturn + OPU (Outer Product Unit) -- opu-fp8 branch
+class REFV128D128RocketOPUVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128RocketOPUConfig)
+
+// FP-stripped Saturn variants (2026-05-16).  intOnly drops all FP; robotMpc
+// is FP16-only.  See VectorParams.intOnlyParams / .robotMpcParams.
+class REFV128D128RocketIntOnlyVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128RocketIntOnlyConfig)
+
+class REFV256D128RocketIntOnlyVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV256D128RocketIntOnlyConfig)
+
+class REFV128D128RocketRobotMpcVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128RocketRobotMpcConfig)
+
+class REFV256D128RocketRobotMpcVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV256D128RocketRobotMpcConfig)
+
+// FP-stripping waterfall (V128D128 only -- matches the prior waterfall plot):
+//   vanilla -> NoFP64 -> RobotMpc (fp16-only) -> RobotMpcNoPermute.
+class REFV128D128RocketNoFP64VCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128RocketNoFP64Config)
+
+class REFV128D128RocketRobotMpcNoPermuteVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128RocketRobotMpcNoPermuteConfig)
+
+// Shuttle frontend (in-order 2-issue) paired with the same V128D128 Saturn
+// + the FP-stripped variants.  Used to measure frontend impact vs Rocket.
+class REFV128D128ShuttleVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128ShuttleConfig)
+
+class REFV128D128ShuttleIntOnlyVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128ShuttleIntOnlyConfig)
+
+class REFV128D128ShuttleRobotMpcVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.REFV128D128ShuttleRobotMpcConfig)
+
+// Gemmini variants (RoCC-side; uses chipyard's Rocket tile).
+class GemminiRocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.GemminiRocketConfig)
+
+class Q31GemminiRocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.Q31GemminiRocketConfig)
+
+class Q31WsGemminiRocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.Q31WsGemminiRocketConfig)
+
+class Q31Ws32x32GemminiRocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.Q31Ws32x32GemminiRocketConfig)
+
+class Q31Ws32x32AccGemminiRocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.Q31Ws32x32AccGemminiRocketConfig)
+
+// IntOnly-Rocket variants of the Q31Ws Gemmini configs (no scalar FPU).
+// Pairs with the Saturn-IntOnly area-minimization sweep.
+class Q31WsGemminiRocketNoFPUVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.Q31WsGemminiRocketNoFPUConfig)
+
+class Q31Ws32x32AccGemminiRocketNoFPUVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.Q31Ws32x32AccGemminiRocketNoFPUConfig)
+
+// 32x32 BOTH-dataflow Gemminis (baselines against Q31Ws32x32Acc).
+class Default32x32GemminiRocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.Default32x32GemminiRocketConfig)
+
+class Q3132x32GemminiRocketVCU118Config extends Config(
+  new WithVCU118Tweaks ++
+  new chipyard.Q3132x32GemminiRocketConfig)
