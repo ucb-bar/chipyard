@@ -176,6 +176,27 @@ endif
 .PHONY: bitstream
 bitstream: $(BIT_FILE)
 
+# Synth-only flow with hierarchical utilization report. Skips place/route/
+# bitstream — for area-comparison prototype runs. Writes to
+# $(build_dir)/obj/report/utilization*.txt and $(build_dir)/obj/post_synth.dcp.
+SYNTH_REPORT_STAMP := $(build_dir)/obj/report/utilization.txt
+$(SYNTH_REPORT_STAMP): $(synth_list_f)
+ifeq ($(FPGA_BRAND),xilinx)
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source $(sim_dir)/scripts/run_synth_only_with_report.tcl \
+		-tclargs \
+			-top-module "$(MODEL)" \
+			-F "$(synth_list_f)" \
+			-board "$(BOARD)" \
+			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')"
+else
+	$(error synth-only flow only supports xilinx for now)
+endif
+
+.PHONY: synth-only-report
+synth-only-report: $(SYNTH_REPORT_STAMP)
+
 .PHONY: debug-bitstream
 debug-bitstream: $(build_dir)/obj/post_synth.dcp
 	cd $(build_dir); vivado \

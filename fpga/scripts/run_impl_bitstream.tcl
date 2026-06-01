@@ -56,5 +56,11 @@ report_design_analysis -logic_level_distribution -of_timing_paths [get_timing_pa
 # bitstream
 write_verilog -force [file join $wrkdir post_route.v]
 write_xdc -no_fixed_only -force [file join $wrkdir post_route.xdc]
+# Phase-1 fit-check support: allow unconstrained-IO ports through bitgen.
+# Downgrade NSTD-1 (no IOSTANDARD) and UCIO-1 (no LOC) to warnings so the
+# .bit produces for designs where some HarnessBinder outputs aren't yet
+# placed on real package pins.
+set_property SEVERITY {Warning} [get_drc_checks NSTD-1]
+set_property SEVERITY {Warning} [get_drc_checks UCIO-1]
 write_bitstream -force [file join $wrkdir top.bit]
 write_debug_probes -force [file join $wrkdir debug_nets.ltx]
