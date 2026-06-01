@@ -4,11 +4,19 @@
 #include <stdlib.h>
 #include <riscv-pk/encoding.h>
 #include "marchid.h"
-#include "mmio.h"
+#include "router.h"
 
-#define CHIP_ID_ADDR 0x2000
-#define COMPUTE1_OFFSET 0x200000000L
-#define COMPUTE2_OFFSET 0x400000000L
+//   IO hub is chip id 1 (port 0 -> compute id 2, port 1 -> compute id 3);
+//   the two compute chiplets are chip ids 2 and 3.
+//
+//   Build the binary with `cmake -S ./ -B ./build/ && cmake --build ./build/`, then
+//   from a sim dir (e.g. sims/verilator) run:
+//   make run-binary CONFIG=TripleChipletConfig BINARY=../../tests/build/triple-chiplet.riscv \
+//     EXTRA_SIM_FLAGS="+chip_id0=0x00004080:0x00000001 +chip_id1=0x00004080:0x00000002 +chip_id2=0x00004080:0x00000003"
+
+#define OFFCHIP_OFFSET   0x100000000L
+#define COMPUTE2_OFFSET  (OFFCHIP_OFFSET * 2)  // reach chip id 2
+#define COMPUTE3_OFFSET  (OFFCHIP_OFFSET * 3)  // reach chip id 3
 
 uint32_t src[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 uint32_t dest[10];
@@ -69,13 +77,21 @@ int main(void) {
   printf("Got chip ID: %d\n", chip_id);
 
   if (chip_id == 1) {
-    rw_mem(COMPUTE2_OFFSET);
-    printf("Chip 1 DONE\n");
+    // IO hub: forward each compute chiplet's traffic out the port it sits on.
+    program_router(0, 2, 0);  // dest chip id 2 -> port 0 (toward compute id 2)
+    program_router(1, 3, 1);  // dest chip id 3 -> port 1 (toward compute id 3)
+    printf("Chip id 1 (IO hub) DONE\n");
   } else if (chip_id == 2) {
-    rw_mem(COMPUTE1_OFFSET);
-    printf("Chip 2 DONE\n");
+    program_router(0, 3, 0);  // dest chip id 3 -> port 0 (toward IO hub)
+    rw_mem(COMPUTE3_OFFSET);
+    printf("Chip id 2 DONE\n");
+  } else if (chip_id == 3) {
+    program_router(0, 2, 0);  // dest chip id 2 -> port 0 (toward IO hub)
+    rw_mem(COMPUTE2_OFFSET);
+    printf("Chip id 3 DONE\n");
   } else {
-    printf("Chip %d DONE\n", chip_id);
+    printf("Invalid chip ID: %d\n", chip_id);
+    exit(1);
   }
 
   return 0;
