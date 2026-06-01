@@ -272,6 +272,113 @@ class FireSimGemminiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.GemminiRocketConfig)
 
+class FireSimFPGemminiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.FPGemminiRocketConfig)
+
+class FireSimSmallGemminiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.SmallGemminiRocketConfig)
+
+class FireSimDualSmallGemminiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.DualSmallGemminiRocketConfig)
+
+class FireSimFP16ReRoCCGemminiRocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.FP16ReRoCCGemminiRocketConfig)
+
+// NOTE: the following FireSim wrappers reference chipyard configs that
+// live in chipyard-fsim but have not yet been ported to FreshScheduler's
+// Saturn submodule (REFV256D128SmallGemmini/QuadTacit/Quad/DualRocketGemmini
+// /DualRocketGemminiQ31). Commented out so the firesim Scala compile
+// proceeds for the configs we DO have (FireSimREFV256D128DualSaturnOPUGemmini32x32Q31WsConfig
+// below). To re-enable: port the missing chipyard configs from chipyard-fsim's
+// SaturnConfigs.scala (the QuadRocket / Q31 dual-rocket variants).
+//
+// class FireSimREFV256D128SmallGemminiRocketConfig extends Config(
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.REFV256D128SmallGemminiRocketConfig)
+//
+// class FireSimREFV256D128QuadTacitRocketConfig extends Config(
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.REFV256D128QuadTacitRocketConfig)
+//
+// class FireSimREFV256D128QuadRocketConfig extends Config(
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.REFV256D128QuadRocketConfig)
+//
+// class FireSimREFV256D128DualRocketGemminiConfig extends Config(
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.REFV256D128DualRocketGemminiConfig)
+//
+// class FireSimREFV256D128DualRocketGemminiQ31Config extends Config(
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.REFV256D128DualRocketGemminiQ31Config)
+
+// Dual Saturn (V256D128 + int8 OPU) + dual Gemmini (Q31Ws 32x32, 128 KB acc)
+// — two heterogeneous matrix engines per tile (OPU is Saturn-internal /
+// vector-ISA; Gemmini is a RoCC accelerator). Built on the opu-fp8 Saturn
+// branch and the Q31Ws32x32Acc Gemmini variant.
+// Pre-requisites + sizing details in
+// `agents/notes/freshscheduler_chipyard_port_plan.md`.
+class FireSimREFV256D128DualSaturnOPUGemmini32x32Q31WsConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV256D128DualRocketSaturnOPUGemmini32x32Q31WsConfig)
+
+// FireSim wrappers for the 4 pure-int dual-core Saturn+Gemmini sweep
+// (no OPU).  Built at 20 MHz on U250 for fast timing closure.
+class FireSimREFV256D128DualRocketGemmini32x32Q31WsConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV256D128DualRocketGemmini32x32Q31WsConfig)
+
+class FireSimREFV128D128DualRocketGemmini16x16Q31WsConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV128D128DualRocketGemmini16x16Q31WsConfig)
+
+class FireSimREFV256D128DualShuttleGemmini32x32Q31WsConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV256D128DualShuttleGemmini32x32Q31WsConfig)
+
+class FireSimREFV128D128DualShuttleGemmini16x16Q31WsConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV128D128DualShuttleGemmini16x16Q31WsConfig)
+
+// V512D256 + Q31 dual-rocket target (port-pending — see note above).
+// class FireSimREFV512D256DualRocketGemminiQ31Config extends Config(
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.REFV512D256DualRocketGemminiQ31Config)
+//
+// class FireSimREFV256D128QuadRocketGemminiQ31Config extends Config(
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.REFV256D128QuadRocketGemminiQ31Config)
+
+class FireSimREFV512D256RocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV512D256RocketConfig)
+
+// class FireSimREFV512D256RocketFPGemminiConfig extends Config(
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.REFV512D256RocketFPGemminiConfig)
+
 class FireSimLeanGemminiRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
