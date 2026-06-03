@@ -178,7 +178,7 @@ jobs:
         id: genkey
         run: |
           echo "extra-tests-cache-key=extra-tests-${{ github.sha }}" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         id: build-extra-tools-cache
         with:
           path: extra-tests-install
