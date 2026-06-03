@@ -188,7 +188,7 @@ jobs:
           git log
           git diff origin/main
           git push origin main
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@v8
         with:
           base: ${{ github.head_ref }}
           add-paths: ${{ env.CHIPYARD_HWDB_PATH }}
