@@ -103,6 +103,9 @@
 [submodule "toolchains/riscv-tools/riscv-tools-feedstock"]
 	path = toolchains/riscv-tools/riscv-tools-feedstock
 	url = https://github.com/ucb-bar/riscv-tools-feedstock.git
+[submodule "tools/DRAMSim3"]
+	path = tools/DRAMSim3
+	url = git@github.com:umd-memsys/DRAMsim3.git
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
@@ -160,6 +163,3 @@
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git
-[submodule "tools/DRAMSim3"]
-	path = tools/DRAMSim3
-	url = git@github.com:umd-memsys/DRAMsim3.git
