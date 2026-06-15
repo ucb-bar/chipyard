@@ -256,6 +256,19 @@ class FireSimLargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LargeBoomV3Config)
 
+//*****************************************************************
+// Saturn configs, base off chipyard's SaturnConfigs
+//*****************************************************************
+class FireSimREFV256D128RocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV256D128RocketConfig)
+
+class FireSimGENV256D128ShuttleConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GENV256D128ShuttleConfig)
+
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig
 //********************************************************************
