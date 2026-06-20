@@ -10,4 +10,4 @@ For floating-point,  Rocket  makes  use  of  Berkeley’s  Chisel  implementatio
 Rocket also supports the RISC-V machine, supervisor, and user privilege levels.
 A number of parameters are exposed, including the optional support of some ISA extensions (M, A, F, D), the number of floating-point pipeline stages, and the cache and TLB sizes.
 
-For more information, please refer to the `GitHub repository <https://github.com/freechipsproject/rocket-chip>`__, `technical report <https://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-17.html>`__ or to `this Chisel Community Conference video <https://youtu.be/Eko86PGEoDY>`__. A set of example Rocket Core configurations can be found at `generators/chipyard/src/main/scala/config/RocketConfigs.scala <https://github.com/ucb-bar/chipyard/blob/main/generators/chipyard/src/main/scala/config/RocketConfigs.scala>`__.
+For more information, please refer to the `GitHub repository <https://github.com/freechipsproject/rocket-chip>`__, `technical report <https://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-17.html>`__ or to `this Chisel Community Conference video <https://youtu.be/Eko86PGEoDY>`__.

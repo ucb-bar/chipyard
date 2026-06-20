@@ -38,7 +38,7 @@ Specifically, ``DigitalTop`` extends a ``System``, which extends a ``Subsystem``
 BaseSubsystem
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``BaseSubsystem`` is defined in `generators/rocket-chip/src/main/scala/subsystem/BaseSubsystem.scala <https://ucb.bar/rocket-chip/src/main/scala/subsystem/BaseSubsystem.scala>`_.
+The ``BaseSubsystem`` is defined in ``generators/rocketchip/src/main/scala/subsystem/BaseSubsystem.scala``.
 Looking at the ``BaseSubsystem`` abstract class, we see that this class instantiates the top-level buses
 (frontbus, systembus, peripherybus, etc.), but does not specify a topology.
 We also see this class define several ``ElaborationArtefacts``, files emitted after Chisel elaboration
@@ -55,7 +55,7 @@ We also connect some basic IOs for each tile here, specifically the hartids and 
 System
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-`generators/chipyard/src/main/scala/System.scala <https://ucb.bar/chipyard/generators/chipyard/src/main/scala/System.scala>`__ completes the definition of the ``System``.
+``generators/chipyard/src/main/scala/System.scala`` completes the definition of the ``System``.
 
 - ``HasAsyncExtInterrupts`` and ``HasExtInterruptsModuleImp`` adds IOs for external interrupts and wires them appropriately to tiles
 - ``CanHaveMasterTLMemPort`` adds a TileLink port for outer memory
@@ -84,6 +84,6 @@ custom traits together without having to worry about the details of the implemen
 TestDriver
 -------------------------
 
-The ``TestDriver`` is defined in `generators/rocketchip/src/main/resources/vsrc/TestDriver.v <https://ucb.bar/rocket-chip/src/main/resources/vsrc/TestDriver.v>`__.
+The ``TestDriver`` is defined in ``generators/rocketchip/src/main/resources/vsrc/TestDriver.v``.
 This Verilog file executes a simulation by instantiating the ``TestHarness``, driving the clock and reset signals, and interpreting the success output.
 This file is compiled with the generated Verilog for the ``TestHarness`` and the ``Top`` to produce a simulator.

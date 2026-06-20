@@ -20,7 +20,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-from datetime import datetime
 import os
 import subprocess
 import sys
@@ -60,7 +59,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Chipyard'
-copyright = f'{datetime.now().year}, Berkeley Architecture Research'
+copyright = u'2019, Berkeley Architecture Research'
 author = u'Berkeley Architecture Research'
 
 # The version info for the project you're documenting, acts as replacement for

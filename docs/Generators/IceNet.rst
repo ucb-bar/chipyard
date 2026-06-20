@@ -67,7 +67,7 @@ an Ethernet pause frame, the pause handler will block sending from the NIC.
 Linux Driver
 ------------
 
-The default Linux configuration provided by `FireMarshal <https://github.com/firesim/FireMarshal>`_
+The default Linux configuration provided by `firesim-software <https://github.com/firesim/firesim-software>`_
 contains an IceNet driver. If you launch a FireSim image that has IceNIC on it,
 the driver will automatically detect the device, and you will be able to use
 the full Linux networking stack in userspace.

@@ -35,6 +35,3 @@ Once we've created our top-level module including the DMA widget, we can create 
     :language: scala
     :start-after: DOC include start: InitZeroRocketConfig
     :end-before: DOC include end: InitZeroRocketConfig
-
-
-For an example of a simple DMA engine integrated into a Chipyard generator, see `Mempress <https://ucb.bar/mempress/src/main/scala>`__.

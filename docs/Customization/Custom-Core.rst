@@ -180,9 +180,9 @@ Rocket chip:
 Remember, you may not need all of these intermediate widgets. See :ref:`diplomatic_widgets` for the meaning of each intermediate
 widget. If you are using TileLink, then you only need the tap node and the TileLink node used by your components. Chipyard also
 provides converters for AHB, APB and AXIS, and most of the AXI4 widgets has equivalent widget for these bus protocol; see the
-source files in `generators/rocket-chip/src/main/scala/amba <https://ucb.bar/rocket-chip/src/main/scala/amba>`_ for more info.
+source files in ``generators/rocket-chip/src/main/scala/amba`` for more info.
 
-If you are using some other bus protocol, you may implement your own converters, using the files in `generators/rocket-chip/src/main/scala/amba <https://ucb.bar/rocket-chip/src/main/scala/amba>`_
+If you are using some other bus protocol, you may implement your own converters, using the files in ``generators/rocket-chip/src/main/scala/amba``
 as the template, but it is not recommended unless you are familiar with TileLink.
 
 ``memAXI4Node`` is an AXI4 master node and is defined as following in our example:
@@ -296,6 +296,6 @@ Now you have finished all the steps to prepare your cores for Chipyard! To gener
 in :ref:`custom_chisel` to add your project to the build system, then create a config by following the steps in :ref:`hetero_socs_`.
 You can now run most desired workflows for the new config just as you would for the built-in cores (depending on the functionality your core supports).
 
-If you would like to see an example of a complete third-party Verilog core integrated into Chipyard, `generators/ariane/src/main/scala/CVA6Tile.scala <https://ucb.bar/cva6-wrapper/src/main/scala/cva6/CVA6Tile.scala>`__
+If you would like to see an example of a complete third-party Verilog core integrated into Chipyard, ``generators/ariane/src/main/scala/CVA6Tile.scala``
 provides a concrete example of the CVA6 core. Note that this particular example includes additional nuances with respect to the interaction of the AXI
 interface with the memory coherency system.

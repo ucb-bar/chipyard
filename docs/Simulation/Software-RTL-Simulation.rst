@@ -197,7 +197,7 @@ A special target that automatically generates the waveform file for a specific t
     make run-binary-debug BINARY=test.riscv
 
 For a Verilator simulation, this will generate a vcd file (vcd is a standard waveform representation file format) that can be loaded to any common waveform viewer.
-Examples of open-source options of vcd-capable waveform viewers include `Surfer <https://surfer-project.org/>`__ and `GTKWave <http://gtkwave.sourceforge.net/>`__.
+An open-source vcd-capable waveform viewer is `GTKWave <http://gtkwave.sourceforge.net/>`__.
 
 For a VCS simulation, this will generate an fsdb file that can be loaded to fsdb-supported waveform viewers.
 If you have Synopsys licenses, we recommend using the Verdi waveform viewer.
@@ -250,7 +250,6 @@ For instance:
 
 .. code-block:: scala
 
-  // ucb.bar/chipyard/generators/chipyard/src/main/scala/config/RocketConfigs.scala#L108
   class FastRTLSimRocketConfig extends Config(
     new freechips.rocketchip.subsystem.WithoutTLMonitors ++
     new chipyard.RocketConfig)

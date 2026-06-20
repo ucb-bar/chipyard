@@ -21,7 +21,7 @@ Block Device Controller
 
 The block device controller provides a generic interface for secondary storage.
 This device is primarily used in FireSim to interface with a block device
-software simulation model. The default Linux configuration in `FireMarshal <https://github.com/firesim/FireMarshal>`_.
+software simulation model. The default Linux configuration in `firesim-software <https://github.com/firesim/firesim-software>`_
 
 To add a block device to your design, add the ``WithBlockDevice`` config fragment to your configuration.
 
@@ -44,7 +44,7 @@ both directions.
 
 For an example of how to use the SERDES classes, take a look at the
 ``SerdesTest`` unit test in `the Test Chip IP unit test suite
-<https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/test/Unittests.scala#L138>`_.
+<https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Unittests.scala>`_.
 
 TileLink Switcher
 -----------------
@@ -59,7 +59,7 @@ kept stable throughout the remainder of operation. It is not safe to change
 the select signal once TileLink messages have begun sending.
 
 For an example of how to use the switcher, take a look at the ``SwitcherTest``
-unit test in the `Test Chip IP unit tests <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/test/Unittests.scala#L483>`_.
+unit test in the `Test Chip IP unit tests <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Unittests.scala>`_.
 
 TileLink Ring Network
 ---------------------
@@ -70,7 +70,7 @@ than crossbars. This can be useful for chips with very wide TileLink networks
 (many cores and L2 banks) that can sacrifice cross-section bandwidth to relieve
 wire routing congestion. Documentation on how to use the ring network can be
 found in :ref:`Customization/Memory-Hierarchy:The System Bus`. The implementation itself can be found
-`here <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/soc/Ring.scala>`_,
+`here <https://github.com/ucb-bar/testchipip/blob/master/src/main/scala/Ring.scala>`_,
 and may serve as an example of how to implement your own TileLink network with
 a different topology.
 

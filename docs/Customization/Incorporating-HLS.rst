@@ -19,11 +19,8 @@ In this tutorial, we use Vitis HLS. The user guide for this tool
 can be found at https://docs.amd.com/r/en-US/ug1399-vitis-hls.
 
 Our project consists of 3 HLS files:
-
 * C program of the GCD algorithm: :gh-file-ref:`generators/chipyard/src/main/resources/hls/HLSAccel.cpp`
-
 * TCL script to run Vitis HLS: :gh-file-ref:`generators/chipyard/src/main/resources/hls/run_hls.tcl`
-
 * Makefile to run HLS and move verilog files: :gh-file-ref:`generators/chipyard/src/main/resources/hls/Makefile`
 
 This example implements an iterative GCD algorithm, which is manually connected to 

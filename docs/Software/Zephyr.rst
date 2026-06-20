@@ -17,15 +17,10 @@ Zephyr Use Cases
 Zephyr provides a lightweight build flow and execution environment that supports running complex end-to-end workloads without the overhead of Linux.
 
 Key benefits:
-
 * **Multicore & Threading Support**: Zephyr provides a task scheduler with multithreading and multicore support. Heterogeneous SoCs can be used via task pinning.
-
 * **POSIX-like API**: Zephyr provides POSIX APIs for threading and synchronization, useful for migrating Linux-based workloads.
-
 * **Fast Boot Times**: Zephyr has a significantly **faster startup time** in **RTL simulations** (~20K cycles for RocketConfig).
-
 * **Small Footprint**: Zephyr ELF files are 20-100KB (excluding application code), suitable for bringup and prototyping targets.
-
 * **Simplified Virtual Memory**: While Zephyr does not support **full virtual memory** like Linux, it does provide basic memory mapping and demand paging.
 
 
@@ -40,9 +35,7 @@ Before beginning, ensure that your Chipyard RISCV toolchain is installed, and `e
     git submodule update --init software/zephyrproject/zephyr/
 
 
-`west` is Zephyr's CMake-based build tool and dependency manager, designed to streamline project setup, compilation, and firmware deployment. It automates building Zephyr applications into ELF binaries and manages multiple repositories and submodules. In Chipyard, `west` is used to build ELF files for simulation on Spike, software RTL simulation, or FireSim. 
-
-Run the following commands to initialize the Zephyr workspace:
+Next, run the following commands to initiaize the Zephyr workspace. `west`` is Zephyr's CMake-based build tool and dependency manager, designed to streamline project setup, compilation, and firmware deployment. It automates building Zephyr applications into ELF binaries and manages multiple repositories and submodules. In Chipyard, `west`` is used to build ELF files for simulation on Spike, software RTL simulation, or FireSim
 
 .. code-block:: shell
 
@@ -51,7 +44,7 @@ Run the following commands to initialize the Zephyr workspace:
     west config manifest.file west-riscv.yml
     west update
 
-Next, set the following environment variables:
+Next, set the followwing environment variables:
 
 .. code-block:: shell
 
@@ -74,7 +67,7 @@ This will generate a build directory with the compiled ELF file, with example ou
 
     Memory region         Used Size  Region Size  %age Used
                 RAM:       36868 B       256 MB      0.01%
-           IDT_LIST:           0 B         2 KB      0.00%
+            IDT_LIST:           0 B         2 KB      0.00%
 
 
 You can run the ELF file on Spike using the following command:
@@ -107,7 +100,6 @@ Zephyr uses **KConfig**, a configuration system that allows developers to **enab
 * Managed using the `menuconfig` or `guiconfig` tools.
 
 Example:
-
 .. code-block:: kconfig
 
     config UART_HTIF
@@ -119,7 +111,6 @@ Example:
             Enable the HTIF (Host-Target Interface) UART driver for RISC-V Spike simulation.
 
 To modify configuration:
-
 .. code-block:: shell
 
    west build -t menuconfig
@@ -131,11 +122,8 @@ Device Trees: Hardware Description
 Zephyr uses **Device Tree Source (DTS) files** to describe **hardware components**, **memory layouts**, and **peripherals** in a structured manner. 
 
 Key components:
-
 - **Board-level DTS files** (e.g., `spike_riscv64.dts`) define **enabled devices**.
-
 - **SoC-level DTS files** (e.g., `virt-riscv.dtsi`) provide **shared hardware descriptions**.
-
 - **Bindings** map devices to their respective drivers.
 
 
@@ -144,7 +132,6 @@ Device Drivers: Enabling Hardware Support
 Device drivers in Zephyr provide **abstraction layers** that interface with hardware components. Each driver is responsible for **initialization**, **communication**, and **handling interrupts** if applicable.
 
 Drivers are located in:
-
 .. code-block:: shell
 
    zephyr/drivers/<subsystem>/   # e.g., serial/
@@ -223,7 +210,7 @@ Edit `boards/spike/riscv64/spike_riscv64.dts` to enable HTIF:
 
 In addition to enabling the HTIF device, this snippet sets the **HTIF UART as the console and shell UART**. The `zephyr,console` and `zephyr,shell-uart` properties specify the device node for the console and shell UART, respectively.
 
-For the full file, refer to `spike_riscv64.dts <https://github.com/ucb-bar/zephyr/blob/chipyard-port/boards/spike/riscv64/spike_riscv64.dts>`__.
+For the full file, refer to [`spike_riscv64.dts`](https://github.com/ucb-bar/zephyr/blob/chipyard-port/boards/spike/riscv64/spike_riscv64.dts).
 
 The **HTIF device itself is fully defined** in `dts/riscv/spike/virt-riscv.dtsi`, which provides a generic definition for the **RISC-V "virt" machine** used in Spike. This file includes:
 
@@ -237,7 +224,7 @@ The **HTIF device itself is fully defined** in `dts/riscv/spike/virt-riscv.dtsi`
 
 This defines the HTIF device as a **UART-compatible peripheral**, setting its `compatible` property to `"ucb,htif"`, which corresponds to the driver binding we will add later. The `label` property provides a **human-readable name** that can be referenced elsewhere in Zephyr's configuration.
 
-For the full file, see `virt-riscv.dtsi <https://github.com/ucb-bar/zephyr/blob/chipyard-port/dts/riscv/spike/virt-riscv.dtsi>`__.
+For the full file, see [`virt-riscv.dtsi`](https://github.com/ucb-bar/zephyr/blob/chipyard-port/dts/riscv/spike/virt-riscv.dtsi).
 
 Define Device Tree Binding
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -257,7 +244,7 @@ Add a binding file to `dts/bindings/serial/ucb,htif-uart.yaml`:
 
 This file defines the **HTIF UART device** as a **serial device** with a `label` property. The `compatible` property matches the device tree entry in `virt-riscv.dtsi`.
 
-For the complete file, see `ucb,htif-uart.yaml <https://github.com/ucb-bar/zephyr/blob/chipyard-port/dts/bindings/serial/ucb,htif-uart.yaml>`__.
+For the complete file, see [`ucb,htif-uart.yaml`](https://github.com/ucb-bar/zephyr/blob/chipyard-port/dts/bindings/serial/ucb,htif-uart.yaml).
 
 Define HTIF Registers and Mutex in a Header
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -277,7 +264,7 @@ Create `include/zephyr/drivers/htif.h` to define HTIF constants and expose globa
 
    #endif // ZEPHYR_DRIVERS_HTIF_H
 
-For the complete header, see `htif.h <https://github.com/ucb-bar/zephyr/blob/chipyard-port/include/zephyr/drivers/htif.h>`__.
+For the complete header, see [`htif.h`](https://github.com/ucb-bar/zephyr/blob/chipyard-port/include/zephyr/drivers/htif.h).
 
 
 
@@ -286,18 +273,8 @@ Implement the HTIF UART Driver
 Create `drivers/serial/uart_htif.c`, implementing `poll_in` and `poll_out` based on OpenSBI logic.
 
 Key functions:
-
-* .. raw:: html
-
-      <code style="font-weight: bold;">uart_htif_poll_out()</code>
-
-   : Transmits a character via HTIF.
-
-* .. raw:: html
-
-      <code style="font-weight: bold;">uart_htif_poll_in()</code> 
-    
-    : Reads a character via HTIF.
+- **`uart_htif_poll_out()`**: Transmits a character via HTIF.
+- **`uart_htif_poll_in()`**: Reads a character via HTIF.
 
 .. code-block:: c
 
@@ -332,7 +309,7 @@ Additionally, define the UART driver API and bind it to the HTIF device:
                     PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEVICE,
                     &uart_htif_driver_api);
 
-For the full implementation, see `uart_htif.c <https://github.com/ucb-bar/zephyr/blob/chipyard-port/drivers/serial/uart_htif.c>`__.
+For the full implementation, see [`uart_htif.c`](https://github.com/ucb-bar/zephyr/blob/chipyard-port/drivers/serial/uart_htif.c).
 
 
 Update the Linker Script
@@ -345,7 +322,7 @@ Ensure that `tohost` and `fromhost` are placed in a dedicated `.htif` section by
        KEEP(*(.htif))
    }
 
-For the full linker script, see `linker.ld <https://github.com/ucb-bar/zephyr/blob/chipyard-port/include/zephyr/arch/riscv/common/linker.ld>`__.
+For the full linker script, see [`linker.ld`](https://github.com/ucb-bar/zephyr/blob/chipyard-port/include/zephyr/arch/riscv/common/linker.ld).
 
 Modify the CMake Build System
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -355,7 +332,7 @@ Zephyr's build system needs to recognize the new driver. Update `drivers/serial/
 
    zephyr_library_sources_ifdef(CONFIG_UART_HTIF uart_htif.c)
 
-For the full file, see `CMakeLists.txt <https://github.com/ucb-bar/zephyr/blob/chipyard-port/drivers/serial/CMakeLists.txt>`__.
+For the full file, see [`CMakeLists.txt`](https://github.com/ucb-bar/zephyr/blob/chipyard-port/drivers/serial/CMakeLists.txt).
 
 Add Kconfig Configuration for HTIF
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -376,7 +353,7 @@ Then, create a new `Kconfig.htif` file to define HTIF-specific options:
        help
            Enable the HTIF (Host-Target Interface) UART driver for RISC-V Spike simulation.
 
-For the complete configuration, see `Kconfig.htif <https://github.com/ucb-bar/zephyr/blob/chipyard-port/drivers/serial/Kconfig.htif>`__.
+For the complete configuration, see [`Kconfig.htif`](https://github.com/ucb-bar/zephyr/blob/chipyard-port/drivers/serial/Kconfig.htif).
 
 You will now be able to enable the HTIF UART driver when building Zephyr applications. 
 

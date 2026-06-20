@@ -7,7 +7,7 @@ You have probably seen snippets of Chisel referencing keys, traits, and configs 
 This section aims to elucidate the interactions between these Chisel/Scala components, and provide
 best practices for how these should be used to create a parameterized design and configure it.
 
-We will continue to use the `GCD example <https://ucb.bar/cy/generators/chipyard/src/main/scala/example/GCD.scala>`__.
+We will continue to use the GCD example.
 
 Keys
 ----

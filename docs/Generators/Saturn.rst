@@ -1,11 +1,11 @@
 Saturn
 ========
 
-`Saturn <https://github.com/ucb-bar/saturn-vectors>`__ is a parameterized RISC-V Vector Unit generator currently supporting integration with the Rocket and Shuttle cores.
+Saturn is a parameterized RISC-V Vector Unit generator currently supporting integration with the Rocket and Shuttle cores.
 Saturn implements a compact short-vector-length vector microarchitecture suitable for deployment in a DSP-optimized core or area-efficient general-purpose core.
 
 More documentation on Saturn will be released in the future.
-A `partial listing <https://ucb.bar/saturn-vectors/chipyard/SaturnConfigs.scala>`__ of supported Saturn configurations is maintained in the Saturn repository and compiled directly from ``generators/saturn/chipyard/`` when the Saturn submodule is initialized.
+A partial listing of supported Saturn configurations is maintained in the Saturn repository and compiled directly from ``generators/saturn/chipyard/`` when the Saturn submodule is initialized.
 
 For now, the recommended Saturn configuration is ``GENV256D128ShuttleConfig``, which builds a dual-issue core with 256-bit VLEN, 128-bit wide SIMD datapath, and separate floating-point and integer vector issue units.
 

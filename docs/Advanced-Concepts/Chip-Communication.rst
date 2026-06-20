@@ -100,7 +100,6 @@ then you must tie-off the serial-link interface, and instantiate the `SimDTM`.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/PeripheralDeviceConfigs.scala
     :language: scala
-    :prepend: // ucb.bar/chipyard/generators/chipyard/src/main/scala/config/PeripheralDeviceConfigs.scala
     :start-after: DOC include start: DmiRocket
     :end-before: DOC include end: DmiRocket
 
@@ -412,6 +411,5 @@ bringup design).
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/ChipConfigs.scala
     :language: scala
-    :prepend: // ucb.bar/chipyard/generators/chipyard/src/main/scala/config/ChipConfigs.scala
     :start-after: DOC include start: TetheredChipLikeRocketConfig
     :end-before: DOC include end: TetheredChipLikeRocketConfig

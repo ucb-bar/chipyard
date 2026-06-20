@@ -3,12 +3,12 @@
 MMIO Peripherals
 ==================
 
-The easiest way to create a MMIO peripheral is to follow the GCD TileLink MMIO example. Since Chipyard and Rocket Chip SoCs primarily use Tilelink as the on-chip interconnect protocol, this section will primarily focus on designing Tilelink-based peripherals. However, see `generators/chipyard/src/main/scala/example/GCD.scala <https://ucb.bar/chipyard/generators/chipyard/src/main/scala/example/GCD.scala>`_ for how an example AXI4 based peripheral is defined and connected to the Tilelink graph through converters.
+The easiest way to create a MMIO peripheral is to follow the GCD TileLink MMIO example. Since Chipyard and Rocket Chip SoCs primarily use Tilelink as the on-chip interconnect protocol, this section will primarily focus on designing Tilelink-based peripherals. However, see ``generators/chipyard/src/main/scala/example/GCD.scala`` for how an example AXI4 based peripheral is defined and connected to the Tilelink graph through converters.
 
 To create a MMIO-mapped peripheral, you will need to specify a ``LazyModule`` wrapper containing the TileLink port as a Diplomacy Node, as well as an internal ``LazyModuleImp`` class that defines the MMIO's implementation and any non-TileLink I/O.
 
 For this example, we will show how to connect a MMIO peripheral which computes the GCD.
-The full code can be found in `generators/chipyard/src/main/scala/example/GCD.scala <https://ucb.bar/chipyard/generators/chipyard/src/main/scala/example/GCD.scala>`_.
+The full code can be found in ``generators/chipyard/src/main/scala/example/GCD.scala``.
 
 In this case we use a submodule ``GCDMMIOChiselModule`` to actually perform the GCD. The ``GCDTL`` and ``GCDAXI4`` classes are the ``LazyModule`` classes which construct the TileLink or AXI4 ports, wrapping the inner ``GCDMMIOChiselModule``.
 The ``node`` object is a Diplomacy node, which connects the peripheral to the Diplomacy interconnect graph.
@@ -97,7 +97,7 @@ Constructing the DigitalTop and Config
 --------------------------------------
 
 Now we want to mix our traits into the system as a whole.
-This code is from `generators/chipyard/src/main/scala/DigitalTop.scala <https://ucb.bar/chipyard/generators/chipyard/src/main/scala/DigitalTop.scala>`_.
+This code is from ``generators/chipyard/src/main/scala/DigitalTop.scala``.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/DigitalTop.scala
     :language: scala
@@ -111,7 +111,7 @@ The ``DigitalTopModule`` class is the actual RTL that gets synthesized.
 
 
 
-And finally, we create a configuration class in `generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala <https://ucb.bar/chipyard/generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala>`_ that uses the ``WithGCD`` config fragment defined earlier.
+And finally, we create a configuration class in ``generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala`` that uses the ``WithGCD`` config fragment defined earlier.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/example/GCD.scala
     :language: scala
