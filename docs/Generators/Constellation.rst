@@ -14,4 +14,4 @@ Constellation
 
 Constellation is fully integrated into Chipyard, and can be used to generate almost any interconnect in a Chipyard/Rocketchip-based SoC.
 
-For documentation on Constellation, see its `documentation pages <http://constellation.readthedocs.io>`__.
+For documentation on Constellation, see its `documentation pages <http://constellation.readthedocs.io>`__. Some Chipyard configurations that use Constellation can be found at `generators/chipyard/src/main/scala/config/NoCConfigs.scala <https://ucb.bar/cy/generators/chipyard/src/main/scala/config/NoCConfigs.scala>`__.

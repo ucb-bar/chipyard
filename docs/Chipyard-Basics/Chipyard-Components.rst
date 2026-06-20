@@ -118,7 +118,7 @@ Sims
   See :ref:`Simulation/Software-RTL-Simulation:Synopsys VCS (License Required)` for more information.
 
 **FireSim**
-  FireSim is an open-source FPGA-accelerated simulation platform, using Amazon Web Services (AWS) EC2 F1 instances on the public cloud.
+  FireSim is an open-source FPGA-accelerated simulation platform, using Amazon Web Services (AWS) EC2 F2 instances on the public cloud.
   FireSim automatically transforms and instruments open-hardware designs into fast (10s-100s MHz), deterministic, FPGA-based simulators that enable productive pre-silicon verification and performance validation.
   To model I/O, FireSim includes synthesizeable and timing-accurate models for standard interfaces like DRAM, Ethernet, UART, and others.
   The use of the elastic public cloud enable FireSim to scale simulations up to thousands of nodes.

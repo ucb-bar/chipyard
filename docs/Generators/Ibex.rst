@@ -2,7 +2,7 @@ Ibex Core
 ====================================
 
 `Ibex <https://github.com/lowRISC/ibex>`__ is a parameterizable RV32IMC embedded core written in SystemVerilog, currently maintained by `lowRISC <https://lowrisc.org>`__.
-The `Ibex core` is wrapped in an `Ibex tile` so it can be used with the `Rocket Chip SoC generator`.
+The `Ibex core` is `wrapped <https://github.com/ucb-bar/ibex-wrapper>`__ in an `Ibex tile` so it can be used with the `Rocket Chip SoC generator`.
 The core exposes a custom memory interface, interrupt ports, and other misc. ports that are connected from within the tile to TileLink buses and other parameterization signals.
 
 .. Warning:: The Ibex mtvec register is 256 byte aligned. When writing/running tests, ensure that the trap vector is also 256 byte aligned.
