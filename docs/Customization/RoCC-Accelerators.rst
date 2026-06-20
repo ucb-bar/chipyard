@@ -49,8 +49,8 @@ The other interfaces available to the accelerator are ``mem``, which provides ac
 the ``busy`` signal, which indicates when the accelerator is still handling an instruction;
 and the ``interrupt`` signal, which can be used to interrupt the CPU.
 
-Look at the examples in ``generators/rocket-chip/src/main/scala/tile/LazyRoCC.scala`` for detailed information on the different IOs.
-There is also more information about each of the signals in `the RoCC Documentation written by UCSD <https://docs.google.com/document/d/1CH2ep4YcL_ojsa3BVHEW-uwcKh1FlFTjH_kg5v8bxVw/edit>`_, although it is updated out of tree and may be out of date.
+Look at the examples in `generators/rocket-chip/src/main/scala/tile/LazyRoCC.scala <https://ucb.bar/rocket-chip/src/main/scala/tile/LazyRoCC.scala>`_ for detailed information on the different IOs.
+There is also more information about each of the signals in `the RoCC Documentation written by UCSD <https://docs.google.com/document/d/e/2PACX-1vRlO9BaoEVfrsn2fcefZrRLwDQjtf0fmbdhfYEAGCrac9XOjpyBnV8mZOcBSk9s5DjfXatPMDBppQGB/pub>`_, although it is outdated & no longer up to date for many signals. The copy above is a recovered copy kept as archive.
 
 
 Accessing Memory via L1 Cache
@@ -59,7 +59,7 @@ Accessing Memory via L1 Cache
 A RoCC accelerator can access memory through the L1 Cache of the core it is attached to.
 This is a simpler interface for accelerator architects to implement, but will generally have lower achievable throughput than a dedicated TileLink port.
 
-In your ``LazyRoCCModuleImp``, the signal ``io.mem`` is a ``HellaCacheIO``, which is defined in ``generators/rocket-chip/src/main/scala/rocket/HellaCache.scala``.
+In your ``LazyRoCCModuleImp``, the signal ``io.mem`` is a ``HellaCacheIO``, which is defined in `generators/rocket-chip/src/main/scala/rocket/HellaCache.scala <https://ucb.bar/rocket-chip/src/main/scala/rocket/HellaCache.scala>`_.
 
 .. code-block:: scala
 
