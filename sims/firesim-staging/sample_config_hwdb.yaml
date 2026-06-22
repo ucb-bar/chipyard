@@ -6,59 +6,59 @@
 # own images.
 
 # DOCREF START: Example HWDB Entry
+#firesim_boom_singlecore_nic_l2_llc4mb_ddr3:
+#    agfi: agfi-0805da1f5da632561
+#    deploy_quintuplet_override: null
+#    deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
+#    custom_runtime_config: null
+# DOCREF END: Example HWDB Entry
 firesim_boom_singlecore_nic_l2_llc4mb_ddr3:
-    agfi: agfi-04de4143495fbdadb
+    agfi: agfi-0805da1f5da632561
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
-# DOCREF END: Example HWDB Entry
 firesim_boom_singlecore_no_nic_l2_llc4mb_ddr3:
-    agfi: agfi-0b7484cfa93e064d6
+    agfi: agfi-0ec7ae76159d3bfb6
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 firesim_gemmini_printf_rocket_singlecore_no_nic:
-    agfi: agfi-0ace16d35c5758893
+    agfi: agfi-0f82901076822127a
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 firesim_gemmini_rocket_singlecore_no_nic:
-    agfi: agfi-05eec5fb565f7cfa3
+    agfi: agfi-0f567000cb21cb06d
+    deploy_quintuplet_override: null
+    deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
+    custom_runtime_config: null
+firesim_megaboom_singlecore_no_nic_l2_llc4mb_ddr3:
+    agfi: agfi-0f4582f3f39b9a8a4
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 firesim_rocket_quadcore_nic_l2_llc4mb_ddr3:
-    agfi: agfi-072cc9daac93249da
+    agfi: agfi-013458e5c75f304a0
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 firesim_rocket_quadcore_no_nic_l2_llc4mb_ddr3:
-    agfi: agfi-0d0cbe59e2914492a
+    agfi: agfi-0c5eedfce0e568971
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 firesim_rocket_singlecore_no_nic_l2_lbp:
-    agfi: agfi-0cfc97258aa8389f0
+    agfi: agfi-033a86c6e5d006fc8
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
-firesim_rocket_singlecore_sha3_nic_l2_llc4mb_ddr3:
-    agfi: agfi-02e4056f9bec5a240
+firesim_saturn_GENV256D128_shuttle_singlecore_no_nic_l2_llc4mb_ddr3:
+    agfi: agfi-065caaeb99b3363c4
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
-firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3:
-    agfi: agfi-0d8abef077c23a4de
-    deploy_quintuplet_override: null
-    deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
-    custom_runtime_config: null
-firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3_printf:
-    agfi: agfi-033e840230f51668f
-    deploy_quintuplet_override: null
-    deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
-    custom_runtime_config: null
-firesim_supernode_rocket_singlecore_nic_l2_lbp:
-    agfi: agfi-0eae0fa36537e2835
+firesim_saturn_REFV256D128_rocket_singlecore_no_nic_l2_llc4mb_ddr3:
+    agfi: agfi-012e92467d7d2149a
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
@@ -73,17 +73,17 @@ vitis_firesim_gemmini_rocket_singlecore_no_nic:
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 alveo_u250_firesim_rocket_singlecore_no_nic:
-    bitstream_tar: https://raw.githubusercontent.com/firesim/firesim-public-bitstreams/a0b443552210d993163d270ed7504613fece277c/xilinx_alveo_u250/alveo_u250_firesim_rocket_singlecore_no_nic.tar.gz
+    bitstream_tar: https://github.com/firesim/firesim-public-bitstreams/raw/b31b0c9571f8b9725cf9864a3221face63535a94/xilinx_alveo_u250/alveo_u250_firesim_rocket_singlecore_no_nic.tar.gz
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 alveo_u250_firesim_rocket_quadcore_no_nic:
-    bitstream_tar: https://raw.githubusercontent.com/firesim/firesim-public-bitstreams/c91b4700e565cae6e33c02ab56ff320db1005430/xilinx_alveo_u250/alveo_u250_firesim_rocket_quadcore_no_nic.tar.gz
+    bitstream_tar: https://github.com/firesim/firesim-public-bitstreams/raw/b31b0c9571f8b9725cf9864a3221face63535a94/xilinx_alveo_u250/alveo_u250_firesim_rocket_quadcore_no_nic.tar.gz
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 alveo_u250_firesim_boom_singlecore_no_nic:
-    bitstream_tar: https://raw.githubusercontent.com/firesim/firesim-public-bitstreams/94f0e9cbeebdf4f018533829e3bff503f382c943/xilinx_alveo_u250/alveo_u250_firesim_boom_singlecore_no_nic.tar.gz
+    bitstream_tar: https://github.com/firesim/firesim-public-bitstreams/raw/b31b0c9571f8b9725cf9864a3221face63535a94/xilinx_alveo_u250/alveo_u250_firesim_boom_singlecore_no_nic.tar.gz
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
@@ -93,9 +93,17 @@ alveo_u250_firesim_rocket_singlecore_nic:
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 alveo_u250_firesim_gemmini_rocket_singlecore_no_nic:
-    bitstream_tar: https://raw.githubusercontent.com/firesim/firesim-public-bitstreams/9e066f051e4de747404f75fb163ac51fdb646925/xilinx_alveo_u250/alveo_u250_firesim_gemmini_rocket_singlecore_no_nic.tar.gz
+    bitstream_tar: https://github.com/firesim/firesim-public-bitstreams/raw/b31b0c9571f8b9725cf9864a3221face63535a94/xilinx_alveo_u250/alveo_u250_firesim_gemmini_rocket_singlecore_no_nic.tar.gz
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
+    custom_runtime_config: null
+alveo_u250_firesim_saturn_GENV256D128_shuttle_singlecore_no_nic:
+    bitstream_tar: https://github.com/firesim/firesim-public-bitstreams/raw/b31b0c9571f8b9725cf9864a3221face63535a94/xilinx_alveo_u250/alveo_u250_firesim_saturn_GENV256D128_shuttle_singlecore_no_nic.tar.gz
+    deploy_quintuplet_override: null
+    custom_runtime_config: null
+alveo_u250_firesim_saturn_REFV256D128_rocket_singlecore_no_nic:
+    bitstream_tar: https://github.com/firesim/firesim-public-bitstreams/raw/b31b0c9571f8b9725cf9864a3221face63535a94/xilinx_alveo_u250/alveo_u250_firesim_saturn_REFV256D128_rocket_singlecore_no_nic.tar.gz
+    deploy_quintuplet_override: null
     custom_runtime_config: null
 alveo_u200_firesim_rocket_singlecore_no_nic:
     bitstream_tar: https://raw.githubusercontent.com/firesim/firesim-public-bitstreams/357c8268872ea107e5877b140b470f9ba20ea7ff/xilinx_alveo_u200/alveo_u200_firesim_rocket_singlecore_no_nic.tar.gz
@@ -108,7 +116,7 @@ alveo_u280_firesim_rocket_singlecore_no_nic:
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
 xilinx_vcu118_firesim_rocket_singlecore_4GB_no_nic:
-    bitstream_tar: https://raw.githubusercontent.com/firesim/firesim-public-bitstreams/0f1f768a805af1c2c2d8d9fd6f4693ba6dec11a0/xilinx_vcu118/xilinx_vcu118_firesim_rocket_singlecore_4GB_no_nic.tar.gz
+    bitstream_tar: https://github.com/firesim/firesim-public-bitstreams/raw/b31b0c9571f8b9725cf9864a3221face63535a94/xilinx_vcu118/xilinx_vcu118_firesim_rocket_singlecore_4GB_no_nic.tar.gz
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null

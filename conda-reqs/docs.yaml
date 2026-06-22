@@ -6,6 +6,7 @@ channels:
 
 platforms:
     - linux-64
+    - osx-arm64 # allow editing of docs locally on MacOS
 
 dependencies:
     # https://conda-forge.org/feedstock-outputs/
