@@ -58,7 +58,7 @@ jobs:
         ((steps.filter.outputs.conda-reqs == 'false') && (steps.filter.outputs.conda-lockfile == 'false')) ||
         ((steps.filter.outputs.conda-reqs == 'true') && (steps.filter.outputs.conda-lockfile == 'true')) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -118,7 +118,7 @@ jobs:
         run: |
             rm -rf ${{ github.workspace }}/* || true
             rm -rf ${{ github.workspace }}/.* || true
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup repo copy
         run: |
           mkdir -p $(dirname ${{ env.REMOTE_WORK_DIR }})
@@ -168,9 +168,9 @@ jobs:
       GH_ORG: firesim
       GH_REPO: firesim-public-bitstreams
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Create temporary clone of repo to store built bitstreams into
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ env.GH_ORG }}/${{ env.GH_REPO }}
           ssh-key: ${{ secrets.BARTENDER_PRIVATE_SSH_KEY }}

@@ -50,7 +50,7 @@ jobs:
     outputs:
       needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Git workaround
         uses: ./.github/actions/git-workaround
       - uses: dorny/paths-filter@v3
@@ -87,7 +87,7 @@ jobs:
             rm -rf ${{ github.workspace }}/* || true
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup repo copy
         run: |
           git clone $GITHUB_WORKSPACE ${{ env.REMOTE_WORK_DIR }}
