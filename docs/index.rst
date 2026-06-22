@@ -43,6 +43,8 @@ Table of Contents
 
    Prototyping/index
 
+   Tutorials/index
+
 
 Indices and tables
 ==================
