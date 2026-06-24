@@ -163,3 +163,6 @@
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git
+[submodule "tools/ramulator2"]
+	path = tools/ramulator2
+	url = https://github.com/ucb-bar/ramulator2.git
