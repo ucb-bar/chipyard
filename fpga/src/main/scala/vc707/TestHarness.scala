@@ -8,7 +8,7 @@ import freechips.rocketchip.subsystem.{SystemBusKey}
 import freechips.rocketchip.diplomacy.{IdRange, TransferSizes}
 import freechips.rocketchip.prci._
 
-import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay}
+import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay, GPIOPeripheralVC707ShellPlacer}
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 import sifive.fpgashells.shell._
 import sifive.fpgashells.clocks.{PLLFactoryKey}
@@ -16,6 +16,7 @@ import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{XilinxVC707PCIeX1IO}
 
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTPortIO}
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
+import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOPortIO}
 
 import chipyard._
 import chipyard.harness._
@@ -56,6 +57,16 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
 
   /*** JTAG ***/
   val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
+
+  /*** GPIO ***/
+  val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
+    Overlay(GPIOOverlayKey, new GPIOPeripheralVC707ShellPlacer(this, GPIOShellInput()))
+  })
+
+  val io_gpio_bb = dp(PeripheryGPIOKey).map { p => BundleBridgeSource(() => (new GPIOPortIO(p))) }
+  (dp(GPIOOverlayKey) zip dp(PeripheryGPIOKey)).zipWithIndex.map { case ((placer, params), i) =>
+    placer.place(GPIODesignInput(params, io_gpio_bb(i)))
+  }
 
   /*** UART ***/
 
