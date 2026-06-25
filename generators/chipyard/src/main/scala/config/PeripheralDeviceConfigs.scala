@@ -64,6 +64,15 @@ class dmiRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: DmiRocket
 
+class dmiCheckpointingRocketConfig extends Config(
+  new freechips.rocketchip.rocket.WithCease(false) ++            // disable xrocket extension to match w/ spike
+  new chipyard.config.WithNoUART ++                              // only use htif prints w/ checkpointing
+  new chipyard.config.WithNPMPs(0) ++                            // remove PMPs (reduce non-core arch state)
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tl
+  new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.AbstractConfig)
+
 class dmiCospikeCheckpointingRocketConfig extends Config(
   new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tl
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
