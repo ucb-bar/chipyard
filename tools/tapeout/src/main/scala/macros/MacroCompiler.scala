@@ -446,7 +446,9 @@ class MacroCompilerPass(
               if (libPort.src.effectiveMaskGran == libPort.src.width.get) {
                 bits(WRef(mem), low / memPort.src.effectiveMaskGran)
               } else {
-                require(isPowerOfTwo(libPort.src.effectiveMaskGran), "only powers of two masks supported for now")
+                if (!isPowerOfTwo(libPort.src.effectiveMaskGran) && libPort.src.effectiveMaskGran != memPort.src.effectiveMaskGran) {
+                  return None // Non-power-of-two mask granularity mismatch — cannot compile this pair
+                }
 
                 // How much of this lib's width we are effectively using.
                 // If we have a mem maskGran less than the lib's maskGran, we'll have to take the smaller maskGran.

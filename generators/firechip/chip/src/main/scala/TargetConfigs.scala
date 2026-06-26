@@ -256,6 +256,19 @@ class FireSimLargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LargeBoomV3Config)
 
+//*****************************************************************
+// Boom config, for Chia
+//*****************************************************************
+class FireSimMegaBoomChiaConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MegaBoomChiaConfig)
+
+class FireSimMegaBoomChiaBigCacheConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MegaBoomChiaBigCacheConfig)
+
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig
 //********************************************************************

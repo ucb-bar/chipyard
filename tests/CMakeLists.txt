@@ -40,7 +40,7 @@ set(CMAKE_EXECUTABLE_SUFFIX            ".riscv")
 #################################
 
 # CPU architecture
-set(ARCH                "rv64imafd")
+set(ARCH                "rv64imafd_zicsr_zifencei")
 set(ABI                 "lp64d")
 set(CMODEL              "medany")
 set(ARCH_FLAGS          -march=${ARCH} -mabi=${ABI} -mcmodel=${CMODEL})
@@ -55,6 +55,7 @@ set(LINKER_SCRIPT       "htif.ld")
 add_compile_options(-std=gnu99)
 add_compile_options(-O2 -Wall -Wextra)
 add_compile_options(-fno-common -fno-builtin-printf)
+add_compile_options(-ffunction-sections -fdata-sections)
 add_compile_options(${ARCH_FLAGS})
 add_compile_options(${SPEC_FLAGS})
 
@@ -87,6 +88,7 @@ add_executable(mt-hello mt-hello.c)
 add_executable(symmetric symmetric.c)
 add_executable(ctc-test ctc-test.c)
 add_executable(multi-ctc-test multi-ctc-test.c)
+add_executable(tma_inject_baremetal tmatests/tma_inject_baremetal.c)
 
 #################################
 # Disassembly
@@ -127,6 +129,74 @@ add_dump_target(mt-hello)
 add_dump_target(symmetric)
 add_dump_target(ctc-test)
 add_dump_target(multi-ctc-test)
+add_dump_target(tma_inject_baremetal)
+
+#################################
+# Microbenchmarks (ubench/)
+#################################
+
+set(UBENCH_DIR ${CMAKE_SOURCE_DIR}/ubench)
+
+# Umbrella target: cmake --build ./build/ --target ubench
+add_custom_target(ubench)
+
+# Helper: add a microbenchmark from ubench/<name>/bench.c
+function(add_ubench name)
+    set(target "ubench-${name}")
+    add_executable(${target} ${UBENCH_DIR}/${name}/bench.c)
+    target_include_directories(${target} PRIVATE ${UBENCH_DIR} ${UBENCH_DIR}/${name})
+    target_compile_definitions(${target} PRIVATE TARGET_VERILATOR=1)
+    target_link_libraries(${target} m)
+    set_target_properties(${target} PROPERTIES OUTPUT_NAME ${name} EXCLUDE_FROM_ALL TRUE)
+    add_dump_target(${target})
+    add_dependencies(ubench ${target})
+endfunction()
+
+# All microbenchmarks.  Six of them (CCe, CCh, CCh_st, CCl, CF1, CRm)
+# ship with a pre-generated randArr.h that is committed to the repo.
+# Do NOT regenerate these files — the random data must stay identical
+# to preserve reproducibility of all prior profiling results.
+# (rand_c_arr.py + rand_arr_args.txt are kept for reference only.)
+add_ubench(CCa)
+add_ubench(CCe)
+add_ubench(CCh)
+add_ubench(CCh_st)
+add_ubench(CCl)
+add_ubench(CCm)
+add_ubench(CF1)
+add_ubench(CRd)
+add_ubench(CRf)
+add_ubench(CRm)
+add_ubench(CS1)
+add_ubench(CS3)
+add_ubench(DP1d)
+add_ubench(DP1f)
+add_ubench(DPcvt)
+add_ubench(DPT)
+add_ubench(DPTd)
+add_ubench(ED1)
+add_ubench(EF)
+add_ubench(EI)
+add_ubench(EM1)
+add_ubench(EM5)
+add_ubench(MC)
+add_ubench(MCS)
+add_ubench(MD)
+add_ubench(M_Dyn)
+add_ubench(MI)
+add_ubench(MIM)
+add_ubench(MIM2)
+add_ubench(MIP)
+add_ubench(ML2)
+add_ubench(ML2_BW_ld)
+add_ubench(ML2_BW_ldst)
+add_ubench(ML2_BW_st)
+add_ubench(ML2_st)
+add_ubench(MM)
+add_ubench(MM_st)
+add_ubench(STc)
+add_ubench(STL2)
+add_ubench(STL2b)
 
 
 # Add custom command to generate spiflash.img from spiflash.py

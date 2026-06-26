@@ -48,13 +48,13 @@
 	url = https://github.com/ucb-bar/rocc-acc-utils.git
 [submodule "generators/rocket-chip"]
 	path = generators/rocket-chip
-	url = https://github.com/chipsalliance/rocket-chip.git
+	url = https://github.com/ucb-bar/rocket-chip.git
 [submodule "generators/rocket-chip-blocks"]
 	path = generators/rocket-chip-blocks
 	url = https://github.com/chipsalliance/rocket-chip-blocks.git
 [submodule "generators/rocket-chip-inclusive-cache"]
 	path = generators/rocket-chip-inclusive-cache
-	url = https://github.com/chipsalliance/rocket-chip-inclusive-cache.git
+	url = https://github.com/ucb-bar/rocket-chip-inclusive-cache.git
 [submodule "generators/shuttle"]
 	path = generators/shuttle
 	url = https://github.com/ucb-bar/shuttle.git
@@ -163,3 +163,12 @@
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git
+[submodule "tests/coremark-pro-src"]
+	path = tests/coremark-pro-src
+	url = https://github.com/eembc/coremark-pro.git
+[submodule "tests/embench-src"]
+	path = tests/embench-src
+	url = https://github.com/embench/embench-iot.git
+[submodule "software/spec2006"]
+	path = software/spec2006
+	url = https://github.com/ucb-bar/spec2006-workload.git

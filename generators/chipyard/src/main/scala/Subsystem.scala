@@ -117,6 +117,29 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
   Seq(PBUS, FBUS, MBUS, CBUS).foreach { loc =>
     tlBusWrapperLocationMap.lift(loc).foreach { _.clockGroupNode := allClockGroupsNode }
   }
+
+  // Wire L2 performance counters from InclusiveCache to BoomTile TMA devices via BundleBridge.
+  // BundleBridge diplomacy handles cross-hierarchy wiring (through TilePRCIDomain wrappers).
+  // The source is driven from InModuleBody using counters exposed on CoherenceManagerWrapper.
+  totalTiles.values.foreach {
+    case b: boom.v3.common.BoomTile =>
+      b.l2PerfCounterSinkNode.foreach { sinkNode =>
+        val sourceNode = BundleBridgeSource[Vec[UInt]](() =>
+          Vec(boom.v3.common.BoomPerfCounterConsts.L2_NUM_COUNTERS, UInt(64.W)))
+        sinkNode := sourceNode
+        InModuleBody {
+          val l2Ref = sifive.blocks.inclusivecache.InclusiveCachePerfCounterRef.counters
+          l2Ref match {
+            case Some(mv) => sourceNode.bundle := mv.getWrappedValue
+            case None =>
+              sourceNode.bundle := VecInit(Seq.fill(
+                boom.v3.common.BoomPerfCounterConsts.L2_NUM_COUNTERS)(0.U(64.W)))
+          }
+        }
+      }
+    case _ =>
+  }
+
   override lazy val module = new ChipyardSubsystemModuleImp(this)
 }
 

@@ -313,6 +313,52 @@ class WithCospike extends HarnessBinder({
   }
 })
 
+class WithSelectiveWaveform(val maxWindows: Int) extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: TracePort, chipId: Int) => {
+    // Use raw plusarg_reader with FORMAT="%h" for PC slots so users can pass
+    // hex values like +wf_pc_0=80000000 (no 0x prefix). The PlusArg helper
+    // hardcodes %d, which would parse "0x80000000" as 0 and disable the slot.
+    val pcs     = Seq.tabulate(maxWindows)(i =>
+      Module(new freechips.rocketchip.util.plusarg_reader(s"wf_pc_$i=%h", 0, s"selective-waveform PC slot $i (hex, no 0x prefix)", 64)).io.out)
+    val num_seen      = Seq.tabulate(maxWindows)(i => PlusArg(s"wf_n_$i",   default=1, width=32))
+    val cyc     = Seq.tabulate(maxWindows)(i => PlusArg(s"wf_cyc_$i", default=0, width=32))
+    val dumpAll = PlusArg("wf_dump_all", default=0, width=1)(0)
+
+    val firstTrace = port.io.traces.head
+    val retired = port.io.traces.flatMap(_.trace.insns)
+
+    val activeUnion = withClockAndReset(firstTrace.clock, firstTrace.reset) {
+      val active = (0 until maxWindows).map { i =>
+        val matched   = retired.map(t => t.valid && !t.exception && t.iaddr === pcs(i))
+        val nMatched  = PopCount(matched)
+        val matchCnt  = RegInit(0.U(32.W))
+        val triggered = RegInit(false.B)
+        val countdown = RegInit(0.U(32.W))
+        val enabled   = pcs(i) =/= 0.U && cyc(i) =/= 0.U
+
+        when (enabled && !triggered) {
+          val newCnt = matchCnt + nMatched
+          matchCnt := newCnt
+          when (newCnt >= num_seen(i)) {
+            triggered := true.B
+            countdown := cyc(i)
+          }
+        }
+        when (countdown > 0.U) { countdown := countdown - 1.U }
+        countdown > 0.U
+      }
+      active.reduce(_ || _)
+    }
+
+    th.wf_active := dumpAll || activeUnion
+  }
+}) {
+  // No-arg ctor so the underscore-CLI config composer (which uses Java
+  // reflection: Class.forName(name).newInstance) can instantiate this class.
+  // Default maxWindows = 64 mirrors the prior Scala default.
+  def this() = this(64)
+}
+
 
 class WithCustomBootPinPlusArg extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: CustomBootPort, chipId: Int) => {

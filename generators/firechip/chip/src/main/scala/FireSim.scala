@@ -106,6 +106,7 @@ class FireSim(implicit val p: Parameters) extends RawModule with HasHarnessInsta
   def referenceClock = false.B.asClock // unused
   def referenceReset = resetBridge.io.reset
   def success = { require(false, "success should not be used in Firesim"); false.B }
+  def wf_active = { require(false, "wf_active should not be used in Firesim"); false.B }
 
   override val supportsMultiChip = true
 

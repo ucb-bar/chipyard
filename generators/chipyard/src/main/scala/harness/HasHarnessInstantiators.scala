@@ -62,6 +62,7 @@ trait HasHarnessInstantiators {
   def referenceClock: Clock
   def referenceReset: Reset
   def success: Bool
+  def wf_active: Bool
 
   // This can be accessed to get new clocks from the harness
   val harnessClockInstantiator = p(HarnessClockInstantiatorKey)()

@@ -69,12 +69,47 @@ HELP_COMPILATION_VARIABLES += \
 "   USE_FST                = set to '1' to build Verilator simulator to emit FST instead of VCD."
 
 HELP_SIMULATION_VARIABLES += \
-"   USE_FST                = set to '1' to run Verilator simulator emitting FST instead of VCD."
+"   USE_FST                = set to '1' to run Verilator simulator emitting FST instead of VCD." \
+"   DUMP_TMA               = set to '1' to dump TMA performance counters at simulation end FOR BOOM ONLY"
+
+# BOOM TMA SUPPORT
+DUMP_TMA ?= 0
+EXTRA_SIM_FLAGS += $(if $(filter $(DUMP_TMA),0),,+dump-tma-counters)
+
+# WF_SCOPES: space-separated list of hierarchy paths to limit `$dumpvars` to.
+# Up to 8 scopes. Empty (default) → dump entire testHarness (legacy behavior).
+# Example: make debug CONFIG=SmallBoomWaveConfig WF_SCOPES="testHarness.chiptop0 testHarness.chiptop0.system"
+# Note: Verilator binds dump scopes at compile time. After changing WF_SCOPES,
+#       run `make clean-sim-debug` before rebuilding the debug simulator.
+WF_SCOPES ?=
+WF_SCOPES_DEFINES :=
+ifneq ($(strip $(WF_SCOPES)),)
+WF_SCOPES_DEFINES += +define+WF_SCOPES_ENABLED
+WF_SCOPES_DEFINES += $(foreach i,1 2 3 4 5 6 7 8,$(if $(word $(i),$(WF_SCOPES)),+define+WF_SCOPE_$(i)=$(word $(i),$(WF_SCOPES))))
+endif
+
+# Stamp file that captures the current WF_SCOPES value. Force-checked on every
+# make invocation; only its mtime is bumped when WF_SCOPES actually changes.
+# model_mk_debug depends on it so changing WF_SCOPES auto-triggers a rebuild.
+WF_STAMP := $(sim_dir)/.wf_scopes.stamp
+.PHONY: wf_stamp_check
+wf_stamp_check:
+	@new_val='$(WF_SCOPES)'; \
+	old_val=$$(cat $(WF_STAMP) 2>/dev/null || echo "__UNSET__"); \
+	if [ "$$new_val" != "$$old_val" ]; then \
+		echo "$$new_val" > $(WF_STAMP); \
+	fi
+$(WF_STAMP): wf_stamp_check ;
 
 #########################################################################################
 # verilator/cxx binary and flags
 #########################################################################################
 VERILATOR := verilator --main --timing --cc --exe
+# Debug build uses our custom main (sim_dir/wf_main.cc) instead of --main so we
+# can capture the model pointer and bridge a DPI-C function that toggles the
+# trace stream's __Vm_dumping flag (Verilator drops $dumpoff/$dumpon).
+VERILATOR_DEBUG := verilator --timing --cc --exe
+WF_DEBUG_MAIN := $(sim_dir)/wf_main.cc
 
 #----------------------------------------------------------------------------------------
 # user configs
@@ -196,11 +231,12 @@ $(model_mk): $(sim_common_files) $(EXTRA_SIM_REQS)
 	$(VERILATOR) $(VERILATOR_OPTS) $(EXTRA_SIM_SOURCES) -o $(sim) -Mdir $(model_dir)
 	touch $@
 
-$(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS)
+$(model_mk_debug): $(sim_common_files) $(EXTRA_SIM_REQS) $(WF_DEBUG_MAIN) $(WF_STAMP)
 	$(call require_cmd,verilator)
 	rm -rf $(model_dir_debug)
 	mkdir -p $(model_dir_debug)
-	$(VERILATOR) $(VERILATOR_OPTS) +define+DEBUG $(EXTRA_SIM_SOURCES) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug)
+	$(sim_dir)/wf_pragma_inject.py $(GEN_COLLATERAL_DIR) "$(WF_SCOPES)"
+	$(VERILATOR_DEBUG) $(VERILATOR_OPTS) +define+DEBUG $(WF_SCOPES_DEFINES) $(EXTRA_SIM_SOURCES) $(WF_DEBUG_MAIN) -o $(sim_debug) $(TRACING_OPTS) -Mdir $(model_dir_debug)
 	touch $@
 
 #########################################################################################

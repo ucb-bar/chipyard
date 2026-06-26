@@ -19,9 +19,12 @@ import chipyard.{ChipTop}
 class TestHarness(implicit val p: Parameters) extends Module with HasHarnessInstantiators {
   val io = IO(new Bundle {
     val success = Output(Bool())
+    val wf_active = Output(Bool())
   })
   val success = WireInit(false.B)
+  val wf_active = WireInit(true.B)
   io.success := success
+  io.wf_active := wf_active
 
   override val supportsMultiChip = true
 
