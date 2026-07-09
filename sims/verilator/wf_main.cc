@@ -18,8 +18,10 @@ static VTestDriver* g_topp = nullptr;
 
 extern "C" void wf_set_dumping(svBit en) {
     if (g_topp && g_topp->rootp && g_topp->rootp->vlSymsp) {
-        g_topp->rootp->vlSymsp->__Vm_dumping = en ? true : false;
-    }
+        auto* syms = g_topp->rootp->vlSymsp;
+        // Guard: only enable dumping when a VCD dumper has been opened
+        if (en && !syms->__Vm_dumperp) return;
+        syms->__Vm_dumping = en ? true : false;    }
 }
 
 int main(int argc, char** argv, char**) {
