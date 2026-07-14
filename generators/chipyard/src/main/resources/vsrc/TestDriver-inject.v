@@ -113,7 +113,7 @@ module TestDriver;
 
   function void dump_perf_stats();
     if (perf_file != "") begin
-      $fwrite(perf_file_fd, "%0d,%0d,%0d,%0d\n", cycles, instret, miss_l1d_req);
+      $fwrite(perf_file_fd, "%0d,%0d,%0d\n", cycles, instret, miss_l1d_req);
     end
   endfunction
 
