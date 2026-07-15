@@ -17,6 +17,8 @@ tags
 *~
 .bsp/
 .conda-env/
+.conda-env-verilator/
+env-verilator.sh
 .#*
 first-clone-setup-fast-log
 .bloop/

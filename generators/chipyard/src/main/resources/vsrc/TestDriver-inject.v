@@ -70,11 +70,18 @@ typedef struct {
   // but chandle seems OK lol
 } loadarch_state_t;
 
+`ifdef VERILATOR
+import "DPI-C" function void loadarch_open(input string loadarch_file);
+import "DPI-C" function longint unsigned loadarch_get_csr(input string name);
+import "DPI-C" function longint unsigned loadarch_get_xpr(input int i);
+import "DPI-C" function longint unsigned loadarch_get_fpr(input int i);
+`else
 import "DPI-C" function void loadarch_from_file
 (
   input string loadarch_file,
   output loadarch_state_t loadarch_state
 );
+`endif
 
 module TestDriver;
 
@@ -130,6 +137,8 @@ module TestDriver;
   localparam integer dcache_tag_bits = dcache_raw_tag_bits + 2; // 2 bits for coherency metadata
   localparam integer dcache_data_rows_per_set = dcache_block_size / dcache_data_bus_width;
   string checkpoint_dir;
+  // Fires once checkpoint_dir has been parsed from plusargs.
+  event checkpoint_dir_ready;
 
   always @(posedge `CORE_CLOCK) begin
     if (!reset && !`CORE_RESET) begin
@@ -162,6 +171,7 @@ module TestDriver;
     void'($value$plusargs("perf-sample-period=%d", sample_period));
     void'($value$plusargs("max-instructions=%d", max_instructions));
     void'($value$plusargs("checkpoint-dir=%s", checkpoint_dir));
+    -> checkpoint_dir_ready;
 
     // Rest of plusargs
     void'($value$plusargs("max-cycles=%d", max_cycles));
@@ -247,8 +257,47 @@ module TestDriver;
     begin
       do_loadarch = 1;
       $display("Reading loadarch file: %s", loadarch_file);
+`ifdef VERILATOR
+      loadarch_open(loadarch_file);
+      loadarch_state.pc       = loadarch_get_csr("pc");
+      loadarch_state.prv      = loadarch_get_csr("prv");
+      loadarch_state.fcsr     = loadarch_get_csr("fcsr");
+      loadarch_state.vstart   = loadarch_get_csr("vstart");
+      loadarch_state.vxsat    = loadarch_get_csr("vxsat");
+      loadarch_state.vxrm     = loadarch_get_csr("vxrm");
+      loadarch_state.vcsr     = loadarch_get_csr("vcsr");
+      loadarch_state.vtype    = loadarch_get_csr("vtype");
+      loadarch_state.stvec    = loadarch_get_csr("stvec");
+      loadarch_state.sscratch = loadarch_get_csr("sscratch");
+      loadarch_state.sepc     = loadarch_get_csr("sepc");
+      loadarch_state.scause   = loadarch_get_csr("scause");
+      loadarch_state.stval    = loadarch_get_csr("stval");
+      loadarch_state.satp     = loadarch_get_csr("satp");
+      loadarch_state.mstatus  = loadarch_get_csr("mstatus");
+      loadarch_state.medeleg  = loadarch_get_csr("medeleg");
+      loadarch_state.mideleg  = loadarch_get_csr("mideleg");
+      loadarch_state.mie      = loadarch_get_csr("mie");
+      loadarch_state.mtvec    = loadarch_get_csr("mtvec");
+      loadarch_state.mscratch = loadarch_get_csr("mscratch");
+      loadarch_state.mepc     = loadarch_get_csr("mepc");
+      loadarch_state.mcause   = loadarch_get_csr("mcause");
+      loadarch_state.mtval    = loadarch_get_csr("mtval");
+      loadarch_state.mip      = loadarch_get_csr("mip");
+      loadarch_state.mcycle   = loadarch_get_csr("mcycle");
+      loadarch_state.minstret = loadarch_get_csr("minstret");
+      loadarch_state.mtime    = loadarch_get_csr("mtime");
+      loadarch_state.mtimecmp = loadarch_get_csr("mtimecmp");
+      loadarch_state.VLEN     = loadarch_get_csr("VLEN");
+      loadarch_state.ELEN     = loadarch_get_csr("ELEN");
+      // VPR left unset here
+      for (int i = 0; i < 32; i++) begin
+        loadarch_state.XPR[i] = loadarch_get_xpr(i);
+        loadarch_state.FPR[i] = loadarch_get_fpr(i);
+      end
+`else
       loadarch_from_file(loadarch_file, loadarch_state);
       $display("Loadarch struct: %p", loadarch_state);
+`endif
     end
 
     if (do_loadarch) begin
@@ -399,6 +448,18 @@ module TestDriver;
     end
   end
 
+`ifdef VERILATOR
+  initial begin
+    wait(loadarch_struct_ready.triggered) begin end
+    @(negedge `CORE_RESET) begin end
+    // FPRs
+    for (int i_fpr = 0; i_fpr < 32; i_fpr++)
+      testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.fpuOpt.regfile_ext.Memory[31-i_fpr] = loadarch_state.FPR[i_fpr];
+    // XPRs
+    for (int i_xpr = 1; i_xpr < 32; i_xpr++)
+      testHarness.chiptop0.system.tile_prci_domain.element_reset_domain_rockettile.core.rf_ext.Memory[30-i_xpr+1] = loadarch_state.XPR[i_xpr];
+  end
+`else
   // LHS of a force statement must be static and genvar loops aren't allowed
   // inside initial blocks
   // Always reload FPRs, just cause. TODO: ask Jerry why he gates loading FPRs based on state.mstatus, may be related to DTM configuration
@@ -425,8 +486,29 @@ module TestDriver;
       //$display("Releasing XPR %d", i_xpr);
     end
   end
+`endif
 
     // Dcache injection
+`ifdef VERILATOR
+  `define TAG_ARRAY_FORCE(way_idx) \
+    bit [dcache_tag_bits-1:0] dcache_tag_array``way_idx`` [dcache_sets]; \
+    event dcache_tag_array_ready``way_idx; \
+    initial begin \
+      wait(checkpoint_dir_ready.triggered) begin end \
+      if (checkpoint_dir.len() > 0) begin \
+        $readmemb($sformatf("%s/dcache_tag_array%0d.bin", checkpoint_dir, way_idx), dcache_tag_array``way_idx``); \
+        -> dcache_tag_array_ready``way_idx; \
+      end \
+    end \
+    initial begin \
+      wait(dcache_tag_array_ready``way_idx.triggered) begin end \
+      @(negedge `CORE_RESET) begin end \
+      @(negedge `DCACHE_RESETTING) begin end \
+      for (int di = 0; di < dcache_sets; di++) \
+        `DCACHE_TAG_ARRAY_ROOT.mem_0_``way_idx.ram[di] = dcache_tag_array``way_idx``[di]; \
+    end \
+
+`else
   `define TAG_ARRAY_FORCE(way_idx) \
     bit [dcache_tag_bits-1:0] dcache_tag_array``way_idx`` [dcache_sets]; \
     event dcache_tag_array_ready``way_idx; \
@@ -444,11 +526,33 @@ module TestDriver;
       release `DCACHE_TAG_ARRAY_ROOT.mem_0_``way_idx.ram; \
     end \
 
+`endif
+
     `TAG_ARRAY_FORCE(0);
     `TAG_ARRAY_FORCE(1);
     `TAG_ARRAY_FORCE(2);
     `TAG_ARRAY_FORCE(3);
 
+`ifdef VERILATOR
+    `define DATA_ARRAY_FORCE(byte_idx) \
+      bit [dcache_data_bus_width-1:0] dcache_data_array``byte_idx`` [dcache_data_rows_per_set * dcache_sets]; \
+      event dcache_data_array_ready``byte_idx; \
+      initial begin \
+        wait(checkpoint_dir_ready.triggered) begin end \
+        if (checkpoint_dir.len() > 0) begin \
+          $readmemb($sformatf("%s/dcache_data_array%0d.bin", checkpoint_dir, byte_idx), dcache_data_array``byte_idx``); \
+          -> dcache_data_array_ready``byte_idx; \
+        end \
+      end \
+      initial begin \
+        wait(dcache_data_array_ready``byte_idx.triggered) begin end \
+        @(negedge `CORE_RESET) begin end \
+        @(negedge `DCACHE_RESETTING) begin end \
+        for (int di = 0; di < dcache_data_rows_per_set * dcache_sets; di++) \
+          `DCACHE_DATA_ARRAY_ROOT.mem_0_``byte_idx.ram[di] = dcache_data_array``byte_idx``[di]; \
+      end \
+
+`else
     `define DATA_ARRAY_FORCE(byte_idx) \
       bit [dcache_data_bus_width-1:0] dcache_data_array``byte_idx`` [dcache_data_rows_per_set * dcache_sets]; \
       event dcache_data_array_ready``byte_idx; \
@@ -465,6 +569,8 @@ module TestDriver;
         @(negedge `DCACHE_RESETTING) begin end \
         release `DCACHE_DATA_ARRAY_ROOT.mem_0_``byte_idx.ram; \
       end \
+
+`endif
 
     // There are data_bus_width * ways (8 * 4 = 32) dcache data RAMs
     `DATA_ARRAY_FORCE(0);
