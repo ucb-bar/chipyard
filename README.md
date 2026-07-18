@@ -2,6 +2,36 @@
 
 # Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
 
+## Custom BOOM Multiplier Fork Notes
+
+This fork contains custom BOOM non-blocking folded multiplier instructions:
+
+- `MULE2N`
+- `MULE3N`
+- `MULE5N`
+
+These changes live partly in the top-level `chipyard` repository and partly in
+the `generators/boom` submodule.
+
+Important:
+
+- The `generators/boom` submodule in this fork points to the custom BOOM fork.
+- A correct clone must fetch submodules.
+- A correct setup must source `env.sh` before running build commands.
+
+Quick start:
+
+```bash
+git clone --recurse-submodules https://github.com/ykptn/chipyard.git
+cd chipyard
+./build-setup.sh riscv-tools
+source ./env.sh
+```
+
+For the full setup, build, and test flow, see:
+
+- [`CUSTOM_MUL_SETUP.md`](CUSTOM_MUL_SETUP.md)
+
 ## Quick Links
 
 * **Latest Documentation**: https://chipyard.readthedocs.io/
