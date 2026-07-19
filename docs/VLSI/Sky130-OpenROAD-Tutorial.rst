@@ -89,7 +89,7 @@ Note that we create a new conda environment for each tool because some of them h
 
 Initial Setup
 -------------
-In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, run:
+In the Chipyard root, ensure that you have the Chipyard environment activated (``source env.sh``). Then, run:
 
 .. code-block:: shell
 

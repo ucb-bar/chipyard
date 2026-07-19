@@ -67,7 +67,7 @@ The prerequisite setup for this tutorial may eventually be scripted, but for now
 
 Initial Setup
 -------------
-In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, run:
+In the Chipyard root, ensure that you have the Chipyard environment activated (``source env.sh``). Then, run:
 
 .. code-block:: shell
 

@@ -2,6 +2,12 @@
 
 This changelog follows the format defined here: https://keepachangelog.com/en/1.0.0/
 
+## [Unreleased]
+
+### Changed
+
+- Replaced conda/conda-lock with [pixi](https://pixi.sh) for dependency management. Dependencies are now declared in `pixi.toml` (conda packages plus PyPI packages resolved by pixi's built-in uv) and pinned in the committed `pixi.lock`. The environment lives per-repository at `.pixi/envs/default` (or `.pixi/envs/lean` with `--use-lean`), and `env.sh` now activates it via `pixi shell-hook`. `conda-reqs/` spec/lock files and `scripts/generate-conda-lockfiles.sh` are removed; use `pixi update` to regenerate the lockfile. `build-setup.sh` no longer supports `--conda-env-name` (pixi environments are per-repo); `--use-lean-conda` is a deprecated alias for `--use-lean`. GitHub CI still uses the previous conda flow for now.
+
 ## [1.14.0] - 2026-6-21
 
 Chipyard 1.14.0 contains numerous new RTL, simulation, FPGA, toolchain, and documentation updates. 

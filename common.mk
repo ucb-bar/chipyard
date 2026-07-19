@@ -5,7 +5,7 @@
 
 define require_riscv
 	@if [ -z "$(RISCV)" ]; then \
-	  echo "RISCV is unset. Source env.sh (which activates the default conda env) before building sims." 1>&2; \
+	  echo "RISCV is unset. Source env.sh (which activates the pixi env) before building sims." 1>&2; \
 	  exit 1; \
 	fi
 endef

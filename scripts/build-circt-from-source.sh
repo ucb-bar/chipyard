@@ -21,12 +21,13 @@ usage() {
     echo "Options"
     echo "   --prefix -p PREFIX    : Install destination."
     echo "   --help -h             : Display this message"
-    echo "   --no-conda            : Do not link CIRCT with conda libraries"
+    echo "   --no-env-libs         : Do not link CIRCT with the pixi environment's libraries"
+    echo "   --no-conda            : (deprecated) alias for --no-env-libs"
     exit "$1"
 }
 
 PREFIX=""
-CONDA=1
+ENV_LIBS=1
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -37,8 +38,8 @@ do
         -p | --prefix )
             shift
             PREFIX=$(realpath $1) ;;
-        --no-conda )
-            unset CONDA ;;
+        --no-env-libs | --no-conda )
+            unset ENV_LIBS ;;
         * )
             error "invalid option $1"
             usage 1 ;;
@@ -80,7 +81,7 @@ echo "Building CIRCT's LLVM/MLIR"
           -DLLVM_ENABLE_ASSERTIONS=ON \
           -DCMAKE_BUILD_TYPE=RELEASE \
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-          ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"}
+          ${ENV_LIBS:+-DCMAKE_EXE_LINKER_FLAGS="-L$CONDA_PREFIX/lib"}
     ninja
 )
 
@@ -96,7 +97,7 @@ echo "Building CIRCT"
           -DLLVM_ENABLE_ASSERTIONS=ON \
           -DCMAKE_BUILD_TYPE=RELEASE \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
-          ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"}
+          ${ENV_LIBS:+-DCMAKE_EXE_LINKER_FLAGS="-L$CONDA_PREFIX/lib"}
     ninja
 )
 

@@ -16,8 +16,7 @@ env.sh
 tags
 *~
 .bsp/
-.conda-env/
-.conda-lock-env/
+.pixi/
 .#*
 first-clone-setup-fast-log
 .bloop/
@@ -30,4 +29,3 @@ project/project/
 .classpath_cache/
 .vscode/
 tests/build/
-conda-reqs/chipyard-base.yaml.bak

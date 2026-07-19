@@ -7,7 +7,7 @@ Using Hammer To Place and Route a Custom Block
 
 Initialize the Hammer Plug-ins
 ----------------------------------
-In the Chipyard root, ensure that you have the Chipyard conda environment activated. Then, depending on if you are using a technology plugin included with Hammer (ASAP7, Sky130) or as a separate plugin, you will run either of the commands below.
+In the Chipyard root, ensure that you have the Chipyard environment activated (``source env.sh``). Then, depending on if you are using a technology plugin included with Hammer (ASAP7, Sky130) or as a separate plugin, you will run either of the commands below.
 
 For Hammer-provided plugins (``<tech-plugin-name>`` is ``asap7`` or ``sky130``):
 

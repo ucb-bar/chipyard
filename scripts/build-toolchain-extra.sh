@@ -54,7 +54,7 @@ do
 done
 
 if [ -z "$RISCV" ] ; then
-    error "ERROR: Prefix not given. If conda is sourced, do you mean $CONDA_PREFIX/$TOOLCHAIN?"
+    error "ERROR: Prefix not given. If env.sh is sourced, do you mean $CONDA_PREFIX/$TOOLCHAIN?"
 fi
 
 XLEN=64

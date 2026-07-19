@@ -4,10 +4,10 @@
 set -e
 set -o pipefail
 
-# exit script if not in Chipyard conda env
-if [[ `basename $CONDA_PREFIX` != .conda-env ]]; then
-    echo 'ERROR: Chipyard conda env not activated. Please source env.sh and run this script again.'
-    exit
+# exit script if not in Chipyard pixi env
+if [[ "$CONDA_PREFIX" != *"/.pixi/envs/"* ]]; then
+    echo 'ERROR: Chipyard pixi env not activated. Please source env.sh and run this script again.'
+    exit 1
 fi
 
 # Explicitly install mentor plugins for Calibre if you have access
