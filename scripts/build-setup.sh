@@ -193,6 +193,8 @@ source $CYDIR/scripts/fix-open-files.sh"
     # activate the environment for the remainder of this script
     eval "$(pixi shell-hook --no-completions --manifest-path "$CYDIR/pixi.toml" -e "$PIXI_ENV_NAME")"
     exit_if_last_command_failed
+    # keep ~/.local user site-packages from shadowing the environment's python packages
+    export PYTHONNOUSERSITE=1
 
     # the riscv-tools conda package's activation scripts must have set $RISCV
     if [ -z "$RISCV" ]; then

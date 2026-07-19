@@ -135,7 +135,10 @@ boto3-stubs = "*"
 mypy-boto3-s3 = "*"
 mypy_boto3_ec2 = "*"
 botocore-stubs = "*"
-cryptography = "<41"
+# firesim's setup pip-installs a recent cryptography over this; keep the env's
+# cryptography/pyopenssl modern so that overwrite stays import-compatible
+cryptography = ">=45"
+pyopenssl = ">=25"
 pytz = "*"
 types-pytz = "*"
 pyyaml = "*"
