@@ -77,12 +77,18 @@ if on_rtd:
 def get_git_tag():
     # get the latest git tag (which is what rtd normally builds under "stable")
     # this works since rtd builds things within the repo
-    process = subprocess.Popen(["git", "describe", "--exact-match", "--tags"], stdout=subprocess.PIPE)
+    process = subprocess.Popen(["git", "describe", "--exact-match", "--tags"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     tag = process.communicate()[0].decode("utf-8").strip()
     if process.returncode == 0:
         return tag
     else:
         return None
+
+def get_rtd_git_identifier():
+    # RTD exposes the real branch or tag behind aliases like "stable". This is
+    # more reliable than git describe when RTD uses a shallow checkout.
+    identifier = os.environ.get("READTHEDOCS_GIT_IDENTIFIER")
+    return identifier or None
 
 def get_git_branch_name():
     # When running locally, try to set version to a branch name that could be
@@ -158,11 +164,11 @@ def get_git_remote_url():
 if on_rtd:
     rtd_version = os.environ.get("READTHEDOCS_VERSION")
     if rtd_version == "latest":
-        branchname = get_git_branch_name()
+        branchname = get_git_branch_name() or get_rtd_git_identifier()
         assert branchname is not None
         version = branchname
     elif rtd_version == "stable":
-        tag = get_git_tag()
+        tag = get_git_tag() or get_rtd_git_identifier()
         assert tag is not None
         version = tag
     else:
