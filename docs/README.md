@@ -35,6 +35,17 @@ cd docs
 npm run build
 ```
 
+Read the Docs also builds downloadable PDF and EPUB versions directly from
+the RST sources using Sphinx. To build the same formats locally:
+
+```sh
+cd docs
+python -m sphinx -M latexpdf . _build
+python -m sphinx -M epub . _build
+```
+
+The PDF build requires a local LaTeX installation.
+
 ## Debugging RST with Sphinx
 
 The original Sphinx live-reload preview is still available for debugging RST

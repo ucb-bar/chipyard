@@ -7,6 +7,7 @@ in `FireSim <https://fires.im/>`_ for multi-node networked simulation.
 A diagram of IceNet's microarchitecture is shown below.
 
 .. image:: ../_static/images/nic-design.png
+   :class: diagram-white-background
 
 There are four basic parts of the NIC: the :ref:`Generators/IceNet:Controller`, which takes requests
 from and sends responses to the CPU; the :ref:`Generators/IceNet:Send Path`, which reads data from

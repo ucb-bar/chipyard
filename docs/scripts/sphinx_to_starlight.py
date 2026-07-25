@@ -82,13 +82,27 @@ def build_sphinx() -> None:
 
 def copy_assets(asset_subdir: str) -> None:
     dest = SPHINX_PUBLIC_ROOT / asset_subdir
-    if dest.exists():
-        shutil.rmtree(dest)
     dest.mkdir(parents=True, exist_ok=True)
+    copied: set[Path] = set()
+
     for name in ("_static", "_images"):
         src = SPHINX_BUILD / name
         if src.exists():
-            shutil.copytree(src, dest / name)
+            asset_dest = dest / name
+            shutil.copytree(src, asset_dest, dirs_exist_ok=True)
+            copied.update(
+                path.relative_to(SPHINX_BUILD)
+                for path in src.rglob("*")
+                if path.is_file()
+            )
+
+    # Keep assets available throughout live-docs rebuilds. Removing the whole
+    # directory before copying creates a window where Astro serves 404s.
+    for path in sorted(dest.rglob("*"), reverse=True):
+        if path.is_file() and path.relative_to(dest) not in copied:
+            path.unlink()
+        elif path.is_dir() and not any(path.iterdir()):
+            path.rmdir()
 
 
 def clean_generated(target_root: Path) -> None:
