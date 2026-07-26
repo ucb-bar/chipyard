@@ -4,3 +4,12 @@
 .important p{
   font-size: 100%;
 }
+
+.chipyard-logo-dark {
+  display: none;
+}
+
+img.diagram-white-background {
+  background-color: white;
+  border: 1px solid white;
+}

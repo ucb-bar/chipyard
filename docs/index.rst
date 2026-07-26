@@ -1,7 +1,12 @@
 Welcome to Chipyard's documentation (version "|version|")!
 ==========================================================
 
-.. image:: ./_static/images/chipyard-logo.svg
+.. raw:: html
+
+   <img alt="Chipyard" class="chipyard-logo-light"
+        src="_static/images/chipyard-logo.svg">
+   <img alt="Chipyard" class="chipyard-logo-dark"
+        src="_static/images/chipyard-logo-dark.svg">
 
 Chipyard is a framework for designing and evaluating full-system hardware using agile teams.
 It is composed of a collection of tools and libraries designed to provide an integration between open-source and commercial tools for the development of systems-on-chip.
@@ -42,11 +47,3 @@ Table of Contents
    TileLink-Diplomacy-Reference/index
 
    Prototyping/index
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

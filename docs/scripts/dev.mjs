@@ -84,7 +84,7 @@ async function sync() {
 }
 
 function startAstro() {
-  const child = spawn(astroBin, ['dev', '--host', '0.0.0.0', ...astroArgs], {
+  const child = spawn(astroBin, ['dev', '--host', '0.0.0.0', '--force', ...astroArgs], {
     cwd: docsRoot,
     env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' },
     stdio: 'inherit',

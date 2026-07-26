@@ -34,6 +34,19 @@ a {
   height: auto;
 }
 
+.sphinx-page img.diagram-white-background {
+  background-color: white;
+  border: 10px solid white;
+}
+
+[data-theme='dark'] .sphinx-page .chipyard-logo-light {
+  display: none;
+}
+
+[data-theme='light'] .sphinx-page .chipyard-logo-dark {
+  display: none;
+}
+
 .sphinx-page table {
   display: block;
   width: 100%;

@@ -21,6 +21,7 @@ Chipyard has example designs that integrate a ``DspBlock`` to a rocketchip-based
 .. figure:: ../_static/images/fir-block-diagram.svg
     :align: center
     :alt: Block diagram showing how FIR is integrated with rocket.
+    :class: diagram-white-background
     :width: 400px
 
 For this example, we will show you how to connect a simple FIR filter created using Dsptools as an MMIO peripheral as shown in the figure above. The full code can be found in `generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala <https://ucb.bar/chipyard/generators/chipyard/src/main/scala/example/dsptools/GenericFIR.scala>`_. That being said, one could substitute any module with a ready valid interface in the place of the FIR and achieve the same results. As long as the read and valid signals of the module are attached to those of a corresponding ``DSPBlock`` wrapper, and that wrapper is placed in a chain with a ``ReadQueue`` and a ``WriteQueue``, following the general outline establised by these steps will allow you to interact with that block as a memory mapped IO.
