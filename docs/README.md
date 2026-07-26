@@ -12,7 +12,10 @@ Node dependencies:
 
 ```sh
 source env.sh
+python -m pip install -r docs/requirements.txt
 cd docs
+eval "$(fnm env --shell bash)"
+fnm install --use
 npm ci
 npm run dev
 ```
@@ -25,8 +28,10 @@ The active environment must include the Python/Sphinx dependencies from either
 `requirements.txt` or `../conda-reqs/docs.yaml`, because the Starlight build
 starts by rendering the RST source with Sphinx. Read the Docs installs
 `requirements.txt` with pip to avoid a slow conda solve, while local development
-can use the docs conda environment. Node.js is provided separately by Read the
-Docs via `.readthedocs.yml`, or by any local Node installation on `PATH`.
+can use the docs conda environment. That environment provides `fnm`, which
+installs the Node.js version selected by `.nvmrc` outside conda to avoid a
+toolchain ICU conflict. Read the Docs provides Node.js separately through
+`.readthedocs.yml`.
 
 Build static docs:
 
