@@ -1,0 +1,328 @@
+{
+  "chipyard-rocket": [
+    {
+      "custom": true,
+      "string": "make run-bmark-tests-fast -j$(nproc) CONFIG=QuadChannelRocketConfig LOADMEM=1"
+    },
+    {
+      "custom": true,
+      "string": "make run-asm-tests-fast -j$(nproc) CONFIG=QuadChannelRocketConfig LOADMEM=1"
+    },
+    {
+      "custom": false,
+      "config": ["QuadChannelRocketConfig"],
+      "binary": ["$LOCAL_CHIPYARD_DIR/tests/hello.riscv"],
+      "loadmem": "1"
+    },
+    {
+      "custom": true,
+      "string": "make run-binary-fast CONFIG=QuadChannelRocketConfig BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv"
+    }
+  ],
+  "chipyard-dmirocket": [
+    {
+      "custom": false,
+      "config": ["dmiRocketConfig"],
+      "binary": ["$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv"],
+      "loadmem": "1"
+    }
+  ],
+  "chipyard-boomv3": [
+    {
+      "custom": true,
+      "string": "make run-asm-tests-fast -j$(nproc) CONFIG=MediumBoomV3CosimConfig LOADMEM=1"
+    },
+    {
+      "custom": true,
+      "string": "make run-bmark-tests-fast -j$(nproc) CONFIG=MediumBoomV3CosimConfig LOADMEM=1"
+    }
+  ],
+  "chipyard-boomv4": [
+    {
+      "custom": true,
+      "string": "make run-asm-tests-fast -j$(nproc) CONFIG=MediumBoomV4CosimConfig LOADMEM=1"
+    },
+    {
+      "custom": true,
+      "string": "make run-bmark-tests-fast -j$(nproc) CONFIG=MediumBoomV4CosimConfig LOADMEM=1"
+    }
+  ],
+  "chipyard-shuttle": [
+    {
+      "custom": true,
+      "string": "make run-asm-tests-fast -j$(nproc) CONFIG=ShuttleConfig LOADMEM=1"
+    },
+    {
+      "custom": true,
+      "string": "make run-bmark-tests-fast -j$(nproc) CONFIG=ShuttleConfig LOADMEM=1"
+    }
+  ],
+  "chipyard-shuttle3": [
+    {
+      "custom": true,
+      "string": "make run-asm-tests-fast -j$(nproc) CONFIG=Shuttle3WideConfig LOADMEM=1"
+    },
+    {
+      "custom": true,
+      "string": "make run-bmark-tests-fast -j$(nproc) CONFIG=Shuttle3WideConfig LOADMEM=1"
+    }
+  ],
+  "chipyard-spike": [
+    {
+      "custom": true,
+      "string": "make run-asm-tests-fast -j$(nproc) CONFIG=SpikeZicntrConfig EXTRA_SIM_FLAGS='+spike-ipc=10' LOADMEM=1"
+    },
+    {
+      "custom": true,
+      "string": "make run-bmark-tests-fast -j$(nproc) CONFIG=SpikeZicntrConfig EXTRA_SIM_FLAGS='+spike-ipc=10' LOADMEM=1"
+    }
+  ],
+  "chipyard-dmiboomv3": [
+    {
+      "custom": true,
+      "string": "$LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000 && make run-binary-fast CONFIG=dmiCheckpointingMediumBoomV3Config LOADARCH=$LOCAL_SIM_DIR/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch"
+    }
+  ],
+  "chipyard-dmiboomv4": [
+    {
+      "custom": true,
+      "string": "$LOCAL_CHIPYARD_DIR/scripts/generate-ckpt.sh -b $RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv -i 10000 && make run-binary-fast CONFIG=dmiCheckpointingMediumBoomV4Config LOADARCH=$LOCAL_SIM_DIR/dhrystone.riscv.0x80000000.unused.10000.defaultspikedts.loadarch"
+    }
+  ],
+  "chipyard-hetero": [
+    {
+      "custom": true,
+      "string": "make run-bmark-tests-fast -j$(nproc) CONFIG=LargeBoomAndRocketConfig LOADMEM=1"
+    }
+  ],
+  "chipyard-prefetchers": [
+    {
+      "custom": false,
+      "config": ["PrefetchingRocketConfig"],
+      "binary": ["$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv"],
+      "loadmem": "1"
+    }
+  ],
+  "chipyard-gemmini": [
+    {
+      "custom": true,
+      "string": "GEMMINI_SOFTWARE_DIR=$LOCAL_CHIPYARD_DIR/generators/gemmini/software/gemmini-rocc-tests && git -C $GEMMINI_SOFTWARE_DIR submodule update --init riscv-tests && (cd $GEMMINI_SOFTWARE_DIR && ./build.sh bareMetalC) && make run-binary-fast CONFIG=GemminiRocketConfig BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/aligned-baremetal LOADMEM=1 && make run-binary-fast CONFIG=GemminiRocketConfig BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/raw_hazard-baremetal LOADMEM=1 && make run-binary-fast CONFIG=GemminiRocketConfig BINARY=$GEMMINI_SOFTWARE_DIR/build/bareMetalC/mvin_mvout-baremetal LOADMEM=1"
+    }
+  ],
+  "chipyard-mempress": [
+    {
+      "custom": true,
+      "string": "make -C $LOCAL_CHIPYARD_DIR/generators/mempress/software/src && make run-binary-fast CONFIG=MempressRocketConfig BINARY=$LOCAL_CHIPYARD_DIR/generators/mempress/software/src/mempress-rocc.riscv LOADMEM=1"
+    }
+  ],
+  "chipyard-compressacc": [
+    {
+      "custom": true,
+      "string": "cd $LOCAL_CHIPYARD_DIR/generators/compress-acc/software-zstd/compress && ./build-hcb-single-file.sh && cd $LOCAL_SIM_DIR && make run-binary-fast CONFIG=ZstdCompressorRocketConfig BINARY=$LOCAL_CHIPYARD_DIR/generators/compress-acc/software-zstd/compress/009987_cl0_ws12.riscv LOADMEM=1"
+    }
+  ],
+  "chipyard-manymmioaccels": [
+    {
+      "custom": false,
+      "config": ["ManyMMIOAcceleratorRocketConfig"],
+      "binary": [
+        "$LOCAL_CHIPYARD_DIR/tests/streaming-passthrough.riscv",
+        "$LOCAL_CHIPYARD_DIR/tests/streaming-fir.riscv",
+        "$LOCAL_CHIPYARD_DIR/tests/fft.riscv"
+      ],
+      "loadmem": "1"
+    }
+  ],
+  "chipyard-nvdla": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast CONFIG=SmallNVDLARocketConfig verilog BINARY=$LOCAL_CHIPYARD_DIR/tests/nvdla.riscv LOADMEM=1"
+    }
+  ],
+  "chipyard-manyperipherals": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast CONFIG=ManyPeripheralsRocketConfig EXTRA_SIM_FLAGS=\"+spiflash0=$LOCAL_CHIPYARD_DIR/tests/spiflash.img\" BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashread.riscv"
+    }
+  ],
+  "chipyard-spiflashwrite": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast CONFIG=SmallSPIFlashRocketConfig EXTRA_SIM_FLAGS=\"+spiflash0=$LOCAL_CHIPYARD_DIR/tests/spiflash.img\" BINARY=$LOCAL_CHIPYARD_DIR/tests/spiflashwrite.riscv LOADMEM=1 && [[ \"$(xxd $LOCAL_CHIPYARD_DIR/tests/spiflash.img | grep '1337 00ff aa55 face' | wc -l)\" == \"6\" ]]"
+    }
+  ],
+  "chipyard-tethered": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast CONFIG=VerilatorCITetheredChipLikeRocketConfig BINARY=$LOCAL_CHIPYARD_DIR/tests/hello.riscv LOADMEM=1 EXTRA_SIM_FLAGS='+cflush_addr=0x2010200'"
+    }
+  ],
+  "chipyard-symmetric": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast CONFIG=MultiSimMultiLinkSymmetricChipletRocketConfig BINARY=$LOCAL_CHIPYARD_DIR/tests/symmetric.riscv LOADMEM=1 EXTRA_SIM_FLAGS='+offchip_sel=0' && make run-binary-fast CONFIG=MultiSimMultiLinkSymmetricChipletRocketConfig BINARY=$LOCAL_CHIPYARD_DIR/tests/symmetric.riscv LOADMEM=1 EXTRA_SIM_FLAGS='+offchip_sel=1'"
+    }
+  ],
+  "chipyard-llcchiplet": [
+    {
+      "custom": false,
+      "config": ["MultiSimLLCChipletRocketConfig"],
+      "binary": ["$LOCAL_CHIPYARD_DIR/tests/hello.riscv"],
+      "loadmem": "1"
+    }
+  ],
+  "chipyard-rerocc": [
+    {
+      "custom": true,
+      "string": "make -C $LOCAL_CHIPYARD_DIR/generators/rerocc/software && make run-binary-fast CONFIG=ReRoCCTestConfig BINARY=$LOCAL_CHIPYARD_DIR/generators/rerocc/software/test.riscv LOADMEM=1"
+    }
+  ],
+  "chipyard-rocketvector": [
+    {
+      "custom": false,
+      "config": ["MINV128D64RocketConfig"],
+      "binary": [
+        "$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-sgemm.riscv",
+        "$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-strcmp.riscv",
+        "$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-daxpy.riscv",
+        "$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-memcpy.riscv"
+      ],
+      "loadmem": "1"
+    }
+  ],
+  "chipyard-shuttlevector": [
+    {
+      "custom": false,
+      "config": ["GENV256D128ShuttleConfig"],
+      "binary": [
+        "$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-sgemm.riscv",
+        "$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-strcmp.riscv",
+        "$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-daxpy.riscv",
+        "$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/vec-memcpy.riscv"
+      ],
+      "loadmem": "1"
+    }
+  ],
+  "chipyard-shuttleara": [
+    {
+      "custom": true,
+      "string": "true"
+    }
+  ],
+  "tracegen": [
+    {
+      "custom": true,
+      "string": "make tracegen CONFIG=NonBlockingTraceGenL2Config"
+    }
+  ],
+  "tracegen-boomv3": [
+    {
+      "custom": true,
+      "string": "make tracegen CONFIG=BoomV3TraceGenConfig"
+    }
+  ],
+  "tracegen-boomv4": [
+    {
+      "custom": true,
+      "string": "make tracegen CONFIG=BoomV4TraceGenConfig"
+    }
+  ],
+  "chipyard-cva6": [
+    {
+      "custom": true,
+      "string": "if ! git -C \"$LOCAL_CHIPYARD_DIR/generators/cva6\" rev-parse --is-inside-work-tree >/dev/null 2>&1; then git -C \"$LOCAL_CHIPYARD_DIR\" submodule update --init generators/cva6; fi && git -C \"$LOCAL_CHIPYARD_DIR/generators/cva6\" submodule update --init --recursive && make run-binary-fast -j$(nproc) CONFIG=CVA6Config BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/multiply.riscv"
+    }
+  ],
+  "chipyard-ibex": [
+    {
+      "custom": true,
+      "string": "true"
+    }
+  ],
+  "chipyard-vexiiriscv": [
+    {
+      "custom": true,
+      "string": "make run-asm-tests-fast -j$(nproc) CONFIG=VexiiRiscvConfig LOADMEM=1"
+    },
+    {
+      "custom": true,
+      "string": "make run-bmark-tests-fast -j$(nproc) CONFIG=VexiiRiscvConfig LOADMEM=1"
+    }
+  ],
+  "chipyard-sodor": [
+    {
+      "custom": true,
+      "string": "make run-asm-tests-fast -j$(nproc) CONFIG=Sodor5StageConfig"
+    }
+  ],
+  "chipyard-constellation": [
+    {
+      "custom": false,
+      "config": ["SharedNoCConfig"],
+      "binary": ["$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv"],
+      "loadmem": "1"
+    }
+  ],
+  "chipyard-tacit-rocket": [
+    {
+      "custom": false,
+      "config": ["TacitRocketConfig"],
+      "binary": ["$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/dhrystone.riscv"],
+      "loadmem": "1"
+    }
+  ],
+  "chipyard-zephyr": [
+    {
+      "custom": true,
+      "string": "bash $LOCAL_CHIPYARD_DIR/.github/scripts/build-zephyr.sh && make run-binary-fast BINARY=$LOCAL_CHIPYARD_DIR/software/zephyrproject/zephyr/build/zephyr/zephyr.elf LOADMEM=1"
+    }
+  ],
+  "chipyard-radiance": [
+    {
+      "custom": true,
+      "string": "true"
+    }
+  ],
+  "icenet": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast SUB_PROJECT=icenet BINARY=none"
+    }
+  ],
+  "testchipip": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast SUB_PROJECT=testchipip BINARY=none"
+    }
+  ],
+  "constellation": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast SUB_PROJECT=constellation BINARY=none"
+    }
+  ],
+  "rocketchip-amba": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast SUB_PROJECT=rocketchip CONFIG=AMBAUnitTestConfig BINARY=none"
+    }
+  ],
+  "rocketchip-tlsimple": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast SUB_PROJECT=rocketchip CONFIG=TLSimpleUnitTestConfig BINARY=none"
+    }
+  ],
+  "rocketchip-tlwidth": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast SUB_PROJECT=rocketchip CONFIG=TLWidthUnitTestConfig BINARY=none"
+    }
+  ],
+  "rocketchip-tlxbar": [
+    {
+      "custom": true,
+      "string": "make run-binary-fast SUB_PROJECT=rocketchip CONFIG=TLXbarUnitTestConfig BINARY=none"
+    }
+  ]
+}

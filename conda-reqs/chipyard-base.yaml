@@ -16,7 +16,7 @@ dependencies:
     #   documentation on package_spec syntax for constraining versions
     - gcc=13.2
     - gxx=13.2
-    - sysroot_linux-64=2.34 # need to be close to system glibc for VCS compatibility
+    - sysroot_linux-64=2.34
     - conda-gcc-specs
     - binutils
 

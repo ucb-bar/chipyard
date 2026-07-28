@@ -78,6 +78,8 @@ HELP_COMMANDS += \
 "   run-binaries                = run [./$(shell basename $(sim))] and log instructions to file" \
 "   run-binaries-fast           = run [./$(shell basename $(sim))] and don't log instructions" \
 "   run-binaries-debug          = run [./$(shell basename $(sim_debug))] and log instructions and waveform to files" \
+"   run-asm-tests-fast          = run RV64GC riscv-tests ISA tests without instruction logs" \
+"   run-bmark-tests-fast        = run riscv-tests benchmarks without instruction logs" \
 "   verilog                     = generate intermediate verilog files from chisel elaboration and firrtl passes" \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
@@ -329,7 +331,7 @@ verilog: $(sim_common_files)
 #########################################################################################
 # helper rules to run simulations
 #########################################################################################
-.PHONY: run-binary run-binary-fast run-binary-debug run-fast
+.PHONY: run-binary run-binary-fast run-binary-debug run-fast run-asm-tests-fast run-bmark-tests-fast \
 	%.check-exists check-binary check-binaries
 
 check-binary:
@@ -447,6 +449,96 @@ run-binary-fast-hex: override SIM_FLAGS += +loadmem=$(BINARY)
 #########################################################################################
 # run assembly/benchmarks rules
 #########################################################################################
+RISCV_TESTS_ISA_DIR = $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa
+RISCV_TESTS_BENCHMARK_DIR = $(RISCV)/riscv64-unknown-elf/share/riscv-tests/benchmarks
+
+RV64GC_ISA_TEST_PREFIXES ?= rv64ui rv64uc rv64um rv64ua rv64uf rv64ud
+
+# https://github.com/riscv-software-src/riscv-tests/issues/419
+RV64GC_ASM_TEST_EXCLUDES ?= rv64ui-p-ma_data
+
+RV64GC_ASM_TESTS ?= $(filter-out \
+	%.dump \
+	$(addprefix $(RISCV_TESTS_ISA_DIR)/,$(RV64GC_ASM_TEST_EXCLUDES)), \
+	$(foreach prefix,$(RV64GC_ISA_TEST_PREFIXES),$(wildcard $(RISCV_TESTS_ISA_DIR)/$(prefix)-p-*)))
+
+RISCV_BMARK_TEST_NAMES ?= \
+	dhrystone \
+	median \
+	memcpy \
+	mm \
+	mt-matmul \
+	mt-memcpy \
+	mt-vvadd \
+	multiply \
+	pmp \
+	qsort \
+	rsort \
+	spmv \
+	towers \
+	vvadd
+
+RISCV_BMARK_TESTS ?= $(wildcard $(addprefix $(RISCV_TESTS_BENCHMARK_DIR)/,$(addsuffix .riscv,$(RISCV_BMARK_TEST_NAMES))))
+RUN_FAST_STATUS_DIR = $(output_dir)/run-fast-status
+RUN_FAST_SIM_READY = $(if $(SIM_PREREQ),$(output_dir)/run-fast-sim-ready)
+get_run_fast_status = $(RUN_FAST_STATUS_DIR)/$(1)/$(notdir $(basename $(2))).status
+RV64GC_ASM_TEST_STATUS = $(foreach binary,$(RV64GC_ASM_TESTS),$(call get_run_fast_status,asm,$(binary)))
+RISCV_BMARK_TEST_STATUS = $(foreach binary,$(RISCV_BMARK_TESTS),$(call get_run_fast_status,bmark,$(binary)))
+
+#########################################################################################
+# include build/project specific makefrags made from the generator
+#########################################################################################
+aggregate_fast_test_goals = run-fast run-asm-tests-fast run-bmark-tests-fast
+ifneq ($(filter run% %.run %.out %.vpd %.vcd %.fsdb,$(MAKECMDGOALS)),)
+ifeq ($(filter $(aggregate_fast_test_goals),$(MAKECMDGOALS)),$(MAKECMDGOALS))
+else
+-include $(build_dir)/$(long_name).d
+endif
+endif
+
+define run_binary_fast_status_rule
+$(call get_run_fast_status,$(1),$(2)): FORCE | $(RUN_FAST_STATUS_DIR)/$(1) $(RUN_FAST_SIM_READY)
+	@rm -f "$$@"
+	@echo "========== Running $(3): $(2) =========="
+	@if $(MAKE) --no-print-directory BREAK_SIM_PREREQ=1 run-binary-fast BINARY="$(2)"; then \
+	  printf 'PASS\t$(2)\n' > "$$@"; \
+	else \
+	  status="$$$$?"; \
+	  printf 'FAIL\t%s\t$(2)\n' "$$$${status}" > "$$@"; \
+	fi
+endef
+
+$(foreach binary,$(RV64GC_ASM_TESTS),$(eval $(call run_binary_fast_status_rule,asm,$(binary),RV64GC ISA tests)))
+$(foreach binary,$(RISCV_BMARK_TESTS),$(eval $(call run_binary_fast_status_rule,bmark,$(binary),riscv-tests benchmarks)))
+
+$(RUN_FAST_STATUS_DIR)/asm $(RUN_FAST_STATUS_DIR)/bmark:
+	mkdir -p $@
+
+$(RUN_FAST_SIM_READY): $(SIM_PREREQ) | $(output_dir)
+	touch $@
+
+.PHONY: FORCE
+FORCE:
+
+define summarize_run_binary_fast_status
+	$(call require_riscv)
+	@if [ -z "$($(1))" ]; then \
+	  echo "No $(2) found under $(3)." >&2; \
+	  exit 1; \
+	fi
+	@failures="$$(awk -F '\t' '$$1 == "FAIL" { printf "  - %s (exit %s)\n", $$3, $$2 }' $(4))"; \
+	if [ -n "$${failures}" ]; then \
+	  printf "\nFailed $(2):\n%s" "$${failures}" >&2; \
+	  exit 1; \
+	fi
+endef
+
+run-asm-tests-fast: $(RV64GC_ASM_TEST_STATUS)
+	$(call summarize_run_binary_fast_status,RV64GC_ASM_TESTS,RV64GC ISA tests,$(RISCV_TESTS_ISA_DIR),$^)
+
+run-bmark-tests-fast: $(RISCV_BMARK_TEST_STATUS)
+	$(call summarize_run_binary_fast_status,RISCV_BMARK_TESTS,riscv-tests benchmarks,$(RISCV_TESTS_BENCHMARK_DIR),$^)
+
 $(output_dir):
 	mkdir -p $@
 
@@ -460,13 +552,6 @@ $(output_dir)/%.run: $(output_dir)/% $(SIM_PREREQ)
 
 $(output_dir)/%.out: $(output_dir)/% $(SIM_PREREQ)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$<) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
-
-#########################################################################################
-# include build/project specific makefrags made from the generator
-#########################################################################################
-ifneq ($(filter run% %.run %.out %.vpd %.vcd %.fsdb,$(MAKECMDGOALS)),)
--include $(build_dir)/$(long_name).d
-endif
 
 #######################################
 # Rules for building DRAMSim2 library

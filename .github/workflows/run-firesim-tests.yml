@@ -1,0 +1,244 @@
+name: run firesim tests
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  packages: read
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+env:
+  FORCE_NON_EC2: 1
+  JVM_OPTS: -Xmx3200m
+  FIRESIM_TEST_TIMEOUT_SECONDS: 7200
+  FIRESIM_HEARTBEAT_SECONDS: 60
+  # override: sims/firesim/sim/make/scala-build.mk:33
+  FIRESIM_JAVA_HEAP_SIZE: 8G
+  # override: sims/firesim/sim/make/verilator.mk:8 -- F2 Gemmini generated C++ is memory-heavy on GitHub runners
+  FIRESIM_F2_VERILATOR_MAKEFLAGS: -j1 VM_PARALLEL_BUILDS=1
+
+jobs:
+  firesim-onprem-tests:
+    name: FireSim Golden Gate Compile + rvi-bmark-tests OnPrem
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      DOCKER_DATA_ROOT: ${{ github.workspace }}/.ci/docker
+    steps:
+      - name: Maximize build space
+        uses: jimfangx/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 10240
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
+      - name: Move Docker storage to workspace
+        run: |
+          sudo systemctl stop docker
+          sudo mkdir -p "${DOCKER_DATA_ROOT}"
+          printf '{ "data-root": "%s" }\n' "${DOCKER_DATA_ROOT}" | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker
+          docker info --format 'Docker root: {{ .DockerRootDir }}'
+
+      - name: Pull Chipyard container
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          image_name="ghcr.io/${GITHUB_REPOSITORY,,}:main"
+          echo "CHIPYARD_IMAGE=${image_name}" >> "${GITHUB_ENV}"
+          echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker pull "${image_name}"
+
+      - name: Run FireSim On-Prem tests
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          docker run --rm -i \
+            --env "FORCE_NON_EC2=${FORCE_NON_EC2}" \
+            --env "JVM_OPTS=${JVM_OPTS}" \
+            --env "JAVA_HEAP_SIZE=${FIRESIM_JAVA_HEAP_SIZE}" \
+            --env "FIRESIM_TEST_TIMEOUT_SECONDS=${FIRESIM_TEST_TIMEOUT_SECONDS}" \
+            --env "FIRESIM_HEARTBEAT_SECONDS=${FIRESIM_HEARTBEAT_SECONDS}" \
+            --env "PR_NUMBER=${PR_NUMBER}" \
+            --env "GITHUB_SERVER_URL=${GITHUB_SERVER_URL}" \
+            --env "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}" \
+            --entrypoint /bin/bash \
+            "${CHIPYARD_IMAGE}" \
+            -leo pipefail <<'CONTAINER_SCRIPT'
+          cd /home/ubuntu/chipyard
+          git config --global --add safe.directory "*"
+          git remote set-url origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+
+          # Record the submodules initialized in the pulled container.
+          initialized_before="$(mktemp)"
+          submodules_after="$(mktemp)"
+          initialized_targets="$(mktemp)"
+          new_targets="$(mktemp)"
+          removed_targets="$(mktemp)"
+
+          git submodule status \
+            | awk 'substr($1, 1, 1) != "-" { print $2 }' \
+            | sort -u > "${initialized_before}"
+
+          # Checkout main in the container.
+          git fetch --no-tags origin main
+          git checkout --detach FETCH_HEAD
+
+          # Move to GitHub's current PR merge commit.
+          git fetch --no-tags origin "pull/${PR_NUMBER}/merge"
+          git checkout --detach FETCH_HEAD
+
+          # Compare submodule membership before and after the PR checkout.
+          git config --file .gitmodules --get-regexp '^submodule\..*\.path$' \
+            | awk '{ print $2 }' \
+            | sort -u > "${submodules_after}"
+
+          comm -12 "${initialized_before}" "${submodules_after}" > "${initialized_targets}"
+          comm -13 "${initialized_before}" "${submodules_after}" > "${new_targets}"
+          comm -23 "${initialized_before}" "${submodules_after}" > "${removed_targets}"
+
+          # Remove submodules deleted by the PR.
+          while read -r submodule_path; do
+            [ -n "${submodule_path}" ] || continue
+            git submodule deinit --force -- "${submodule_path}" || true
+            rm -rf -- "${submodule_path}"
+          done < "${removed_targets}"
+
+          # Update submodules already initialized in the container.
+          while read -r submodule_path; do
+            [ -n "${submodule_path}" ] || continue
+            git submodule sync -- "${submodule_path}"
+            git submodule update --init -- "${submodule_path}"
+          done < "${initialized_targets}"
+
+          # Initialize submodules newly added by the PR.
+          while read -r submodule_path; do
+            [ -n "${submodule_path}" ] || continue
+            git submodule init -- "${submodule_path}"
+            git submodule sync -- "${submodule_path}"
+            git submodule update --init -- "${submodule_path}"
+          done < "${new_targets}"
+
+          git rev-parse --short HEAD
+          .github/scripts/run-firesim-tests.sh onprem "${PR_NUMBER}" /home/ubuntu/chipyard
+          CONTAINER_SCRIPT
+
+  firesim-f2-tests:
+    name: FireSim Golden Gate Compile + rvi-bmark-tests AWS F2
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      DOCKER_DATA_ROOT: ${{ github.workspace }}/.ci/docker
+    steps:
+      - name: Maximize build space
+        uses: jimfangx/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 10240
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
+      - name: Move Docker storage to workspace
+        run: |
+          sudo systemctl stop docker
+          sudo mkdir -p "${DOCKER_DATA_ROOT}"
+          printf '{ "data-root": "%s" }\n' "${DOCKER_DATA_ROOT}" | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker
+          docker info --format 'Docker root: {{ .DockerRootDir }}'
+
+      - name: Pull Chipyard container
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          image_name="ghcr.io/${GITHUB_REPOSITORY,,}:main"
+          echo "CHIPYARD_IMAGE=${image_name}" >> "${GITHUB_ENV}"
+          echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker pull "${image_name}"
+
+      - name: Run FireSim AWS F2 tests
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          docker run --rm -i \
+            --env "FORCE_NON_EC2=${FORCE_NON_EC2}" \
+            --env "JVM_OPTS=${JVM_OPTS}" \
+            --env "JAVA_HEAP_SIZE=${FIRESIM_JAVA_HEAP_SIZE}" \
+            --env "VERILATOR_MAKEFLAGS=${FIRESIM_F2_VERILATOR_MAKEFLAGS}" \
+            --env "FIRESIM_TEST_TIMEOUT_SECONDS=${FIRESIM_TEST_TIMEOUT_SECONDS}" \
+            --env "FIRESIM_HEARTBEAT_SECONDS=${FIRESIM_HEARTBEAT_SECONDS}" \
+            --env "PR_NUMBER=${PR_NUMBER}" \
+            --env "GITHUB_SERVER_URL=${GITHUB_SERVER_URL}" \
+            --env "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}" \
+            --entrypoint /bin/bash \
+            "${CHIPYARD_IMAGE}" \
+            -leo pipefail <<'CONTAINER_SCRIPT'
+          cd /home/ubuntu/chipyard
+          git config --global --add safe.directory "*"
+          git remote set-url origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+
+          # Record the submodules initialized in the pulled container.
+          initialized_before="$(mktemp)"
+          submodules_after="$(mktemp)"
+          initialized_targets="$(mktemp)"
+          new_targets="$(mktemp)"
+          removed_targets="$(mktemp)"
+
+          git submodule status \
+            | awk 'substr($1, 1, 1) != "-" { print $2 }' \
+            | sort -u > "${initialized_before}"
+
+          # Checkout main in the container.
+          git fetch --no-tags origin main
+          git checkout --detach FETCH_HEAD
+
+          # Move to GitHub's current PR merge commit.
+          git fetch --no-tags origin "pull/${PR_NUMBER}/merge"
+          git checkout --detach FETCH_HEAD
+
+          # Compare submodule membership before and after the PR checkout.
+          git config --file .gitmodules --get-regexp '^submodule\..*\.path$' \
+            | awk '{ print $2 }' \
+            | sort -u > "${submodules_after}"
+
+          comm -12 "${initialized_before}" "${submodules_after}" > "${initialized_targets}"
+          comm -13 "${initialized_before}" "${submodules_after}" > "${new_targets}"
+          comm -23 "${initialized_before}" "${submodules_after}" > "${removed_targets}"
+
+          # Remove submodules deleted by the PR.
+          while read -r submodule_path; do
+            [ -n "${submodule_path}" ] || continue
+            git submodule deinit --force -- "${submodule_path}" || true
+            rm -rf -- "${submodule_path}"
+          done < "${removed_targets}"
+
+          # Update submodules already initialized in the container.
+          while read -r submodule_path; do
+            [ -n "${submodule_path}" ] || continue
+            git submodule sync -- "${submodule_path}"
+            git submodule update --init -- "${submodule_path}"
+          done < "${initialized_targets}"
+
+          # Initialize submodules newly added by the PR.
+          while read -r submodule_path; do
+            [ -n "${submodule_path}" ] || continue
+            git submodule init -- "${submodule_path}"
+            git submodule sync -- "${submodule_path}"
+            git submodule update --init -- "${submodule_path}"
+          done < "${new_targets}"
+
+          git rev-parse --short HEAD
+          .github/scripts/run-firesim-tests.sh f2 "${PR_NUMBER}" /home/ubuntu/chipyard
+          CONTAINER_SCRIPT

@@ -2,3 +2,4 @@
 sims
 toolchains
 .conda-env
+.ci

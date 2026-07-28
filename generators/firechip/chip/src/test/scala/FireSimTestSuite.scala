@@ -17,7 +17,10 @@ import freechips.rocketchip.system.TestGeneration._
 import freechips.rocketchip.system.DefaultTestSuites._
 
 object BaseConfigs {
-  case object F1 extends BasePlatformConfig("f1", Seq("BaseF1Config"))
+  case object F1    extends BasePlatformConfig("f1",                Seq("BaseF1Config"))
+  case object F2    extends BasePlatformConfig("f2",                Seq("BaseF2Config"))
+  case object U250  extends BasePlatformConfig("xilinx_alveo_u250", Seq("BaseXilinxAlveoU250Config"))
+  case object VCU118 extends BasePlatformConfig("xilinx_vcu118",    Seq("BaseXilinxVCU118Config"))
 }
 
 abstract class FireSimTestSuite(
@@ -83,6 +86,7 @@ abstract class FireSimTestSuite(
   }
 }
 
+// AWS F1 tests
 class SimpleRocketF1Tests
     extends FireSimTestSuite(
       "FireSim",
@@ -131,11 +135,106 @@ class CVA6F1Tests
       Seq("FRFCFS16GBQuadRankLLC4MB"),
     )
 
-class CITests
+// F2 platform tests
+class RocketF2Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.RocketConfig",
+      BaseConfigs.F2,
+    )
+
+class MultiRocketF2Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "WithNIC_WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.QuadRocketConfig",
+      BaseConfigs.F2,
+      Seq("WithSynthAsserts", "WithModelMultiThreading", "FRFCFS16GBQuadRankLLC4MB"),
+    )
+  
+class GemminiRocketF2Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "FireSimLeanGemminiRocketConfig",
+      BaseConfigs.F2,
+    )
+
+class LargeBoomF2Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "WithNIC_WithDefaultFireSimBridges_WithFireSimHighPerfConfigTweaks_chipyard.LargeBoomV3Config",
+      BaseConfigs.F2,
+      Seq("WithAutoILA_FRFCFS16GBQuadRankLLC4MB"),
+    )
+
+class MegaBoomF2Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "WithDefaultFireSimBridges_WithFireSimTestChipConfigTweaks_chipyard.MegaBoomV3Config",
+      BaseConfigs.F2,
+      Seq("WithAutoILA_FRFCFS16GBQuadRankLLC4MB"),
+    )
+
+class ShuttleF2Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "FireSimGENV256D128ShuttleConfig",
+      BaseConfigs.F2,
+      Seq("WithAutoILA_FRFCFS16GBQuadRankLLC4MB"),
+    )
+
+// U250 platform tests
+class RocketU250Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "FireSimRocketConfig",
+      BaseConfigs.U250,
+    )
+
+class QuadRocketU250Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "FireSimQuadRocketConfig",
+      BaseConfigs.U250,
+    )
+
+class LargeBoomU250Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "FireSimLargeBoomConfig",
+      BaseConfigs.U250,
+    )
+
+class ShuttleU250Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "FireSimGENV256D128ShuttleConfig",
+      BaseConfigs.U250,
+    )
+
+// VCU118 platform tests
+class RocketVCU118Tests
+    extends FireSimTestSuite(
+      "FireSim",
+      "FireSimRocket4GiBDRAMConfig",
+      BaseConfigs.VCU118,
+    )
+
+class AllTests
     extends Suites(
       new SimpleRocketF1Tests,
       new RocketF1Tests,
       new MultiRocketF1Tests,
       new BoomF1Tests,
       new RocketNICF1Tests,
+      new RocketF2Tests,
+      new MultiRocketF2Tests,
+      new GemminiRocketF2Tests,
+      new LargeBoomF2Tests,
+      new MegaBoomF2Tests,
+      new ShuttleF2Tests,
+      new RocketU250Tests,
+      new QuadRocketU250Tests,
+      new LargeBoomU250Tests,
+      new ShuttleU250Tests,
+      new RocketVCU118Tests,
     )
