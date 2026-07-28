@@ -88,6 +88,7 @@ add_executable(symmetric symmetric.c)
 add_executable(ctc-test ctc-test.c)
 add_executable(multi-ctc-test multi-ctc-test.c)
 add_executable(triple-chiplet triple-chiplet.c)
+add_executable(topdown topdown.c)
 
 #################################
 # Disassembly
