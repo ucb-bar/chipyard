@@ -1,5 +1,9 @@
 version: 2
 
+formats:
+    - pdf
+    - epub
+
 build:
     os: ubuntu-24.04
     tools:
@@ -8,9 +12,15 @@ build:
     jobs:
         build:
             html:
-                - python -m pip install -r docs/requirements.txt
                 - cd docs && npm ci
                 - cd docs && python scripts/sphinx_to_starlight.py
                 - cd docs && npm run build:astro
                 - mkdir -p $READTHEDOCS_OUTPUT/html
                 - cp -r docs/dist/* $READTHEDOCS_OUTPUT/html/
+
+sphinx:
+    configuration: docs/conf.py
+
+python:
+    install:
+        - requirements: docs/requirements.txt
