@@ -37,3 +37,10 @@ class WithVC707DDRMemHarnessBinder extends HarnessBinder({
     ddrClientBundle <> port.io
   }
 })
+
+
+class WithVC707GPIOHarnessBinder extends HarnessBinder({
+  case (th: VC707FPGATestHarnessImp, port: GPIOPinsPort, chipId: Int) => {
+    th.vc707Outer.io_gpio_bb(port.gpioId).bundle <> port.io
+  }
+})
