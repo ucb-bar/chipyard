@@ -1,0 +1,130 @@
+name: Chisel 7 Support Audit
+
+on:
+  schedule:
+    - cron: "0 10 * * 1"
+  workflow_dispatch:
+    inputs:
+      projects:
+        description: "Optional space-separated SBT projects to audit"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  chisel7-support-audit:
+    name: Chisel 7 support audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      AUDIT_RESULTS_DIR: ${{ github.workspace }}/chisel7-audit-results
+      DOCKER_DATA_ROOT: ${{ github.workspace }}/.ci/docker
+      FORCE_NON_EC2: 1
+      JVM_OPTS: -Xmx8G
+    steps:
+      - name: Maximize build space
+        uses: jimfangx/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 10240
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Move Docker storage to workspace
+        run: |
+          sudo systemctl stop docker
+          sudo mkdir -p "${DOCKER_DATA_ROOT}"
+          printf '{ "data-root": "%s" }\n' "${DOCKER_DATA_ROOT}" | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker
+          docker info --format 'Docker root: {{ .DockerRootDir }}'
+
+      - name: Pull Chipyard container
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          image_name="ghcr.io/${GITHUB_REPOSITORY,,}:main"
+          echo "CHIPYARD_IMAGE=${image_name}" >> "${GITHUB_ENV}"
+          echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker pull "${image_name}"
+
+      - name: Run Chisel 7 audit in container
+        env:
+          CHISEL7_AUDIT_PROJECTS: ${{ github.event.inputs.projects || '' }}
+        run: |
+          mkdir -p "${AUDIT_RESULTS_DIR}"
+          docker run --rm -i \
+            --env "CHISEL7_AUDIT_PROJECTS=${CHISEL7_AUDIT_PROJECTS:-}" \
+            --env "FORCE_NON_EC2=${FORCE_NON_EC2}" \
+            --env "GITHUB_ACTOR=${GITHUB_ACTOR}" \
+            --env "GITHUB_REF=${GITHUB_REF}" \
+            --env "GITHUB_REF_NAME=${GITHUB_REF_NAME}" \
+            --env "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}" \
+            --env "GITHUB_RUN_ATTEMPT=${GITHUB_RUN_ATTEMPT}" \
+            --env "GITHUB_RUN_ID=${GITHUB_RUN_ID}" \
+            --env "GITHUB_RUN_NUMBER=${GITHUB_RUN_NUMBER}" \
+            --env "GITHUB_SERVER_URL=${GITHUB_SERVER_URL}" \
+            --env "GITHUB_SHA=${GITHUB_SHA}" \
+            --env "GITHUB_WORKFLOW=${GITHUB_WORKFLOW}" \
+            --env "JVM_OPTS=${JVM_OPTS}" \
+            --volume "${AUDIT_RESULTS_DIR}:/chisel7-audit-results" \
+            "${CHIPYARD_IMAGE}" \
+            bash -leo pipefail <<'CONTAINER_SCRIPT'
+          cd /home/ubuntu/chipyard
+          git config --global --add safe.directory "*"
+          git remote set-url origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          git fetch --no-tags origin "${GITHUB_REF}"
+          git checkout --detach "${GITHUB_SHA}"
+
+          initialized_submodules="$(mktemp)"
+          git submodule status \
+            | awk 'substr($1, 1, 1) != "-" { print $2 }' \
+            | sort -u > "${initialized_submodules}"
+          while read -r submodule_path; do
+            [ -n "${submodule_path}" ] || continue
+            git submodule sync -- "${submodule_path}"
+            git submodule update --init --recursive -- "${submodule_path}"
+          done < "${initialized_submodules}"
+
+          audit_args=(
+            --output /chisel7-audit-results/results.json
+            --log-dir /chisel7-audit-results/logs
+          )
+          if [ -n "${CHISEL7_AUDIT_PROJECTS:-}" ]; then
+            read -r -a projects <<< "${CHISEL7_AUDIT_PROJECTS}"
+            audit_args+=(--projects "${projects[@]}")
+          fi
+
+          python3 .github/scripts/chisel7-support-audit.py "${audit_args[@]}"
+          CONTAINER_SCRIPT
+
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chisel7-support-audit
+          path: ${{ env.AUDIT_RESULTS_DIR }}
+          if-no-files-found: error
+
+      - name: Install MongoDB publisher dependency
+        run: |
+          python3 -m pip install --user 'pymongo[srv]'
+
+      - name: Publish audit to MongoDB
+        env:
+          MONGODB_SRV: ${{ secrets.MONGODB_SRV }}
+        run: |
+          python3 .github/scripts/publish-chisel7-support.py \
+            "${AUDIT_RESULTS_DIR}/results.json" \
+            --database main \
+            --collection chisel7_support

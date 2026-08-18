@@ -1,0 +1,72 @@
+name: build-setup ubuntu
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: number
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  build-setup-ubuntu:
+    name: build-setup ubuntu
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      CONDA_INSTALL_DIR: ${{ github.workspace }}/.ci/conda
+      FORCE_NON_EC2: 1
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - name: Maximize build space
+        uses: jimfangx/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 10240
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Refresh pull request merge ref
+        run: |
+          git fetch --no-tags origin "pull/${{ inputs.pr_number }}/merge"
+          git checkout --detach FETCH_HEAD
+          git rev-parse --short HEAD
+
+      - name: Install conda
+        run: |
+          mkdir -p "$(dirname "${CONDA_INSTALL_DIR}")"
+          wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+          bash Miniforge3.sh -b -p "${CONDA_INSTALL_DIR}"
+          source "${CONDA_INSTALL_DIR}/etc/profile.d/conda.sh"
+          if [ -f "${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh" ]; then
+            source "${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh"
+          fi
+          conda activate
+
+      - name: Exclude CI-managed directories from ctags
+        run: |
+          grep -qxF ".ci" .ctagsignore || printf "\n.ci\n" >> .ctagsignore
+
+      - name: Run build setup
+        run: |
+          git config --global --add safe.directory "*"
+          source "${CONDA_INSTALL_DIR}/etc/profile.d/conda.sh"
+          if [ -f "${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh" ]; then
+            source "${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh"
+          fi
+          conda activate
+          ./build-setup.sh riscv-tools
+          grep -F "Setup complete!" build-setup.log

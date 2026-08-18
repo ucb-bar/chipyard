@@ -1,0 +1,70 @@
+name: launch firesim manager
+
+on:
+  workflow_dispatch:
+    inputs:
+      manager_ami_id:
+        description: 'Manager AMI ID or public AMI name. Leave empty to use the script default.'
+        required: false
+        type: string
+      ssh_cidr:
+        description: 'CIDR allowed to SSH into the manager. Leave empty to use the GitHub runner public IP/32.'
+        required: false
+        type: string
+      manager_image:
+        description: 'Container image to run on the manager. Leave empty for ghcr.io/${GITHUB_REPOSITORY,,}:main.'
+        required: false
+        type: string
+      container_script:
+        description: 'Repo-relative script to run inside the manager container.'
+        required: false
+        default: '.github/scripts/firesim-manager-entrypoint.sh'
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  launch-firesim-manager:
+    name: launch firesim manager
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+      AWS_DEFAULT_REGION: us-west-2
+      FIRESIM_MANAGER_AMI_ID: ${{ inputs.manager_ami_id }}
+      FIRESIM_MANAGER_SSH_CIDR: ${{ inputs.ssh_cidr }}
+      FIRESIM_MANAGER_IMAGE: ${{ inputs.manager_image }}
+      FIRESIM_MANAGER_CONTAINER_SCRIPT: ${{ inputs.container_script }}
+      FIRESIM_MANAGER_DETACH_CONTAINER: "1"
+      FIRESIM_MANAGER_SSH_PRIVATE_KEY: ${{ secrets.FIRESIM_MANAGER_SSH_PRIVATE_KEY }}
+      GHCR_USERNAME: ${{ github.actor }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Validate inputs
+        run: |
+          if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY repository secrets." >&2
+            exit 1
+          fi
+
+          if [ -n "${FIRESIM_MANAGER_CONTAINER_SCRIPT}" ] && [ ! -f "${FIRESIM_MANAGER_CONTAINER_SCRIPT}" ]; then
+            echo "Container script does not exist: ${FIRESIM_MANAGER_CONTAINER_SCRIPT}" >&2
+            exit 1
+          fi
+
+      - name: Launch FireSim manager
+        run: |
+          .github/scripts/launch-firesim-manager.sh

@@ -1,0 +1,59 @@
+# Build-time build design / AGFI configuration for the FireSim Simulation Manager
+# See https://docs.fires.im/en/stable/Advanced-Usage/Manager/Manager-Configuration-Files.html for documentation of all of these params.
+
+# this refers to build farms defined in config_build_farm.yaml
+build_farm:
+  base_recipe: build-farm-recipes/aws_ec2.yaml
+  recipe_arg_overrides:
+    # tag to apply to build farm hosts
+    build_farm_tag: mainbuildfarm
+    # instance type to use per build
+    instance_type: m8i.4xlarge
+    # instance market to use per build (ondemand, spot)
+    build_instance_market: spot
+    # if using spot instances, determine the interrupt behavior (terminate, stop, hibernate)
+    spot_interruption_behavior: terminate
+    # if using spot instances, determine the max price
+    spot_max_price: "0.5"
+    # default location of build directory on build host
+    default_build_dir: /home/ubuntu/firesim-build
+
+builds_to_run:
+    # this section references builds defined in config_build_recipes.yaml
+    # if you add a build here, it will be built when you run buildbitstream
+    - firesim_rocket_quadcore_nic_l2_llc4mb_ddr3
+    - firesim_rocket_quadcore_no_nic_l2_llc4mb_ddr3
+    - firesim_boom_singlecore_nic_l2_llc4mb_ddr3
+    - firesim_boom_singlecore_no_nic_l2_llc4mb_ddr3
+    - firesim_megaboom_singlecore_no_nic_l2_llc4mb_ddr3
+    # # - firesim_supernode_rocket_singlecore_nic_l2_lbp
+    - firesim_rocket_singlecore_no_nic_l2_lbp
+    # # - firesim_rocket_singlecore_sha3_nic_l2_llc4mb_ddr3
+    # # - firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3
+    # # - firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3_printf
+    - firesim_gemmini_printf_rocket_singlecore_no_nic
+    - firesim_gemmini_rocket_singlecore_no_nic
+    - firesim_saturn_REFV256D128_rocket_singlecore_no_nic_l2_llc4mb_ddr3
+    - firesim_saturn_GENV256D128_shuttle_singlecore_no_nic_l2_llc4mb_ddr3
+
+agfis_to_share:
+    - firesim_rocket_quadcore_nic_l2_llc4mb_ddr3
+    - firesim_rocket_quadcore_no_nic_l2_llc4mb_ddr3
+    - firesim_boom_singlecore_nic_l2_llc4mb_ddr3
+    - firesim_boom_singlecore_no_nic_l2_llc4mb_ddr3
+    - firesim_megaboom_singlecore_no_nic_l2_llc4mb_ddr3
+    # # - firesim_supernode_rocket_singlecore_nic_l2_lbp
+    - firesim_rocket_singlecore_no_nic_l2_lbp
+    # # - firesim_rocket_singlecore_sha3_nic_l2_llc4mb_ddr3
+    # # - firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3
+    # # - firesim_rocket_singlecore_sha3_no_nic_l2_llc4mb_ddr3_printf
+    - firesim_gemmini_printf_rocket_singlecore_no_nic
+    - firesim_gemmini_rocket_singlecore_no_nic
+    - firesim_saturn_REFV256D128_rocket_singlecore_no_nic_l2_llc4mb_ddr3
+    - firesim_saturn_GENV256D128_shuttle_singlecore_no_nic_l2_llc4mb_ddr3
+
+share_with_accounts:
+    public: public
+    # To share with a specific user:
+    # somebodysname: 123456789012
+    # To share publicly:

@@ -1,0 +1,66 @@
+name: Chipyard Pull Request CI
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - labeled
+      - unlabeled
+
+permissions:
+  actions: write
+  contents: read
+  packages: read
+  pull-requests: read
+
+concurrency:
+  group: pr-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: ${{ contains(github.event.pull_request.labels.*.name, 'ci:disable') }}
+
+jobs:
+  check-ci-disable:
+    name: check-ci-disable
+    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' }}
+    uses: ./.github/workflows/check-ci-disable.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      pr_head_ref: ${{ github.event.pull_request.head.ref }}
+      pr_head_repo_id: ${{ github.event.pull_request.head.repo.id }}
+      pr_labels: ${{ toJson(github.event.pull_request.labels.*.name) }}
+
+  build-setup-ubuntu:
+    name: build-setup ubuntu
+    needs: check-ci-disable
+    if: ${{ needs.check-ci-disable.outputs.ci_disabled != 'true' }}
+    uses: ./.github/workflows/build-setup-ubuntu.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+
+  build-setup-rhel:
+    name: build-setup rhel
+    needs: check-ci-disable
+    if: ${{ needs.check-ci-disable.outputs.ci_disabled != 'true' }}
+    uses: ./.github/workflows/build-setup-rhel.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+
+  run-generator-tests:
+    name: run generator tests
+    needs: check-ci-disable
+    if: ${{ needs.check-ci-disable.outputs.ci_disabled != 'true' }}
+    uses: ./.github/workflows/run-generator-tests.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+    secrets: inherit
+
+  run-firesim-tests:
+    name: run firesim tests
+    needs: check-ci-disable
+    if: ${{ needs.check-ci-disable.outputs.ci_disabled != 'true' }}
+    uses: ./.github/workflows/run-firesim-tests.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+    secrets: inherit
