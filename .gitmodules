@@ -165,4 +165,4 @@
 	url = https://github.com/ucb-bar/radiance.git
 [submodule "software/spec2026"]
 	path = software/spec2026
-	url = git@github.com:ucb-bar/spec2026-workload.git
+	url = https://github.com/ucb-bar/spec2026-workload.git
