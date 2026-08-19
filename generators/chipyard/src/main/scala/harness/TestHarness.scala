@@ -21,7 +21,7 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessInst
     val success = Output(Bool())
     val wf_active = Output(Bool())
   })
-  val success = WireInit(false.B)
+  val success = successFn(chiptopSuccess)
   val wf_active = WireInit(true.B)
   io.success := success
   io.wf_active := wf_active

@@ -172,3 +172,6 @@
 [submodule "software/spec2006"]
 	path = software/spec2006
 	url = https://github.com/ucb-bar/spec2006-workload.git
+[submodule "software/spec2026"]
+	path = software/spec2026
+	url = https://github.com/ucb-bar/spec2026-workload.git

@@ -7,3 +7,5 @@ Gemmini enables architects to make useful insights into how different components
 Check out `Gemmini's documentation <https://github.com/ucb-bar/gemmini/blob/master/README.md>`__ to learn how to generate, simulate, and profile DNN accelerators with Gemmini and Chipyard.
 
 .. image:: ../_static/images/gemmini-system.png
+
+Example configurations for Gemmini can be found at `generators/gemmini/chipyard/GemminiConfigs.scala <https://ucb.bar/gemmini/chipyard/GemminiConfigs.scala>`__.

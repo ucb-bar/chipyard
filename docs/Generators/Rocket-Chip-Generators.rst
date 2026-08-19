@@ -1,7 +1,7 @@
 Rocket-Chip Generators
 ======================
 
-Chipyard includes several open-source generators developed by `SiFive <https://www.sifive.com/>`__, and now openly maintained as part of Chips Alliance.
+Chipyard includes several open-source generators developed by `SiFive <https://www.sifive.com/>`__, and now openly maintained as part of `Chips Alliance <https://www.chipsalliance.org/>`__.
 These are currently organized within two submodules named ``rocket-chip-blocks`` and ``rocket-chip-inclusive-cache``.
 
 Last-Level Cache Generator

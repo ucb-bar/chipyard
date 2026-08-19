@@ -1,9 +1,9 @@
 import Tests._
 
 val chisel6Version = "6.7.0"
-val chisel7Version = "7.0.0-RC4"
+val chisel7Version = "7.13.0"
 val chiselTestVersion = "6.0.0"
-val scalaVersionFromChisel = "2.13.16"
+val scalaVersionFromChisel = if (sys.env.contains("USE_CHISEL7")) "2.13.18" else "2.13.16"
 
 val chisel3Version = "3.6.1"
 
@@ -151,7 +151,13 @@ lazy val rocketchip = freshProject("rocketchip", rocketChipDir)
   .settings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "mainargs" % "0.5.0",
-      "org.json4s" %% "json4s-jackson" % "4.0.5",
+      // Chisel 7+ needs a more recent version of json4s to avoid linking errors, and json4s
+      // migrated group ID at version 4.0.7.
+      if (sys.env.contains("USE_CHISEL7")) {
+        "io.github.json4s" %% "json4s-jackson" % "4.1.0"
+      } else {
+        "org.json4s" %% "json4s-jackson" % "4.0.5"
+      },
       "org.scala-graph" %% "graph-core" % "1.13.5"
     )
   )

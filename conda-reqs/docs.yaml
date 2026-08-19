@@ -6,6 +6,7 @@ channels:
 
 platforms:
     - linux-64
+    - osx-arm64 # allow editing of docs locally on MacOS
 
 dependencies:
     # https://conda-forge.org/feedstock-outputs/
@@ -21,3 +22,9 @@ dependencies:
     - sphinx-autobuild
     - sphinx_rtd_theme
     - docutils
+    - requests
+
+    # Install Node.js outside conda to avoid conflicting with the ICU version
+    # required by Chipyard's toolchain. fnm reads docs/.nvmrc and installs an
+    # official Node.js binary that does not use conda's ICU package.
+    - fnm

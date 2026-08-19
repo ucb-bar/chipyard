@@ -3,7 +3,7 @@
 Baremetal RISC-V Programs
 ==========================
 
-To build baremetal RISC-V programs to run in simulation, we use the riscv64-unknown-elf cross-compiler and a fork of the libgloss board support package. To build such a program yourself, simply invoke the cross-compiler with the flags "-fno-common -fno-builtin-printf -specs=htif_nano.specs" and the link with the arguments "-static -specs=htif_nano.specs". For instance, if we want to run a "Hello, World" program in baremetal, we could do the following.
+To build baremetal RISC-V programs to run in simulation, we use the riscv64-unknown-elf cross-compiler and a fork of the libgloss board support package. To build such a program yourself, simply invoke the cross-compiler with the flags `-fno-common -fno-builtin-printf -specs=htif_nano.specs` and the link with the arguments `-static -specs=htif_nano.specs`. For instance, if we want to run a "Hello, World" program in baremetal, we could do the following.
 
 .. code:: c
 

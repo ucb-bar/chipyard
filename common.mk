@@ -203,6 +203,11 @@ MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVa
 FIRTOOL_EXTRA_FLAGS ?=
 ifdef USE_CHISEL7
 FIRTOOL_EXTRA_FLAGS += --verification-flavor=if-else-fatal --disable-layers=Verification.Assume,Verification.Cover
+# Enable the Verification (for printf statements) and Assert (for assert statements) layers.
+VERIFICATION_LAYER_DIR = $(GEN_COLLATERAL_DIR)/verification
+ASSERT_LAYER_DIR = $(VERIFICATION_LAYER_DIR)/assert
+EXTRA_SIM_SOURCES += $(VERIFICATION_LAYER_DIR)/layers-$(MODEL)-Verification.sv $(ASSERT_LAYER_DIR)/layers-$(MODEL)-Verification-Assert.sv
+EXT_INCDIRS += $(VERIFICATION_LAYER_DIR) $(ASSERT_LAYER_DIR)
 endif
 
 # DOC include start: FirrtlCompiler

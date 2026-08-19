@@ -89,6 +89,7 @@ add_executable(symmetric symmetric.c)
 add_executable(ctc-test ctc-test.c)
 add_executable(multi-ctc-test multi-ctc-test.c)
 add_executable(tma_inject_baremetal tmatests/tma_inject_baremetal.c)
+add_executable(triple-chiplet triple-chiplet.c)
 
 #################################
 # Disassembly
@@ -130,6 +131,8 @@ add_dump_target(symmetric)
 add_dump_target(ctc-test)
 add_dump_target(multi-ctc-test)
 add_dump_target(tma_inject_baremetal)
+add_dump_target(triple-chiplet)
+
 
 # Add custom command to generate spiflash.img from spiflash.py
 add_custom_command(

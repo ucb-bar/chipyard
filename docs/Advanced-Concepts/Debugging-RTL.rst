@@ -96,7 +96,7 @@ To run overnight tests (repeated random tests), run
 
   make CONFIG=CustomConfig TORTURE_ONIGHT_OPTIONS=<overnight options> torture-overnight
 
-You can find the overnight options in `overnight/src/main/scala/main.scala` in the torture repo.
+You can find the overnight options in `overnight/src/main/scala/main.scala <https://ucb.bar/riscv-torture/overnight/src/main/scala/main.scala>`__. in the torture repo.
 
 Firesim Debugging
 ---------------------------

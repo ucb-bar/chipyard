@@ -268,6 +268,17 @@ class FireSimMegaBoomChiaBigCacheConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
   new chipyard.MegaBoomChiaBigCacheConfig)
+// Saturn configs, base off chipyard's SaturnConfigs
+//*****************************************************************
+class FireSimREFV256D128RocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV256D128RocketConfig)
+
+class FireSimGENV256D128ShuttleConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GENV256D128ShuttleConfig)
 
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig
@@ -369,7 +380,15 @@ class FireSimLargeBoomSV39CospikeConfig extends Config(
 
 class CTCFireSimConfig extends Config(
   new WithCTCBridge ++
-  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true))) ++ 
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(
+    translationParams = testchipip.soc.OutwardAddressTranslatorParams(
+      // Outward CTC: accesses from this chip to offchipAddr+x are interpreted as going off chip via CTC/accesses are routed to CTC.
+      // The translator strips that local off-chip base value before forwarding, so
+      // the other chip receives onchipAddr+x in its normal Chipyard address map.
+      onchipAddr = 0x0L,
+      offchipAddr = 0x1000000000L,
+      size = ((1L << 32) - 1)),
+    phyParams = None))) ++
   new chipyard.iobinders.WithCTCPunchthrough ++ 
   new FireSimRocketConfig
 )

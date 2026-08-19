@@ -127,3 +127,30 @@ class VerilatorCITetheredChipLikeRocketConfig extends Config(
     new chipyard.config.WithNoResetSynchronizers ++
     new ChipLikeRocketConfig) ++
   new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))
+
+
+// Example chip with no AXI4 memport which can still use loadmem over serialTL with FastRAM
+class NoAXI4MemPortChipLikeRocketConfig extends Config(
+  new chipyard.harness.WithSimTSIOverSerialTL(fast = true) ++                  // Enable FastRAM
+  new testchipip.serdes.WithSerialTL(
+    Seq(
+      testchipip.serdes.SerialTLParams(
+        manager = Some(                                                        // port acts as a manager of offchip memory
+          testchipip.serdes.SerialTLManagerParams(
+            memParams = Seq(
+              testchipip.serdes.ManagerRAMParams(
+                address = BigInt("80000000", 16),                              // Chipyard DRAM base
+                size = BigInt("100000000", 16)
+              )
+            ),
+            isMemoryDevice = true,
+            slaveWhere = MBUS
+          )
+        ),
+        client = Some(testchipip.serdes.SerialTLClientParams()),               // client for TSI connection
+        phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams()
+      )
+  )) ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++
+  new chipyard.config.AbstractConfig)

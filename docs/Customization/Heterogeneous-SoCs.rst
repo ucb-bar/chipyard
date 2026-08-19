@@ -17,6 +17,7 @@ The following example shows a dual core BOOM with a single core Rocket.
 
 .. literalinclude:: ../../generators/chipyard/src/main/scala/config/HeteroConfigs.scala
     :language: scala
+    :prepend: // https://ucb.bar/chipyard/generators/chipyard/src/main/scala/config/HeteroConfigs.scala
     :start-after: DOC include start: DualBoomAndSingleRocket
     :end-before: DOC include end: DualBoomAndSingleRocket
 

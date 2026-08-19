@@ -28,6 +28,8 @@ dependencies:
     - make
     - git
     - ninja # needed in case we need to built circt from scratch
+    - libnuma # added to prevent libnuma.so.1 not found err on systems without it
+    - numactl # same as above
 
     - sbt
     - openjdk=20

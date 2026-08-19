@@ -6,7 +6,15 @@ Nexys Video Instructions
 
 The default Digilent Nexys Video harness uses a TSI-over-UART adapter to bringup the FPGA.
 A user can connect to the Nexys Video target using a special ``uart_tsi`` program that opens a UART TTY.
-The interface for the ``uart_tsi`` program provides unique functionality that is useful for bringing up test chips.
+The interface for the ``uart_tsi`` program provides unique functionality that is useful for bringing up test chips. 
+
+An example tweaks + Rocket config fragment can be found below:
+
+.. literalinclude:: ../../fpga/src/main/scala/nexysvideo/Configs.scala
+    :language: scala
+    :prepend: // https://ucb.bar/chipyard/fpga/src/main/scala/nexysvideo/Configs.scala
+    :start-after: DOC include start: WithNexysVideoTweaks and Rocket
+    :end-before: DOC include end: WithNexysVideoTweaks and Rocket
 
 To build the design (Vivado should be added to the ``PATH``), run:
 

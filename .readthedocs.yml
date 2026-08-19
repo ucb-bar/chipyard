@@ -1,12 +1,26 @@
 version: 2
 
+formats:
+    - pdf
+    - epub
+
 build:
-    os: ubuntu-20.04
+    os: ubuntu-24.04
     tools:
-        python: "mambaforge-4.10"
+        python: "3.12"
+        nodejs: "22"
+    jobs:
+        build:
+            html:
+                - cd docs && npm ci
+                - cd docs && python scripts/sphinx_to_starlight.py
+                - cd docs && npm run build:astro
+                - mkdir -p $READTHEDOCS_OUTPUT/html
+                - cp -r docs/dist/* $READTHEDOCS_OUTPUT/html/
 
 sphinx:
     configuration: docs/conf.py
 
-conda:
-    environment: conda-reqs/docs.yaml
+python:
+    install:
+        - requirements: docs/requirements.txt
