@@ -15,10 +15,16 @@ if ! conda-lock --version | grep $(grep "conda-lock" $REQS_DIR/chipyard-base.yam
   exit 1
 fi
 
+# a lockfile is only replaced once its solve has succeeded: generate to a
+# temporary path beside it and move into place, so a failed solve leaves the
+# committed lockfile intact rather than deleting the only working fallback
+TMP_LOCKFILE=""
+trap 'rm -f "$TMP_LOCKFILE"' EXIT
+
 for TOOLCHAIN_TYPE in riscv-tools; do
     # note: lock file must end in .conda-lock.yml - see https://github.com/conda-incubator/conda-lock/issues/154
     LOCKFILE=$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-linux-64.conda-lock.yml
-    rm -rf $LOCKFILE
+    TMP_LOCKFILE=${LOCKFILE%.conda-lock.yml}.tmp.$$.conda-lock.yml
 
     conda-lock \
       --no-mamba \
@@ -28,10 +34,12 @@ for TOOLCHAIN_TYPE in riscv-tools; do
       -f "$REQS_DIR/docs.yaml" \
       -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
       -p linux-64 \
-      --lockfile $LOCKFILE
+      --lockfile $TMP_LOCKFILE
+
+    mv $TMP_LOCKFILE $LOCKFILE
 
     LOCKFILE=$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-linux-64-lean.conda-lock.yml
-    rm -rf $LOCKFILE
+    TMP_LOCKFILE=${LOCKFILE%.conda-lock.yml}.tmp.$$.conda-lock.yml
 
     conda-lock \
       --no-mamba \
@@ -40,5 +48,7 @@ for TOOLCHAIN_TYPE in riscv-tools; do
       -f "$REQS_DIR/docs.yaml" \
       -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
       -p linux-64 \
-      --lockfile $LOCKFILE
+      --lockfile $TMP_LOCKFILE
+
+    mv $TMP_LOCKFILE $LOCKFILE
 done

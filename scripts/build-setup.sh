@@ -185,13 +185,39 @@ conda environment or \`source env.sh\` and skip this step with \`-s 1\`." >&2
         $CYDIR/scripts/generate-conda-lockfiles.sh
         exit_if_last_command_failed
     fi
+    # conda-forge publishes sysroot_linux-64 for these glibc versions only, see
+    # https://anaconda.org/conda-forge/sysroot_linux-64 . The sysroot is a build
+    # target floor, so it must be <= the host glibc, and VCS shared libraries
+    # need >= 2.33 (#2174); it does not have to equal the host glibc.
+    AVAILABLE_SYSROOTS="2.12 2.12.2 2.17 2.28 2.34 2.39"
+    VCS_MIN_GLIBC="2.33"
+
     SYS_GLIBC=$(ldd --version | awk '/ldd/{print $NF}')
-    DEFAULT_GLIBC=$(grep -i "sysroot_linux-64=" conda-reqs/chipyard-base.yaml | awk -F= '{print $2}')
-    if [ "$SYS_GLIBC" != "$DEFAULT_GLIBC" ]; then
-        # replace the glibc version
-        sed -i.bak "s/^\([[:space:]]*-\s*sysroot_linux-64=\).*/\1$SYS_GLIBC/" conda-reqs/chipyard-base.yaml
-        $CYDIR/scripts/generate-conda-lockfiles.sh
-        exit_if_last_command_failed
+    # strip any trailing comment: this line is read with grep, not a YAML parser
+    DEFAULT_GLIBC=$(grep -i "sysroot_linux-64=" conda-reqs/chipyard-base.yaml | sed 's/#.*//' | awk -F= '{print $2}' | tr -d '[:space:]')
+
+    # use the greatest published sysroot that is still <= the host glibc
+    TARGET_GLIBC=""
+    for sysroot in $AVAILABLE_SYSROOTS; do
+        if version_le "$sysroot" "$SYS_GLIBC"; then
+            TARGET_GLIBC=$sysroot
+        fi
+    done
+
+    if [ -z "$TARGET_GLIBC" ]; then
+        echo "Warning: no published sysroot_linux-64 is <= the host glibc ('$SYS_GLIBC'); \
+keeping the pinned sysroot_linux-64=$DEFAULT_GLIBC" >&2
+    else
+        if version_le "$TARGET_GLIBC" "$VCS_MIN_GLIBC" && [ "$TARGET_GLIBC" != "$VCS_MIN_GLIBC" ]; then
+            echo "Warning: host glibc $SYS_GLIBC only allows sysroot_linux-64=$TARGET_GLIBC, which is \
+below the glibc $VCS_MIN_GLIBC that VCS shared libraries need; VCS simulation may not link" >&2
+        fi
+        if [ "$TARGET_GLIBC" != "$DEFAULT_GLIBC" ]; then
+            # replace the glibc version
+            sed -i.bak "s/^\([[:space:]]*-\s*sysroot_linux-64=\).*/\1$TARGET_GLIBC/" conda-reqs/chipyard-base.yaml
+            $CYDIR/scripts/generate-conda-lockfiles.sh
+            exit_if_last_command_failed
+        fi
     fi
     echo "Using lockfile for conda: $LOCKFILE"
 

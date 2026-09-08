@@ -90,6 +90,31 @@ function save_bash_options
 }
 
 #######################################
+# Compare two dotted numeric versions.
+# Returns 0 if $1 <= $2, 1 otherwise.
+# An empty or non-numeric component compares as 0.
+# Arguments:
+#   $1: version, e.g. 2.34
+#   $2: version to compare against, e.g. 2.35
+#######################################
+function version_le
+{
+    awk -v lhs="$1" -v rhs="$2" '
+        BEGIN {
+            nl = split(lhs, l, ".")
+            nr = split(rhs, r, ".")
+            n = (nl > nr) ? nl : nr
+            for (i = 1; i <= n; i++) {
+                li = (i <= nl) ? l[i] + 0 : 0
+                ri = (i <= nr) ? r[i] + 0 : 0
+                if (li < ri) exit 0
+                if (li > ri) exit 1
+            }
+            exit 0
+        }'
+}
+
+#######################################
 # Restore bash options. Must be called
 # after a corresponding `save_bash_options`.
 #######################################
