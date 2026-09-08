@@ -24,7 +24,8 @@
 	url = https://github.com/ucb-bar/FFTGenerator.git
 [submodule "generators/gemmini"]
 	path = generators/gemmini
-	url = https://github.com/ucb-bar/gemmini.git
+	url = https://github.com/AlexisHernandez1/Gemmini.git
+	branch = attention-accelerator
 [submodule "generators/hardfloat"]
 	path = generators/hardfloat
 	url = https://github.com/ucb-bar/berkeley-hardfloat.git

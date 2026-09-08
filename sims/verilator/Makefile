@@ -226,8 +226,14 @@ $(output_dir)/%.vpd: $(output_dir)/% $(sim_debug)
 #########################################################################################
 # general cleanup rules
 #########################################################################################
-.PHONY: clean clean-sim clean-sim-debug
+# clean: scoped to CONFIG — removes only this config's generated-src subtree and
+# simulator binaries. Does NOT wipe other CONFIG builds or the shared classpath.
+# clean-all-configs: previous nuke-everything behavior (explicit opt-in).
+.PHONY: clean clean-all-configs clean-sim clean-sim-debug
 clean:
+	rm -rf $(build_dir) $(sim) $(sim_debug)
+
+clean-all-configs:
 	rm -rf $(CLASSPATH_CACHE) $(gen_dir) $(sim_prefix)-*
 
 clean-sim:
