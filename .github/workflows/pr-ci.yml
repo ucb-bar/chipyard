@@ -39,6 +39,14 @@ jobs:
     with:
       pr_number: ${{ github.event.pull_request.number }}
 
+  build-setup-ubuntu-2604:
+    name: build-setup ubuntu 26.04
+    needs: check-ci-disable
+    if: ${{ needs.check-ci-disable.outputs.ci_disabled != 'true' }}
+    uses: ./.github/workflows/build-setup-ubuntu-26.04.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+
   build-setup-rhel:
     name: build-setup rhel
     needs: check-ci-disable
