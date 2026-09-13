@@ -95,6 +95,7 @@ add_executable(symmetric symmetric.c)
 add_executable(ctc-test ctc-test.c)
 add_executable(multi-ctc-test multi-ctc-test.c)
 add_executable(triple-chiplet triple-chiplet.c)
+add_executable(topdown topdown.c)
 
 # Work around the broken _REENT_SMALL exit path in the GCC 16 nano Newlib
 # shipped by the conda toolchain.  Keep cpp-hello on its separate full-libc
