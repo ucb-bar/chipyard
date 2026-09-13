@@ -99,6 +99,32 @@ class WithDMIBridge extends HarnessBinder({
   }
 })
 
+/** Direct JTAG bridge binder.
+  *
+  * Exposes the target's JTAG DTM pins (TCK/TMS/TDI/TDO) to the host through the
+  * FireSim `JTAGBridge`. The host-side driver (`jtagbridge_t`) runs an
+  * OpenOCD-compatible remote_bitbang server, so an external JTAG client such as
+  * OpenOCD can drive the target TAP for debug.
+  *
+  * Enabling: add this binder to a FireSim config that exposes a `JTAGPort`. See
+  * `FireSimDirectJTAGRocketConfig` for a ready-made Rocket example.
+  *
+  * Runtime: the server listens on TCP port `25000 + <bridge index>` by default;
+  * override it with the `+jtag_rbb_port=<port>` plusarg. Connect OpenOCD with the
+  * `remote_bitbang` adapter driver, e.g.
+  * `adapter driver remote_bitbang; remote_bitbang host localhost; remote_bitbang port 25000`.
+  *
+  * Performance: the remote_bitbang protocol is bit-banged, so each JTAG bit costs
+  * several host operations (TCK low, TCK high, and an optional TDO read) and debug
+  * throughput is low. Default (non-JTAG) behavior is unchanged because the bridge
+  * is opt-in.
+  */
+class WithJTAGBridge extends HarnessBinder({
+  case (th: FireSim, port: JTAGPort, chipId: Int) => {
+    JTAGBridge(th.harnessBinderClock, port.io, th.harnessBinderReset.asBool)(th.p)
+  }
+})
+
 class WithNICBridge extends HarnessBinder({
   case (th: FireSim, port: NICPort, chipId: Int) => {
     NICBridge(port.io.clock, port.io.bits)(th.p)

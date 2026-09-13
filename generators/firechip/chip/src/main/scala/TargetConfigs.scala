@@ -12,7 +12,7 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.tilelink.{BootROMLocated}
-import freechips.rocketchip.devices.debug.{DebugModuleKey}
+import freechips.rocketchip.devices.debug.{DebugModuleKey, DefaultDebugModuleParams}
 import freechips.rocketchip.diplomacy.{AddressSet}
 import freechips.rocketchip.prci.{AsynchronousCrossing}
 import testchipip.cosim.{TracePortKey}
@@ -247,6 +247,25 @@ class FireSimDmiRocketConfig extends Config(
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
   new chipyard.dmiRocketConfig)
+
+// Direct JTAG config: exposes the target's JTAG DTM through the FireSim JTAGBridge
+// so a host-side remote_bitbang server (OpenOCD) can drive it. The base
+// chipyard.RocketConfig exposes a JTAG DTM by default (WithJtagDTM in AbstractConfig).
+//
+// WithFireSimConfigTweaks disables the debug module by default (WithNoDebug); this
+// config re-enables it with clock-gating off so the JTAG DTM is present. The stock
+// Rocket JTAG TAP contains negedge-clocked logic, but Golden Gate's FAME-1 transform
+// lowers it to enable-gated posedge logic, so the DTM works on the official rocket-chip
+// revision with no rocket-chip changes required.
+class FireSimDirectJTAGRocketConfig extends Config(
+  new chipyard.harness.WithSerialTLTiedOff ++ // (must be at top) tieoff serialTL so only the JTAG DTM is exposed
+  new WithJTAGBridge ++
+  new WithDefaultFireSimBridges ++
+  new Config((site, here, up) => {
+    case DebugModuleKey => Some(DefaultDebugModuleParams(64).copy(clockGate = false)) // RV64 FireSim targets
+  }) ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RocketConfig)
 
 //*****************************************************************
 // Boom config, base off chipyard's LargeBoomV3Config

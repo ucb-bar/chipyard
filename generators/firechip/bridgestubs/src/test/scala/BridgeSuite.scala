@@ -94,10 +94,36 @@ class BlockDevTest(targetConfig: BasePlatformConfig)
 
 class BlockDevF1Test extends BlockDevTest(BaseConfigs.F1)
 
+class JTAGTest(targetConfig: BasePlatformConfig) extends BridgeSuite("JTAGModule", "NoConfig", targetConfig) {
+  // Reserve an ephemeral TCP port and release it immediately, then pass it to
+  // both the bridge's remote_bitbang server and the in-simulation client via the
+  // +jtag_rbb_port plusarg. This keeps parallel test jobs from colliding on the
+  // fixed default port; the client retries the connection to cover the window
+  // between release here and the server binding in the simulator.
+  private def freeTcpPort(): Int = {
+    val socket = new java.net.ServerSocket(0)
+    try socket.getLocalPort
+    finally socket.close()
+  }
+
+  override def defineTests(backend: String, debug: Boolean) {
+    it should "read the TAP IDCODE over remote_bitbang" in {
+      // The C++ JTAGModule test embeds the remote_bitbang client: it resets the
+      // TAP, shifts out the 32-bit IDCODE twice, asserts it equals 0x00000001,
+      // and returns a non-zero exit code on any failure.
+      val runResult = run(backend, debug, args = Seq(s"+jtag_rbb_port=${freeTcpPort()}"))
+      assert(runResult == 0)
+    }
+  }
+}
+
+class JTAGF1Test extends JTAGTest(BaseConfigs.F1)
+
 class BridgeTests
     extends Suites(
       new UARTF1Test,
       new BlockDevF1Test,
+      new JTAGF1Test,
       new TracerVF1TestCount1,
       new TracerVF1TestCount6,
       new TracerVF1TestCount7,
