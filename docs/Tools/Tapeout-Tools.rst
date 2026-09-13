@@ -1,8 +1,8 @@
 Tapeout-Tools
 ===============================
 
-Tapeout-Tools is a collection of useful FIRRTL transformations and compilers to help the build process.
-Included in the tools are a MacroCompiler (used to map Chisel memory constructs to vendor SRAMs), FIRRTL transforms (to separate harness and top-level SoC files), and more.
+Tapeout-Tools is a collection of useful utilities to help the build process.
+Included in the tools are the MacroCompiler (used to map Chisel memory constructs to vendor SRAMs) and the macro description library it relies on.
 
 Mapping technology SRAMs (MacroCompiler)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -17,11 +17,11 @@ This, unfortunately, requires the designer to include the SRAM instantiation in 
 In Verilog-entry designs, it is possible to create a layer of abstraction that allows a new process technology to implement a specific sequential memory block in a wrapper module.
 However, this method can be fragile and laborious.
 
-The FIRRTL compiler contains a transformation to replace the ``SeqMem`` primitives called ``ReplSeqMem``.
+The FIRRTL compiler (``firtool``) contains a transformation to replace the ``SeqMem`` primitives, enabled with the ``--repl-seq-mem`` flag.
 This simply converts all ``SeqMem`` instances above a size threshold into external module references.
 An external module reference is a FIRRTL construct that enables a design to reference a module without describing its contents, only its inputs and outputs.
-A list of unique SRAM configurations is output to a ``.conf`` file by FIRRTL, which is used to map technology SRAMs.
-Without this transform, FIRRTL will map all ``SeqMem`` s to flip-flop arrays with equivalent behavior, which may lead to a design that is difficult to route.
+A list of unique SRAM configurations is output to a ``.conf`` file by ``firtool``, which is used to map technology SRAMs.
+Without this transform, ``firtool`` will map all ``SeqMem`` s to flip-flop arrays with equivalent behavior, which may lead to a design that is difficult to route.
 
 The ``.conf`` file is consumed by a tool called MacroCompiler, which is part of the :ref:`Tools/Tapeout-Tools:Tapeout-Tools` scala package.
 MacroCompiler is also passed an ``.mdf`` file that describes the available list of technology SRAMs or the capabilities of the SRAM compiler, if one is provided by the foundry.
@@ -105,10 +105,8 @@ This is necessary to facilitate post-synthesis and post-place-and-route simulati
 Simulations, after your design goes through a VLSI flow, will use the verilog netlist generated from the flow and will need an untouched test harness to drive it.
 Separating these components into separate files makes this straightforward.
 Without the separation the file that included the test harness would also redefine the DUT which is often disallowed in simulation tools.
-To do this, there is a FIRRTL ``App`` in :ref:`Tools/Tapeout-Tools:Tapeout-Tools` called ``GenerateTopAndHarness``, which runs the appropriate transforms to elaborate the modules separately.
-This also renames modules in the test harness so that any modules that are instantiated in both the test harness and the chip are uniquified.
-
-.. Note:: For VLSI projects, this ``App`` is run instead of the normal FIRRTL ``App`` to elaborate Verilog.
+To do this, the Chipyard build system passes a ``MarkDUTAnnotation`` (marking the ``ChipTop`` module as the DUT) to ``firtool`` and runs it with ``--split-verilog``, so that each module is emitted into its own Verilog file along with JSON descriptions of the test harness and DUT module hierarchies.
+The :gh-file-ref:`scripts/uniquify-module-names.py` script then uses these hierarchies to rename (uniquify) any modules that are instantiated in both the test harness and the chip, and to emit separate filelists for the DUT and the test harness.
 
 Macro Description Format
 ~~~~~~~~~~~~~~~~~~~~~~~~
