@@ -457,6 +457,37 @@ $(output_dir)/%.out: $(output_dir)/% $(SIM_PREREQ)
 	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$<) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
+# run Embench benchmark rules
+#########################################################################################
+EMBENCH_DIR ?= $(base_dir)/software/embench/build
+
+EMBENCH_BMARKS = \
+	aha-mont64 \
+	crc32 \
+	cubic \
+	edn \
+	huffbench \
+	matmult-int \
+	minver \
+	nbody \
+	nettle-aes \
+	nettle-sha256 \
+	nsichneu \
+	picojpeg \
+	qrduino \
+	sglib-combined \
+	slre \
+	st \
+	statemate \
+	ud \
+	wikisort
+
+EMBENCH_BINS = $(addprefix $(EMBENCH_DIR)/,$(EMBENCH_BMARKS))
+
+.PHONY: run-embench-tests
+run-embench-tests: $(addsuffix .run,$(EMBENCH_BINS))
+
+#########################################################################################
 # include build/project specific makefrags made from the generator
 #########################################################################################
 ifneq ($(filter run% %.run %.out %.vpd %.vcd %.fsdb,$(MAKECMDGOALS)),)
@@ -464,7 +495,7 @@ ifneq ($(filter run% %.run %.out %.vpd %.vcd %.fsdb,$(MAKECMDGOALS)),)
 endif
 
 #######################################
-# Rules for building DRAMSim2 library
+# Rules for building DRAMSim2/Ramulator2 library
 #######################################
 dramsim_dir = $(base_dir)/tools/DRAMSim2
 dramsim_lib = $(dramsim_dir)/libdramsim.a
@@ -472,6 +503,15 @@ dramsim_lib = $(dramsim_dir)/libdramsim.a
 $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
+ramulator2_dir = $(base_dir)/tools/ramulator2
+ramulator2_build_dir = $(ramulator2_dir)/build
+ramulator2_lib = $(ramulator2_dir)/libramulator.so
+
+$(ramulator2_lib):
+	/usr/bin/cmake -S $(ramulator2_dir) -B $(ramulator2_build_dir)
+	/usr/bin/cmake --build $(ramulator2_build_dir)
+	cp $(ramulator2_build_dir)/ramulator2 $(ramulator2_dir)/ramulator2
+	
 ################################################
 # Helper to run SBT
 ################################################

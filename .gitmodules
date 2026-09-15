@@ -60,7 +60,7 @@
 	url = https://github.com/ucb-bar/shuttle.git
 [submodule "generators/testchipip"]
 	path = generators/testchipip
-	url = https://github.com/ucb-bar/testchipip.git
+	url = https://github.com/ericli914/testchipip.git
 [submodule "sims/firesim"]
 	path = sims/firesim
 	url = https://github.com/firesim/firesim.git
@@ -165,4 +165,4 @@
 	url = https://github.com/ucb-bar/radiance.git
 [submodule "tools/ramulator2"]
 	path = tools/ramulator2
-	url = https://github.com/ucb-bar/ramulator2.git
+	url = https://github.com/ericli914/ramulator2.git

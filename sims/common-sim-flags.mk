@@ -12,6 +12,9 @@ SIM_CXXFLAGS = \
 	-std=c++17 \
 	-I$(RISCV)/include \
 	-I$(dramsim_dir) \
+	-I$(ramulator2_dir)/src \
+	-I$(ramulator2_dir)/ext/spdlog/include \
+	-I$(ramulator2_dir)/ext/yaml-cpp/include \
 	-I$(GEN_COLLATERAL_DIR) \
 	$(EXTRA_SIM_CXXFLAGS)
 
@@ -21,9 +24,12 @@ SIM_LDFLAGS = \
 	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \
 	-L$(dramsim_dir) \
+	-L$(ramulator2_dir) \
 	$(LRISCV) \
 	-lfesvr \
 	-ldramsim \
+	-lramulator \
+	-Wl,-rpath,$(ramulator2_dir) \
 	$(EXTRA_SIM_LDFLAGS)
 
 CLOCK_PERIOD ?= 1.0

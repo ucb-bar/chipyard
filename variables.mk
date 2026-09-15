@@ -288,7 +288,12 @@ endef
 #########################################################################################
 # output directory for tests
 #########################################################################################
-output_dir=$(sim_dir)/output/$(long_name)
+default_output_dir=$(sim_dir)/output/$(long_name)
+output_dir=$(default_output_dir)
+
+ifneq ($(RUN_OUTPUT_DIR),)
+output_dir=$(abspath $(RUN_OUTPUT_DIR))
+endif
 
 #########################################################################################
 # helper variables to run binaries
