@@ -504,13 +504,18 @@ $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
 ramulator2_dir = $(base_dir)/tools/ramulator2
-ramulator2_build_dir = $(ramulator2_dir)/build
+ramulator2_build_dir = $(ramulator2_dir)/build-chipyard
 ramulator2_lib = $(ramulator2_dir)/libramulator.so
 
-$(ramulator2_lib):
-	/usr/bin/cmake -S $(ramulator2_dir) -B $(ramulator2_build_dir)
-	/usr/bin/cmake --build $(ramulator2_build_dir)
-	cp $(ramulator2_build_dir)/ramulator2 $(ramulator2_dir)/ramulator2
+.PHONY: build-ramulator2
+build-ramulator2:
+	/usr/bin/cmake -S $(ramulator2_dir) -B $(ramulator2_build_dir) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DRAMULATOR_PYTHON_BINDINGS=OFF
+	/usr/bin/cmake --build $(ramulator2_build_dir) --parallel 8
+
+$(ramulator2_lib): build-ramulator2
+	test -f $(ramulator2_lib)
 	
 ################################################
 # Helper to run SBT

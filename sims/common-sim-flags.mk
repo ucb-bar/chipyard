@@ -9,11 +9,11 @@ export USE_CHISEL6=1
 SIM_CXXFLAGS = \
 	$(CXXFLAGS) \
 	$(SIM_OPT_CXXFLAGS) \
-	-std=c++17 \
+	-std=c++20 \
 	-I$(RISCV)/include \
 	-I$(dramsim_dir) \
 	-I$(ramulator2_dir)/src \
-	-I$(ramulator2_dir)/ext/spdlog/include \
+	-I$(ramulator2_dir)/ext/fmt/include \
 	-I$(ramulator2_dir)/ext/yaml-cpp/include \
 	-I$(GEN_COLLATERAL_DIR) \
 	$(EXTRA_SIM_CXXFLAGS)
