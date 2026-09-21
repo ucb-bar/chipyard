@@ -6,7 +6,7 @@
 #define fprintf(stdout, fmt, ...) (0)
 
 firesim_tsi_t::firesim_tsi_t(int argc, char **argv, bool can_have_loadmem)
-    : testchip_tsi_t(argc, argv, can_have_loadmem), is_busy(false),
+    : testchip_tsi_t(argc, argv, can_have_loadmem, 0), is_busy(false),
       is_loaded_in_host(false), is_loaded_in_target(false) {
   idle_counts = 10;
   std::vector<std::string> args(argv + 1, argv + argc);

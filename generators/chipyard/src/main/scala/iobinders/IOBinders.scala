@@ -480,84 +480,84 @@ class WithTraceGenSuccessPunchthrough extends OverrideIOBinder({
   }
 })
 
-class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
-  (system: CanHaveTraceIO) => InModuleBody {
-    val ports: Option[TracePort] = system.traceIO.map { t =>
-      val trace = IO(DataMirror.internal.chiselTypeClone[TraceOutputTop](t)).suggestName("trace")
-      trace <> t
-      val p = GetSystemParameters(system)
-      val chipyardSystem = system.asInstanceOf[ChipyardSystem]
-      val tiles = chipyardSystem.totalTiles.values
-      val viewpointBus = system.asInstanceOf[HasConfigurableTLNetworkTopology].viewpointBus
-      val ignoreAddresses = Seq(
-        BigInt(0x10000) // bootrom is handled specially
-      )
-      // The debug module goes in neither list: access is denied outside debug mode,
-      // so spike having no device there is what makes both models fault.
-      val debugAddresses = p(DebugModuleKey).toSeq.map(_.address.base)
-      val skipAddresses = ignoreAddresses ++ debugAddresses
-      val memRegionTypes = Seq(RegionType.CACHED, RegionType.TRACKED,
-                               RegionType.UNCACHED, RegionType.IDEMPOTENT)
-      val mems = viewpointBus.unifyManagers.filter { m =>
-        memRegionTypes.contains(m.regionType) && !skipAddresses.contains(m.address.map(_.base).min)
-      }.map { m =>
-        val base = m.address.map(_.base).min
-        val size = m.address.map(_.max).max - base + 1
-        (base, size)
-      }
-      // A device is anything in the map that is not memory. The complement, not a
-      // list of region types: enumerating types silently omits any rocket adds or
-      // renames, which is how RegionType.VOLATILE (rocket's TLError) was missed.
-      val devices = viewpointBus.unifyManagers.filter { m =>
-        !memRegionTypes.contains(m.regionType) && !skipAddresses.contains(m.address.map(_.base).min)
-      }.map { m =>
-        val base = m.address.map(_.base).min
-        val size = m.address.map(_.max).max - base + 1
-        (base, size)
-      }
-      // Asserted, not assumed: a later change to the address map, the region types
-      // or the filter above fails elaboration instead of hiding a bug class.
-      require(!devices.exists { case (base, size) =>
-                debugAddresses.exists(d => d >= base && d < base + size) },
-              s"cospike: the debug module must not be registered as a device " +
-              s"(devices=$devices, debug=$debugAddresses)")
-      val useSimDTM = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
-      val cfg = SpikeCosimConfig(
-        isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
-        priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
-        maxpglevels = tiles.headOption.map(_.tileParams.core.pgLevels).getOrElse(0),
-        pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
-        nharts = tiles.size,
-        bootrom = chipyardSystem.bootROM.headOption.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
-        has_dtm = useSimDTM,
-        mems = mems,
-        devices = devices,
-        customCSRs = tiles.headOption.toSeq.flatMap { t =>
-          // t.p, not p: CustomCSRs builds a CoreBundle, which needs p(TileKey).
-          t.tileParams.core.customCSRs(t.p).decls.map(c =>
-            (c.id, c.mask, c.init.getOrElse(BigInt(0))))
-        },
-        paddrBits = viewpointBus.busView.bundle.addressBits,
-        // Mirrors HasTileParameters.{vaddrBits,vpnBitsExtended}, which tiles do
-        // not mix in (BaseTile only gets HasNonDiplomaticTileParameters).
-        vaddrBitsExtended = tiles.headOption.map { t =>
-          val pa = viewpointBus.busView.bundle.addressBits
-          val va = if (t.usingVM) t.maxHVAddrBits else ((pa + 1) min t.xLen)
-          va + (if (va < t.xLen) 1 + (if (t.usingHypervisor) 1 else 0) else 0)
-        }.getOrElse(0),
-        // The CSR count, not nPMPs: rocket fixes it at CSR.maxPMPs if any PMP exists.
-        npmpcsrs = tiles.headOption.map(t =>
-          if (t.tileParams.core.nPMPs > 0) freechips.rocketchip.rocket.CSR.maxPMPs
-          else 0).getOrElse(0),
-        // Connect using the legacy API for firesim only
-        mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
-        mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
-      )
-      TracePort(() => trace, cfg)
-    }
-    (ports.toSeq, Nil)
-  }
-})
+// class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
+//   (system: CanHaveTraceIO) => InModuleBody {
+//     val ports: Option[TracePort] = system.traceIO.map { t =>
+//       val trace = IO(DataMirror.internal.chiselTypeClone[TraceOutputTop](t)).suggestName("trace")
+//       trace <> t
+//       val p = GetSystemParameters(system)
+//       val chipyardSystem = system.asInstanceOf[ChipyardSystem]
+//       val tiles = chipyardSystem.totalTiles.values
+//       val viewpointBus = system.asInstanceOf[HasConfigurableTLNetworkTopology].viewpointBus
+//       val ignoreAddresses = Seq(
+//         BigInt(0x10000) // bootrom is handled specially
+//       )
+//       // The debug module goes in neither list: access is denied outside debug mode,
+//       // so spike having no device there is what makes both models fault.
+//       val debugAddresses = p(DebugModuleKey).toSeq.map(_.address.base)
+//       val skipAddresses = ignoreAddresses ++ debugAddresses
+//       val memRegionTypes = Seq(RegionType.CACHED, RegionType.TRACKED,
+//                                RegionType.UNCACHED, RegionType.IDEMPOTENT)
+//       val mems = viewpointBus.unifyManagers.filter { m =>
+//         memRegionTypes.contains(m.regionType) && !skipAddresses.contains(m.address.map(_.base).min)
+//       }.map { m =>
+//         val base = m.address.map(_.base).min
+//         val size = m.address.map(_.max).max - base + 1
+//         (base, size)
+//       }
+//       // A device is anything in the map that is not memory. The complement, not a
+//       // list of region types: enumerating types silently omits any rocket adds or
+//       // renames, which is how RegionType.VOLATILE (rocket's TLError) was missed.
+//       val devices = viewpointBus.unifyManagers.filter { m =>
+//         !memRegionTypes.contains(m.regionType) && !skipAddresses.contains(m.address.map(_.base).min)
+//       }.map { m =>
+//         val base = m.address.map(_.base).min
+//         val size = m.address.map(_.max).max - base + 1
+//         (base, size)
+//       }
+//       // Asserted, not assumed: a later change to the address map, the region types
+//       // or the filter above fails elaboration instead of hiding a bug class.
+//       require(!devices.exists { case (base, size) =>
+//                 debugAddresses.exists(d => d >= base && d < base + size) },
+//               s"cospike: the debug module must not be registered as a device " +
+//               s"(devices=$devices, debug=$debugAddresses)")
+//       val useSimDTM = p(ExportDebug).protocols.contains(DMI) // assume that exposing clockeddmi means we will connect SimDTM
+//       val cfg = SpikeCosimConfig(
+//         isa = tiles.headOption.map(_.isaDTS).getOrElse(""),
+//         priv = tiles.headOption.map(t => if (t.usingUser) "MSU" else if (t.usingSupervisor) "MS" else "M").getOrElse(""),
+//         maxpglevels = tiles.headOption.map(_.tileParams.core.pgLevels).getOrElse(0),
+//         pmpregions = tiles.headOption.map(_.tileParams.core.nPMPs).getOrElse(0),
+//         nharts = tiles.size,
+//         bootrom = chipyardSystem.bootROM.headOption.map(_.module.contents.toArray.mkString(" ")).getOrElse(""),
+//         has_dtm = useSimDTM,
+//         mems = mems,
+//         devices = devices,
+//         customCSRs = tiles.headOption.toSeq.flatMap { t =>
+//           // t.p, not p: CustomCSRs builds a CoreBundle, which needs p(TileKey).
+//           t.tileParams.core.customCSRs(t.p).decls.map(c =>
+//             (c.id, c.mask, c.init.getOrElse(BigInt(0))))
+//         },
+//         paddrBits = viewpointBus.busView.bundle.addressBits,
+//         // Mirrors HasTileParameters.{vaddrBits,vpnBitsExtended}, which tiles do
+//         // not mix in (BaseTile only gets HasNonDiplomaticTileParameters).
+//         vaddrBitsExtended = tiles.headOption.map { t =>
+//           val pa = viewpointBus.busView.bundle.addressBits
+//           val va = if (t.usingVM) t.maxHVAddrBits else ((pa + 1) min t.xLen)
+//           va + (if (va < t.xLen) 1 + (if (t.usingHypervisor) 1 else 0) else 0)
+//         }.getOrElse(0),
+//         // The CSR count, not nPMPs: rocket fixes it at CSR.maxPMPs if any PMP exists.
+//         npmpcsrs = tiles.headOption.map(t =>
+//           if (t.tileParams.core.nPMPs > 0) freechips.rocketchip.rocket.CSR.maxPMPs
+//           else 0).getOrElse(0),
+//         // Connect using the legacy API for firesim only
+//         mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
+//         mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
+//       )
+//       TracePort(() => trace, cfg)
+//     }
+//     (ports.toSeq, Nil)
+//   }
+// })
 
 class WithCustomBootPin extends OverrideIOBinder({
   (system: CanHavePeripheryCustomBootPin) => system.custom_boot_pin.map({ p =>
