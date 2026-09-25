@@ -22,17 +22,24 @@ class ChipLikeRocketConfig extends Config(
   //==================================
   // Set up I/O
   //==================================
-  new testchipip.serdes.WithSerialTL(Seq(testchipip.serdes.SerialTLParams(              // 1 serial tilelink port
-    manager = Some(testchipip.serdes.SerialTLManagerParams(                             // port acts as a manager of offchip memory
-      memParams = Seq(testchipip.serdes.ManagerRAMParams(                               // 4 GB of off-chip memory
-        address = BigInt("80000000", 16),
-        size    = BigInt("100000000", 16)
+  new testchipip.serdes.WithSerialTL(Seq(
+    testchipip.serdes.SerialTLParams(
+      manager = None,
+      client = Some(testchipip.serdes.SerialTLClientParams()),                                        // Allow chip to access this device's memory (DRAM)
+      phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32)  // serial-tilelink interface with 32 lanes
+    ),
+    testchipip.serdes.SerialTLParams(              // 1 serial tilelink port
+      manager = Some(testchipip.serdes.SerialTLManagerParams(                             // port acts as a manager of offchip memory
+        memParams = Seq(testchipip.serdes.ManagerRAMParams(                               // 4 GB of off-chip memory
+          address = BigInt("80000000", 16),
+          size    = BigInt("100000000", 16)
+        )),
+        isMemoryDevice = true
       )),
-      isMemoryDevice = true
-    )),
-    client = Some(testchipip.serdes.SerialTLClientParams()),                            // Allow an external manager to probe this chip
-    phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=4, flitWidth=16)   // 4-bit bidir interface, sync'd to an external clock
-  ))) ++
+      client = Some(testchipip.serdes.SerialTLClientParams()),                            // Allow an external manager to probe this chip
+      phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=4, flitWidth=16)   // 4-bit bidir interface, sync'd to an external clock
+    ))
+  ) ++
 
   new freechips.rocketchip.subsystem.WithNoMemPort ++                                   // Remove axi4 mem port
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++                          // 1 memory channel
@@ -64,7 +71,7 @@ class ChipBringupHostConfig extends Config(
   //=============================
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++  // Generate absolute frequencies
   new chipyard.harness.WithSerialTLTiedOff ++                       // when doing standalone sim, tie off the serial-tl port
-  new chipyard.harness.WithSimTSIToUARTTSI ++                       // Attach SimTSI-over-UART to the UART-TSI port
+  // new chipyard.harness.WithSimTSIToUARTTSI ++                       // Attach SimTSI-over-UART to the UART-TSI port
   new chipyard.iobinders.WithSerialTLPunchthrough ++                // Don't generate IOCells for the serial TL (this design maps to FPGA)
 
   //=============================
@@ -96,7 +103,7 @@ class ChipBringupHostConfig extends Config(
   //=============================
   // Generate the TSI-over-UART side of the bringup system
   //=============================
-  new testchipip.tsi.WithUARTTSIClient(initBaudRate = BigInt(921600)) ++       // nonstandard baud rate to improve performance
+  // new testchipip.tsi.WithUARTTSIClient(initBaudRate = BigInt(3686400L)) ++       // nonstandard baud rate to improve performance
 
   //=============================
   // Set up clocks of the bringup system
@@ -110,7 +117,7 @@ class ChipBringupHostConfig extends Config(
 // DOC include start: TetheredChipLikeRocketConfig
 class TetheredChipLikeRocketConfig extends Config(
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++   // use absolute freqs for sims in the harness
-  new chipyard.harness.WithMultiChipSerialTL(0, 1) ++                // connect the serial-tl ports of the chips together
+  new chipyard.harness.WithMultiChipSerialTL(0, 1, 1, 0) ++                // connect the serial-tl ports of the chips together
   new chipyard.harness.WithMultiChip(0, new ChipLikeRocketConfig) ++ // ChipTop0 is the design-to-be-taped-out
   new chipyard.harness.WithMultiChip(1, new ChipBringupHostConfig))  // ChipTop1 is the bringup design
 // DOC include end: TetheredChipLikeRocketConfig

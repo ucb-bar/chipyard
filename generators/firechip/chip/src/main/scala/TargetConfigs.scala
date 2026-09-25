@@ -21,6 +21,8 @@ import icenet._
 import chipyard.clocking.{ChipyardPRCIControlKey}
 import chipyard.harness.{HarnessClockInstantiatorKey}
 
+import scala.collection.immutable.ListMap
+
 // Disables clock-gating; doesn't play nice with our FAME-1 pass
 class WithoutClockGating extends Config((site, here, up) => {
   case DebugModuleKey => up(DebugModuleKey).map(_.copy(clockGate = false))
@@ -394,6 +396,30 @@ class IrisFiresimConfig extends Config(
   new WithoutClockGating ++
   // Optional: Do not support debug module w. JTAG until FIRRTL stops emitting @(posedge ~clock)
   new chipyard.config.WithNoDebug ++
+
+  new testchipip.serdes.WithSerialTL(Seq(
+    testchipip.serdes.SerialTLParams(
+      manager = None,
+      client = Some(testchipip.serdes.SerialTLClientParams()),                                        // Allow chip to access this device's memory (DRAM)
+      phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=32, flitWidth=32)  // serial-tilelink interface with 32 lanes
+    ),
+    testchipip.serdes.SerialTLParams(
+      // port acts as a manager of offchip memory
+      manager = Some(testchipip.serdes.SerialTLManagerParams(
+        memParams = Seq(testchipip.serdes.ManagerRAMParams(
+          address = BigInt("80000000", 16),
+          size = BigInt("100000000", 16)
+        )),
+        isMemoryDevice = true,
+        slaveWhere = MBUS
+      )),
+      // Allow an external manager to probe this chip
+      client = Some(testchipip.serdes.SerialTLClientParams()),
+      // 16-bit bidir interface, synced to an external clock
+      phyParams = testchipip.serdes.DecoupledExternalSyncSerialPhyParams(phitWidth=16, flitWidth=16)  // serial-tilelink interface with 16 lanes
+    ))
+  ) ++
+  
   new chipyard.config.WithUART(
     baudrate=BigInt(3686400L),
     txEntries=256, rxEntries=256) ++        // FireSim requires a larger UART FIFO buffer,
@@ -450,9 +476,9 @@ class IrisFiresimBringupConfig extends Config(
   new chipyard.NoCoresConfig
 )
 
-class IrisFiresimCombinedConfig extends Config(
+class IrisFiresimNOCflushCombinedConfig extends Config(
   new WithFireSimHarnessClockBridgeInstantiator ++
-  new chipyard.harness.WithMultiChipSerialTL(0, 1) ++
+  new chipyard.harness.WithMultiChipSerialTL(0, 1, 1, 0) ++                // connect the serial-tl ports of the chips together
   new chipyard.harness.WithMultiChip(0, new IrisFiresimConfig) ++
   new chipyard.harness.WithMultiChip(1, new IrisFiresimBringupConfig)
 

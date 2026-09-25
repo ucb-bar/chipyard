@@ -68,8 +68,10 @@ class WithTSIBridgeAndHarnessRAMOverSerialTL extends HarnessBinder({
         // This assumes that:
         // If ExtMem for the target is defined, then FASED bridge will be attached
         // If FASED bridge is attached, loadmem widget is present
-        val hasMainMemory = th.chipParameters(chipId)(ExtMem).isDefined
-        val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(chipId))
+        // Iterate through all chiptops in the system to find the lowest numbered one with external memory
+        val mainMemoryChipIndex = th.chipParameters.map(c => c(ExtMem).isDefined).indexWhere(identity)
+        val hasMainMemory = mainMemoryChipIndex != -1
+        val mainMemoryName = Option.when(hasMainMemory)(MainMemoryConsts.globalName(mainMemoryChipIndex))
         TSIBridge(th.harnessBinderClock, ram.io.tsi.get, mainMemoryName, th.harnessBinderReset.asBool)(th.p)
       }
     }
