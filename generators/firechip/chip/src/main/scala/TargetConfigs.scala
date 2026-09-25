@@ -326,13 +326,56 @@ class FireSimLeanGemminiRocketMMIOOnlyConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LeanGemminiRocketConfig)
 
-class FireSimRadianceClusterSynConfig extends Config(
-  new chipyard.harness.WithHarnessBinderClockFreqMHz(500.0) ++
+// NOTE: renamed from FireSimRadianceClusterSynConfig (RadianceClusterSynConfig -> VirgoClusterSynConfig).
+// Currently DISABLED because the entire generators/radiance/chipyard/VirgoConfigs.scala is block-commented
+// (/* ... */, lines 12-150) in the checked-out radiance submodule, so chipyard.VirgoClusterSynConfig does
+// not compile. (The pre-rename version was equally non-compiling; it only linked against a stale
+// .classpath_cache/chipyard.jar that still had the old RadianceClusterSynConfig.class.)
+// To enable: uncomment VirgoConfigs.scala in the radiance submodule, then restore this class.
+// class FireSimVirgoClusterSynConfig extends Config(
+//   new chipyard.harness.WithHarnessBinderClockFreqMHz(500.0) ++
+//   new chipyard.config.WithNoTraceIO ++
+//   new WithDefaultFireSimBridges ++
+//   new chipyard.config.WithRadBootROM ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.VirgoClusterSynConfig)
+
+// Radiance GPU tapeout SoC (chipyard.RadianceTapeoutSimConfig) on FireSim.
+// - WithRadianceSimParams(false): force NON-sim mode so CyclotronLinked is false and the
+//   real Muon RTL is synthesized instead of the Cyclotron DPI golden-model core (whose C++
+//   would otherwise be concatenated into the netlist and fail Vivado synthesis).
+// - WithNoTraceIO: GPU (Muon) tiles have no rocket-style instruction trace (disable TracerV).
+// - WithExtMemSize 4 GiB: pin target DRAM to the chip's real 4 GiB, overriding FireSim's 16 GiB
+//   default (which inflates the address width to 35-bit and overlaps the contingent scratchpad).
+// GPUResetKey override: the tapeout configs set defaultReset=false, which starts the Muon
+// cores NOT held in reset. With no active warps at boot, the GPUResetAggregator's
+// stop("no more active warps for 1k cycles") fires ~immediately and halts the FireSim
+// simulation before the Rocket can boot. For a standalone FireSim run we want the cores
+// held in soft-reset by default (like the HostLaunch variants) so the sim runs; the Rocket
+// releases them later. Override just the field (do NOT re-add the injector).
+class WithGPUDefaultResetHeld extends Config((site, here, up) => {
+  case radiance.subsystem.GPUResetKey => up(radiance.subsystem.GPUResetKey).map(_.copy(defaultReset = true))
+})
+
+class FireSimRadianceTapeoutConfig extends Config(
+  new WithGPUDefaultResetHeld ++
+  new radiance.subsystem.WithRadianceSimParams(false) ++
   new chipyard.config.WithNoTraceIO ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
-  new chipyard.config.WithRadBootROM ++
   new WithFireSimConfigTweaks ++
-  new chipyard.RadianceClusterSynConfig)
+  new chipyard.RadianceTapeoutSimConfig)
+
+// Single-cluster Radiance on FireSim -- same FireSim tweaks as FireSimRadianceTapeoutConfig,
+// but the single-cluster target (~1.42M LUTs) so it fits one U250 (2-cluster is ~1.7x too big).
+class FireSimRadianceSingleClusterConfig extends Config(
+  new WithGPUDefaultResetHeld ++
+  new radiance.subsystem.WithRadianceSimParams(false) ++
+  new chipyard.config.WithNoTraceIO ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.RadianceSingleClusterTapeoutSimConfig)
 
 class FireSimLargeBoomCospikeConfig extends Config(
   new WithCospikeBridge ++
