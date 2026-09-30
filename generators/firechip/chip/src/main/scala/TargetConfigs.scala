@@ -368,14 +368,28 @@ class FireSimRadianceTapeoutConfig extends Config(
 
 // Single-cluster Radiance on FireSim -- same FireSim tweaks as FireSimRadianceTapeoutConfig,
 // but the single-cluster target (~1.42M LUTs) so it fits one U250 (2-cluster is ~1.7x too big).
-class FireSimRadianceSingleClusterConfig extends Config(
+// DISABLED: chipyard.RadianceSingleClusterTapeoutSimConfig only exists on radiance's split-l2 branch,
+// not on radiance main, so this does not compile against main. Restore it when radiance is on split-l2.
+// class FireSimRadianceSingleClusterConfig extends Config(
+//   new WithGPUDefaultResetHeld ++
+//   new radiance.subsystem.WithRadianceSimParams(false) ++
+//   new chipyard.config.WithNoTraceIO ++
+//   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.RadianceSingleClusterTapeoutSimConfig)
+
+// Single-cluster Radiance whose Gemmini supports E4M3 single throughput only (no QuantLut), built from
+// radiance main's chipyard.RadianceE4M3MxGemminiSingleClusterConfig. Same FireSim tweaks as
+// FireSimRadianceTapeoutConfig.
+class FireSimE4M3MxGemminiRadianceConfig extends Config(
   new WithGPUDefaultResetHeld ++
   new radiance.subsystem.WithRadianceSimParams(false) ++
   new chipyard.config.WithNoTraceIO ++
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
-  new chipyard.RadianceSingleClusterTapeoutSimConfig)
+  new chipyard.RadianceE4M3MxGemminiSingleClusterConfig)
 
 class FireSimLargeBoomCospikeConfig extends Config(
   new WithCospikeBridge ++
