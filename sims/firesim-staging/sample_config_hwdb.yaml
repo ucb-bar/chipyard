@@ -127,3 +127,8 @@ nitefury_firesim_rocket_singlecore_no_nic:
     deploy_quintuplet_override: null
     deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
     custom_runtime_config: null
+corigine_mimicturbo_gt_firesim_rocket_singlecore_4GB_no_nic:
+    bitstream_tar: https://bitstreams.ucb.bar/corigine_mimicturbo_gt/corigine_mimicturbo_gt_firesim_rocket_singlecore_4GB_no_nic.tar.gz
+    deploy_quintuplet_override: null
+    deploy_makefrag_override: ../../generators/firechip/chip/src/main/makefrag/firesim
+    custom_runtime_config: null
