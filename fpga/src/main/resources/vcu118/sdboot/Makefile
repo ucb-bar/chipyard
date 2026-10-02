@@ -13,6 +13,15 @@ LFLAGS=-static -nostdlib -L $(ROOT_DIR)/linker -T sdboot.elf.lds
 # default to 1MHz but really should be overridden
 PBUS_CLK ?= 1000000
 
+# SPI divisors set by the design rather than derived from PBUS_CLK, when its SPI
+# controller does not run at the peripheral bus clock
+ifneq ($(SPI_DIV),)
+CFLAGS += -DSPI_DIV=$(SPI_DIV)
+endif
+ifneq ($(SPI_INIT_DIV),)
+CFLAGS += -DSPI_INIT_DIV=$(SPI_INIT_DIV)
+endif
+
 default: elf bin dump
 
 # Always rebuilt: the image depends on PBUS_CLK as well as the sources, and the

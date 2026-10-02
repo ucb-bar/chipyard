@@ -3,7 +3,7 @@ package chipyard.fpga.vcu118
 import sys.process._
 
 import org.chipsalliance.cde.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{PeripheryBusKey, ControlBusKey, ExtMem}
+import freechips.rocketchip.subsystem.{ControlBusKey, ExtMem}
 import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{RegionType, AddressSet}
@@ -31,9 +31,7 @@ class WithSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
-    // the SPI controller is on the peripheral bus, so its clock sets the SPI divisor
-    val freqMHz = (site(PeripheryBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-    val make = s"make -C fpga/src/main/resources/vcu118/sdboot PBUS_CLK=${freqMHz} bin"
+    val make = s"make -C fpga/src/main/resources/vcu118/sdboot ${SDBoot.makeVars(site)} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = SystemFileName(s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin"))
   }

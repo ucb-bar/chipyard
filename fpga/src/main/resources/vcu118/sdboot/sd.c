@@ -41,8 +41,14 @@
 // down would run the card faster than requested.
 // @see https://ucb-bar.gitbook.io/baremetal-ide/baremetal-ide/using-peripheral-devices/sifive-ips/serial-peripheral-interface-spi
 #define SPI_DIV_FOR(khz) 	(((F_CLK * 1000) + 2 * (khz) - 1) / (2 * (khz)) - 1)
+// Either divisor may instead be set at build time (SPI_DIV=, SPI_INIT_DIV=), by a
+// design whose SPI controller does not run at TL_CLK.
+#ifndef SPI_DIV
 #define SPI_DIV 	SPI_DIV_FOR(SPI_CLK)
+#endif
+#ifndef SPI_INIT_DIV
 #define SPI_INIT_DIV 	SPI_DIV_FOR(SPI_INIT_CLK)
+#endif
 
 static volatile uint32_t * const spi = (void *)(SPI_CTRL_ADDR);
 
