@@ -2,8 +2,9 @@ package chipyard.fpga.zcu104
 
 import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.resources.DTSTimebase
-import freechips.rocketchip.subsystem.{ExtMem, SystemBusKey}
+import freechips.rocketchip.subsystem.ExtMem
 import freechips.rocketchip.util.SystemFileName
+import chipyard.fpga.vcu118.SDBoot
 import org.chipsalliance.cde.config.Config
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
@@ -22,8 +23,7 @@ class WithSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
-    val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-    val make = s"make -C fpga/src/main/resources/zcu104/sdboot PBUS_CLK=$freqMHz bin"
+    val make = s"make -C fpga/src/main/resources/zcu104/sdboot ${SDBoot.makeVars(site)} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = SystemFileName(s"./fpga/src/main/resources/zcu104/sdboot/build/sdboot.bin"))
   }
