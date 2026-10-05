@@ -461,6 +461,38 @@ nitefury_firesim_rocket_singlecore_no_nic:
     metasim_customruntimeconfig: null
     bit_builder_recipe: bit-builder-recipes/rhsresearch_nitefury_ii.yaml
 
+# Corigine MimicTurbo GT-only Config (8 GiB host DRAM, so at most 8 GiB of target DRAM)
+corigine_mimicturbo_gt_firesim_rocket_singlecore_4GB_no_nic:
+    PLATFORM: corigine_mimicturbo_gt
+    TARGET_PROJECT: firesim
+    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+    DESIGN: FireSim
+    TARGET_CONFIG: FireSimRocket4GiBDRAMConfig
+    PLATFORM_CONFIG: BaseCorigineMimicTurboGTConfig
+    deploy_quintuplet: null
+    platform_config_args:
+        fpga_frequency: 60
+        build_strategy: TIMING
+    post_build_hook: null
+    metasim_customruntimeconfig: null
+    bit_builder_recipe: bit-builder-recipes/corigine_mimicturbo_gt.yaml
+
+# Xilinx Alveo V80-only Config
+xilinx_alveo_v80_firesim_rocket_singlecore_no_nic:
+    PLATFORM: xilinx_alveo_v80
+    TARGET_PROJECT: firesim
+    TARGET_PROJECT_MAKEFRAG: ../../generators/firechip/chip/src/main/makefrag/firesim
+    DESIGN: FireSim
+    TARGET_CONFIG: FireSimRocketConfig
+    PLATFORM_CONFIG: BaseXilinxAlveoV80Config
+    deploy_quintuplet: null
+    platform_config_args:
+        fpga_frequency: 10
+        build_strategy: RUNTIME_OPTIMIZED
+    post_build_hook: null
+    metasim_customruntimeconfig: null
+    bit_builder_recipe: bit-builder-recipes/xilinx_alveo_v80.yaml
+
 # DOC include start: F2 Rocket Partition Build Recipe
 ################################################################################################
 # Fast-mode : pull out a RocketTile out from your SoC
