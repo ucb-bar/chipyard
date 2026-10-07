@@ -119,6 +119,23 @@ lazy val scalaTestSettings =  Seq(
 
 // Subproject definitions begin
 
+// -- PMU --
+
+lazy val pmu_schema = (project in file("generators/pmu/schema"))
+  .settings(commonSettings)
+  .settings(libraryDependencies += "com.lihaoyi" %% "ujson" % "3.1.0")
+
+lazy val pmu = (project in file("generators/pmu"))
+  .dependsOn(cde, pmu_schema)
+  .settings(commonSettings)
+  .settings(chiselSettings)
+  .settings(scalaTestSettings)
+
+lazy val pmu_tilelink = (project in file("generators/pmu/tilelink"))
+  .dependsOn(pmu, rocketchip)
+  .settings(commonSettings)
+  .settings(chiselSettings)
+
 // -- Rocket Chip --
 
 lazy val hardfloat = {
@@ -305,7 +322,7 @@ lazy val icenet = withInitCheck((project in file("generators/icenet")), "icenet"
   .settings(commonSettings)
 
 lazy val boom = freshProject("boom", file("generators/boom"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, pmu, pmu_tilelink)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
