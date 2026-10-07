@@ -11,6 +11,19 @@ class SmallBoomV3Config extends Config(
   new boom.v3.common.WithNSmallBooms(1) ++                          // small boom config
   new chipyard.config.AbstractConfig)
 
+// BOOM with a tile PMU in each tile, read over MMIO.
+class SmallBoomV3PMUConfig extends Config(
+  new boom.v3.common.WithTilePMU() ++
+  new SmallBoomV3Config)
+
+class DualSmallBoomV3PMUConfig extends Config(
+  new boom.v3.common.WithTilePMU() ++
+  new DualSmallBoomV3Config)
+
+class MediumBoomV3PMUConfig extends Config(
+  new boom.v3.common.WithTilePMU() ++
+  new MediumBoomV3Config)
+
 class MediumBoomV3Config extends Config(
   new boom.v3.common.WithNMediumBooms(1) ++                         // medium boom config
   new chipyard.config.AbstractConfig)
