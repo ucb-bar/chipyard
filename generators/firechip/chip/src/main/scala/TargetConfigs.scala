@@ -400,14 +400,15 @@ class FireSimE4M3MxGemminiTwoClusterRadianceConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.RadianceE4M3MxGemminiTwoClusterConfig)
 
-class FireSimE4M3MxGemminiTwoClusterOneCoreRadianceConfig extends Config(
+class FireSimE4M3MxGemminiFourClusterRadianceConfig extends Config(
   new WithGPUDefaultResetHeld ++
   new radiance.subsystem.WithRadianceSimParams(false) ++
   new chipyard.config.WithNoTraceIO ++
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
-  new chipyard.RadianceE4M3MxGemminiTwoClusterOneCoreConfig)
+  new chipyard.RadianceE4M3MxGemminiFourClusterConfig)
+
 
 class FireSimLargeBoomCospikeConfig extends Config(
   new WithCospikeBridge ++
