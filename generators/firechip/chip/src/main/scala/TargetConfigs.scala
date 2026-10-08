@@ -256,6 +256,20 @@ class FireSimLargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LargeBoomV3Config)
 
+// BOOM with an interval trace bridge per tile. The MMIO-only bridge set has no
+// TracerV bridge, which would also attach to the trace port.
+class FireSimLargeBoomV3IntervalTraceConfig extends Config(
+  new WithBoomIntervalTrace ++
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.LargeBoomV3Config)
+
+class FireSimMegaBoomV3IntervalTraceConfig extends Config(
+  new WithBoomIntervalTrace ++
+  new WithDefaultMMIOOnlyFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MegaBoomV3Config)
+
 //*****************************************************************
 // Saturn configs, base off chipyard's SaturnConfigs
 //*****************************************************************
