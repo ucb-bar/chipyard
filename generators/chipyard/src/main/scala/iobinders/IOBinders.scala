@@ -480,6 +480,13 @@ class WithTraceGenSuccessPunchthrough extends OverrideIOBinder({
   }
 })
 
+/** retirementLatency: cycles by which the tile's trace retirement lags its PMU events. */
+case class PMUTraceParams(retirementLatency: Int)
+case object ExportPMUTrace extends Field[Option[PMUTraceParams]](None)
+class WithPMUTraceIO(retirementLatency: Int) extends Config((site, here, up) => {
+  case ExportPMUTrace => Some(PMUTraceParams(retirementLatency))
+})
+
 class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveTraceIO) => InModuleBody {
     val ports: Option[TracePort] = system.traceIO.map { t =>
@@ -553,7 +560,24 @@ class WithTraceIOPunchthrough extends OverrideLazyIOBinder({
         mem0_base = p(ExtMem).map(_.master.base).getOrElse(BigInt(0)),
         mem0_size = p(ExtMem).map(_.master.size).getOrElse(BigInt(0)),
       )
-      TracePort(() => trace, cfg)
+      val pmuPorts = p(ExportPMUTrace).map { pmuTrace =>
+        val tileIds = chipyardSystem.traceNodes.keys.toSeq
+        require(tileIds.size == trace.traces.size, "Trace port and tile identities disagree")
+        tileIds.map { tileId =>
+          val events = chipyardSystem.totalTiles(tileId).module match {
+            case m: pmu.CanHavePMUEvents => m.pmuEvents.getOrElse(
+              throw new IllegalArgumentException(s"PMU trace tile $tileId has no PMU events"))
+            case other => throw new IllegalArgumentException(
+              s"PMU trace tile $tileId does not provide PMU events: ${other.getClass.getName}")
+          }
+          val local = events.bore()
+          val pmu_events = IO(Output(new PMUTraceIO(local.increments.map(chiselTypeOf(_)))))
+            .suggestName(s"pmu_events_$tileId")
+          pmu_events.increments.zip(local.increments).foreach { case (sink, source) => sink := source }
+          PMUTracePort(() => pmu_events, local.manifest, pmuTrace.retirementLatency)
+        }
+      }.getOrElse(Nil)
+      TracePort(() => trace, cfg, pmuPorts)
     }
     (ports.toSeq, Nil)
   }
