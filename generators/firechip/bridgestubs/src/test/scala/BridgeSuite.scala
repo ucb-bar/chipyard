@@ -11,6 +11,7 @@ import firesim.{BasePlatformConfig, TestSuiteCommon}
 
 object BaseConfigs {
   case object F1 extends BasePlatformConfig("f1", Seq("DefaultF1Config"))
+  case object U250 extends BasePlatformConfig("xilinx_alveo_u250", Seq("BaseXilinxAlveoU250Config"))
 }
 
 abstract class BridgeSuite(
@@ -101,4 +102,6 @@ class BridgeTests
       new TracerVF1TestCount1,
       new TracerVF1TestCount6,
       new TracerVF1TestCount7,
+      new IntervalTraceU250Width1Test,
+      new IntervalTraceU250Width4Test,
     )

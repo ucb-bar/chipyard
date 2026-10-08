@@ -222,3 +222,20 @@ Epoch IDs start at 1 and the baseline snapshot ID is 0. Each nominal snapshot an
 the final snapshot take the next ID. Within a target cycle, PMU records precede BB
 records; an epoch start precedes its baseline, and an epoch end follows the final
 snapshot and any partial BB.
+
+## Tests
+
+From the Chipyard root:
+
+```sh
+sbt "project firechip_bridgestubs; testOnly firechip.bridgestubs.IntervalTraceInterfaceSpec"
+sbt "project firechip_bridgestubs; testOnly firechip.bridgestubs.IntervalTraceU250Width1Test firechip.bridgestubs.IntervalTraceU250Width4Test"
+```
+
+`IntervalTraceInterfaceSpec` checks bridge keys and the target-side annotations.
+The other two build `IntervalTraceModule` as a Verilator metasimulation: a target
+with two bridges, with retirement latencies 1 and 0, fed through peek/poke. Its
+C++ test ([`IntervalTraceModule.cc`](src/main/cc/bridges/test/IntervalTraceModule.cc))
+drives a fixed retirement and PMU sequence, models the bridge, and writes the
+expected output files. The suite compares every output file of both bridges under
+each trigger mode.

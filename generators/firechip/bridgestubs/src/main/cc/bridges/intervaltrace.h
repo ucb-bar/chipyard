@@ -39,6 +39,16 @@ public:
   bool terminate() override { return failed; }
   int exit_code() override { return failed ? 1 : 0; }
 
+  // Capture configuration, read by tests that model the bridge's output.
+  bool capture_enabled() const { return enabled; }
+  uint64_t interval_length() const { return nominal_interval; }
+  uint32_t trigger_mode() const { return trigger_selector; }
+  uint64_t trigger_start_endpoint() const { return trigger_start; }
+  uint64_t trigger_end_endpoint() const { return trigger_end; }
+  const std::string &output_prefix() const { return prefix; }
+  const std::string &manifest_json() const { return manifest; }
+  const std::vector<std::string> &event_list() const { return event_names; }
+
 private:
   size_t drain(size_t minimum_bytes);
   void write_features(const intervaltrace_features &features);
