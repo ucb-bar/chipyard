@@ -3,7 +3,7 @@ package chipyard.fpga.vc707
 import sys.process._
 
 import org.chipsalliance.cde.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
+import freechips.rocketchip.subsystem.{ControlBusKey, ExtMem}
 import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{RegionType, AddressSet}
@@ -19,6 +19,7 @@ import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize}
 import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem}
+import chipyard.fpga.vcu118.SDBoot
 import chipyard.harness._
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
@@ -30,8 +31,7 @@ class WithSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt{(1e6).toLong}
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
-    val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-    val make = s"make -C fpga/src/main/resources/vc707/sdboot PBUS_CLK=${freqMHz} bin"
+    val make = s"make -C fpga/src/main/resources/vc707/sdboot ${SDBoot.makeVars(site)} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = SystemFileName(s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin"))
   }
