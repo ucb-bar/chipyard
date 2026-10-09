@@ -139,6 +139,28 @@ class WithTracerVBridge extends HarnessBinder({
   }
 })
 
+/** One interval trace bridge per traced tile, fed by the tile's trace and PMU events. */
+class WithIntervalTraceBridge extends HarnessBinder({
+  case (th: FireSim, port: TracePort, chipId: Int) => {
+    require(port.pmuPorts.size == port.io.traces.size,
+      s"Interval trace chip $chipId requires a PMU event port for every traced tile")
+    port.io.traces.zip(port.pmuPorts).foreach { case (tile_trace, pmuPort) =>
+      IntervalTraceBridge(tile_trace, pmuPort.manifest, pmuPort.io.increments.toSeq, pmuPort.retirementLatency)
+    }
+  }
+})
+
+/** Interval tracing for BOOM: collects PMU events, exports them with the trace
+  * port, and attaches an interval trace bridge to each tile.
+  */
+class WithBoomIntervalTrace extends Config(
+  new WithIntervalTraceBridge ++
+  // BOOM reports retirement one cycle after its PMU events.
+  new chipyard.iobinders.WithPMUTraceIO(retirementLatency = 1) ++
+  new boom.v3.common.WithPMUEvents ++
+  new chipyard.config.WithTraceIO
+)
+
 class WithCospikeBridge extends HarnessBinder({
   case (th: FireSim, port: TracePort, chipId: Int) => {
     port.io.traces.zipWithIndex.map(t => CospikeBridge(t._1, t._2, port.cosimCfg))

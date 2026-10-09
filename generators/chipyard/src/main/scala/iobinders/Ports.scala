@@ -2,6 +2,7 @@ package chipyard.iobinders
 
 import chisel3._
 import chisel3.experimental.{Analog}
+import chisel3.util.{MixedVec}
 import sifive.blocks.devices.uart.{UARTPortIO}
 import sifive.blocks.devices.spi.{SPIFlashParams, SPIPortIO}
 import sifive.blocks.devices.gpio.{GPIOPortIO}
@@ -86,7 +87,17 @@ case class UARTTSIPort     (val getIO: () => UARTTSIIO)
 case class SuccessPort     (val getIO: () => Bool)
     extends Port[Bool]
 
-case class TracePort       (val getIO: () => TraceOutputTop, val cosimCfg: SpikeCosimConfig)
+/** One tile's PMU event increments, in event-ID order. */
+class PMUTraceIO(incrementTypes: Seq[UInt]) extends Bundle {
+  val increments = MixedVec(incrementTypes)
+}
+
+/** Sideband event port owned by the corresponding entry of TracePort. */
+case class PMUTracePort(val getIO: () => PMUTraceIO, manifest: pmu.PMUManifest, retirementLatency: Int)
+    extends Port[PMUTraceIO]
+
+case class TracePort       (val getIO: () => TraceOutputTop, val cosimCfg: SpikeCosimConfig,
+                            pmuPorts: Seq[PMUTracePort] = Nil)
     extends Port[TraceOutputTop]
 
 case class CustomBootPort  (val getIO: () => Bool)
