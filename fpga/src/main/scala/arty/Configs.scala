@@ -35,3 +35,12 @@ class TinyRocketArtyConfig extends Config(
   new chipyard.TinyRocketConfig
 )
 // DOC include end: AbstractArty and Rocket
+
+// DOC include start: Arty BSCAN JTAG
+// Same TinyRocket SoC, but the JTAG DTM is reached through the FPGA's own TAP
+// (BSCANE2 USER4 tunnel) over the USB programming cable instead of PMOD.
+class TinyRocketArtyBScanConfig extends Config(
+  new WithArtyBScanJTAGHarnessBinder ++
+  new TinyRocketArtyConfig
+)
+// DOC include end: Arty BSCAN JTAG

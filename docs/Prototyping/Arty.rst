@@ -70,6 +70,47 @@ Adding this config. fragment will enable and connect the JTAG and UART interface
 
 Future peripherals to be supported include the Arty A7-35T SPI Flash EEPROM, and I2C/PWM/SPI over the Arty A7-35T GPIO pins. These peripherals are available as part of sifive-blocks.
 
+Arty35T: Debugging over the USB Cable (BSCAN Tunnel)
+----------------------------------------------------
+
+The Arty A7-35T's USB cable carries two FTDI channels: channel A programs the FPGA over the Artix-7's own JTAG TAP, and channel B is the UART.
+The stock ``TinyRocketArtyConfig`` above brings the SoC's RISC-V JTAG DTM out on PMOD, so debugging needs a second JTAG adapter.
+``TinyRocketArtyBScanConfig`` instead routes the DTM through the FPGA TAP's ``USER4`` register using the ``JTAGTUNNEL`` block from ``fpga-shells``, so the programming cable is also the debug cable.
+
+.. literalinclude:: ../../fpga/src/main/scala/arty/Configs.scala
+    :language: scala
+    :start-after: DOC include start: Arty BSCAN JTAG
+    :end-before: DOC include end: Arty BSCAN JTAG
+
+Build and program as usual:
+
+.. code-block:: shell
+
+		cd fpga/
+		make SUB_PROJECT=arty35t CONFIG=TinyRocketArtyBScanConfig bitstream
+
+Then attach OpenOCD with the provided configuration, which selects the Series-7 TAP and enables the nested-TAP BSCAN tunnel (``riscv use_bscan_tunnel 5``, Rocket's DTM IR width):
+
+.. code-block:: shell
+
+		openocd -f fpga/scripts/arty35t_bscan_openocd.cfg
+
+GDB connects to OpenOCD's GDB server on port 3333.
+Declare the BootROM as read-only first; otherwise GDB single-steps by planting a software breakpoint at the next PC, which fails inside ROM:
+
+.. code-block:: shell
+
+		riscv64-unknown-elf-gdb
+		(gdb) target extended-remote :3333
+		(gdb) mem 0x10000 0x1ffff ro
+		(gdb) info registers pc
+
+Notes:
+
+* The tunnelled DTM is clocked by the FPGA TCK only while ``USER4`` is selected, which is what OpenOCD's tunnel expects.
+* ``openFPGALoader`` and OpenOCD both open FTDI channel A; program first, then start OpenOCD.
+* Requires an OpenOCD with the ``riscv`` target and BSCAN tunnel support.
+
 Brief Implementation Description and Guidance for Adding/Changing Xilinx Collateral
 -----------------------------------------------------------------------------------
 
