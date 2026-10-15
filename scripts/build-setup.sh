@@ -200,11 +200,27 @@ conda environment or \`source env.sh\` and skip this step with \`-s 1\`." >&2
         $CYDIR/scripts/generate-conda-lockfiles.sh
         exit_if_last_command_failed
     fi
-    SYS_GLIBC=$(ldd --version | awk '/ldd/{print $NF}')
-    DEFAULT_GLIBC=$(grep -i "sysroot_linux-64=" conda-reqs/chipyard-base.yaml | awk -F= '{print $2}')
-    if [ "$SYS_GLIBC" != "$DEFAULT_GLIBC" ]; then
-        # replace the glibc version
-        sed -i.bak "s/^\([[:space:]]*-\s*sysroot_linux-64=\).*/\1$SYS_GLIBC/" conda-reqs/chipyard-base.yaml
+    SYS_GLIBC=$(ldd --version 2>/dev/null | awk '/ldd/{print $NF; exit}')
+    DEFAULT_GLIBC=$(sed -n 's/^[[:space:]]*-[[:space:]]*sysroot_linux-64=\([0-9.]*\).*/\1/p' "$CONDA_REQS/chipyard-base.yaml")
+    SYSROOT_GLIBC=""
+    if [[ "$SYS_GLIBC" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+        # Conda-forge publishes only these sysroots. Use the newest one that
+        # does not require a newer glibc than the host provides.
+        # NOTE: THIS REQUIRES MANUAL UPDATES BY CHECKING HERE: https://anaconda.org/channels/conda-forge/packages/sysroot_linux-64/files
+        for version in 2.39 2.34 2.28 2.17 2.12.2 2.12; do
+            if [ "$(printf '%s\n' "$version" "$SYS_GLIBC" | sort -V | head -n 1)" = "$version" ]; then
+                SYSROOT_GLIBC=$version
+                break
+            fi
+        done
+    fi
+    if [ -z "$SYSROOT_GLIBC" ]; then
+        echo "WARNING: Cannot select a sysroot for host glibc '${SYS_GLIBC:-unknown}'; keeping $DEFAULT_GLIBC."
+    elif [ "$(printf '%s\n' "$SYSROOT_GLIBC" 2.33 | sort -V | head -n 1)" != 2.33 ]; then
+        echo "WARNING: Selected sysroot $SYSROOT_GLIBC is below glibc 2.33 required by VCS."
+    fi
+    if [ -n "$SYSROOT_GLIBC" ] && [ "$SYSROOT_GLIBC" != "$DEFAULT_GLIBC" ]; then
+        sed -i "s/^\([[:space:]]*-[[:space:]]*sysroot_linux-64=\)[0-9.]*/\1$SYSROOT_GLIBC/" "$CONDA_REQS/chipyard-base.yaml"
         $CYDIR/scripts/generate-conda-lockfiles.sh
         exit_if_last_command_failed
     fi
