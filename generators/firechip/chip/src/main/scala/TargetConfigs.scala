@@ -91,6 +91,10 @@ class WithFireSimDesignTweaks extends Config(
   new testchipip.iceblk.WithBlockDevice
 )
 
+// 8 GiB of target DRAM, for hosts with 8 GB of DRAM; put it first in TARGET_CONFIG: With8GiBDRAM_<config>
+class With8GiBDRAM extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L))
+
 // Tweaks to modify target clock frequencies / crossings to legacy firesim defaults
 class WithFireSimHighPerfClocking extends Config(
   // Create clock group for uncore that does not include mbus
@@ -258,7 +262,7 @@ class FireSimLargeBoomConfig extends Config(
 
 // MegaBoom with 8 GiB of DRAM, the DRAM size of the Corigine MimicTurbo GT board
 class FireSimMegaBoom8GiBDRAMConfig extends Config(
-  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++
+  new With8GiBDRAM ++
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
   new chipyard.MegaBoomV3Config)
