@@ -153,8 +153,8 @@ transformed or augmented by any Chipyard FIRRTL transform.
 
 As mentioned earlier in this section, ``BlackBox`` resource files must
 be integrated into the build process, so any project providing
-``BlackBox`` resources must be made visible to the ``tapeout`` project
-in ``build.sbt``.
+``BlackBox`` resources must be made visible to the ``chipyard`` generator
+project in ``build.sbt``.
 
 Differences between ``HasBlackBoxPath`` and ``HasBlackBoxResource``
 -------------------------------------------------------------------
@@ -168,8 +168,8 @@ Files referenced by the ``addResource`` must be located within this ``jar`` file
 Thus if a file is generated during Chisel generation it will not be present in the ``jar`` file until the next time the Chisel sources are compiled.
 
 ``HasBlackBoxPath`` differs in that it incorporates extra files by using an absolute path to them.
-Later in the build process, the FIRRTL compiler will copy the file from that location to the generated sources directory.
-Thus, the file must be present before the FIRRTL compiler is run (i.e. the file doesn't need to be in the ``src/main/resources`` or it can be auto-generated during Chisel elaboration).
+Later in the build process, the FIRRTL compiler (``firtool``) will copy the file from that location to the generated sources directory.
+Thus, the file must be present before ``firtool`` is run (i.e. the file doesn't need to be in the ``src/main/resources`` or it can be auto-generated during Chisel elaboration).
 
 Additionally, both mechanisms do not enforce the order of files added.
 For example:
