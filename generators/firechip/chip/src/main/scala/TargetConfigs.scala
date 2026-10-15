@@ -256,6 +256,13 @@ class FireSimLargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LargeBoomV3Config)
 
+// MegaBoom with 8 GiB of DRAM, the DRAM size of the Corigine MimicTurbo GT board
+class FireSimMegaBoom8GiBDRAMConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L) ++
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MegaBoomV3Config)
+
 //*****************************************************************
 // Saturn configs, base off chipyard's SaturnConfigs
 //*****************************************************************
