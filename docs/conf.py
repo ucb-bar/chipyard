@@ -325,8 +325,8 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'python' : ('https://docs.python.org/', None),
-                       'boom' : ('https://docs.boom-core.org/en/latest/', None),
-                        'firesim' : ('http://docs.fires.im/en/latest/', None) }
+                       'boom' : ('https://docs.boom-core.org/en/latest/', None) }
+# FireSim links use fsim_doc below; its Starlight site does not publish objects.inv.
 
 # resolve label conflict between documents
 autosectionlabel_prefix_document = True
