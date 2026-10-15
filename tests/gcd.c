@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "mmio.h"
 
 #define GCD_STATUS 0x4000

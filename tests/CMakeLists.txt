@@ -54,7 +54,6 @@ set(LINKER_SCRIPT       "htif.ld")
 
 add_compile_options(-std=gnu99)
 add_compile_options(-O2 -Wall -Wextra)
-add_compile_options(-Wno-implicit-function-declaration)
 add_compile_options(-fno-common -fno-builtin-printf)
 add_compile_options(${ARCH_FLAGS})
 add_compile_options(${SPEC_FLAGS})
@@ -73,12 +72,6 @@ add_executable(blkdev blkdev.c)
 add_executable(accum accum.c)
 add_executable(charcount charcount.c)
 add_executable(cpp-hello cpp-hello.cpp)
-target_link_libraries(cpp-hello PRIVATE
-    "-Wl,--start-group"
-    "-l:libc.a"
-    "-lstdc++"
-    "-Wl,--end-group"
-)
 add_executable(nic-loopback nic-loopback.c)
 add_executable(big-blkdev big-blkdev.c)
 add_executable(pingd pingd.c)
@@ -97,8 +90,7 @@ add_executable(multi-ctc-test multi-ctc-test.c)
 add_executable(triple-chiplet triple-chiplet.c)
 
 # Work around the broken _REENT_SMALL exit path in the GCC 16 nano Newlib
-# shipped by the conda toolchain.  Keep cpp-hello on its separate full-libc
-# path.
+# shipped by the conda toolchain.
 set(NANO_TEST_TARGETS
     pwm blkdev accum charcount nic-loopback big-blkdev pingd
     streaming-passthrough streaming-fir nvdla spiflashread spiflashwrite
