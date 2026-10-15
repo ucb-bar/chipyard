@@ -32,6 +32,13 @@ class WithInclusiveCacheExteriorBuffer(buffer: InclusiveCachePortParameters = In
   case InclusiveCacheKey => up(InclusiveCacheKey).copy(bufInnerExterior=buffer, bufOuterExterior=buffer)
 })
 
+// Customize the control crossing of the inclusive LLC. The LLC runs on the sbus domain, and the
+// two control ports are driven by the cbus. Defaults to whatever crossing is already configured
+// between sbus and cbus.
+class WithInclusiveCacheCtrlCrossingType(xType: Option[ClockCrossingType] = None) extends Config((site, here, up) => {
+  case InclusiveCacheKey => up(InclusiveCacheKey).copy(ctrlXType = xType.getOrElse(site(SbusToCbusXTypeKey)))
+})
+
 /** Use asynchronous reset for Rocket Chip's Debug Module. */
 class WithAsyncResetRocketSubsystem extends Config((_, _, _) => {
   case SubsystemResetSchemeKey => ResetAsynchronous
