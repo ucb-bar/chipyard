@@ -28,10 +28,15 @@ fi
 # We never authenticate to a private index, so disable the keyring to avoid weird errs
 export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
 
+trap 'rm -f "${TMP_LOCKFILE:-}"' EXIT
+
 for TOOLCHAIN_TYPE in riscv-tools; do
   for PLATFORM in linux-64 linux-aarch64; do
     LOCKFILE="$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-$PLATFORM.conda-lock.yml"
-    rm -f "$LOCKFILE"
+    # Keep the temporary lock beside the destination so relative source paths
+    # remain valid after installation. conda-lock requires a nonexistent file.
+    TMP_LOCKFILE=$(mktemp "$LOCKFILE.XXXXXX.conda-lock.yml")
+    rm -f "$TMP_LOCKFILE"
 
     "$CONDA_LOCK_ENV_PATH/bin/conda-lock" \
       --conda "$CONDA_EXE" \
@@ -40,10 +45,12 @@ for TOOLCHAIN_TYPE in riscv-tools; do
       -f "$REQS_DIR/docs.yaml" \
       -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
       -p "$PLATFORM" \
-      --lockfile "$LOCKFILE"
+      --lockfile "$TMP_LOCKFILE"
+    mv -f "$TMP_LOCKFILE" "$LOCKFILE"
 
     LOCKFILE="$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-$PLATFORM-lean.conda-lock.yml"
-    rm -f "$LOCKFILE"
+    TMP_LOCKFILE=$(mktemp "$LOCKFILE.XXXXXX.conda-lock.yml")
+    rm -f "$TMP_LOCKFILE"
 
     "$CONDA_LOCK_ENV_PATH/bin/conda-lock" \
       --conda "$CONDA_EXE" \
@@ -51,6 +58,7 @@ for TOOLCHAIN_TYPE in riscv-tools; do
       -f "$REQS_DIR/docs.yaml" \
       -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
       -p "$PLATFORM" \
-      --lockfile "$LOCKFILE"
+      --lockfile "$TMP_LOCKFILE"
+    mv -f "$TMP_LOCKFILE" "$LOCKFILE"
   done
 done

@@ -40,6 +40,9 @@
 [submodule "generators/nvdla"]
 	path = generators/nvdla
 	url = https://github.com/ucb-bar/nvdla-wrapper.git
+[submodule "generators/pmu"]
+	path = generators/pmu
+	url = https://github.com/ucb-bar/pmu.git
 [submodule "generators/riscv-sodor"]
 	path = generators/riscv-sodor
 	url = https://github.com/ucb-bar/riscv-sodor.git

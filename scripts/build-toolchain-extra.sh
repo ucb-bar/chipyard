@@ -86,7 +86,50 @@ echo '==>  Installing Proxy Kernel'
 CC= CXX= module_all riscv-pk --prefix="${RISCV}" --host=riscv${XLEN}-unknown-elf --with-arch=rv64gc_zifencei
 
 echo '==>  Installing RISC-V tests'
-module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=${XLEN}
+# to be compatible with multi-lib toolchain
+RISCV_TESTS_BASE_BMARKS="median qsort rsort towers vvadd memcpy multiply mm dhrystone spmv mt-vvadd mt-matmul mt-memcpy pmp"
+RISCV_TESTS_VECTOR_BMARKS="vec-memcpy vec-daxpy vec-sgemm vec-strcmp"
+RISCV_TESTS_BASE_BMARKS_ESCAPED="${RISCV_TESTS_BASE_BMARKS// /\\ }"
+RISCV_TESTS_MAKEFLAGS="${MAKEFLAGS} bmarks=${RISCV_TESTS_BASE_BMARKS_ESCAPED}"
+if [ "${XLEN}" = 32 ]; then
+    RISCV_TESTS_ABI=ilp32d
+else
+    RISCV_TESTS_ABI=lp64d
+fi
+RISCV_TESTS_GCC_COMMON="-DPREALLOCATE=1 -mcmodel=medany -static -std=gnu99 -O2 -ffast-math -fno-common -fno-builtin-printf -fno-tree-loop-distribute-patterns -Wno-implicit-int -Wno-implicit-function-declaration -mabi=${RISCV_TESTS_ABI}"
+RISCV_TESTS_BUILD_DIR="${SRCDIR}/riscv-tests/build/benchmarks"
+RISCV_TESTS_SOURCE_DIR="${SRCDIR}/riscv-tests/benchmarks"
+RISCV_TESTS_PREFIX="${RISCV}/bin/riscv${XLEN}-unknown-elf-"
+RISCV_TESTS_INSTALL_DIR="${RISCV}/riscv${XLEN}-unknown-elf/share/riscv-tests/benchmarks"
+
+RISCV_TESTS_GCC_OPTS="${RISCV_TESTS_GCC_COMMON} -march=rv${XLEN}gc"
+MAKEFLAGS="${RISCV_TESTS_MAKEFLAGS}" \
+    module_all riscv-tests --prefix="${RISCV}/riscv${XLEN}-unknown-elf" --with-xlen=${XLEN}
+
+RISCV_TESTS_BASE_TARGETS=""
+for bmark in ${RISCV_TESTS_BASE_BMARKS}; do
+    RISCV_TESTS_BASE_TARGETS="${RISCV_TESTS_BASE_TARGETS} ${bmark}.riscv"
+done
+RISCV_TESTS_VECTOR_TARGETS=""
+for bmark in ${RISCV_TESTS_VECTOR_BMARKS}; do
+    RISCV_TESTS_VECTOR_TARGETS="${RISCV_TESTS_VECTOR_TARGETS} ${bmark}.riscv"
+done
+
+# RISCV_GCC_OPTS is passed only to the benchmark sub-makes; the ISA tests use
+# their own per-test compiler options.
+module_run riscv-tests "${MAKE}" -C build/benchmarks -f "${RISCV_TESTS_SOURCE_DIR}/Makefile" -B \
+    src_dir="${RISCV_TESTS_SOURCE_DIR}" XLEN=${XLEN} \
+    RISCV_PREFIX="${RISCV_TESTS_PREFIX}" \
+    RISCV_GCC_OPTS="${RISCV_TESTS_GCC_OPTS}" \
+    ${RISCV_TESTS_BASE_TARGETS}
+install -d "${RISCV_TESTS_INSTALL_DIR}"
+install -p -m 644 "${RISCV_TESTS_BUILD_DIR}"/*.riscv "${RISCV_TESTS_INSTALL_DIR}"
+module_run riscv-tests "${MAKE}" -C build/benchmarks -f "${RISCV_TESTS_SOURCE_DIR}/Makefile" -B \
+    src_dir="${RISCV_TESTS_SOURCE_DIR}" XLEN=${XLEN} \
+    RISCV_PREFIX="${RISCV_TESTS_PREFIX}" \
+    RISCV_GCC_OPTS="${RISCV_TESTS_GCC_COMMON} -march=rv${XLEN}gcv" \
+    ${RISCV_TESTS_VECTOR_TARGETS}
+install -p -m 644 "${RISCV_TESTS_BUILD_DIR}"/*.riscv "${RISCV_TESTS_INSTALL_DIR}"
 
 echo '==> Installing espresso logic minimizer'
 (
