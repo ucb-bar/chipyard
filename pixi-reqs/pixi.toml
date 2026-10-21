@@ -1,0 +1,153 @@
+[workspace]
+authors = ["Jim Fang <yf328@berkeley.edu>"]
+channels = ["ucb-bar", "conda-forge", "litex-hub"]
+name = "chipyard"
+platforms = ["linux-64"]
+version = "0.1.0"
+requires-pixi = ">=0.82.1"
+
+[system-requirements]
+libc = { family = "glibc", version = "2.28" }
+
+[tasks]
+
+[feature.base.dependencies]
+gcc = ">=15,<16"
+gxx = ">=15,<16"
+sysroot_linux-64 = "2.34.*"
+conda-gcc-specs = "*"
+binutils = "*"
+autoconf = "*"
+coreutils = "*"
+jq = "*"
+pip = "*"
+make = "*"
+git = "*"
+ninja = "*"
+sbt = "*"
+openjdk = "20.*"
+dtc = "*"
+verilator = "==5.022"
+
+[feature.extended.dependencies]
+conda-tree = "*"
+constructor = "*"
+readline = "*"
+qemu = "*"
+rsync = "*"
+psutil = "*"
+doit = ">=0.34.0"
+gitpython = "*"
+humanfriendly = "*"
+universal-ctags = "*"
+bison = "*"
+flex = "*"
+expat = "*"
+python = ">=3.9,<3.11"
+bc = "*"
+unzip = "*"
+patch = "*"
+which = "*"
+sed = "*"
+diffutils = "*"
+bash = "*"
+gzip = "*"
+bzip2 = "*"
+perl = "*"
+tar = "*"
+file = "*"
+wget = "*"
+findutils = "*"
+lzop = "*"
+bash-completion = "*"
+ca-certificates = "*"
+mosh = "*"
+gmp = "*"
+mpfr = "*"
+mpc = "*"
+zlib = "*"
+vim = "*"
+gengetopt = "*"
+libffi = "*"
+libusb1 = "*"
+ncurses = "*"
+cmake = "*"
+graphviz = "*"
+expect = "*"
+gperf = "*"
+ccache = "*"
+west = "*"
+pyelftools = "*"
+clang-format = "*"
+clang-tools = "*"
+sty = "*"
+screen = "*"
+elfutils = "*"
+libdwarf = { version = "2.1.0.*", channel = "conda-forge" }
+libdwarf-dev = { version = "2.1.0.*", channel = "conda-forge" }
+colorama = "*"
+argcomplete = "*"
+python-graphviz = "*"
+pyparsing = "*"
+numpy = ">=1.23.0,<2.0.0"
+kiwisolver = "*"
+matplotlib-base = "*"
+pandas = "*"
+awscli = "*"
+pytest = "*"
+pytest-dependency = "*"
+pytest-mock = "*"
+moto = "*"
+mypy = "*"
+s3fs = "==0.4.2"
+aiohttp = "*"
+boto3 = "*"
+boto3-stubs = "*"
+mypy-boto3-s3 = "*"
+mypy_boto3_ec2 = "*"
+botocore-stubs = "*"
+cryptography = "<41"
+pytz = "*"
+types-pytz = "*"
+pyyaml = "*"
+types-pyyaml = "*"
+requests = "*"
+types-requests = "*"
+azure-identity = "*"
+fsspec = "*"
+"ruamel.yaml" = ">=0.17.21,<0.18"
+pydantic = ">=1.9.2,<2.0.0"
+
+[feature.extended.pypi-dependencies]
+hammer-vlsi = { version = "==1.2.0", extras = ["asap7"] }
+sure = "*"
+pylddwrap = "*"
+fab-classic = "==1.21.0"
+paramiko = "==2.9.0"
+bcrypt = "<4.0.0"
+
+[feature.docs.dependencies]
+sphinx = "*"
+pygments = "*"
+sphinx-autobuild = "*"
+sphinx_rtd_theme = "*"
+docutils = "*"
+requests = "*"
+fnm = "*"
+
+[feature.riscv-tools.dependencies]
+riscv-tools = "==1.0.10"
+
+[environments]
+# Ordinary `pixi add` installs into the environment activated by setup.
+default = ["base", "extended", "docs", "riscv-tools"]
+base = ["default", "base"]
+extended = ["default", "base", "extended"]
+docs = ["default", "docs"]
+riscv-tools = ["default", "riscv-tools"]
+full = ["default", "base", "extended", "docs", "riscv-tools"]
+lean = ["default", "base", "docs", "riscv-tools"]
+
+[dependencies]
+libnuma = ">=2.0.18,<3"
+numactl = ">=2.0.18,<3"

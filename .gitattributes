@@ -1,2 +1,1 @@
-conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64-lean.conda-lock.yml linguist-generated=true
-conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml linguist-generated=true
+pixi.lock merge=binary linguist-language=YAML linguist-generated=true -diff

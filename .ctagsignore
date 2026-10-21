@@ -2,4 +2,5 @@
 sims
 toolchains
 .conda-env
+pixi-reqs/.pixi
 .ci
