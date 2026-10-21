@@ -16,6 +16,11 @@ def assignment(name, value):
 def main():
     variables = json.load(sys.stdin)["environment_variables"]
     root = sys.argv[1]
+    # Export the same cache used to obtain the hook, and include it in the
+    # restoration below so deactivation restores the caller's cache choice.
+    variables["PIXI_CACHE_DIR"] = (os.environ.get("PIXI_CACHE_DIR")
+                                   or os.environ.get("RATTLER_CACHE_DIR")
+                                   or root + "/pixi-reqs/.pixi/cache")
     # These paths belong to the active environment, including packages added later.
     riscv = variables.get("RISCV")
     if riscv:

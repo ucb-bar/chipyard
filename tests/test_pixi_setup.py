@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -34,10 +35,11 @@ class Sysroots(unittest.TestCase):
 
 class ShellActivation(unittest.TestCase):
     def test_shells_and_package_updates(self):
-        for shell in ("bash", "zsh"):
+        for shell, cache_kind in ((s, c) for s in ("bash", "zsh")
+                                  for c in ("default", "PIXI_CACHE_DIR", "RATTLER_CACHE_DIR")):
             if not shutil.which(shell):
                 continue
-            with self.subTest(shell=shell), tempfile.TemporaryDirectory() as tmp:
+            with self.subTest(shell=shell, cache=cache_kind), tempfile.TemporaryDirectory() as tmp:
                 base = Path(tmp)
                 fake = base / "pixi"
                 # Exercise the real activation parser and wrappers with isolated
@@ -45,6 +47,7 @@ class ShellActivation(unittest.TestCase):
                 fake.write_text('''#!/usr/bin/env python3
 import json, os, pathlib, sys
 args=sys.argv[1:]
+assert os.environ['PIXI_CACHE_DIR'] == os.environ['EXPECTED_PIXI_CACHE']
 base=pathlib.Path(os.environ['TEST_PIXI_DIR'])
 with (base/'calls').open('a') as f: f.write(json.dumps(args)+'\\n')
 if args[0]=='shell-hook':
@@ -69,11 +72,14 @@ export CPLUS_INCLUDE_PATH='old cpp includes'
 pixi() { echo old-function; }
 old_path=$PATH
 old_pid=$$
+old_cache_set=${PIXI_CACHE_DIR+x}
+old_cache=${PIXI_CACHE_DIR-}
 source "$CY_TEST_ROOT/scripts/pixi-env.sh" lean
 [ "$$" = "$old_pid" ]
 [ "$RISCV" = /toolchain ]
 [ "$PIXI_ENVIRONMENT_NAME" = lean ]
 [ "$CONDA_PREFIX" = /prefix/lean ]
+[ "$PIXI_CACHE_DIR" = "$EXPECTED_PIXI_CACHE" ]
 first_path=$PATH
 first_includes=$C_INCLUDE_PATH
 touch "$TEST_PIXI_DIR/hook-fails"
@@ -106,6 +112,8 @@ pixi deactivate
 [ "$C_INCLUDE_PATH" = 'old includes' ]
 [ "$CPLUS_INCLUDE_PATH" = 'old cpp includes' ]
 [ "${ADDED_VARIABLE+x}" != x ]
+[ "${PIXI_CACHE_DIR+x}" = "$old_cache_set" ]
+[ "${PIXI_CACHE_DIR-}" = "$old_cache" ]
 [ "$(pixi)" = old-function ]
 chipyard_activate default
 pixi deactivate
@@ -118,6 +126,13 @@ touch "$TEST_PIXI_DIR/hook-fails"
 if chipyard_activate; then exit 43; else [ "$?" = 17 ]; fi
 '''
                 env = dict(os.environ, PATH=tmp + ":" + os.environ["PATH"], TEST_PIXI_DIR=tmp, CY_TEST_ROOT=str(ROOT))
+                env.pop('PIXI_CACHE_DIR', None)
+                env.pop('RATTLER_CACHE_DIR', None)
+                env['EXPECTED_PIXI_CACHE'] = str(ROOT / 'pixi-reqs/.pixi/cache')
+                if cache_kind != 'default':
+                    env[cache_kind] = env['EXPECTED_PIXI_CACHE'] = tmp + '/custom cache'
+                if cache_kind == 'PIXI_CACHE_DIR':
+                    env['RATTLER_CACHE_DIR'] = tmp + '/lower priority cache'
                 result = subprocess.run([shell, "-f" if shell == "zsh" else "--noprofile", "-c", script], env=env, capture_output=True, text=True)
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 calls = [json.loads(line) for line in (base / "calls").read_text().splitlines()]
@@ -134,6 +149,88 @@ if chipyard_activate; then exit 43; else [ "$?" = 17 ]; fi
                     self.assertEqual(args, expected)
                 self.assertEqual(installs[7], ['install', '--script', '/other/tool.py'])
                 self.assertEqual(additions[2], ['add', '--manifest-path', '/other/pixi.toml', 'other-package'])
+
+
+class SetupProgress(unittest.TestCase):
+    def run_setup(self, interactive, install_exit=0, verbose=False, cache_override=None):
+        with tempfile.TemporaryDirectory(prefix="chipyard-setup-") as tmp:
+            root = Path(tmp)
+            for name in ('build-setup.sh', 'utils.sh', 'replace-content.py', 'fix-open-files.sh',
+                         'pixi-env.sh', 'pixi-activation.py', 'pixi-sysroot.py'):
+                target = root / 'scripts' / name
+                target.parent.mkdir(exist_ok=True)
+                shutil.copy2(ROOT / 'scripts' / name, target)
+            (root / 'pixi-reqs').mkdir()
+            shutil.copy2(ROOT / 'pixi-reqs/pixi.toml', root / 'pixi-reqs/pixi.toml')
+            subprocess.run(['git', 'init', '-q', tmp], check=True)
+            (root / 'bin').mkdir()
+            fake = root / 'bin/pixi'
+            fake.write_text('''#!/usr/bin/env python3
+import json, os, pathlib, sys
+args = sys.argv[1:]
+with open(os.environ['SETUP_CALLS'], 'a') as f:
+    f.write(json.dumps({'args': args, 'tty': os.isatty(1) and os.isatty(2),
+        'cache': os.environ.get('PIXI_CACHE_DIR')}) + '\\n')
+if 'shell-hook' in args:
+    print(json.dumps({'environment_variables': {'PATH': os.environ['PATH'],
+        'CONDA_PREFIX': '/test-prefix', 'PIXI_ENVIRONMENT_NAME': 'default'}}))
+elif 'lock' in args:
+    sys.exit(1 if '--check' in args else 0)
+elif 'install' in args:
+    sys.exit(int(os.environ['SETUP_INSTALL_EXIT']))
+''')
+            fake.chmod(0o755)
+            env = dict(os.environ, PATH=str(root / 'bin') + ':' + os.environ['PATH'],
+                       SETUP_CALLS=str(root / 'calls'), SETUP_INSTALL_EXIT=str(install_exit),
+                       SHELL=shutil.which('bash'))
+            env.pop('PIXI_CACHE_DIR', None)
+            env.pop('RATTLER_CACHE_DIR', None)
+            expected_cache = str(root / 'pixi-reqs/.pixi/cache')
+            if cache_override:
+                env[cache_override] = expected_cache = str(root / 'custom cache')
+            command = ['bash', str(root / 'scripts/build-setup.sh')]
+            for step in range(2, 12):
+                command += ['-s', str(step)]
+            if verbose:
+                command += ['--verbose']
+            if interactive:
+                command = ['script', '-qefc', shlex.join(command), '/dev/null']
+            result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True,
+                                    input='', timeout=30)
+            self.assertTrue((root / 'calls').exists(), result.stdout + result.stderr)
+            calls = [json.loads(line) for line in (root / 'calls').read_text().splitlines()]
+            self.assertTrue(all(call['cache'] == expected_cache for call in calls), calls)
+            return result, calls, (root / 'build-setup.log').read_text()
+
+    def test_explicit_cache_overrides(self):
+        for variable in ('PIXI_CACHE_DIR', 'RATTLER_CACHE_DIR'):
+            with self.subTest(variable=variable):
+                result, _, _ = self.run_setup(interactive=False, cache_override=variable)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    @unittest.skipUnless(shutil.which('script'), 'script is needed to preserve terminal progress')
+    def test_progress_survives_tee(self):
+        result, calls, log = self.run_setup(interactive=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(all(call['tty'] for call in calls if 'shell-hook' not in call['args']))
+        self.assertIn('Resolving Pixi dependencies...', log)
+        self.assertIn("Installing Pixi environment 'default'...", log)
+
+    def test_noninteractive_verbose_logs(self):
+        result, calls, log = self.run_setup(interactive=False, verbose=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for call in calls:
+            self.assertFalse(call['tty'])
+            if 'shell-hook' not in call['args']:
+                self.assertIn('-vv', call['args'])
+        self.assertIn('Setup complete!', log)
+
+    @unittest.skipUnless(shutil.which('script'), 'script is needed to preserve terminal progress')
+    def test_terminal_install_failure_is_preserved(self):
+        result, calls, log = self.run_setup(interactive=True, install_exit=7)
+        self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+        self.assertIn('failed with exit code 7 at step 1', log)
+        self.assertFalse(any('shell-hook' in call['args'] for call in calls))
 
 
 if __name__ == '__main__':

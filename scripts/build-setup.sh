@@ -128,6 +128,30 @@ run_step() {
     [[ ! " ${SKIP_LIST[*]} " =~ " ${value} " ]]
 }
 
+# Capture this before the setup output is piped through tee below.
+PIXI_SETUP_TERMINAL=false
+if [ -t 1 ]; then
+    PIXI_SETUP_TERMINAL=true
+fi
+
+run_pixi() {
+    local -a pixi_cmd=(env "PIXI_CACHE_DIR=${PIXI_CACHE_DIR:-${RATTLER_CACHE_DIR:-$CYDIR/pixi-reqs/.pixi/cache}}" pixi)
+    local pixi_shell_cmd
+    if [ "$VERBOSE" = true ]; then
+        pixi_cmd+=(-vv)
+    fi
+    pixi_cmd+=("$@")
+
+    # Pixi suppresses progress when stderr is not a terminal. Give interactive
+    # setup a PTY while keeping its output in build-setup.log through tee.
+    if [ "$PIXI_SETUP_TERMINAL" = true ] && command -v script >/dev/null 2>&1; then
+        printf -v pixi_shell_cmd '%q ' "${pixi_cmd[@]}"
+        SHELL="$BASH" script -qefc "$pixi_shell_cmd" /dev/null
+    else
+        "${pixi_cmd[@]}"
+    fi
+}
+
 {
 
 #######################################
@@ -172,11 +196,14 @@ if run_step "1"; then
 
     python3 "$CYDIR/scripts/pixi-sysroot.py" "$PIXI_MANIFEST"
     exit_if_last_command_failed
-    if ! pixi lock --manifest-path "$PIXI_MANIFEST" --check; then
-        pixi lock --manifest-path "$PIXI_MANIFEST"
+    echo "Checking Pixi lockfile..."
+    if ! run_pixi lock --manifest-path "$PIXI_MANIFEST" --check; then
+        echo "Resolving Pixi dependencies..."
+        run_pixi lock --manifest-path "$PIXI_MANIFEST"
         exit_if_last_command_failed
     fi
-    pixi install --manifest-path "$PIXI_MANIFEST" --environment "$PIXI_ENV_NAME" --locked
+    echo "Installing Pixi environment '$PIXI_ENV_NAME'..."
+    run_pixi install --manifest-path "$PIXI_MANIFEST" --environment "$PIXI_ENV_NAME" --locked
     exit_if_last_command_failed
 
     # Setup and subsequent shells use the same evaluated activation. Completion

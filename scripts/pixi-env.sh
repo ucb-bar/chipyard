@@ -42,7 +42,8 @@ chipyard_activate() {
     # leave the caller active; successful switches never stack paths.
     _cy_code=$(
         if [ -n "${_CY_PIXI_RESTORE-}" ]; then eval "$_CY_PIXI_RESTORE"; fi
-        _cy_json=$(command pixi shell-hook --json --as-is --no-completions \
+        _cy_json=$(PIXI_CACHE_DIR="${PIXI_CACHE_DIR:-${RATTLER_CACHE_DIR:-$_CY_PIXI_ROOT/pixi-reqs/.pixi/cache}}" \
+            command pixi shell-hook --json --as-is --no-completions \
             --manifest-path "$_CY_PIXI_ROOT/pixi-reqs/pixi.toml" \
             --environment "$_cy_env") || exit $?
         printf '%s\n' "$_cy_json" | python3 "$_CY_PIXI_ROOT/scripts/pixi-activation.py" "$_CY_PIXI_ROOT"
