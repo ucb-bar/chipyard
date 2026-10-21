@@ -1,5 +1,5 @@
 [workspace]
-authors = ["Jim Fang <yf328@berkeley.edu>"]
+authors = ["UCB-BAR <ucb_bar@berkeley.edu>"]
 channels = ["ucb-bar", "conda-forge", "litex-hub"]
 name = "chipyard"
 platforms = ["linux-64"]
