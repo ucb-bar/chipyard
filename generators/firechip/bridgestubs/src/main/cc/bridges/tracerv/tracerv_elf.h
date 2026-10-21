@@ -16,6 +16,7 @@ public:
   void *section_data(const char *, size_t *);
 
 private:
+  int fd;
   Elf *elf;
 };
 

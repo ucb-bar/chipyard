@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
   subroutine_map funcs;
   {
-    dwarf_t dwarf = dwarf_t(elf);
+    dwarf_t dwarf = dwarf_t(fd);
     dwarf.subroutines(funcs);
   }
 

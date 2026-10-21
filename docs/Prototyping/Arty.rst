@@ -60,7 +60,7 @@ Arty35T Legacy Instructions
 
 The default Digilent Arty A7-35T harness is setup to have JTAG available over the board's PMOD pins, and UART available over its FTDI serial USB adapter. The pin mappings for JTAG signals are identical to those described in the `SiFive Freedom E310 Arty 35T Getting Started Guide <https://static.dev.sifive.com/SiFive-E310-arty-gettingstarted-v1.0.6.pdf>`__.
 The JTAG interface allows a user to connect to the core via OpenOCD, run bare-metal applications, and debug these applications with gdb. UART allows a user to communicate with the core over a USB connection and serial console running on a PC.
-To extend this design, a user may create their own Chipyard configuration and add the ``WithArtyTweaks`` located in ``fpga/src/main/scala/arty/Configs.scala``.
+To extend this design, a user may create their own Chipyard configuration and add the ``WithArtyTweaks`` located in `fpga/src/main/scala/arty/Configs.scala <https://ucb.bar/chipyard/fpga/src/main/scala/arty/Configs.scala>`__.
 Adding this config. fragment will enable and connect the JTAG and UART interfaces to your Chipyard design.
 
 .. literalinclude:: ../../fpga/src/main/scala/arty/Configs.scala

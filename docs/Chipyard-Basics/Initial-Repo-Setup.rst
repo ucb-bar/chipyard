@@ -4,19 +4,19 @@ Initial Repository Setup
 Prerequisites
 -------------------------------------------
 
-Chipyard is developed and tested on Linux-based systems.
+Chipyard is developed and tested on x86 Linux-based systems.
 
 .. Warning:: It is possible to use this on macOS or other BSD-based systems, although GNU tools will need to be installed;
-    it is also recommended to install the RISC-V toolchain from ``brew``.
+    it is also recommended to install the RISC-V toolchain from ``brew``. Builds of Chipyard on ARM Linux-based systems have not been tested and may experience dependency issues.
 
-.. Warning:: If using Windows, it is recommended that you use `Windows Subsystem for Linux (WSL) <https://learn.microsoft.com/en-us/windows/wsl/>`.
+.. Warning:: If using Windows, it is recommended that you use `Windows Subsystem for Linux (WSL) <https://learn.microsoft.com/en-us/windows/wsl/>`__.
 
 Running on AWS EC2 with FireSim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you plan on using Chipyard alongside FireSim on AWS EC2 instances, you should refer to the :fsim_doc:`FireSim documentation <>`.
-Specifically, you should follow the :fsim_doc:`Initial Setup/Installation <Getting-Started-Guides/AWS-EC2-F1-Getting-Started/Initial-Setup/index.html>`
-section of the docs up until :fsim_doc:`Setting up the FireSim Repo <Getting-Started-Guides/AWS-EC2-F1-Getting-Started/Initial-Setup/Setting-up-your-Manager-Instance.html#setting-up-the-firesim-repo>`.
+If you are a new user, start with the :fsim_doc:`FireSim AWS first time setup <AWS-EC2-F2-Initial-Setup/index.html>`. Otherwise, follow the :fsim_doc:`Initial Setup/Installation <Getting-Started-Guides/AWS-EC2-F2-Getting-Started/index.html>`
+section of the docs up until :fsim_doc:`Setting up the FireSim Repo <Getting-Started-Guides/AWS-EC2-F2-Getting-Started/Setting-Up-The-FireSim-Repo.html#setting-up-the-firesim-repo>`.
 At that point, instead of cloning FireSim you can clone Chipyard by following :ref:`Chipyard-Basics/Initial-Repo-Setup:Setting up the Chipyard Repo`.
 
 Default Requirements Installation
@@ -28,7 +28,7 @@ Conda allows users to create an "environment" that holds system dependencies lik
 .. Note:: Chipyard can also run on systems without a Conda installation. However, users on these systems must manually install toolchains and dependencies.
 
 First, Chipyard requires the latest Conda to be installed on the system.
-Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#download>`__ on how to install the latest Conda with the **Miniforge** installer.
+Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#install>`__ on how to install the latest Conda with the **Miniforge** installer.
 
 After Conda is installed and is on your ``PATH``, we need to install a version of ``git`` to initially checkout the repository.
 For this you can use the system package manager like ``yum`` or ``apt`` to install ``git``.
@@ -41,19 +41,24 @@ By default after Conda's setup you should already be in the ``base`` environment
 
     conda activate base
 
+If Conda is not present in your path by default, activate it with the following command:
+
+.. code-block:: shell
+
+    source ~/miniforge3/bin/activate # Your miniforge3 install location may vary
 
 Setting up the Chipyard Repo
 -------------------------------------------
 
-Start by checking out the proper Chipyard version. Run:
+Start by cloning Chipyard. The `main` branch will be the latest stable version. Run:
 
-.. parsed-literal::
+.. code-block:: shell
 
     git clone https://github.com/ucb-bar/chipyard.git
     cd chipyard
-    # checkout latest official chipyard release
-    # note: this may not be the latest release if the documentation version != "stable"
-    git checkout |version|
+.. # checkout latest official chipyard release
+.. # note: this may not be the latest release if the documentation version != "stable"
+.. git checkout |version| no longer needed as main will be latest version
 
 Next run the following script to fully setup Chipyard with the ``riscv-tools`` toolchain.
 
@@ -133,21 +138,21 @@ You can source this file in your ``.bashrc`` or equivalent environment setup fil
     However, it is recommended that the final ``env.sh`` file sourced is the ``env.sh`` located in the
     Chipyard repo that you expect to run ``make`` commands in.
 
-DEPRECATED: Pre-built Docker Image
--------------------------------------------
+.. DEPRECATED: Pre-built Docker Image
+.. -------------------------------------------
 
-An alternative to setting up the Chipyard repository locally is to pull the pre-built Docker image from Docker Hub. The image comes with all dependencies installed, Chipyard cloned, and toolchains initialized. This image sets up baseline Chipyard (not including FireMarshal, FireSim, and Hammer initializations). Each image comes with a tag that corresponds to the version of Chipyard cloned/set-up in that image. Not including a tag during the pull will pull the image with the latest version of Chipyard.
-First, pull the Docker image. Run:
+.. An alternative to setting up the Chipyard repository locally is to pull the pre-built Docker image from Docker Hub. The image comes with all dependencies installed, Chipyard cloned, and toolchains initialized. This image sets up baseline Chipyard (not including FireMarshal, FireSim, and Hammer initializations). Each image comes with a tag that corresponds to the version of Chipyard cloned/set-up in that image. Not including a tag during the pull will pull the image with the latest version of Chipyard.
+.. First, pull the Docker image. Run:
 
-.. code-block:: shell
+.. .. code-block:: shell
 
-    sudo docker pull ucbbar/chipyard-image:<TAG>
+..     sudo docker pull ucbbar/chipyard-image:<TAG>
 
-To run the Docker container in an interactive shell, run:
+.. To run the Docker container in an interactive shell, run:
 
-.. code-block:: shell
+.. .. code-block:: shell
 
-    sudo docker run -it ucbbar/chipyard-image bash
+..     sudo docker run -it ucbbar/chipyard-image bash
 
 What's Next?
 -------------------------------------------
@@ -196,3 +201,12 @@ If you would still like to try to perform an in-place manual version upgrade (**
 
 This is by no means a comprehensive list of potential stale state within Chipyard.
 Hence, as mentioned earlier, the recommended method for a Chipyard version upgrade is a fresh clone (or a merge, and then a fresh clone).
+
+Tips on navigating Chipyard
+-------------------------------------------
+
+To aid in navigating Chipyard and its various generators, consider installing a Scala LSP, such as `Scala Metals <https://scalameta.org/metals/>`__, then running the ``Metals: Import build`` command from the VS Code command palette, then selecting ``sbt`` as the build system. If you run into errors, check the status with ``Metals: Run doctor`` from the VS Code command palette.
+
+IntelliJ IDEA also has native support for Scala and can help with navigating the Scala codebase.
+
+Additionally, most references can also be located via `grep` and/or the VS Code search function.

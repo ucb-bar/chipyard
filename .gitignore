@@ -30,5 +30,4 @@ project/project/
 .classpath_cache/
 .vscode/
 tests/build/
-.pixi/*
-!.pixi/config.toml
+conda-reqs/chipyard-base.yaml.bak

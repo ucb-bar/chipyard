@@ -34,10 +34,10 @@ const subroutine_t *subroutine_find(const subroutine_map &, uint64_t);
 
 class dwarf_t {
 public:
-  dwarf_t(Elf *);
+  dwarf_t(int);
   virtual ~dwarf_t(void) {
     if (this->dbg) {
-      dwarf_finish(this->dbg, nullptr);
+      dwarf_finish(this->dbg);
     }
   }
 

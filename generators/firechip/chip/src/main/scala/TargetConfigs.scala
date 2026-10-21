@@ -91,6 +91,10 @@ class WithFireSimDesignTweaks extends Config(
   new testchipip.iceblk.WithBlockDevice
 )
 
+// 8 GiB of target DRAM, for hosts with 8 GB of DRAM; put it first in TARGET_CONFIG: With8GiBDRAM_<config>
+class With8GiBDRAM extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 8L))
+
 // Tweaks to modify target clock frequencies / crossings to legacy firesim defaults
 class WithFireSimHighPerfClocking extends Config(
   // Create clock group for uncore that does not include mbus
@@ -256,6 +260,26 @@ class FireSimLargeBoomConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.LargeBoomV3Config)
 
+// MegaBoom with 8 GiB of DRAM, the DRAM size of the Corigine MimicTurbo GT board
+class FireSimMegaBoom8GiBDRAMConfig extends Config(
+  new With8GiBDRAM ++
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MegaBoomV3Config)
+
+//*****************************************************************
+// Saturn configs, base off chipyard's SaturnConfigs
+//*****************************************************************
+class FireSimREFV256D128RocketConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.REFV256D128RocketConfig)
+
+class FireSimGENV256D128ShuttleConfig extends Config(
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.GENV256D128ShuttleConfig)
+
 //********************************************************************
 // Heterogeneous config, base off chipyard's LargeBoomAndRocketConfig
 //********************************************************************
@@ -356,7 +380,15 @@ class FireSimLargeBoomSV39CospikeConfig extends Config(
 
 class CTCFireSimConfig extends Config(
   new WithCTCBridge ++
-  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(onchipAddr = 0x1000000000L, offchipAddr = 0x0L, size = ((1L << 32) - 1), noPhy=true))) ++ 
+  new testchipip.ctc.WithCTC(Seq(new testchipip.ctc.CTCParams(
+    translationParams = testchipip.soc.OutwardAddressTranslatorParams(
+      // Outward CTC: accesses from this chip to offchipAddr+x are interpreted as going off chip via CTC/accesses are routed to CTC.
+      // The translator strips that local off-chip base value before forwarding, so
+      // the other chip receives onchipAddr+x in its normal Chipyard address map.
+      onchipAddr = 0x0L,
+      offchipAddr = 0x1000000000L,
+      size = ((1L << 32) - 1)),
+    phyParams = None))) ++
   new chipyard.iobinders.WithCTCPunchthrough ++ 
   new FireSimRocketConfig
 )

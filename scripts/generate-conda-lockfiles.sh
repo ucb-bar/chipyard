@@ -2,43 +2,63 @@
 
 set -ex
 
-CUR_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+CUR_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+CY_DIR=$(cd "$CUR_DIR/.." && pwd)
 
-REQS_DIR="$CUR_DIR/../conda-reqs"
-if [ ! -d "$REQS_DIR" ]; then
-  echo "$REQS_DIR does not exist, make sure you're calling this script from chipyard/"
+REQS_DIR="$CY_DIR/conda-reqs"
+CONDA_LOCK_ENV_PATH="$CY_DIR/.conda-lock-env"
+
+if [[ ! -d "$REQS_DIR" ]]; then
+  echo "$REQS_DIR does not exist"
   exit 1
 fi
 
-if ! conda-lock --version | grep $(grep "conda-lock" $REQS_DIR/chipyard-base.yaml | sed 's/^ \+-.*=//'); then
-  echo "Invalid conda-lock version, make sure you're calling this script with the sourced chipyard env.sh"
+CONDA_EXE="${CONDA_EXE:-$(command -v conda || true)}"
+if [[ -z "$CONDA_EXE" || ! -x "$CONDA_EXE" ]]; then
+  echo "No conda executable found; initialize Miniforge or set CONDA_EXE."
   exit 1
 fi
+
+# isolated conda-lock environment if build-setup hasn't ran yet
+if [[ ! -x "$CONDA_LOCK_ENV_PATH/bin/conda-lock" ]]; then
+  echo "Creating conda-lock environment at $CONDA_LOCK_ENV_PATH"
+  "$CONDA_EXE" create -y -p "$CONDA_LOCK_ENV_PATH" -c conda-forge conda-lock
+fi
+
+# We never authenticate to a private index, so disable the keyring to avoid weird errs
+export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
+
+trap 'rm -f "${TMP_LOCKFILE:-}"' EXIT
 
 for TOOLCHAIN_TYPE in riscv-tools; do
-    # note: lock file must end in .conda-lock.yml - see https://github.com/conda-incubator/conda-lock/issues/154
-    LOCKFILE=$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-linux-64.conda-lock.yml
-    rm -rf $LOCKFILE
+  for PLATFORM in linux-64 linux-aarch64; do
+    LOCKFILE="$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-$PLATFORM.conda-lock.yml"
+    # Keep the temporary lock beside the destination so relative source paths
+    # remain valid after installation. conda-lock requires a nonexistent file.
+    TMP_LOCKFILE=$(mktemp "$LOCKFILE.XXXXXX.conda-lock.yml")
+    rm -f "$TMP_LOCKFILE"
 
-    conda-lock \
-      --no-mamba \
-      --no-micromamba \
+    "$CONDA_LOCK_ENV_PATH/bin/conda-lock" \
+      --conda "$CONDA_EXE" \
       -f "$REQS_DIR/chipyard-base.yaml" \
       -f "$REQS_DIR/chipyard-extended.yaml" \
       -f "$REQS_DIR/docs.yaml" \
       -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
-      -p linux-64 \
-      --lockfile $LOCKFILE
+      -p "$PLATFORM" \
+      --lockfile "$TMP_LOCKFILE"
+    mv -f "$TMP_LOCKFILE" "$LOCKFILE"
 
-    LOCKFILE=$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-linux-64-lean.conda-lock.yml
-    rm -rf $LOCKFILE
+    LOCKFILE="$REQS_DIR/conda-lock-reqs/conda-requirements-$TOOLCHAIN_TYPE-$PLATFORM-lean.conda-lock.yml"
+    TMP_LOCKFILE=$(mktemp "$LOCKFILE.XXXXXX.conda-lock.yml")
+    rm -f "$TMP_LOCKFILE"
 
-    conda-lock \
-      --no-mamba \
-      --no-micromamba \
+    "$CONDA_LOCK_ENV_PATH/bin/conda-lock" \
+      --conda "$CONDA_EXE" \
       -f "$REQS_DIR/chipyard-base.yaml" \
       -f "$REQS_DIR/docs.yaml" \
       -f "$REQS_DIR/$TOOLCHAIN_TYPE.yaml" \
-      -p linux-64 \
-      --lockfile $LOCKFILE
+      -p "$PLATFORM" \
+      --lockfile "$TMP_LOCKFILE"
+    mv -f "$TMP_LOCKFILE" "$LOCKFILE"
+  done
 done

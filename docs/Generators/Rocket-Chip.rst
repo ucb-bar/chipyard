@@ -11,7 +11,11 @@ out-of-order core generator or some other custom CPU generator instead.
 
 A detailed diagram of a typical Rocket Chip system is shown below.
 
-.. image:: ../_static/images/rocketchip-diagram.png
+.. raw:: html
+
+   <img alt="Diagram of a typical Rocket Chip system"
+        class="diagram-white-background"
+        src="../_static/images/rocketchip-diagram.png">
 
 Tiles
 -----

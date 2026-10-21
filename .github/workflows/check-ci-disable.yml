@@ -1,0 +1,102 @@
+name: check-ci-disable
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: number
+      pr_head_ref:
+        required: true
+        type: string
+      pr_head_repo_id:
+        required: true
+        type: number
+      pr_labels:
+        required: true
+        type: string
+    outputs:
+      ci_disabled:
+        value: ${{ jobs.check-ci-disable.outputs.ci_disabled }}
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  check-ci-disable:
+    name: check-ci-disable
+    runs-on: ubuntu-latest
+    outputs:
+      ci_disabled: ${{ steps.ci-label.outputs.ci_disabled }}
+    steps:
+      - name: Check ci:disable label
+        id: ci-label
+        env:
+          PR_LABELS: ${{ inputs.pr_labels }}
+        run: |
+          if jq -e 'index("ci:disable") != null' <<< "${PR_LABELS}" > /dev/null; then
+            echo "ci_disabled=true" >> "${GITHUB_OUTPUT}"
+            echo "ci:disable is present; downstream CI workflows will be skipped." >> "${GITHUB_STEP_SUMMARY}"
+          else
+            echo "ci_disabled=false" >> "${GITHUB_OUTPUT}"
+            echo "ci:disable is not present; downstream CI workflows may run." >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+      - name: Cancel active CI runs for this PR
+        if: ${{ steps.ci-label.outputs.ci_disabled == 'true' }}
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PR_HEAD_REF: ${{ inputs.pr_head_ref }}
+          PR_HEAD_REPO_ID: ${{ inputs.pr_head_repo_id }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = Number(process.env.PR_NUMBER);
+            const prHeadRef = process.env.PR_HEAD_REF;
+            const prHeadRepoId = Number(process.env.PR_HEAD_REPO_ID);
+            const activeStatuses = ['queued', 'in_progress', 'requested', 'waiting', 'pending'];
+            const currentRunId = context.runId;
+            const cancelled = [];
+
+            function isSamePullRequest(run) {
+              const pullRequests = run.pull_requests || [];
+              const matchesPrNumber = pullRequests.some((runPr) => runPr.number === prNumber);
+              if (matchesPrNumber) {
+                return true;
+              }
+
+              const runRepoId = run.head_repository && run.head_repository.id;
+              return runRepoId === prHeadRepoId && run.head_branch === prHeadRef;
+            }
+
+            for (const status of activeStatuses) {
+              const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+                owner,
+                repo,
+                event: 'pull_request',
+                status,
+                per_page: 100,
+              });
+
+              for (const run of runs) {
+                if (run.id === currentRunId || !isSamePullRequest(run)) {
+                  continue;
+                }
+
+                await github.rest.actions.cancelWorkflowRun({
+                  owner,
+                  repo,
+                  run_id: run.id,
+                });
+                cancelled.push(`${run.name || run.workflow_id}#${run.run_number}`);
+              }
+            }
+
+            core.info(`Cancelled ${cancelled.length} active run(s): ${cancelled.join(', ') || 'none'}`);

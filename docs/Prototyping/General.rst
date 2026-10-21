@@ -32,8 +32,8 @@ For example:
 
     make SBT_PROJECT=chipyard_fpga MODEL=VCU118FPGATestHarness VLOG_MODEL=VCU118FPGATestHarness MODEL_PACKAGE=chipyard.fpga.vcu118 CONFIG=RocketVCU118Config CONFIG_PACKAGE=chipyard.fpga.vcu118 GENERATOR_PACKAGE=chipyard TB=none TOP=ChipTop BOARD=vcu118 FPGA_BRAND=... bitstream
 
-Some ``SUB_PROJECT`` defaults are already defined for use, including ``vcu118`` and ``arty``.
-These default ``SUB_PROJECT``'s setup the necessary test harnesses, packages, and more for the Chipyard make system.
+Some ``SUB_PROJECT`` defaults are already defined for use, including ``vcu118``, ``zcu104``, ``arty35t``, ``arty100t``, ``genesys2``, and ``nexysvideo``.
+These defaults set up the necessary test harnesses, packages, and more for the Chipyard make system.
 Like a software RTL simulation make invocation, all of the make variables can be overridden with user specific values (ex. include the ``SUB_PROJECT`` with a ``CONFIG`` and ``CONFIG_PACKAGE`` override).
 In most cases, you will just need to run a command with a ``SUB_PROJECT`` and an overridden ``CONFIG`` to point to.
 For example, building the BOOM configuration on the VCU118:

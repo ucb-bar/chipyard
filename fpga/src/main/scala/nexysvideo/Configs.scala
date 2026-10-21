@@ -2,19 +2,8 @@
 package chipyard.fpga.nexysvideo
 
 import org.chipsalliance.cde.config._
-import freechips.rocketchip.subsystem._
-import freechips.rocketchip.devices.debug._
-import freechips.rocketchip.devices.tilelink._
 import org.chipsalliance.diplomacy.lazymodule._
-import freechips.rocketchip.system._
-import freechips.rocketchip.tile._
-
-import sifive.blocks.devices.uart._
-import sifive.fpgashells.shell.{DesignKey}
-
-import testchipip.serdes.{SerialTLKey}
-
-import chipyard.{BuildSystem}
+import sifive.fpgashells.shell.DesignKey
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
@@ -71,6 +60,7 @@ class TinyRocketNexysVideoConfig extends Config(
 
 class BringupNexysVideoConfig extends Config(
   new WithNexysVideoSerialTLToGPIO ++
-  new WithNexysVideoTweaks(freqMHz = 75) ++
+  new WithNexysVideoTweaks(freqMHz = 50) ++
+  new testchipip.serdes.WithSerialTLPHYParams(
+    testchipip.serdes.DecoupledInternalSyncSerialPhyParams(freqMHz = 50)) ++
   new chipyard.ChipBringupHostConfig)
-

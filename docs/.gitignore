@@ -1,1 +1,9 @@
 _build
+node_modules
+dist
+.astro
+src/content/docs/**
+!src/content/docs/
+!src/content/docs/.gitkeep
+public/sphinx
+public/**/*.html

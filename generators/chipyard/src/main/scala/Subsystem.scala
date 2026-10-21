@@ -123,4 +123,6 @@ class ChipyardSubsystem(implicit p: Parameters) extends BaseSubsystem
 class ChipyardSubsystemModuleImp[+L <: ChipyardSubsystem](_outer: L) extends BaseSubsystemModuleImp(_outer)
     with HasHierarchicalElementsRootContextModuleImp {
   override lazy val outer = _outer
+  ElaborationArtefacts.files = ElaborationArtefacts.files.filterNot(_._1 == "graphml")
+  ElaborationArtefacts.add(s"${dtsLM.getParent.map(_.suggestedName).getOrElse(dtsLM.suggestedName)}.graphml", dtsLM.graphML)
 }

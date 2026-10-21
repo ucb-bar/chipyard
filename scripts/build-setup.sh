@@ -19,7 +19,7 @@ usage() {
     echo ""
     echo "Helper script to fully initialize repository that wraps other scripts."
     echo "By default it initializes/installs things in the following order:"
-    echo "   1. Pixi environment"
+    echo "   1. Conda environment"
     echo "   2. Chipyard submodules"
     echo "   3. Toolchain collateral (Spike, PK, tests, libgloss)"
     echo "   4. Ctags"
@@ -36,14 +36,15 @@ usage() {
     echo "Options"
     echo "  --help -h               : Display this message"
     echo "  --verbose -v            : Verbose printout"
-    echo "  --use-unpinned-deps -ud : Deprecated for Pixi; kept for CLI compatibility"
-    echo "  --use-lean-conda        : Install a leaner version of the repository (uses Pixi 'lean' env; no FireSim, no FireMarshal)"
+    echo "  --use-unpinned-deps -ud : Use unpinned conda environment"
+    echo "  --use-lean-conda        : Install a leaner version of the repository (smaller conda env, no FireSim, no FireMarshal)"
     echo "  --build-circt           : Builds CIRCT from source, instead of downloading the precompiled binary"
-    echo "  --conda-env-name NAME   : Deprecated for Pixi; kept for CLI compatibility"
+    echo "                            (uses gcc/g++ by default; set CC/CXX to override)"
+    echo "  --conda-env-name NAME   : Optionally use a global conda env name instead of storing env in Chipyard directory"
     echo "  --github-token TOKEN    : Optionally use a Github token to download CIRCT"
 
     echo "  --skip -s N             : Skip step N in the list above. Use multiple times to skip multiple steps ('-s N -s M ...')."
-    echo "  --skip-conda            : Skip environment initialization (step 1)"
+    echo "  --skip-conda            : Skip Conda initialization (step 1)"
     echo "  --skip-submodules       : Skip submodule initialization (step 2)"
     echo "  --skip-toolchain        : Skip toolchain collateral (step 3)"
     echo "  --skip-ctags            : Skip ctags (step 4)"
@@ -65,8 +66,6 @@ SKIP_LIST=()
 BUILD_CIRCT=false
 GLOBAL_ENV_NAME=""
 GITHUB_TOKEN="null"
-PIXI_ENV_NAME=""
-PIXI_ENV_PREFIX=""
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -77,9 +76,8 @@ do
         riscv-tools )
             TOOLCHAIN_TYPE=$1 ;;
         --verbose | -v)
-            VERBOSE=true
             VERBOSE_FLAG=$1
-            ;;
+            set -x ;;
         --use-lean-conda)
             USE_LEAN_CONDA=true
             SKIP_LIST+=(4 6 7 8 9) ;;
@@ -150,189 +148,124 @@ function exit_if_last_command_failed
     fi
 }
 
-function version_ge
-{
-    [ "$1" = "$2" ] && return 0
-    [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n1)" = "$1" ]
-}
-
 # add helper variable pointing to current chipyard top-level dir
 replace_content env.sh cy-dir-helper "CY_DIR=${CYDIR}"
 
-# setup and install pixi environment
+# setup and install conda environment
 if run_step "1"; then
-    begin_step "1" "Pixi environment setup"
-    PIXI_MANIFEST=$CYDIR/pixi-reqs/pixi.toml
-    PIXI_LOCK=$CYDIR/pixi-reqs/pixi.lock
-    MANIFEST_SYSROOT_VERSION=""
+    begin_step "1" "Conda environment setup"
+    # note: lock file must end in .conda-lock.yml - see https://github.com/conda-incubator/conda-lock/issues/154
+    CONDA_REQS=$CYDIR/conda-reqs
+    CONDA_LOCK_REQS=$CONDA_REQS/conda-lock-reqs
 
-    # Detect host glibc and export an override for conda-style solving paths.
-    # This helps avoid selecting binaries that require a newer glibc than host.
-    HOST_GLIBC_VERSION=""
-    if type ldd >& /dev/null; then
-        HOST_GLIBC_VERSION="$(ldd --version 2>/dev/null | head -n1 | sed -E 's/.* ([0-9]+\.[0-9]+).*/\1/')"
-        if [[ "$HOST_GLIBC_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            export CONDA_OVERRIDE_GLIBC="$HOST_GLIBC_VERSION"
-            echo "Detected host glibc $HOST_GLIBC_VERSION (exported CONDA_OVERRIDE_GLIBC)"
-        fi
-    fi
+    case "$(uname -m)" in
+      x86_64)
+        CONDA_PLATFORM=linux-64
+        ;;
+      aarch64|arm64)
+        CONDA_PLATFORM=linux-aarch64
+        ;;
+      *)
+        echo "Unsupported Linux architecture: $(uname -m)"
+        exit 1
+        ;;
+    esac
 
-    if ! type pixi >& /dev/null; then
-        die "pixi is required for step 1 but was not found on PATH"
-    fi
-
-    if [ ! -f "$PIXI_MANIFEST" ]; then
-        die "Pixi manifest not found at $PIXI_MANIFEST"
-    fi
-
-    MANIFEST_SYSROOT_VERSION="$(grep -m1 -E '^sysroot_linux-64 = "[0-9]+\.[0-9]+\.\*"' "$PIXI_MANIFEST" | sed -E 's/.*"([0-9]+\.[0-9]+)\.\*".*/\1/')"
-
-    if [[ "$HOST_GLIBC_VERSION" =~ ^[0-9]+\.[0-9]+$ ]] && [[ "$MANIFEST_SYSROOT_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
-        if ! version_ge "$HOST_GLIBC_VERSION" "$MANIFEST_SYSROOT_VERSION"; then
-            echo "Adjusting Pixi sysroot pin from $MANIFEST_SYSROOT_VERSION to host glibc $HOST_GLIBC_VERSION"
-            sed -i.bak -E "s/^sysroot_linux-64 = \"[0-9]+\.[0-9]+\\.\*\"/sysroot_linux-64 = \"$HOST_GLIBC_VERSION.*\"/" "$PIXI_MANIFEST"
-            rm -f "$PIXI_MANIFEST.bak"
-            MANIFEST_SYSROOT_VERSION="$HOST_GLIBC_VERSION"
-        fi
-    fi
-
+    # must match with the file generated by generate-conda-lockfiles.sh
     if [ "$USE_LEAN_CONDA" = false ]; then
-        PIXI_ENV_NAME="full"
+      LOCKFILE=$CONDA_LOCK_REQS/conda-requirements-$TOOLCHAIN_TYPE-$CONDA_PLATFORM.conda-lock.yml
     else
-        PIXI_ENV_NAME="lean"
+      LOCKFILE=$CONDA_LOCK_REQS/conda-requirements-$TOOLCHAIN_TYPE-$CONDA_PLATFORM-lean.conda-lock.yml
     fi
 
-    if [ -n "$GLOBAL_ENV_NAME" ]; then
-        die "--conda-env-name is not supported with Pixi environments"
+    # create conda-lock only environment to be used in this section.
+    # done with cloning base then installing conda lock to speed up dependency solving.
+    CONDA_LOCK_ENV_PATH=$CYDIR/.conda-lock-env
+
+    # check if directories already exist
+    if [ -d $CONDA_LOCK_ENV_PATH ] || [ -d "$CYDIR/.conda-env" ]; then
+        echo "Error: Conda environment directories already exist! Delete them before trying to recreate the \
+conda environment or \`source env.sh\` and skip this step with \`-s 1\`." >&2
+        exit 1
     fi
+    
+    rm -rf $CONDA_LOCK_ENV_PATH &&
+    "$CONDA_EXE" create -y -p "$CONDA_LOCK_ENV_PATH" -c conda-forge conda-lock &&
+    source $(conda info --base)/etc/profile.d/conda.sh &&
+    conda activate $CONDA_LOCK_ENV_PATH
+    exit_if_last_command_failed
 
     if [ "$USE_UNPINNED_DEPS" = true ]; then
-        echo "WARNING: --use-unpinned-deps is ignored when using Pixi."
-    fi
-
-    LOCK_NEEDS_UPDATE=false
-    LOCK_UPDATE_REASON=""
-    LOCKED_GLIBC_VERSION=""
-
-    if [ ! -f "$PIXI_LOCK" ]; then
-        LOCK_NEEDS_UPDATE=true
-        LOCK_UPDATE_REASON="missing lockfile"
-    elif ! pixi lock --manifest-path "$PIXI_MANIFEST" --check > /dev/null 2>&1; then
-        LOCK_NEEDS_UPDATE=true
-        LOCK_UPDATE_REASON="manifest and lockfile are out of sync"
-    else
-        LOCKED_GLIBC_VERSION="$(grep -m1 -E 'sysroot_linux-64 ==[0-9]+\.[0-9]+' "$PIXI_LOCK" | sed -E 's/.*==([0-9]+\.[0-9]+).*/\1/')"
-        if [ -z "$LOCKED_GLIBC_VERSION" ]; then
-            LOCKED_GLIBC_VERSION="$(grep -m1 -E 'sysroot_linux-64-[0-9]+\.[0-9]+' "$PIXI_LOCK" | sed -E 's/.*sysroot_linux-64-([0-9]+\.[0-9]+).*/\1/')"
-        fi
-    fi
-
-    if [[ "$HOST_GLIBC_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
-        if [ -z "$LOCKED_GLIBC_VERSION" ]; then
-            LOCK_NEEDS_UPDATE=true
-            LOCK_UPDATE_REASON="unable to determine locked sysroot glibc"
-        elif ! version_ge "$HOST_GLIBC_VERSION" "$LOCKED_GLIBC_VERSION"; then
-            LOCK_NEEDS_UPDATE=true
-            LOCK_UPDATE_REASON="host glibc $HOST_GLIBC_VERSION is older than locked sysroot $LOCKED_GLIBC_VERSION"
-        fi
-    fi
-
-    if [ "$LOCK_NEEDS_UPDATE" = true ]; then
-        echo "Refreshing Pixi lockfile ($LOCK_UPDATE_REASON)"
-        pixi lock --manifest-path "$PIXI_MANIFEST"
+        # auto-gen the lockfiles
+        $CYDIR/scripts/generate-conda-lockfiles.sh
         exit_if_last_command_failed
-    else
-        echo "Pixi lockfile is up to date; skipping lock resolution"
     fi
-
-    PIXI_INSTALL_CMD=(pixi install --manifest-path "$PIXI_MANIFEST" --environment "$PIXI_ENV_NAME" --locked)
-    printf -v PIXI_INSTALL_SHELL_CMD '%q ' "${PIXI_INSTALL_CMD[@]}"
-    echo "Running: ${PIXI_INSTALL_CMD[*]}"
-
-    if type script >& /dev/null; then
-        script -qefc "$PIXI_INSTALL_SHELL_CMD" /dev/null
-    else
-        "${PIXI_INSTALL_CMD[@]}"
+    SYS_GLIBC=$(ldd --version 2>/dev/null | awk '/ldd/{print $NF; exit}')
+    DEFAULT_GLIBC=$(sed -n 's/^[[:space:]]*-[[:space:]]*sysroot_linux-64=\([0-9.]*\).*/\1/p' "$CONDA_REQS/chipyard-base.yaml")
+    SYSROOT_GLIBC=""
+    if [[ "$SYS_GLIBC" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+        # Conda-forge publishes only these sysroots. Use the newest one that
+        # does not require a newer glibc than the host provides.
+        # NOTE: THIS REQUIRES MANUAL UPDATES BY CHECKING HERE: https://anaconda.org/channels/conda-forge/packages/sysroot_linux-64/files
+        for version in 2.39 2.34 2.28 2.17 2.12.2 2.12; do
+            if [ "$(printf '%s\n' "$version" "$SYS_GLIBC" | sort -V | head -n 1)" = "$version" ]; then
+                SYSROOT_GLIBC=$version
+                break
+            fi
+        done
     fi
+    if [ -z "$SYSROOT_GLIBC" ]; then
+        echo "WARNING: Cannot select a sysroot for host glibc '${SYS_GLIBC:-unknown}'; keeping $DEFAULT_GLIBC."
+    elif [ "$(printf '%s\n' "$SYSROOT_GLIBC" 2.33 | sort -V | head -n 1)" != 2.33 ]; then
+        echo "WARNING: Selected sysroot $SYSROOT_GLIBC is below glibc 2.33 required by VCS."
+    fi
+    if [ -n "$SYSROOT_GLIBC" ] && [ "$SYSROOT_GLIBC" != "$DEFAULT_GLIBC" ]; then
+        sed -i "s/^\([[:space:]]*-[[:space:]]*sysroot_linux-64=\)[0-9.]*/\1$SYSROOT_GLIBC/" "$CONDA_REQS/chipyard-base.yaml"
+        $CYDIR/scripts/generate-conda-lockfiles.sh
+        exit_if_last_command_failed
+    fi
+    echo "Using lockfile for conda: $LOCKFILE"
+
+    # use conda-lock to create env
+    if [ -z "$GLOBAL_ENV_NAME" ] ; then
+        CONDA_ENV_PATH=$CYDIR/.conda-env
+        CONDA_ENV_ARG="-p $CONDA_ENV_PATH"
+        CONDA_ENV_NAME=$CONDA_ENV_PATH
+    else
+        CONDA_ENV_ARG="-n $GLOBAL_ENV_NAME"
+        CONDA_ENV_NAME=$GLOBAL_ENV_NAME
+    fi
+    echo "Storing main conda environment in $CONDA_ENV_NAME"
+
+    conda-lock install --conda $CONDA_EXE $CONDA_ENV_ARG $LOCKFILE &&
+    ## If the above line errors in your environment, you can try the line below
+    # conda-lock install --conda $(which conda) $CONDA_ENV_ARG $LOCKFILE &&
+    source $(conda info --base)/etc/profile.d/conda.sh &&
+    conda activate $CONDA_ENV_NAME
     exit_if_last_command_failed
 
-    OLD_BASH_XTRACEFD="${BASH_XTRACEFD-}"
-    exec {PIXI_XTRACE_FD}>/dev/null
-    export BASH_XTRACEFD="$PIXI_XTRACE_FD"
-    set +x
-    eval "$(pixi shell-hook --as-is --manifest-path "$PIXI_MANIFEST" --environment "$PIXI_ENV_NAME")"
-    set +x
-    if [ -n "$OLD_BASH_XTRACEFD" ]; then
-        export BASH_XTRACEFD="$OLD_BASH_XTRACEFD"
-    else
-        unset BASH_XTRACEFD
-    fi
-    exec {PIXI_XTRACE_FD}>&-
-    exit_if_last_command_failed
-
-    PIXI_ENV_PREFIX="$CYDIR/pixi-reqs/.pixi/envs/$PIXI_ENV_NAME"
-
-    # Pixi setup
+    # Conda Setup
     # Provide a sourceable snippet that can be used in subshells that may not have
-    # inherited shell state from an interactive session (e.g., VSCode, CI)
-    read -r -d '\0' PIXI_ACTIVATE_PREAMBLE <<'END_PIXI_ACTIVATE'
-if ! type pixi >& /dev/null; then
-    echo "::ERROR:: you must have pixi in your environment first"
+    # inhereted conda functions that would be brought in under a login shell that
+    # has run conda init (e.g., VSCode, CI)
+    read -r -d '\0' CONDA_ACTIVATE_PREAMBLE <<'END_CONDA_ACTIVATE'
+if ! type conda >& /dev/null; then
+    echo "::ERROR:: you must have conda in your environment first"
     return 1  # don't want to exit here because this file is sourced
 fi
+
+source $(conda info --base)/etc/profile.d/conda.sh
 \0
-END_PIXI_ACTIVATE
+END_CONDA_ACTIVATE
 
     replace_content env.sh build-setup-conda "# line auto-generated by $0
-$PIXI_ACTIVATE_PREAMBLE
-
-if ! type python3 >& /dev/null; then
-    echo \"::ERROR:: python3 is required to parse pixi JSON shell-hook output\"
-    return 1
-fi
-
-eval \"\$(pixi shell-hook --json --as-is --manifest-path $CYDIR/pixi-reqs/pixi.toml --environment $PIXI_ENV_NAME | python3 -c 'import json, shlex, sys; d = json.load(sys.stdin).get(\"environment_variables\", {}); print(\"\\n\".join(f\"export {k}={shlex.quote(v)}\" for k, v in d.items()))')\"
-if [ \$? -ne 0 ]; then
-    echo \"::ERROR:: failed to activate Pixi environment metadata\"
-    return 1
-fi
-
-DRAMSIM2_INCLUDE="$CYDIR/tools/DRAMSim2"
-
-if [ -n "\$RISCV" ]; then
-    if [ -n "\${C_INCLUDE_PATH-}" ]; then
-        export C_INCLUDE_PATH="\$RISCV/include:\$DRAMSIM2_INCLUDE:\$C_INCLUDE_PATH"
-    else
-        export C_INCLUDE_PATH="\$RISCV/include:\$DRAMSIM2_INCLUDE"
-    fi
-
-    if [ -n "\${CPLUS_INCLUDE_PATH-}" ]; then
-        export CPLUS_INCLUDE_PATH="\$RISCV/include:\$DRAMSIM2_INCLUDE:\$CPLUS_INCLUDE_PATH"
-    else
-        export CPLUS_INCLUDE_PATH="\$RISCV/include:\$DRAMSIM2_INCLUDE"
-    fi
-fi
-
-echo \"Chipyard Pixi environment activated in current shell\"
-
-# After 'pixi add/remove/update', automatically re-install the active environment
-# (full or lean) so the change takes effect immediately.
-pixi() {
-    command pixi \"\$@\"
-    local ret=\$?
-    if [[ \$ret -eq 0 && \"\$1\" =~ ^(add|remove|update)\$ ]]; then
-        echo \":: Re-installing pixi environment '\${PIXI_ENVIRONMENT_NAME}' ...\"
-        command pixi install --manifest-path \"$CYDIR/pixi-reqs/pixi.toml\" \\
-            --environment \"\${PIXI_ENVIRONMENT_NAME:-$PIXI_ENV_NAME}\"
-    fi
-    return \$ret
-}
-
+$CONDA_ACTIVATE_PREAMBLE
+conda activate $CONDA_ENV_NAME
 source $CYDIR/scripts/fix-open-files.sh"
 fi
 
-if run_step "1" && [ -z "$PIXI_ENV_NAME" ]; then
-    echo "!!!!! WARNING: No Pixi environment selected in step 1."
+if [ -z ${CONDA_DEFAULT_ENV+x} ]; then
+    echo "!!!!! WARNING: No conda environment detected. Did you activate the conda environment (e.x. 'conda activate base')?"
 fi
 
 # initialize all submodules (without the toolchain submodules)
@@ -346,10 +279,10 @@ fi
 if run_step "3"; then
     begin_step "3" "Building toolchain collateral"
     if run_step "1"; then
-        PREFIX=$PIXI_ENV_PREFIX/$TOOLCHAIN_TYPE
+        PREFIX=$CONDA_PREFIX/$TOOLCHAIN_TYPE
     else
         if [ -z "$RISCV" ] ; then
-            error "ERROR: If environment initialization is skipped, \$RISCV variable must be defined."
+            error "ERROR: If conda initialization skipped, \$RISCV variable must be defined."
             exit 1
         fi
         PREFIX=$RISCV
@@ -421,16 +354,36 @@ fi
 
 if run_step "10"; then
     begin_step "10" "Installing CIRCT"
-    # install CIRCT into the selected environment prefix
+    # install circt into conda
     if run_step "1"; then
-        PREFIX=$PIXI_ENV_PREFIX/$TOOLCHAIN_TYPE
+        PREFIX=$CONDA_PREFIX/$TOOLCHAIN_TYPE
     else
         if [ -z "$RISCV" ] ; then
-            error "ERROR: If environment initialization is skipped, \$RISCV variable must be defined."
+            error "ERROR: If conda initialization skipped, \$RISCV variable must be defined."
             exit 1
         fi
         PREFIX=$RISCV
     fi
+
+    # Select the prebuilt CIRCT tarball for the host architecture. CIRCT only
+    # publishes prebuilt *Linux* binaries for x86_64, so on other architectures
+    # (e.g. aarch64) there is nothing to download and we must build from source.
+    case "$(uname -m)" in
+      x86_64)
+        CIRCT_ARCH=linux-x64
+        ;;
+      aarch64|arm64)
+        CIRCT_ARCH=linux-arm64
+        if [ "$BUILD_CIRCT" = false ] ; then
+            echo "No prebuilt CIRCT binary is published for $(uname -m); building from source instead."
+            BUILD_CIRCT=true
+        fi
+        ;;
+      *)
+        error "Unsupported architecture for CIRCT: $(uname -m)"
+        exit 1
+        ;;
+    esac
 
     if [ "$BUILD_CIRCT" = true ] ; then
 	echo "Building CIRCT from source, and installing to $PREFIX"
@@ -440,10 +393,10 @@ if run_step "10"; then
 
 	git submodule update --init $CYDIR/tools/install-circt &&
 	    $CYDIR/tools/install-circt/bin/download-release-or-nightly-circt.sh \
-		-f circt-full-static-linux-x64.tar.gz \
+		-f circt-full-static-$CIRCT_ARCH.tar.gz \
 		-i $PREFIX \
 		-v version-file \
-		-x $CYDIR/pixi-reqs/circt.json \
+		-x $CYDIR/conda-reqs/circt.json \
 		-g $GITHUB_TOKEN
     fi
     exit_if_last_command_failed

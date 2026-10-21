@@ -44,6 +44,34 @@ ifeq ($(SUB_PROJECT),vcu118)
 	FPGA_BRAND        ?= xilinx
 endif
 
+ifeq ($(SUB_PROJECT),zcu104)
+	SBT_PROJECT       ?= chipyard_fpga
+	MODEL             ?= ZCU104FPGATestHarness
+	VLOG_MODEL        ?= ZCU104FPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.zcu104
+	CONFIG            ?= RocketZCU104Config
+	CONFIG_PACKAGE    ?= chipyard.fpga.zcu104
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= zcu104
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),genesys2)
+	SBT_PROJECT       ?= chipyard_fpga
+	MODEL             ?= Genesys2Harness
+	VLOG_MODEL        ?= Genesys2Harness
+	MODEL_PACKAGE     ?= chipyard.fpga.genesys2
+	CONFIG            ?= RocketGenesys2Config
+	CONFIG_PACKAGE    ?= chipyard.fpga.genesys2
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= genesys2
+	FPGA_BRAND        ?= xilinx
+endif
+
 ifeq ($(SUB_PROJECT),nexysvideo)
 	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= NexysVideoHarness

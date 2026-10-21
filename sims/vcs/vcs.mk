@@ -35,8 +35,11 @@ VCS_CC_OPTS = \
 	-LDFLAGS "$(filter-out -l%,$(VCS_LDFLAGS))" \
 	$(filter -l%,$(VCS_LDFLAGS))
 
+# VCS-generated C omits some internal prototypes. GCC 14+ diagnoses these as
+# errors; keep them as warnings in the code-generation compiler only.
 VCS_NONCC_OPTS = \
 	-notice \
+	-Xcflags=-Wno-error=implicit-function-declaration \
 	-line \
 	+lint=all,noVCDE,noONGS,noUI \
 	-error=PCWM-L \

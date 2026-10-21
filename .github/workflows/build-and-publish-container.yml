@@ -1,0 +1,84 @@
+name: build and publish container
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  build-and-publish-container:
+    name: build and publish container
+    runs-on: ubuntu-24.04
+    env:
+      BUILDKIT_PROGRESS: plain
+      DOCKER_BUILDKIT: 1
+      DOCKER_DATA_ROOT: ${{ github.workspace }}/.ci/docker
+      FORCE_NON_EC2: 1
+    steps:
+      - name: Maximize build space
+        uses: jimfangx/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 10240
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Move Docker storage to workspace
+        run: |
+          sudo systemctl stop docker
+          sudo mkdir -p "${DOCKER_DATA_ROOT}"
+          printf '{ "data-root": "%s" }\n' "${DOCKER_DATA_ROOT}" | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker
+          docker info --format 'Docker root: {{ .DockerRootDir }}'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-flags: --allow-insecure-entitlement security.insecure
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image metadata
+        id: image
+        run: |
+          image_name="ghcr.io/${GITHUB_REPOSITORY,,}"
+          unix_timestamp="$(date +%s)"
+          echo "image_ref=${image_name}:main" >> "${GITHUB_OUTPUT}"
+          echo "unix_timestamp=${unix_timestamp}" >> "${GITHUB_OUTPUT}"
+
+      - name: Build and publish container
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: dockerfiles/Dockerfile
+          target: base-with-tools
+          allow: security.insecure
+          build-args: |
+            CHIPYARD_REPO=${{ github.server_url }}/${{ github.repository }}.git
+            CHIPYARD_REF=main
+          labels: |
+            org.chipyard.ci.unix-timestamp=${{ steps.image.outputs.unix_timestamp }}
+          tags: |
+            ${{ steps.image.outputs.image_ref }}
+          outputs: |
+            type=image,push=true,oci-mediatypes=true,compression=zstd,compression-level=15,force-compression=true

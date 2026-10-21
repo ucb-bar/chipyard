@@ -7,6 +7,7 @@ in `FireSim <https://fires.im/>`_ for multi-node networked simulation.
 A diagram of IceNet's microarchitecture is shown below.
 
 .. image:: ../_static/images/nic-design.png
+   :class: diagram-white-background
 
 There are four basic parts of the NIC: the :ref:`Generators/IceNet:Controller`, which takes requests
 from and sends responses to the CPU; the :ref:`Generators/IceNet:Send Path`, which reads data from
@@ -67,7 +68,7 @@ an Ethernet pause frame, the pause handler will block sending from the NIC.
 Linux Driver
 ------------
 
-The default Linux configuration provided by `firesim-software <https://github.com/firesim/firesim-software>`_
+The default Linux configuration provided by `FireMarshal <https://github.com/firesim/FireMarshal>`_
 contains an IceNet driver. If you launch a FireSim image that has IceNIC on it,
 the driver will automatically detect the device, and you will be able to use
 the full Linux networking stack in userspace.

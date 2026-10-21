@@ -53,6 +53,33 @@ CVA6_VERILATOR_FLAGS = \
 DEFAULT_MIDAS_VERILATOR_FLAGS = \
 	--assert
 
+# here to make verilator happy; prevents: 
+# "Operator DIV expects 16 bits on the RHS, but RHS's CONST '5'h10' generates 5 bits." err -- known issue, see: 
+# generators/gemmini/src/main/scala/gemmini/LoadController.scala:117
+# generators/gemmini/src/main/scala/gemmini/LoopConv.scala:474
+GEMMINI_VERILATOR_FLAGS = \
+	$(DEFAULT_MIDAS_VERILATOR_FLAGS) \
+	-Wno-WIDTHEXPAND
+
+# Saturn/Shuttle vector configs can emit unsigned comparisons that Verilator
+# treats as fatal under the FireSim verilator backend.
+SHUTTLE_VECTOR_VERILATOR_FLAGS = \
+	$(DEFAULT_MIDAS_VERILATOR_FLAGS) \
+	-Wno-UNSIGNED
+
 # AJG: this must be evaluated after verilog generation to work (hence the =)
 EXTRA_VERILATOR_FLAGS = \
-	$(shell if ! grep -iq "module.*cva6" $(simulator_verilog); then echo "$(DEFAULT_MIDAS_VERILATOR_FLAGS)"; else echo "$(CVA6_VERILATOR_FLAGS)"; fi)
+	$(shell \
+		if grep -iq "module.*cva6" $(simulator_verilog); then \
+			echo "$(CVA6_VERILATOR_FLAGS)"; \
+		elif echo "$(TARGET_CONFIG)" | grep -Eiq "Gemmini"; then \
+			echo "$(GEMMINI_VERILATOR_FLAGS)"; \
+		elif grep -iq "module.*gemmini" $(simulator_verilog); then \
+			echo "$(GEMMINI_VERILATOR_FLAGS)"; \
+		elif echo "$(TARGET_CONFIG)" | grep -Eiq "Shuttle"; then \
+			echo "$(SHUTTLE_VECTOR_VERILATOR_FLAGS)"; \
+		elif grep -Eiq "module.*shuttle.*vector|shuttle_tile.*vector_unit|vector_unit\.vu" $(simulator_verilog); then \
+			echo "$(SHUTTLE_VECTOR_VERILATOR_FLAGS)"; \
+		else \
+			echo "$(DEFAULT_MIDAS_VERILATOR_FLAGS)"; \
+		fi)

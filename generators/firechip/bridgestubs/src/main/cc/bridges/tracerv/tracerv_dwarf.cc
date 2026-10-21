@@ -41,10 +41,9 @@ private:
   Dwarf_Debug dbg;
 };
 
-dwarf_t::dwarf_t(Elf *elf) {
+dwarf_t::dwarf_t(int fd) {
   Dwarf_Error err;
-  if (dwarf_elf_init(
-          elf, DW_DLC_READ, &dwarf_runtime_error, nullptr, &this->dbg, &err) !=
+  if (dwarf_init_b(fd, DW_GROUPNUMBER_ANY, &dwarf_runtime_error, nullptr, &this->dbg, &err) !=
       DW_DLV_OK) {
     this->dbg = nullptr;
   }
@@ -55,7 +54,7 @@ void dwarf_t::subroutines(subroutine_map &table) {
     return;
   }
   Dwarf_Unsigned next_cu_offset;
-  while (dwarf_next_cu_header_c(this->dbg,
+  while (dwarf_next_cu_header_d(this->dbg,
                                 1,       // is_info
                                 nullptr, // cu_header_length
                                 nullptr, // version_stamp
@@ -65,12 +64,13 @@ void dwarf_t::subroutines(subroutine_map &table) {
                                 nullptr, // extension_size
                                 nullptr, // signature
                                 nullptr, // typeoffset
-                                &next_cu_offset,
+                                &next_cu_offset, // next hdr offset
+                                nullptr, // header_type
                                 nullptr) == DW_DLV_OK) {
 
     // Expect CU to have an initial DIE
     Dwarf_Die die;
-    if (dwarf_siblingof(this->dbg, nullptr, &die, nullptr) != DW_DLV_OK) {
+    if (dwarf_siblingof_b(this->dbg, nullptr, 1, &die, nullptr) != DW_DLV_OK) {
       continue;
     }
     die_ptr die_wrap(die, dwarf_deleter(dbg));
@@ -92,7 +92,7 @@ void dwarf_t::siblings(die_ptr die,
     Dwarf_Die p = die.get();
 
     (this->*fn)(p, arg);
-    if (dwarf_siblingof(this->dbg, p, &p, nullptr) != DW_DLV_OK) {
+    if (dwarf_siblingof_b(this->dbg, p, 1, &p, nullptr) != DW_DLV_OK) {
       return;
     }
     die = die_ptr(p, dwarf_deleter(dbg));

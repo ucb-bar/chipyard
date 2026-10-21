@@ -1,0 +1,52 @@
+Running a Design on ZCU104
+==========================
+
+Basic ZCU104 Design
+-------------------
+
+The default Xilinx ZCU104 harness is set up with UART, a SPI SDCard, DDR backing memory, and JTAG.
+This allows it to run RISC-V Linux from an SDCard while piping the terminal over UART to the host machine.
+To extend this design, you can create your own Chipyard configuration and add the ``WithZCU104Tweaks`` located in `fpga/src/main/scala/zcu104/Configs.scala <https://ucb.bar/chipyard/fpga/src/main/scala/zcu104/Configs.scala>`__.
+Adding this config fragment enables and connects the default peripherals to your Chipyard design/config.
+
+.. literalinclude:: ../../fpga/src/main/scala/zcu104/Configs.scala
+    :language: scala
+    :start-after: DOC include start: AbstractZCU104 and Rocket
+    :end-before: /** UART-TSI ZCU104 */
+
+To build the default design (Vivado should be added to the ``PATH``), run:
+
+.. code-block:: shell
+
+    cd fpga/
+    make SUB_PROJECT=zcu104 bitstream
+
+Running Linux on ZCU104 Designs
+-------------------------------
+
+The ZCU104 uses the same SD boot flow and flat Linux binaries as the VCU118.
+Follow :ref:`Prototyping/VCU118:Running Linux on VCU118 Designs` to build Linux and prepare the SDCard.
+
+UART-TSI No-DDR Design
+----------------------
+
+The ``RocketZCU104NoDDRConfig`` uses UART-TSI, disables DDR and the default peripherals, and provides a 256 KiB DTIM at ``0x80000000``.
+Build it with:
+
+.. code-block:: shell
+
+    cd fpga/
+    make SUB_PROJECT=zcu104 CONFIG=RocketZCU104NoDDRConfig bitstream
+
+Build the UART-based frontend server:
+
+.. code-block:: shell
+
+    cd generators/testchipip/uart_tsi
+    make
+
+After programming the bitstream, load a program that fits in the DTIM:
+
+.. code-block:: shell
+
+    ./uart_tsi +tty=/dev/ttyUSBX +selfcheck program.riscv

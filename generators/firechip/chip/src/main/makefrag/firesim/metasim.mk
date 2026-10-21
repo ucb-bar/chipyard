@@ -1,5 +1,7 @@
 # See LICENSE for license details.
 
+SHELL := /bin/bash
+
 ################################################################
 # SW RTL Simulation Args -- for MIDAS- & FPGA-level Simulation #
 ################################################################

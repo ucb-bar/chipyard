@@ -1,0 +1,6 @@
+sphinx
+pygments
+sphinx-autobuild
+sphinx-rtd-theme
+docutils
+requests

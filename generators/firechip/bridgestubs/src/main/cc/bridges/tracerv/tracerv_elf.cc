@@ -29,7 +29,7 @@ inline void elf_version_init(void) {
 }
 } // namespace
 
-elf_t::elf_t(int fd) {
+elf_t::elf_t(int fd) : fd(fd) {
   elf_version_init();
   this->elf = elf_begin(fd, ELF_C_READ, nullptr);
   if (this->elf == nullptr) {
@@ -75,7 +75,7 @@ void *elf_t::section_data(const char *name, size_t *size) {
 
 std::pair<uint64_t, uint64_t> elf_t::subroutines(subroutine_map &table) {
   {
-    dwarf_t dwarf(this->elf);
+    dwarf_t dwarf(this->fd);
     dwarf.subroutines(table);
   }
 

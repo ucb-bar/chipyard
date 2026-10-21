@@ -1,0 +1,230 @@
+---
+import SidebarRestorePoint from '@astrojs/starlight/components/SidebarRestorePoint.astro';
+import { Badge, Icon } from '@astrojs/starlight/components';
+
+type Sidebar = typeof Astro.locals.starlightRoute.sidebar;
+type SidebarEntry = Sidebar[number];
+
+interface Props {
+  sublist: Sidebar;
+  nested?: boolean;
+}
+
+const { sublist, nested } = Astro.props;
+
+function containsCurrent(entries: Sidebar): boolean {
+  return entries.some((entry) =>
+    entry.type === 'link' ? entry.isCurrent : containsCurrent(entry.entries),
+  );
+}
+
+function groupLandingPage(entry: SidebarEntry) {
+  if (entry.type === 'link') return undefined;
+  const firstEntry = entry.entries[0];
+  return firstEntry?.type === 'link' ? firstEntry : undefined;
+}
+
+function groupDropdownEntries(entry: SidebarEntry): Sidebar {
+  if (entry.type === 'link') return [];
+  return groupLandingPage(entry) ? entry.entries.slice(1) : entry.entries;
+}
+---
+
+<ul class:list={{ 'top-level': !nested }}>
+  {
+    sublist.map((entry) => (
+      <li>
+        {entry.type === 'link' ? (
+          <a
+            href={entry.href}
+            aria-current={entry.isCurrent ? 'page' : undefined}
+            class:list={[{ large: !nested }, entry.attrs.class]}
+            {...entry.attrs}
+          >
+            <span>{entry.label}</span>
+            {entry.badge && (
+              <Badge
+                variant={entry.badge.variant}
+                class={entry.badge.class}
+                text={entry.badge.text}
+              />
+            )}
+          </a>
+        ) : (
+          <details open={containsCurrent(entry.entries) || !entry.collapsed}>
+            <summary>
+              <span class="group-label">
+                {groupLandingPage(entry) ? (
+                  <a
+                    class="group-link"
+                    href={groupLandingPage(entry)?.href}
+                    aria-current={groupLandingPage(entry)?.isCurrent ? 'page' : undefined}
+                  >
+                    <span class="large">{entry.label}</span>
+                    {entry.badge && (
+                      <Badge
+                        variant={entry.badge.variant}
+                        class={entry.badge.class}
+                        text={entry.badge.text}
+                      />
+                    )}
+                  </a>
+                ) : (
+                  <>
+                    <span class="large">{entry.label}</span>
+                    {entry.badge && (
+                      <Badge
+                        variant={entry.badge.variant}
+                        class={entry.badge.class}
+                        text={entry.badge.text}
+                      />
+                    )}
+                  </>
+                )}
+              </span>
+              <Icon name="right-caret" class="caret" size="1.25rem" />
+            </summary>
+            <SidebarRestorePoint />
+            <Astro.self sublist={groupDropdownEntries(entry)} nested />
+          </details>
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  function preserveGroupLinkNavigation() {
+    document.querySelectorAll('summary a.group-link').forEach((link) => {
+      if (!(link instanceof HTMLElement) || link.dataset.sidebarLinkReady) return;
+      link.dataset.sidebarLinkReady = 'true';
+      link.addEventListener('click', (event) => event.stopPropagation());
+    });
+  }
+
+  preserveGroupLinkNavigation();
+  document.addEventListener('astro:page-load', preserveGroupLinkNavigation);
+</script>
+
+<style>
+  @layer starlight.core {
+    ul {
+      --sl-sidebar-item-padding-inline: 0.5rem;
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      overflow-wrap: anywhere;
+    }
+
+    ul ul li {
+      margin-inline-start: var(--sl-sidebar-item-padding-inline);
+      border-inline-start: 1px solid var(--sl-color-hairline-light);
+      padding-inline-start: var(--sl-sidebar-item-padding-inline);
+    }
+
+    .large {
+      font-size: var(--sl-text-lg);
+      font-weight: 600;
+      color: var(--sl-color-white);
+    }
+
+    .top-level > li + li {
+      margin-top: 0.75rem;
+    }
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.2em var(--sl-sidebar-item-padding-inline);
+      line-height: 1.4;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    summary::marker,
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .group-label {
+      min-width: 0;
+    }
+
+    .group-link {
+      padding: 0;
+    }
+
+    .group-link:hover .large,
+    .group-link:focus .large {
+      color: var(--sl-color-text-accent);
+    }
+
+    .group-link[aria-current='page'],
+    .group-link[aria-current='page']:hover,
+    .group-link[aria-current='page']:focus {
+      color: var(--sl-color-text-accent);
+      background: none;
+    }
+
+    .group-link[aria-current='page'] .large {
+      color: var(--sl-color-text-accent);
+    }
+
+    .caret {
+      transition: transform 0.2s ease-in-out;
+      flex-shrink: 0;
+    }
+
+    :global([dir='rtl']) .caret {
+      transform: rotateZ(180deg);
+    }
+
+    [open] > summary .caret {
+      transform: rotateZ(90deg);
+    }
+
+    a {
+      display: block;
+      border-radius: 0.25rem;
+      text-decoration: none;
+      color: var(--sl-color-gray-2);
+      padding: 0.3em var(--sl-sidebar-item-padding-inline);
+      line-height: 1.4;
+    }
+
+    a:hover,
+    a:focus {
+      color: var(--sl-color-white);
+    }
+
+    [aria-current='page'],
+    [aria-current='page']:hover,
+    [aria-current='page']:focus {
+      font-weight: 600;
+      color: var(--sl-color-text-invert);
+      background-color: var(--sl-color-text-accent);
+    }
+
+    a > *:not(:last-child),
+    .group-label > *:not(:last-child) {
+      margin-inline-end: 0.25em;
+    }
+
+    @media (min-width: 50rem) {
+      .top-level > li + li {
+        margin-top: 0.5rem;
+      }
+
+      .large {
+        font-size: var(--sl-text-base);
+      }
+
+      a {
+        font-size: var(--sl-text-sm);
+      }
+    }
+  }
+</style>

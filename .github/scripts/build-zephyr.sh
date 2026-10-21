@@ -1,24 +1,25 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# turn echo on and error on earliest command
-set -ex
+chipyard_dir="${LOCAL_CHIPYARD_DIR:-/home/ubuntu/chipyard}"
+zephyr_dir="${chipyard_dir}/software/zephyrproject/zephyr"
 
-# get shared variables
-SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
-source $SCRIPT_DIR/defaults.sh
+if [ -z "${RISCV:-}" ]; then
+  echo "RISCV is unset. Source env.sh before building Zephyr." >&2
+  exit 1
+fi
 
-# install Zephyr dependencies
-git submodule update --init $LOCAL_CHIPYARD_DIR/software/zephyrproject/zephyr
-cd $LOCAL_CHIPYARD_DIR/software/zephyrproject/zephyr/
-west init -l .
+git -C "${chipyard_dir}" submodule update --init -- software/zephyrproject/zephyr
+
+cd "${zephyr_dir}"
+if [ ! -d .west ]; then
+  west init -l .
+fi
 west config manifest.file west-riscv.yml
 west update
 
-# set environment variables for Zephyr
-export ZEPHYR_BASE=$LOCAL_CHIPYARD_DIR/software/zephyrproject/zephyr
+export ZEPHYR_BASE="${zephyr_dir}"
 export ZEPHYR_TOOLCHAIN_VARIANT=cross-compile
-export CROSS_COMPILE=$RISCV/bin/riscv64-unknown-elf-
+export CROSS_COMPILE="${RISCV}/bin/riscv64-unknown-elf-"
 
-
-# Build hello world
 west build -p -b chipyard_riscv64 samples/chipyard/hello_world/

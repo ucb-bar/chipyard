@@ -1,0 +1,153 @@
+name: build-setup rhel
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: number
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  build-setup-rhel:
+    name: build-setup rhel
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      DOCKER_DATA_ROOT: ${{ github.workspace }}/.ci/docker
+      FORCE_NON_EC2: 1
+      JVM_OPTS: -Xmx3200m
+      RHEL_IMAGE: registry.access.redhat.com/ubi9/ubi:latest
+      RHEL_CONDA_INSTALL_DIR: /workspace/.ci/rhel-conda
+    steps:
+      - name: Maximize build space
+        uses: jimfangx/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 10240
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Refresh pull request merge ref
+        run: |
+          git fetch --no-tags origin "pull/${{ inputs.pr_number }}/merge"
+          git checkout --detach FETCH_HEAD
+          git rev-parse --short HEAD
+
+      - name: Move Docker storage to workspace
+        run: |
+          sudo systemctl stop docker
+          sudo mkdir -p "${DOCKER_DATA_ROOT}"
+          printf '{ "data-root": "%s" }\n' "${DOCKER_DATA_ROOT}" | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker
+          docker info --format 'Docker root: {{ .DockerRootDir }}'
+
+      - name: Exclude CI-managed directories from ctags
+        run: |
+          grep -qxF ".ci" .ctagsignore || printf "\n.ci\n" >> .ctagsignore
+
+      - name: Run build setup in RHEL 9
+        run: |
+          docker run --rm \
+            --privileged \
+            --volume "${GITHUB_WORKSPACE}:/workspace" \
+            --workdir /workspace \
+            --env "CONDA_INSTALL_DIR=${RHEL_CONDA_INSTALL_DIR}" \
+            --env "FORCE_NON_EC2=${FORCE_NON_EC2}" \
+            --env "JVM_OPTS=${JVM_OPTS}" \
+            "${RHEL_IMAGE}" \
+            bash -leo pipefail -c '
+              dnf install -y \
+                bzip2 \
+                findutils \
+                git \
+                gzip \
+                kmod \
+                make \
+                patch \
+                procps-ng \
+                python3 \
+                shadow-utils \
+                sudo \
+                tar \
+                unzip \
+                util-linux \
+                wget \
+                which \
+                xz
+              dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+              printf "%s\n" \
+                "[almalinux-baseos]" \
+                "name=AlmaLinux 9 BaseOS" \
+                "baseurl=https://repo.almalinux.org/almalinux/9/BaseOS/\$basearch/os/" \
+                "enabled=1" \
+                "gpgcheck=0" \
+                "" \
+                "[almalinux-appstream]" \
+                "name=AlmaLinux 9 AppStream" \
+                "baseurl=https://repo.almalinux.org/almalinux/9/AppStream/\$basearch/os/" \
+                "enabled=1" \
+                "gpgcheck=0" \
+                "" \
+                "[almalinux-crb]" \
+                "name=AlmaLinux 9 CRB" \
+                "baseurl=https://repo.almalinux.org/almalinux/9/CRB/\$basearch/os/" \
+                "enabled=1" \
+                "gpgcheck=0" \
+                > /etc/yum.repos.d/almalinux-guestfs.repo
+              dnf install -y --setopt=install_weak_deps=False libguestfs-tools libguestfs-tools-c
+              command -v guestmount
+              command -v guestunmount
+
+              # Run build-setup as the mounted workspace owner so FireMarshal
+              # cannot use passwordless sudo and falls back to guestmount.
+              workspace_uid="$(stat -c %u /workspace)"
+              workspace_gid="$(stat -c %g /workspace)"
+
+              if ! getent group "${workspace_gid}" >/dev/null; then
+                groupadd -g "${workspace_gid}" chipyard-ci
+              fi
+              workspace_group="$(getent group "${workspace_gid}" | cut -d: -f1)"
+
+              if ! getent passwd "${workspace_uid}" >/dev/null; then
+                useradd -m -u "${workspace_uid}" -g "${workspace_group}" chipyard-ci
+              fi
+              workspace_user="$(getent passwd "${workspace_uid}" | cut -d: -f1)"
+              workspace_home="$(getent passwd "${workspace_uid}" | cut -d: -f6)"
+
+              mkdir -p "$(dirname "${CONDA_INSTALL_DIR}")"
+              chown "${workspace_uid}:${workspace_gid}" "$(dirname "${CONDA_INSTALL_DIR}")"
+
+              runuser -u "${workspace_user}" -- env \
+                "CONDA_INSTALL_DIR=${CONDA_INSTALL_DIR}" \
+                "FORCE_NON_EC2=${FORCE_NON_EC2}" \
+                "JVM_OPTS=${JVM_OPTS}" \
+                "HOME=${workspace_home}" \
+                bash -leo pipefail -c "
+                  cd /workspace
+                  git config --global --add safe.directory \"*\"
+                  mkdir -p \"\$(dirname \"\${CONDA_INSTALL_DIR}\")\"
+                  wget -O Miniforge3.sh \"https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-\$(uname)-\$(uname -m).sh\"
+                  bash Miniforge3.sh -b -p \"\${CONDA_INSTALL_DIR}\"
+                  source \"\${CONDA_INSTALL_DIR}/etc/profile.d/conda.sh\"
+                  if [ -f \"\${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh\" ]; then
+                    source \"\${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh\"
+                  fi
+                  conda activate
+                  ./build-setup.sh riscv-tools
+                  grep -F \"Setup complete!\" build-setup.log
+                "
+            '

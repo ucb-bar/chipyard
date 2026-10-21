@@ -1,0 +1,59 @@
+name: build documentation
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: number
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  build-docs:
+    name: build documentation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      SKIP_URL_CHECK: "1"
+    steps:
+      - name: Check out pull request merge ref
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ inputs.pr_number }}/merge
+
+      - name: Initialize documentation submodules
+        run: |
+          git submodule sync -- generators/fft-generator
+          git submodule update --init --depth 1 -- generators/fft-generator
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: docs/.nvmrc
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install Sphinx dependencies
+        run: python -m pip install -r docs/requirements.txt
+
+      - name: Install Starlight dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build documentation
+        working-directory: docs
+        run: npm run build

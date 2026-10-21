@@ -2,27 +2,11 @@
 package chipyard.fpga.nexysvideo
 
 import chisel3._
-
-import freechips.rocketchip.jtag.{JTAGIO}
-import freechips.rocketchip.subsystem.{PeripheryBusKey}
-import freechips.rocketchip.tilelink.{TLBundle}
-import freechips.rocketchip.util.{HeterogeneousBag}
-import freechips.rocketchip.diplomacy.{LazyRawModuleImp}
-import org.chipsalliance.diplomacy.nodes.{HeterogeneousBag}
-
-import sifive.blocks.devices.uart.{UARTPortIO, UARTParams}
-import sifive.blocks.devices.jtag.{JTAGPins, JTAGPinsFromPort}
-import sifive.blocks.devices.pinctrl.{BasePin}
-
-//import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
-import sifive.fpgashells.shell._
-import sifive.fpgashells.ip.xilinx._
-import sifive.fpgashells.shell.xilinx._
-import sifive.fpgashells.clocks._
-
-import chipyard._
+import org.chipsalliance.diplomacy.lazymodule.LazyRawModuleImp
+import org.chipsalliance.diplomacy.nodes.HeterogeneousBag
 import chipyard.harness._
 import chipyard.iobinders._
+import sifive.fpgashells.shell._
 import testchipip.serdes._
 
 class WithNexysVideoUARTTSI(uartBaudRate: BigInt = 115200) extends HarnessBinder({
@@ -90,11 +74,15 @@ class WithNexysVideoSerialTLToGPIO extends HarnessBinder({
           }}
         }
 
-        nexysTh.sdc.addClock("ser_tl_clock", clkIO, 100)
+        val serialTLFreqMHz = port.params.phyParams match {
+          case p: DecoupledInternalSyncSerialPhyParams => p.freqMHz.toDouble
+          case p: CreditedSourceSyncSerialPhyParams    => p.freqMHz.toDouble
+          case _: DecoupledExternalSyncSerialPhyParams => 100.0
+        }
+        nexysTh.sdc.addClock("ser_tl_clock", clkIO, serialTLFreqMHz)
         nexysTh.sdc.addGroup(pins = Seq(clkIO))
         nexysTh.xdc.clockDedicatedRouteFalse(clkIO)
       }
     }
   }
 })
-

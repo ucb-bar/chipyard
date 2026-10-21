@@ -22,11 +22,26 @@ usage() {
     echo "   --prefix -p PREFIX    : Install destination."
     echo "   --help -h             : Display this message"
     echo "   --no-conda            : Do not link CIRCT with conda libraries"
+    echo ""
+    echo "Environment"
+    echo "   CC / CXX              : C/C++ compilers to build CIRCT with (default: gcc/g++)"
     exit "$1"
 }
 
 PREFIX=""
 CONDA=1
+
+# Build with GCC by default
+CC=${CC:-$(command -v gcc)}
+CXX=${CXX:-$(command -v g++)}
+if [ -z "$CC" ] || [ -z "$CXX" ]; then
+    error "ERROR: no gcc/g++ found on PATH. Activate the Chipyard conda environment, or set CC/CXX."
+    exit 1
+fi
+export CC CXX
+
+# flags for GCC >= 15
+CIRCT_CXX_FLAGS="${CXXFLAGS:-} -include cstdint"
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -80,6 +95,9 @@ echo "Building CIRCT's LLVM/MLIR"
           -DLLVM_ENABLE_ASSERTIONS=ON \
           -DCMAKE_BUILD_TYPE=RELEASE \
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DCMAKE_C_COMPILER="$CC" \
+          -DCMAKE_CXX_COMPILER="$CXX" \
+          -DCMAKE_CXX_FLAGS="$CIRCT_CXX_FLAGS" \
           ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"}
     ninja
 )
@@ -96,6 +114,9 @@ echo "Building CIRCT"
           -DLLVM_ENABLE_ASSERTIONS=ON \
           -DCMAKE_BUILD_TYPE=RELEASE \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          -DCMAKE_C_COMPILER="$CC" \
+          -DCMAKE_CXX_COMPILER="$CXX" \
+          -DCMAKE_CXX_FLAGS="$CIRCT_CXX_FLAGS" \
           ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"}
     ninja
 )
