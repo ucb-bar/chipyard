@@ -35,7 +35,7 @@ CONDA=1
 CC=${CC:-$(command -v gcc)}
 CXX=${CXX:-$(command -v g++)}
 if [ -z "$CC" ] || [ -z "$CXX" ]; then
-    error "ERROR: no gcc/g++ found on PATH. Activate the Chipyard conda environment, or set CC/CXX."
+    error "ERROR: no gcc/g++ found on PATH. Activate the Chipyard environment, or set CC/CXX."
     exit 1
 fi
 export CC CXX
@@ -98,7 +98,7 @@ echo "Building CIRCT's LLVM/MLIR"
           -DCMAKE_C_COMPILER="$CC" \
           -DCMAKE_CXX_COMPILER="$CXX" \
           -DCMAKE_CXX_FLAGS="$CIRCT_CXX_FLAGS" \
-          ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"}
+          ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$CONDA_PREFIX/lib"}
     ninja
 )
 
@@ -117,7 +117,7 @@ echo "Building CIRCT"
           -DCMAKE_C_COMPILER="$CC" \
           -DCMAKE_CXX_COMPILER="$CXX" \
           -DCMAKE_CXX_FLAGS="$CIRCT_CXX_FLAGS" \
-          ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$RDIR/.conda-env/lib"}
+          ${CONDA:+-DCMAKE_EXE_LINKER_FLAGS="-L$CONDA_PREFIX/lib"}
     ninja
 )
 
