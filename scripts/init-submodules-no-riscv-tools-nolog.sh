@@ -143,7 +143,7 @@ do
     shift
 done
 
-# check that git version is at least 1.7.8
+# Parallel submodule cloning requires Git 2.9 or newer.
 MYGIT=$(git --version)
 MYGIT=${MYGIT#'git version '} # Strip prefix
 case ${MYGIT} in
@@ -153,7 +153,7 @@ case ${MYGIT} in
         echo "WARNING: unknown git version"
         ;;
 esac
-MINGIT="1.8.5"
+MINGIT="2.9.0"
 if [ "$MINGIT" != "$(echo -e "$MINGIT\n$MYGIT" | sort -V | head -n1)" ]; then
   echo "This script requires git version $MINGIT or greater. Exiting."
   exit 4
@@ -167,6 +167,7 @@ set +e
 
 cd "$RDIR"
 
+submodule_name="top-level submodules"
 (
     # Blocklist of submodules to initially skip:
     # - Toolchain submodules
@@ -216,6 +217,39 @@ cd "$RDIR"
     trap 'git_submodule_exclude _unskip' EXIT INT TERM
     (
         set -x
+        git_submodule_exclude _skip
+
+        # Fetch all selected top-level modules together. Keep this batch
+        # non-recursive; nested dependencies are initialized as before below.
+        for name in generators/rocket-chip sims/firesim tools/rocket-dsp-utils \
+            tools/dsptools software/firemarshal
+        do
+            _unskip "$name"
+        done
+        for optional_submodule in \
+            CVA6:generators/cva6 \
+            NVDLA:generators/nvdla \
+            ARA:generators/ara \
+            CALIPTRA:generators/caliptra-aes-acc \
+            FFT:generators/fft-generator \
+            RADIANCE:generators/radiance \
+            COMPRESSACC:generators/compress-acc \
+            MEMPRESS:generators/mempress \
+            SATURN:generators/saturn \
+            SODOR:generators/riscv-sodor \
+            IBEX:generators/ibex \
+            VEXIIRISCV:generators/vexiiriscv \
+            TACIT:generators/tacit \
+            GEMMINI:generators/gemmini
+        do
+            enable_flag=ENABLE_${optional_submodule%%:*}
+            if [[ "${!enable_flag}" -eq 1 ]]; then
+                _unskip "${optional_submodule#*:}"
+            fi
+        done
+        git submodule update --init --jobs=8 || exit 1
+
+        # Reinstate exclusions before the existing recursive initialization.
         git_submodule_exclude _skip
         git submodule update --init --recursive || exit 1
     )
