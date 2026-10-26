@@ -19,6 +19,9 @@
 [submodule "generators/diplomacy"]
 	path = generators/diplomacy
 	url = https://github.com/chipsalliance/diplomacy.git
+[submodule "generators/ethernet"]
+	path = generators/ethernet
+	url = https://github.com/ucb-bar/ethernet.git
 [submodule "generators/fft-generator"]
 	path = generators/fft-generator
 	url = https://github.com/ucb-bar/FFTGenerator.git

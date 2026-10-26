@@ -55,3 +55,6 @@ Self-check that binary loading proceeded correctly:
 .. code-block:: shell
 
 		./uart_tsi +tty=/dev/ttyUSBX +selfcheck dhrystone.riscv
+
+Optional RGMII Ethernet designs are provided by ``RocketNexysVideoVerilogEthConfig`` and ``RocketNexysVideoChiselEthConfig``.
+The ``RocketNexysVideoVerilogUdpEthConfig`` and ``RocketNexysVideoChiselUdpEthConfig`` variants add UDP/IPv4/ARP offload; example firmware is in ``software/ethernet``.

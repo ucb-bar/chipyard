@@ -65,6 +65,10 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithGCDIOPunchthrough ++
   new chipyard.iobinders.WithNMITiedOff ++
   new chipyard.iobinders.WithOffchipBusSel ++
+  new chipyard.iobinders.WithEthernetRGMIIPunchthrough ++
+  new chipyard.iobinders.WithEthernetMDIOPunchthrough ++
+  new chipyard.iobinders.WithEthernetGMIIPunchthrough ++
+  new chipyard.iobinders.WithEthernetXGMIIPunchthrough ++
 
 
   // ================================================

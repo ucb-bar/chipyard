@@ -54,3 +54,5 @@ Self-check that binary loading proceeded correctly:
 .. code-block:: shell
 
 		./uart_tsi +tty=/dev/ttyUSBX +selfcheck dhrystone.riscv
+
+Optional RGMII Ethernet designs are provided by ``RocketGenesys2VerilogEthConfig`` and ``RocketGenesys2ChiselEthConfig``; example firmware is in ``software/ethernet``.
