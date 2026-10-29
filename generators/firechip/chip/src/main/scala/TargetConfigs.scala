@@ -444,7 +444,7 @@ class FireSimMxE4M3VpuGemminiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.MxE4M3VpuGemminiRocketConfig)
 
-// FP4 only (no E4M3, no QuantLut) with the VPU; 4-bank L2 with 64 DRAM reads in flight:
+// FP4 only (no E4M3, no QuantLut) with the VPU:
 // chipyard.MxFp4VpuGemminiRocketConfig. 4 GiB target DRAM (Corigine MimicTurbo GT).
 class FireSimMxFp4VpuGemminiRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
@@ -452,13 +452,70 @@ class FireSimMxFp4VpuGemminiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.MxFp4VpuGemminiRocketConfig)
 
-// FP6 E3M2 only (LUT) with the VPU and SPAD_REQUANT; 4-bank L2 with 64 DRAM reads in flight:
+// FP6 E3M2 only (LUT) with the VPU and SPAD_REQUANT:
 // chipyard.MxE3M2VpuGemminiRocketConfig. 4 GiB target DRAM (Corigine MimicTurbo GT).
 class FireSimMxE3M2VpuGemminiRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
   new chipyard.MxE3M2VpuGemminiRocketConfig)
+
+// The standalone MX Gemmini variants below all pin target DRAM to 4 GiB (FireSim's default is 16 GiB) so they
+// fit the Corigine MimicTurbo GT's 8 GiB.
+
+// Full-format MX Gemmini (standalone twin: internal spad + MMIO requant), DIM 16: chipyard.MxGemminiRocketConfig.
+class FireSimMxGemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MxGemminiRocketConfig)
+
+// FP4 + FP6 E3M2 + E4M3 with the VPU, DIM 4 (class name predates E4M3): chipyard.MxDim4Fp4E3M2VpuGemminiRocketConfig.
+class FireSimMxDim4Fp4E3M2VpuGemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MxDim4Fp4E3M2VpuGemminiRocketConfig)
+
+// FP4 + FP6 E3M2 + E4M3 with the VPU, DIM 8: chipyard.MxDim8Fp4E3M2E4M3VpuGemminiRocketConfig.
+class FireSimMxDim8Fp4E3M2E4M3VpuGemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MxDim8Fp4E3M2E4M3VpuGemminiRocketConfig)
+
+// FP4 + FP6 E3M2 + E4M3 with the VPU, DIM 16: chipyard.MxFp4E3M2E4M3VpuGemminiRocketConfig.
+class FireSimMxFp4E3M2E4M3VpuGemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MxFp4E3M2E4M3VpuGemminiRocketConfig)
+
+// E4M3 with the VPU, DIM 32: chipyard.MxDim32E4M3VpuWideMemGemminiRocketConfig.
+class FireSimMxDim32E4M3VpuWideMemGemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MxDim32E4M3VpuWideMemGemminiRocketConfig)
+
+// BF16 baselines (plain non-MX Gemmini), DIM 8 / 16 / 32: chipyard.BF16Dim*GemminiRocketConfig.
+class FireSimBF16Dim8GemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.BF16Dim8GemminiRocketConfig)
+
+class FireSimBF16Dim16GemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.BF16Dim16GemminiRocketConfig)
+
+class FireSimBF16Dim32GemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.BF16Dim32GemminiRocketConfig)
 
 
 class FireSimLargeBoomCospikeConfig extends Config(
