@@ -34,7 +34,7 @@ public:
   static char KIND;
 
   tracerv_t(simif_t &sim,
-            StreamEngine &stream,
+            HostStreamEngine &stream,
             const TRACERVBRIDGEMODULE_struct &mmio_addrs,
             int tracerno,
             const std::vector<std::string> &args,
