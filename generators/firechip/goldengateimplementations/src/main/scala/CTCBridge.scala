@@ -111,24 +111,34 @@ class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CT
 
     val inBuf  = Module(new Queue(new CTCToken, 10))
     val outBuf = Module(new Queue(new CTCToken, 10))
+    val clientIn = Module(new Queue(UInt(CTC.WIDTH.W), 64))
+    val managerIn = Module(new Queue(UInt(CTC.WIDTH.W), 64))
 
     val target = hPort.hBits.ctc_io
-    val tFire = hPort.toHost.hValid && hPort.fromHost.hReady
+    val canAcceptInput =
+      (!inBuf.io.deq.bits.manager_valid || clientIn.io.enq.ready) &&
+      (!inBuf.io.deq.bits.client_valid || managerIn.io.enq.ready)
+    val tokenReady = inBuf.io.deq.valid && outBuf.io.enq.ready && canAcceptInput
+    hPort.toHost.hReady := tokenReady && hPort.fromHost.hReady
+    hPort.fromHost.hValid := tokenReady && hPort.toHost.hValid
+    val tFire = hPort.toHost.hValid && hPort.toHost.hReady
     val targetReset = tFire & hPort.hBits.reset
 
-    hPort.toHost.hReady := outBuf.io.enq.ready
-    hPort.fromHost.hValid := inBuf.io.deq.valid
+    // Accept each local Decoupled flit once. The host link can be thousands of
+    // cycles long, so its delayed ready bits cannot directly drive the target.
+    target.client_flit.out.ready := true.B
+    target.manager_flit.out.ready := true.B
 
     // Connect CTC to Host buffers
     outBuf.io.enq.bits.client_data := target.client_flit.out.bits
     outBuf.io.enq.bits.client_valid := target.client_flit.out.valid
-    outBuf.io.enq.bits.client_ready := target.client_flit.in.ready
+    outBuf.io.enq.bits.client_ready := true.B
 
     outBuf.io.enq.bits.manager_data := target.manager_flit.out.bits
     outBuf.io.enq.bits.manager_valid := target.manager_flit.out.valid
-    outBuf.io.enq.bits.manager_ready := target.manager_flit.in.ready
+    outBuf.io.enq.bits.manager_ready := true.B
 
-    outBuf.io.enq.valid := hPort.toHost.hValid
+    outBuf.io.enq.valid := tFire
 
     // Convert to wider host token + send over pcie
     val ctc2host = Module(new CTCToHostAdapter)
@@ -141,16 +151,21 @@ class CTCBridgeModule(implicit p: Parameters) extends BridgeModule[HostPortIO[CT
     inBuf.io.enq <> host2ctc.io.ctc_out
 
     // Connect host to CTC buffers
-    // Incoming manager bits drive my client, incoming client bits drive my manager
-    target.client_flit.in.valid := inBuf.io.deq.bits.manager_valid
-    target.client_flit.in.bits := inBuf.io.deq.bits.manager_data
-    target.client_flit.out.ready := inBuf.io.deq.bits.manager_ready
+    // Buffer peer flit events until the local CTC endpoint accepts them.
+    // Incoming manager flits are requests for my client endpoint; incoming
+    // client flits are responses for my manager endpoint.
+    clientIn.io.enq.valid := tFire && inBuf.io.deq.bits.manager_valid
+    clientIn.io.enq.bits := inBuf.io.deq.bits.manager_data
+    managerIn.io.enq.valid := tFire && inBuf.io.deq.bits.client_valid
+    managerIn.io.enq.bits := inBuf.io.deq.bits.client_data
+    target.client_flit.in.valid := clientIn.io.deq.valid
+    target.client_flit.in.bits := clientIn.io.deq.bits
+    clientIn.io.deq.ready := tFire && target.client_flit.in.ready
+    target.manager_flit.in.valid := managerIn.io.deq.valid
+    target.manager_flit.in.bits := managerIn.io.deq.bits
+    managerIn.io.deq.ready := tFire && target.manager_flit.in.ready
 
-    target.manager_flit.in.valid := inBuf.io.deq.bits.client_valid
-    target.manager_flit.in.bits := inBuf.io.deq.bits.client_data
-    target.manager_flit.out.ready := inBuf.io.deq.bits.client_ready
-
-    inBuf.io.deq.ready := hPort.fromHost.hReady
+    inBuf.io.deq.ready := tFire
 
     genROReg(!tFire, "done") // placeholder MMIO reg
 

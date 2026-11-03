@@ -3,6 +3,7 @@
 #include "simplenic.h"
 
 #include <cassert>
+#include <cerrno>
 #include <cstdio>
 #include <cstring>
 
@@ -52,7 +53,7 @@ static void simplify_frac(int n, int d, int *nn, int *dd) {
   }
 
 simplenic_t::simplenic_t(simif_t &sim,
-                         StreamEngine &stream,
+                         HostStreamEngine &stream,
                          const SIMPLENICBRIDGEMODULE_struct &mmio_addrs,
                          int simplenicno,
                          const std::vector<std::string> &args,
@@ -172,7 +173,34 @@ simplenic_t::simplenic_t(simif_t &sim,
   }
 
   char name[257];
-  int shmemfd;
+  auto map_port = [&](const char *port_name) -> char * {
+    const size_t length = BUFBYTES + EXTRABYTES;
+    // The switch normally creates this port as ubuntu before the FPGA driver
+    // opens it as root. O_CREAT on that existing file is denied by Linux's
+    // fs.protected_regular setting even though root can open it for writing.
+    int fd = shm_open(port_name, O_RDWR, S_IRWXU);
+    if (fd < 0 && errno == ENOENT) {
+      fd = shm_open(port_name, O_RDWR | O_CREAT, S_IRWXU);
+    }
+    if (fd < 0) {
+      perror(port_name);
+      exit(1);
+    }
+    if (ftruncate(fd, length) != 0) {
+      perror("simplenic ftruncate");
+      close(fd);
+      exit(1);
+    }
+    void *mapped = mmap(nullptr, length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    const int map_errno = errno;
+    close(fd);
+    if (mapped == MAP_FAILED) {
+      errno = map_errno;
+      perror(port_name);
+      exit(1);
+    }
+    return static_cast<char *>(mapped);
+  };
 
   if (!loopback) {
     assert(shmemportname != nullptr);
@@ -181,27 +209,13 @@ simplenic_t::simplenic_t(simif_t &sim,
       sprintf(name, "/port_nts%s_%d", shmemportname, j);
 
       printf("opening/creating shmem region\n%s\n", name);
-      shmemfd = shm_open(name, O_RDWR | O_CREAT, S_IRWXU);
-      ftruncate(shmemfd, BUFBYTES + EXTRABYTES);
-      pcis_read_bufs[j] = (char *)mmap(nullptr,
-                                       BUFBYTES + EXTRABYTES,
-                                       PROT_READ | PROT_WRITE,
-                                       MAP_SHARED,
-                                       shmemfd,
-                                       0);
+      pcis_read_bufs[j] = map_port(name);
 
       printf("Using non-slot-id associated shmemportname:\n");
       sprintf(name, "/port_stn%s_%d", shmemportname, j);
 
       printf("opening/creating shmem region\n%s\n", name);
-      shmemfd = shm_open(name, O_RDWR | O_CREAT, S_IRWXU);
-      ftruncate(shmemfd, BUFBYTES + EXTRABYTES);
-      pcis_write_bufs[j] = (char *)mmap(nullptr,
-                                        BUFBYTES + EXTRABYTES,
-                                        PROT_READ | PROT_WRITE,
-                                        MAP_SHARED,
-                                        shmemfd,
-                                        0);
+      pcis_write_bufs[j] = map_port(name);
     }
   } else {
     for (int j = 0; j < 2; j++) {
@@ -292,8 +306,16 @@ void simplenic_t::tick() {
         );
 
     if (token_bytes_obtained_from_fpga == 0) {
+      // The FPGA-managed C2H path normally sends full 4 KiB pages. A NIC
+      // batch need not be page-aligned, so request its partial final page if
+      // the complete batch has not become visible after repeated polls.
+      if (++empty_pull_polls == flush_poll_limit) {
+        pull_flush(stream_to_cpu_idx);
+        empty_pull_polls = 0;
+      }
       return;
     }
+    empty_pull_polls = 0;
     // read into read_buffer
     pcis_read_bufs[currentround][BUFBYTES] = 1;
 

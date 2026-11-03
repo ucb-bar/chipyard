@@ -22,7 +22,7 @@ char cospike_t::KIND;
  * Constructor for cospike
  */
 cospike_t::cospike_t(simif_t &sim,
-                     StreamEngine &stream,
+                     HostStreamEngine &stream,
                      int cospikeno,
                      std::vector<std::string> &args,
                      uint32_t iaddr_width,

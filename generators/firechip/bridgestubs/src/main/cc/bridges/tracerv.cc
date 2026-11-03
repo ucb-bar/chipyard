@@ -24,7 +24,7 @@ char tracerv_t::KIND;
 // #define FIREPERF_LOGGER
 
 tracerv_t::tracerv_t(simif_t &sim,
-                     StreamEngine &stream,
+                     HostStreamEngine &stream,
                      const TRACERVBRIDGEMODULE_struct &mmio_addrs,
                      int tracerno,
                      const std::vector<std::string> &args,
