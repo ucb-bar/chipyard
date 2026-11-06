@@ -409,6 +409,8 @@ class FireSimE4M3MxGemminiFourClusterRadianceConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.RadianceE4M3MxGemminiFourClusterConfig)
 
+// The HBM configs below take RadianceHBMConfig's GPU caches (WithRadianceHBMCaches, radiance 92ecb59): 64 B lines,
+// 512-bit system bus, incoherent 4-bank L1, unordered L0d. Kernels must use the 64 B hash unit and mu_l1_flush.
 class FireSimE4M3MxGemminiHBMRadianceConfig extends Config(
   new WithGPUDefaultResetHeld ++
   new radiance.subsystem.WithRadianceSimParams(false) ++
@@ -416,6 +418,7 @@ class FireSimE4M3MxGemminiHBMRadianceConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
+  new chipyard.WithRadianceHBMCaches ++
   new chipyard.RadianceE4M3MxGemminiSingleClusterHBMConfig)
 
 class FireSimE4M3MxGemminiTwoClusterHBMRadianceConfig extends Config(
@@ -425,7 +428,18 @@ class FireSimE4M3MxGemminiTwoClusterHBMRadianceConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
+  new chipyard.WithRadianceHBMCaches ++
   new chipyard.RadianceE4M3MxGemminiTwoClusterHBMConfig)
+
+// The dual-cluster HBM config with wider DRAM channel ports (8 B per cycle above): 4 GPU ports x 16 B or 32 B,
+// against the DDR3 build's 4 x 8 B. The width applies to every region port, the host channel's included.
+class FireSimE4M3MxGemminiTwoClusterHBMRadianceMem16BConfig extends Config(
+  new chipyard.WithDRAMChannelBeatBytes(16) ++
+  new FireSimE4M3MxGemminiTwoClusterHBMRadianceConfig)
+
+class FireSimE4M3MxGemminiTwoClusterHBMRadianceMem32BConfig extends Config(
+  new chipyard.WithDRAMChannelBeatBytes(32) ++
+  new FireSimE4M3MxGemminiTwoClusterHBMRadianceConfig)
 
 class FireSimE4M3MxGemminiFourClusterHBMRadianceConfig extends Config(
   new WithGPUDefaultResetHeld ++
@@ -434,6 +448,7 @@ class FireSimE4M3MxGemminiFourClusterHBMRadianceConfig extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
+  new chipyard.WithRadianceHBMCaches ++
   new chipyard.RadianceE4M3MxGemminiFourClusterHBMConfig)
 
 // Standalone MX Gemmini (Rocket + RoCC), FP8 E4M3 only (single throughput, no QuantLut) with the VPU:
@@ -498,24 +513,56 @@ class FireSimMxDim32E4M3VpuWideMemGemminiRocketConfig extends Config(
   new WithFireSimConfigTweaks ++
   new chipyard.MxDim32E4M3VpuWideMemGemminiRocketConfig)
 
-// BF16 baselines (plain non-MX Gemmini), DIM 8 / 16 / 32: chipyard.BF16Dim*GemminiRocketConfig.
-class FireSimBF16Dim8GemminiRocketConfig extends Config(
+// Two MX Gemminis per core (16x16 on custom3, 32x32 on custom2), A8W4 + FP4 + E4M3: chipyard.MxDualA8W4GemminiBoomConfig
+// (medium BOOM) and chipyard.MxDualA8W4E3M2GemminiRocketConfig (huge Rocket, plus E3M2). Their system bus is already
+// 512 bits; WithEdgeDataBits(256) widens the memory bus to 32 B, and the DRAM port follows it (ExtMem takes the memory
+// bus beat), against 16 B in the chipyard configs.
+class FireSimMxDualA8W4GemminiBoomConfig extends Config(
+  new freechips.rocketchip.subsystem.WithEdgeDataBits(256) ++
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
-  new chipyard.BF16Dim8GemminiRocketConfig)
+  new chipyard.MxDualA8W4GemminiBoomConfig)
 
-class FireSimBF16Dim16GemminiRocketConfig extends Config(
+class FireSimMxDualA8W4E3M2GemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithEdgeDataBits(256) ++
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
-  new chipyard.BF16Dim16GemminiRocketConfig)
+  new chipyard.MxDualA8W4E3M2GemminiRocketConfig)
 
-class FireSimBF16Dim32GemminiRocketConfig extends Config(
+// The same two builds with 16x16 (custom3) + 8x8 (custom2) Gemminis.
+class FireSimMxDualA8W4Dim8GemminiBoomConfig extends Config(
+  new freechips.rocketchip.subsystem.WithEdgeDataBits(256) ++
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
   new WithDefaultFireSimBridges ++
   new WithFireSimConfigTweaks ++
-  new chipyard.BF16Dim32GemminiRocketConfig)
+  new chipyard.MxDualA8W4Dim8GemminiBoomConfig)
+
+class FireSimMxDualA8W4E3M2Dim8GemminiRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithEdgeDataBits(256) ++
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+  new WithDefaultFireSimBridges ++
+  new WithFireSimConfigTweaks ++
+  new chipyard.MxDualA8W4E3M2Dim8GemminiRocketConfig)
+
+// class FireSimBF16Dim8GemminiRocketConfig extends Config(
+//   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.BF16Dim8GemminiRocketConfig)
+
+// class FireSimBF16Dim16GemminiRocketConfig extends Config(
+//   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.BF16Dim16GemminiRocketConfig)
+
+// class FireSimBF16Dim32GemminiRocketConfig extends Config(
+//   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(1) << 32) ++ // 4 GiB
+//   new WithDefaultFireSimBridges ++
+//   new WithFireSimConfigTweaks ++
+//   new chipyard.BF16Dim32GemminiRocketConfig)
 
 
 class FireSimLargeBoomCospikeConfig extends Config(
