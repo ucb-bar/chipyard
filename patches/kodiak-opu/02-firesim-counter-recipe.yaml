@@ -1,0 +1,17 @@
+# Add this distinct entry to sims/firesim/deploy/config_build_recipes.yaml after
+# applying the Kodiak one-core OPU patches and 01-saturn-autocounter.patch.
+# Keep the certified uninstrumented recipe and hardware database entry intact.
+alveo_u250_firesim_kodiak_opu_1core_autocounter:
+    PLATFORM: xilinx_alveo_u250
+    TARGET_PROJECT: firesim
+    TARGET_PROJECT_MAKEFRAG: null
+    DESIGN: FireSim
+    TARGET_CONFIG: FireSimKodiakOPU1CoreConfig
+    CONFIG_PACKAGE: firechip.chip
+    PLATFORM_CONFIG: WithAutoCounter_BaseXilinxAlveoU250Config
+    deploy_quintuplet: null
+    platform_config_args:
+        fpga_frequency: 15
+        build_strategy: TIMING
+    post_build_hook: null
+    metasim_customruntimeconfig: null
