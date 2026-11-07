@@ -71,10 +71,10 @@ label a trigger-gated CSV interval as a compute ROI without checking plateaus.
 
 For one OPU instance over one inference, let `R` be the difference between
 the post-compute and pre-compute **cumulative row counter plateaus**, `C` the
-exact target `METRIC cycles` around compute, and `M` the exact valid routed
-MACs from the image's SHA-checked routing sidecar. The exact ELF must invoke
-the OPU only inside that compute window; verify this from the program path and
-the stable plateaus. Then:
+exact target `METRIC cycles` for the entire timed inference, and `M` the exact
+valid routed MACs from the image's SHA-checked routing sidecar. The exact ELF
+must invoke the OPU only inside that timed inference; verify this from the
+program path and the stable plateaus. Then:
 
 - Issued physical MAC slots: `128 × R`.
 - MAC issue duty: `R / (8 × C)`.
@@ -99,11 +99,20 @@ delta `2048` and gate-low delta `0`; its counter receipt is SHA-256
 `5100e696e5151d4c822563bff607259742c7b58f41d4f2899b85170304c0b41e`.
 For this 64³ full-tile workload, the SHA-bound routing sidecar reports
 `262144` valid MACs, which equal the `128 × 2048` issued cell slots. This
-gives **0.032358328% row issue duty over the exact compute window** and
+gives **0.032358328% row issue duty over the entire timed inference** and
 100% useful issued-slot efficiency. These are metasim results; they do not
 establish FPGA occupancy or power activity. The OPU interface exposes no
 per-cell valid-lane mask, so the counter cannot independently measure valid
 lanes. Valid MACs require an exact runtime or compiler work manifest.
+
+A separate one-core plain-RVV control ELF
+(`e002e6c09177c55629ba6cb0bf102f2d6de10a6cfee0df77173d8c46040b0f7d`)
+passed Spike and the same Verilator counter target with the full-output hash
+`2089162557` and `DONE`. All 2291 emitted counter samples had row and
+gate-low values zero. Its SHA-bound negative-control receipt is
+`9fde4abef784fa5e182174efa4f4ff1c9eddb10eae33607be9454dca6e9d5f7b`.
+The control was rebuilt with one Zephyr CPU and without the post-hash UART
+dump, so its target cycles are not a cross-image speedup comparison.
 
 The counter U250 recipe is **15 MHz with `TIMING` strategy**. Keep the
 instrumented build separate from the certified bitstream and fail closed if
