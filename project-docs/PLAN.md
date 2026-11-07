@@ -25,7 +25,7 @@ youngest YRoT among its sources, and it is safe once its YRoT is older than the 
 fixes each one:
 
 | Problem | µSTT fix | Reference code |
-|---|---|---|
+| --- | --- | --- |
 | Computing YRoT at rename means comparing ages across the whole decode group, which is slow | **Age Matrix**: a shallow circuit that propagates taint | `reference/uSTT/rtl/src/stt_age.v`, `stt_control.v` (standalone Verilog, timing/area study only; 8-wide, 380 phys regs, 512 ROB). The baseline STT circuit is `stt_og.v` + `younger.v`. |
 | Every issue-queue entry needs logic to hold back a tainted transmitter, which costs area | **Impede micro-op**: decode puts a special uop in front of each transmitter. The impede uop waits in the issue queue until the VP passes its YRoT. The transmitter depends on it, so the ordinary wakeup logic delays the transmitter. | gem5 only: `reference/uSTT/gem5/src/cpu/o3/{rename,iew,inst_queue,rob}.cc`, `src/arch/arm/isa/insts/*stt.isa`. Look for `[Boru, STT]` comments. |
 
@@ -38,7 +38,7 @@ All paths below are relative to `generators/boom/src/main/scala/v3/`. Use v3
 (SonicBOOM): Chipyard's BOOM FPGA configs are built on v3.
 
 | STT piece | BOOM v3 location | Notes |
-|---|---|---|
+| --- | --- | --- |
 | YRoT field on each uop | `common/micro-op.scala` | Add `yrot` (ROB index + valid bit). It sits next to the existing `rob_idx`, `br_mask`, `prs1/2`, `pdst`. |
 | Per-physical-register taint table | `exu/rename/rename-busytable.scala` (pattern to copy), `exu/rename/rename-stage.scala` | Read for the sources and write for `pdst` at rename. A load's `pdst` gets the load's own `rob_idx`. |
 | YRoT computation within a rename group | `exu/rename/rename-stage.scala` | `decodeWidth` is 1 to 5 (Small to Mega). The bypass between instructions in the same group is where the Age Matrix replaces the age comparisons. |
@@ -56,6 +56,7 @@ mechanism second. C and D are the two evaluation halves (security/performance
 and hardware cost).
 
 ### A. Taint tracking and the Age Matrix (rename side)
+
 1. Read `rename-stage.scala`, `rename-busytable.scala` and `rob.scala`. Write a
    short interface spec covering the new uop fields and the `isSafe(yrot)` /
    VP signal, and agree on it with B in the first week. *This is the one hard
@@ -67,6 +68,7 @@ and hardware cost).
    produce identical YRoTs.
 
 ### B. Holding back transmitters and the impede micro-op (issue side)
+
 1. Start right away, without waiting on A, with a **conservative stand-in**: hold
    every load, store and branch while it is under any unresolved branch
    (`br_mask =/= 0`). This is stronger than STT, so C can already confirm that a
@@ -78,6 +80,7 @@ and hardware cost).
    and an extra issue-queue entry reserved at dispatch. Write it up, then build it.
 
 ### C. Attacks, functional checks and performance
+
 1. Port `riscv-boom/boom-attacks` (Spectre v1, v2 and RSB) to a Chipyard bare-metal
    test. Add it as a submodule under `reference/` or `tests/`. Show that it
    **leaks on baseline BOOM** in Verilator.
@@ -89,6 +92,7 @@ and hardware cost).
    heavier that runs in reasonable simulation time.
 
 ### D. Hardware cost and FPGA
+
 1. Get Vivado 2023.2 synthesis of the BOOM tile running out of context
    (`./ustt --vivado ...`). Record baseline LUTs, FFs, BRAM, DSPs and WNS for
    Small and Medium BOOM.
@@ -103,7 +107,7 @@ and hardware cost).
 ## 4. Milestones
 
 | # | Milestone | Owners | Done when |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | M0 | Everyone's environment works | all | Each person builds `SmallBoomV3Config` in Verilator and runs one riscv-test via `./ustt` |
 | M1 | Spectre leaks on baseline, and the interface is agreed | C, A+B | The PoC recovers a secret in simulation, and the interface spec is merged |
 | M2 | The conservative stand-in blocks the attack | B, C | Attack fails, riscv-tests pass, slowdown measured |
@@ -133,6 +137,7 @@ cp ustt-env.local.sh.example ustt-env.local.sh   # edit for your machine
 ./ustt make -C sims/verilator CONFIG=SmallBoomV3Config -j16
 ./ustt make -C sims/verilator CONFIG=SmallBoomV3Config run-asm-tests-fast   # all ISA tests
 # or a single program:
+
 ./ustt bash -c 'make -C sims/verilator CONFIG=SmallBoomV3Config run-binary \
        BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-add'
 ```
