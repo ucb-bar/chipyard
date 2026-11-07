@@ -47,7 +47,7 @@ Decisions so far (#2): Spectre threat model first (Futuristic is a stretch goal)
 6. **Merge after one approval**, then delete the branch.
 7. **Report on the issue.** Post measurements and decisions as comments before closing it.
 
-There is no CI for this project. Chipyard's upstream GitHub workflows are disabled on this fork (they need Berkeley's self-hosted runners), and BOOM builds are too heavy for GitHub's runners. All testing happens locally.
+There is no CI for this project. Chipyard's upstream GitHub workflows came with the fork and should stay disabled (Actions tab → each workflow → Disable workflow): they need Berkeley's self-hosted runners, and BOOM builds are too heavy for GitHub's runners. All testing happens locally.
 
 ## Environment
 
