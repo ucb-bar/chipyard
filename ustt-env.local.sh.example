@@ -16,3 +16,6 @@
 # export USTT_XILINX_LICENSE=2100@harrison.ece.utexas.edu
 # Vivado settings script (2023.2 only on ECE: license capped at 2023.10)
 # export VIVADO_SETTINGS=/usr/local/packages/xilinx_2023.2/Vivado/2023.2/settings64.sh
+
+# Local TeX Live for building the reports (auto-detected at /misc/scratch/$USER/texlive/2026)
+# export TEXLIVE_ROOT=/misc/scratch/$USER/texlive/2026

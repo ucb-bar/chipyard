@@ -83,6 +83,15 @@ _ustt_main() {
     fi
     source "$repo/env.sh" || return 1
 
+    # 5. Optional local TeX Live for building project-docs/*-report (if installed)
+    local tl
+    for tl in "${TEXLIVE_ROOT:-}" "/misc/scratch/$USER/texlive/2026"; do
+        if [ -n "$tl" ] && [ -x "$tl/bin/x86_64-linux/pdflatex" ]; then
+            export PATH="$tl/bin/x86_64-linux:$PATH"
+            break
+        fi
+    done
+
     export USTT_ROOT="$repo"
     if [ "$quiet" = 0 ]; then
         echo "boom-ustt env ready: $repo"
