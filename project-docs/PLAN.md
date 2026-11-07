@@ -93,27 +93,41 @@ and hardware cost).
 
 ### D. Hardware cost and FPGA
 
-1. Get Vivado 2023.2 synthesis of the BOOM tile running out of context
-   (`./ustt --vivado ...`). Record baseline LUTs, FFs, BRAM, DSPs and WNS for
-   Small and Medium BOOM.
-2. Synthesize uSTT's standalone RTL (`stt_og` vs `stt_age`) at BOOM-sized
+**Target: VCU118** (`xcvu9p-flga2104-2L-e`), with `BoomVCU118Config` (MegaBoom).
+We have no board, so everything below runs in Vivado 2023.2 on the ECE machines.
+Part, board files, `ddr4:2.2` IP and license have all been checked there.
+
+1. Run the baseline flow through implementation:
+   `./ustt --vivado make -C fpga SUB_PROJECT=vcu118 CONFIG=BoomVCU118Config bitstream`.
+   The bitstream itself is a by-product. What we want are the reports: hierarchical
+   utilization (`report_utilization -hierarchical`, so STT logic can be attributed
+   to `BoomTile` and its submodules), timing summary/WNS, and vectorless power.
+   Keep the hierarchy intact so the core can be separated from the shell and DDR.
+   Write a script that collects these into a table.
+2. Out-of-context synthesis of just the BOOM tile, for Small/Medium/Mega. This is
+   faster than the full flow, so use it to iterate.
+3. Synthesize uSTT's standalone RTL (`stt_og` vs `stt_age`) at BOOM-sized
    parameters to reproduce the paper's claims. These are the numbers to compare
    the Chisel versions from A and B against.
-3. Bring BOOM up on an FPGA, either on whatever board we can get or through
-   emulation. `fpga/` has `BoomVCU118Config`, `BoomVC707Config` and
-   `BoomZCU104Config`, all MegaBoom. Smaller boards (Arty100T, Nexys Video) will
-   need a SmallBoom config, if it fits at all.
+4. **Vivado simulation ("emulation")**. Investigate, then pick one:
+   (a) Run Chipyard's simulation harness in xsim. It uses DPI-C models for memory
+   and the host link; xsim supports DPI-C, but the C++ models need to build under
+   `xsc`. (b) Run post-synthesis/post-implementation functional sim of the BOOM
+   tile with a small testbench, to check that synthesized STT logic behaves like
+   the Chisel. Expect xsim of a whole BOOM SoC to be slow (on the order of kHz),
+   so use it for short targeted programs such as the Spectre gadget, not for
+   benchmarks. Verilator stays the main tool for functional and performance runs.
 
 ## 4. Milestones
 
 | # | Milestone | Owners | Done when |
 | --- | --- | --- | --- |
 | M0 | Everyone's environment works | all | Each person builds `SmallBoomV3Config` in Verilator and runs one riscv-test via `./ustt` |
-| M1 | Spectre leaks on baseline, and the interface is agreed | C, A+B | The PoC recovers a secret in simulation, and the interface spec is merged |
+| M1 | Baselines established | C, A+B, D | The PoC recovers a secret in simulation, the interface spec is merged, and baseline VCU118 reports exist |
 | M2 | The conservative stand-in blocks the attack | B, C | Attack fails, riscv-tests pass, slowdown measured |
 | M3 | Baseline STT | A, B, C | Attack fails, tests pass, faster than M2 |
 | M4 | µSTT: Age Matrix + impede uop | A, B | Same checks as M3, plus area/timing deltas from D |
-| M5 | Hardware evaluation | D | Vivado numbers for each config, and FPGA (or emulation) runs |
+| M5 | Hardware evaluation | D | VCU118 utilization/timing/power for each config, and Vivado simulation of the protected design |
 
 ## 5. Decisions for the team
 
@@ -123,8 +137,9 @@ and hardware cost).
 - **Main config:** use `SmallBoomV3Config` or `MediumBoomV3Config` for development,
   since Verilator is slow on big cores. uSTT's own RTL assumes an 8-wide core,
   which is bigger than MegaBoom.
-- **FPGA board:** what hardware do we actually have? This decides D3. Vivado must be
-  2023.2 on the ECE machines, because the license is capped at 2023.10.
+- **FPGA target (decided):** VCU118, Vivado-only (reports + xsim), since we have no
+  board. Vivado must be 2023.2 on the ECE machines, because the license is capped
+  at 2023.10.
 - **Workflow:** one branch per task (`a/taint-table`, `c/spectre-v1`, ...), with PRs
   into `dev`.
 
@@ -137,7 +152,6 @@ cp ustt-env.local.sh.example ustt-env.local.sh   # edit for your machine
 ./ustt make -C sims/verilator CONFIG=SmallBoomV3Config -j16
 ./ustt make -C sims/verilator CONFIG=SmallBoomV3Config run-asm-tests-fast   # all ISA tests
 # or a single program:
-
 ./ustt bash -c 'make -C sims/verilator CONFIG=SmallBoomV3Config run-binary \
        BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/isa/rv64ui-p-add'
 ```
