@@ -1,2 +1,4 @@
 conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64-lean.conda-lock.yml linguist-generated=true
 conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64.conda-lock.yml linguist-generated=true
+# Unified-diff blank context lines begin with one literal space.
+patches/kodiak-opu/*.patch whitespace=-blank-at-eol

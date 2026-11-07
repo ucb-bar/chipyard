@@ -1,0 +1,25 @@
+--- a/src/main/scala/exu/OuterProductUnit.scala
++++ b/src/main/scala/exu/OuterProductUnit.scala
+@@ -11,6 +11,7 @@
+ import saturn.backend._
+ import hardfloat._
+ import scala.math._
++import midas.targetutils.PerfCounter
+ 
+ // Declare supported types (dictates multipler instantiated)
+ object OPUTypes extends Enumeration { val INT32, INT16, INT8 = Value }
+@@ -184,6 +185,14 @@
+   io.YOU_SHALL_PASS := io.op.macc(0) & io.op.macc(0) | io.op.shift(0)
+   dontTouch(io.YOU_SHALL_PASS)
+ 
++  // Each row enable drives all 128 int8 MAC cells in Kodiak's dLen=256 OPU.
++  // These counters accumulate every target cycle, even when the FireSim
++  // trigger suppresses samples. Subtract stable pre/post-compute samples.
++  val activeRows = PopCount(io.op.macc.asUInt)
++  PerfCounter(activeRows, "opu_active_row_cycles", "OPU active MAC row cycles")
++  PerfCounter((io.op.macc.asUInt.orR && !io.op.clock_enable).asUInt,
++    "opu_macc_gate_low_cycles", "MAC enabled while OPU clock gate is low")
++
+   val clusters = Seq.fill(yDim, xDim)(withClock(gated_clock) { Module(new OuterProductCluster) })
+ 
+   for (j <- 0 until xDim) {
