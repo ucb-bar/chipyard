@@ -7,7 +7,8 @@ the OPU source file at that pin has SHA-256
 `7d782ff91e99653ff4c774edf2862bb02b65aa75f8c259454462404da4130a95` and is byte-identical
 to the later `e16a301` file. FireSim targetutils API signatures were checked
 against the pinned FireSim commit `b084672c2f8cf32e55d78f73a001074c23f8a2b8`.
-This commit stages source and build inputs; no metasim or FPGA result exists yet.
+The one-core Golden Gate and Verilator metasim gate passed for a full 64³ GEMM.
+No instrumented U250 bitstream or FPGA measurement exists yet.
 
 ## Source and build
 
@@ -87,3 +88,24 @@ efficiency exceeds one, or the exact image/bitstream identities differ. The
 receipt must pin the CSV, ELF, bitstream, and routing-sidecar SHA-256 digests.
 For a multi-core design, sum issued slots across OPU instances and use the
 matching per-core compute windows; do not silently sum core-cycle denominators.
+
+## Verified one-core metasim gate
+
+The exact hash-only OPU ELF (`4ad0a55a9195eae0e82e364979205f0603a52cbea4e728cdb59ae5fed51bdd28`)
+passed Spike and Verilator metasim with full-output FNV-1a hash `2089162557`
+and `DONE`. The metasim reported `METRIC cycles 791141`. The unique OPU
+instance's cumulative row count was flat before and after compute, with row
+delta `2048` and gate-low delta `0`; its counter receipt is SHA-256
+`5100e696e5151d4c822563bff607259742c7b58f41d4f2899b85170304c0b41e`.
+For this 64³ full-tile workload, the SHA-bound routing sidecar reports
+`262144` valid MACs, which equal the `128 × 2048` issued cell slots. This
+gives **0.032358328% row issue duty over the exact compute window** and
+100% useful issued-slot efficiency. These are metasim results; they do not
+establish FPGA occupancy or power activity. The OPU interface exposes no
+per-cell valid-lane mask, so the counter cannot independently measure valid
+lanes. Valid MACs require an exact runtime or compiler work manifest.
+
+The counter U250 recipe is **15 MHz with `TIMING` strategy**. Keep the
+instrumented build separate from the certified bitstream and fail closed if
+the YAML recipe or generated RTL digest changes. Do not run Vivado concurrently
+with another U250 build on the shared host.
