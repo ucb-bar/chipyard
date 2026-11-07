@@ -1,0 +1,14 @@
+# Copy to ustt-env.local.sh (git-ignored) and adjust for your machine.
+# Sourced by ustt-env.sh before anything else.
+
+# Where Miniforge/conda is installed (if it isn't already on your PATH)
+# export CONDA_ROOT=/misc/scratch/$USER/miniforge3
+
+# Keep caches off a small home-directory quota (ECE machines: 2 GB home)
+# export XDG_CACHE_HOME=/misc/scratch/$USER/.cache
+# export COURSIER_CACHE=$XDG_CACHE_HOME/coursier
+# export PIP_CACHE_DIR=$XDG_CACHE_HOME/pip
+# export CONDA_PKGS_DIRS=$CONDA_ROOT/pkgs
+
+# Vivado settings script used by `source ustt-env.sh --vivado`
+# export VIVADO_SETTINGS=/usr/local/packages/xilinx_2023.2/Vivado/2023.2/settings64.sh

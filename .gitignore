@@ -31,3 +31,6 @@ project/project/
 .vscode/
 tests/build/
 conda-reqs/chipyard-base.yaml.bak
+
+# boom-ustt: machine-specific env overrides
+ustt-env.local.sh

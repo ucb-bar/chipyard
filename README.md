@@ -22,9 +22,20 @@ release **1.15.0**. Day-to-day work happens on the `dev` branch.
 ```bash
 git clone https://github.com/Capheuss/boom-ustt.git && cd boom-ustt
 git switch dev
-./build-setup.sh riscv-tools   # needs conda; see Chipyard docs
-source env.sh
+cp ustt-env.local.sh.example ustt-env.local.sh   # edit: conda path, caches, Vivado
+./build-setup.sh riscv-tools                    # one-time; needs conda (Miniforge)
 ```
+
+Then in every new shell:
+
+```bash
+source ustt-env.sh            # conda + Chipyard toolchain
+source ustt-env.sh --vivado   # ...plus Vivado, for FPGA work
+```
+
+Tip: add `alias ustt='source /path/to/boom-ustt/ustt-env.sh'` to your `~/.bashrc`.
+Avoid sourcing it automatically in every shell: the conda env shadows system
+gcc/python and can break other EDA tools.
 
 ## Pulling upstream changes
 
