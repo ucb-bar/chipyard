@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# ustt: run a command inside the boom-ustt environment (conda + Chipyard,
+# plus Xilinx/Vivado with --vivado). Your own shell is left untouched.
+#
+#   ./ustt make -C sims/verilator CONFIG=SmallBoomV3Config
+#   ./ustt --vivado make -C fpga SUB_PROJECT=vcu118 bitstream
+#   ./ustt                 # no command: open a subshell with the env (exit to leave)
+#   ./ustt --vivado        # same, with Vivado too
+#
+# Setup details live in ustt-env.sh / ustt-env.local.sh.
+
+env_args=(--quiet)
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --vivado) env_args+=(--vivado); shift ;;
+        -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
+        --) shift; break ;;
+        *) break ;;
+    esac
+done
+
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=ustt-env.sh
+source "$repo/ustt-env.sh" "${env_args[@]}" || exit 1
+
+if [ $# -eq 0 ]; then
+    echo "boom-ustt subshell (conda env: ${CONDA_PREFIX:-?}); type 'exit' to leave."
+    PS1="(ustt) ${PS1:-\\u@\\h:\\w\\$ }" exec bash --norc -i
+fi
+exec "$@"

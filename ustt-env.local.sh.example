@@ -10,5 +10,9 @@
 # export PIP_CACHE_DIR=$XDG_CACHE_HOME/pip
 # export CONDA_PKGS_DIRS=$CONDA_ROOT/pkgs
 
-# Vivado settings script used by `source ustt-env.sh --vivado`
+# --vivado: environment module that sets the Xilinx license server (set empty to skip)
+# export XILINX_MODULE=xilinx/2023
+# License server used if the module is unavailable
+# export USTT_XILINX_LICENSE=2100@harrison.ece.utexas.edu
+# Vivado settings script (2023.2 only on ECE: license capped at 2023.10)
 # export VIVADO_SETTINGS=/usr/local/packages/xilinx_2023.2/Vivado/2023.2/settings64.sh
