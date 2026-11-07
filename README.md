@@ -15,6 +15,7 @@ release **1.15.0**. Day-to-day work happens on the `dev` branch.
 | `generators/boom/` | **BOOM source, in-tree** (git subtree of [riscv-boom](https://github.com/riscv-boom/riscv-boom) @ `ba03175`). µSTT changes go here, committed like any other file. |
 | `generators/chipyard/` | SoC configs; add BOOM+µSTT configs here. |
 | `reference/uSTT/` | Original µSTT (gem5 + RTL) as a read-only submodule for reference. |
+| `project-docs/PLAN.md` | **Project plan, workstreams and milestones.** |
 | `fpga/` | Chipyard's Vivado FPGA flows (VCU118, VC707, Arty100T, Nexys Video, ...). |
 
 ## Getting started
