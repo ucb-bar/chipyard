@@ -166,3 +166,6 @@
 [submodule "software/spec2026"]
 	path = software/spec2026
 	url = https://github.com/ucb-bar/spec2026-workload.git
+[submodule "reference/uSTT"]
+	path = reference/uSTT
+	url = https://github.com/FPSG-UIUC/uSTT.git

@@ -1,3 +1,42 @@
+# boom-ustt: µSTT Spectre mitigation in SonicBOOM
+
+Hardware security class project: implementing the µSTT speculative taint tracking
+mitigation ([FPSG-UIUC/uSTT](https://github.com/FPSG-UIUC/uSTT), ICCD'25, previously
+only evaluated in gem5 on ARM) in the SonicBOOM out-of-order RISC-V core, with RTL
+simulation and eventual FPGA / Vivado emulation.
+
+This repo is a fork of [Chipyard](https://github.com/ucb-bar/chipyard), branched from
+release **1.15.0**. Day-to-day work happens on the `dev` branch.
+
+## Layout
+
+| Path | What it is |
+|---|---|
+| `generators/boom/` | **BOOM source, in-tree** (git subtree of [riscv-boom](https://github.com/riscv-boom/riscv-boom) @ `ba03175`). µSTT changes go here, committed like any other file. |
+| `generators/chipyard/` | SoC configs; add BOOM+µSTT configs here. |
+| `reference/uSTT/` | Original µSTT (gem5 + RTL) as a read-only submodule for reference. |
+| `fpga/` | Chipyard's Vivado FPGA flows (VCU118, VC707, Arty100T, Nexys Video, ...). |
+
+## Getting started
+
+```bash
+git clone https://github.com/Capheuss/boom-ustt.git && cd boom-ustt
+git switch dev
+./build-setup.sh riscv-tools   # needs conda; see Chipyard docs
+source env.sh
+```
+
+## Pulling upstream changes
+
+```bash
+# Chipyard (remote "upstream" = ucb-bar/chipyard), e.g. a new release tag:
+git fetch upstream --tags && git merge <tag>
+# BOOM (requires git-subtree):
+git subtree pull --prefix=generators/boom https://github.com/riscv-boom/riscv-boom.git master
+```
+
+---
+
 ![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/main/docs/_static/images/chipyard-logo-full.png)
 
 # Chipyard framework
