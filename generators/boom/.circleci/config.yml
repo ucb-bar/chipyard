@@ -1,0 +1,641 @@
+# CircleCI Configuration File
+
+# version of circleci
+version: 2.1
+
+# "plugins" to use
+orbs:
+    aws-cli: circleci/aws-cli@1.0.0
+
+# default execution env.s
+executors:
+    main-env:
+        docker:
+            - image: ucbbar/chipyard-image:1.0.1
+        environment:
+            JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+
+# pipeline parameters
+parameters:
+    # parameters to manage workload/job flow
+    largefireboom_buildroot:
+        type: boolean
+        default: false
+    largefireboom_fedora:
+        type: boolean
+        default: false
+    largefireboom_coremark:
+        type: boolean
+        default: false
+    largefireboom_spec17-intspeed-test-600:
+        type: boolean
+        default: false
+    launchrunfarm_passed:
+        type: boolean
+        default: false
+    infrasetup_passed:
+        type: boolean
+        default: false
+    runworkload_passed:
+        type: boolean
+        default: false
+
+    # workload run parameters
+    build-and-test-boom-configs-run:
+        type: boolean
+        default: true
+    init-firesim-run:
+        type: boolean
+        default: true
+    finish-firesim-afi-run:
+        type: boolean
+        default: false
+    launch-firesim-workloads-run:
+        type: boolean
+        default: false
+    finish-firesim-workload-run:
+        type: boolean
+        default: false
+
+    # misc parameters
+    tools-cache-version:
+        type: string
+        default: "v5"
+    chipyard-cache-version:
+        type: string
+        default: "v14"
+
+# re-usable commands
+commands:
+    ssh-checkout:
+        description: "Add SSH key and checkout code"
+        steps:
+            - add_ssh_keys:
+                fingerprints:
+                    - "2b:95:8d:2e:23:b9:cf:0a:d6:65:4c:d5:76:93:42:07"
+            - checkout
+
+    toolchain-build:
+        description: "Build a toolchain"
+        parameters:
+            tools-version:
+                type: string
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
+            - run:
+                name: Building << parameters.tools-version >>
+                command: |
+                    .circleci/build-toolchains.sh << parameters.tools-version >>
+                no_output_timeout: 120m
+            - save_cache:
+                key: << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
+                paths:
+                    - "/home/riscvuser/<< parameters.tools-version >>-install"
+
+    prepare-rtl:
+        description: "Run the prepare step of RTL"
+        parameters:
+            tools-version:
+                type: string
+                default: "riscv-tools"
+            config-key:
+                type: string
+            timeout:
+                type: string
+                default: "120m"
+        steps:
+            - ssh-checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
+            - restore_cache:
+                keys:
+                    - chipyard-<< pipeline.parameters.chipyard-cache-version >>-{{ checksum "CHIPYARD.hash" }}
+            - run:
+                name: Building << parameters.config-key >> Config using Verilator
+                command: .circleci/do-rtl-build.sh << parameters.config-key >>
+                no_output_timeout: << parameters.timeout >>
+            - save_cache:
+                key: << parameters.config-key >>config-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/home/riscvuser/chipyard"
+
+    test-setup:
+        description: "Setup the environment for tests to run"
+        parameters:
+            tools-version:
+                type: string
+                default: "riscv-tools"
+            config-key:
+                type: string
+        steps:
+            - checkout
+            - run:
+                name: Create hash of toolchains
+                command: |
+                    .circleci/create-hash.sh
+            - restore_cache:
+                keys:
+                    - << parameters.tools-version >>-installed-<< pipeline.parameters.tools-cache-version >>-{{ checksum "../<< parameters.tools-version >>.hash" }}
+            - restore_cache:
+                keys:
+                    - << parameters.config-key >>config-{{ .Branch }}-{{ .Revision }}
+
+    firesim-workload-build:
+        description: "Build a FireSim workload"
+        parameters:
+            config-key:
+                type: string
+            workload:
+                type: string
+        steps:
+            - ssh-checkout
+            - restore_cache:
+                keys:
+                    - firesim-aws-instance-data-{{ .Branch }}-{{ .Revision }}
+            - run:
+                name: Build a << parameters.config-key >> << parameters.workload >> workload
+                command: |
+                    .circleci/firesim-build-workload.sh << parameters.config-key >> << parameters.workload >>
+                no_output_timeout: 30m
+
+# set of jobs to run
+jobs:
+    install-riscv-toolchain:
+        executor: main-env
+        steps:
+            - toolchain-build:
+                tools-version: "riscv-tools"
+    install-esp-toolchain:
+        executor: main-env
+        steps:
+            - toolchain-build:
+                tools-version: "esp-tools"
+    prepare-build-environment:
+        executor: main-env
+        steps:
+            - ssh-checkout
+            - restore_cache:
+                keys:
+                    - chipyard-<< pipeline.parameters.chipyard-cache-version >>-{{ checksum "CHIPYARD.hash" }}
+            - run:
+                name: Setup build environment
+                command: |
+                    .circleci/prepare-for-rtl-build.sh
+                no_output_timeout: 120m
+            - run:
+                name: Install Verilator to remote
+                command: |
+                    .circleci/install-verilator.sh
+            - save_cache:
+                key: chipyard-<< pipeline.parameters.chipyard-cache-version >>-{{ checksum "CHIPYARD.hash" }}
+                paths:
+                    - "/home/riscvuser/chipyard"
+    run-scala-checkstyle:
+        executor: main-env
+        steps:
+            - checkout
+            - run:
+                name: Run Scala checkstyle
+                command: make checkstyle
+    prepare-smallboomconfig:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                config-key: "smallboom"
+    prepare-mediumboomconfig:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                config-key: "mediumboom"
+    prepare-largeboomconfig:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                config-key: "largeboom"
+    prepare-megaboomconfig:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                config-key: "megaboom"
+                timeout: "240m"
+    prepare-smallrv32boomconfig:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                config-key: "rv32boom"
+    prepare-hwachaboomconfig:
+        executor: main-env
+        steps:
+            - prepare-rtl:
+                tools-version: "esp-tools"
+                config-key: "hwachaboom"
+    smallboomconfig-run-csmith-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "smallboom"
+            - run:
+                name: Run SmallBoomConfig csmith tests
+                command: .circleci/build-run-csmith-tests.sh smallboom 50
+                no_output_timeout: 30m
+    smallboomconfig-run-riscv-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "smallboom"
+            - run:
+                name: Run SmallBoomConfig riscv tests
+                command: .circleci/run-tests.sh smallboom
+    mediumboomconfig-run-csmith-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "mediumboom"
+            - run:
+                name: Run MediumBoomConfig csmith tests
+                command: .circleci/build-run-csmith-tests.sh mediumboom 50
+                no_output_timeout: 30m
+    mediumboomconfig-run-riscv-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "mediumboom"
+            - run:
+                name: Run MediumBoomConfig riscv tests
+                command: .circleci/run-tests.sh mediumboom
+                no_output_timeout: 30m
+    largeboomconfig-run-csmith-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "largeboom"
+            - run:
+                name: Run LargeBoomConfig csmith tests
+                command: .circleci/build-run-csmith-tests.sh largeboom 40
+                no_output_timeout: 30m
+    largeboomconfig-run-riscv-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "largeboom"
+            - run:
+                name: Run LargeBoomConfig riscv tests
+                command: .circleci/run-tests.sh largeboom
+    megaboomconfig-run-csmith-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "megaboom"
+            - run:
+                name: Run MegaBoomConfig csmith tests
+                command: .circleci/build-run-csmith-tests.sh megaboom 40
+                no_output_timeout: 30m
+    megaboomconfig-run-riscv-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "megaboom"
+            - run:
+                name: Run MegaBoomConfig riscv tests
+                command: .circleci/run-tests.sh megaboom
+                no_output_timeout: 30m
+    smallrv32boomconfig-run-csmith-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "rv32boom"
+            - run:
+                name: Run SmallRV32BoomConfig csmith tests
+                command: .circleci/build-run-csmith-tests.sh rv32boom 50
+                no_output_timeout: 30m
+    smallrv32boomconfig-run-riscv-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "rv32boom"
+            - run:
+                name: Run SmallRV32BoomConfig riscv tests
+                command: .circleci/run-tests.sh rv32boom
+    hwachaboomconfig-run-riscv-tests:
+        executor: main-env
+        steps:
+            - test-setup:
+                config-key: "hwachaboom"
+                tools-version: "esp-tools"
+            - run:
+                name: Run HwachaBoomConfig riscv tests
+                command: .circleci/run-tests.sh hwachaboom
+                no_output_timeout: 30m
+
+    ###########################################################################################
+
+    initialize-manager:
+        executor: aws-cli/default
+        environment:
+            TERM: xterm-256color
+        steps:
+            - ssh-checkout
+            - aws-cli/setup
+            - run:
+                name: Initialize FireSim manager instance with Chipyard
+                command: |
+                    .circleci/firesim-init-manager.sh
+            - save_cache:
+                key: firesim-aws-instance-data-{{ .Branch }}-{{ .Revision }}
+                paths:
+                    - "/tmp/FSIM_MANAGER_INSTANCE_DATA.txt"
+
+    build-largefireboom-buildroot:
+        executor: main-env
+        steps:
+            - firesim-workload-build:
+                config-key: "largefireboom"
+                workload: "buildroot"
+    build-largefireboom-fedora:
+        executor: main-env
+        steps:
+            - firesim-workload-build:
+                config-key: "largefireboom"
+                workload: "fedora"
+    build-largefireboom-coremark:
+        executor: main-env
+        steps:
+            - firesim-workload-build:
+                config-key: "largefireboom"
+                workload: "coremark"
+    build-largefireboom-spec17-intspeed-test-600:
+        executor: main-env
+        steps:
+            - firesim-workload-build:
+                config-key: "largefireboom"
+                workload: "spec17-intspeed-test-600"
+    launch-largefireboom-afi-build:
+        executor: main-env
+        steps:
+            - ssh-checkout
+            - restore_cache:
+                keys:
+                    - firesim-aws-instance-data-{{ .Branch }}-{{ .Revision }}
+            - run:
+                name: Build a LargeFireBoom AFI
+                command: |
+                    .circleci/firesim-build-afi.sh largefireboom
+                no_output_timeout: 240m
+    largefireboom-afi-failed:
+        executor: aws-cli/default
+        environment:
+            TERM: xterm-256color
+        steps:
+            - ssh-checkout
+            - aws-cli/setup
+            - restore_cache:
+                keys:
+                    - firesim-aws-instance-data-{{ .Branch }}-{{ .Revision }}
+            - run:
+                name: LargeFireBoom AFI build failed
+                command: |
+                    .circleci/firesim-afi-failed.sh largefireboom
+    launch-largefireboom-workloads:
+        executor: main-env
+        steps:
+            - ssh-checkout
+            - restore_cache:
+                keys:
+                    - firesim-aws-instance-data-{{ .Branch }}-{{ .Revision }}
+            - when:
+                condition: << pipeline.parameters.largefireboom_buildroot >>
+                steps:
+                    - run:
+                        name: Run a LargeFireBoom Buildroot workload
+                        command: |
+                            .circleci/firesim-run-workload.sh largefireboom buildroot 30m
+            - when:
+                condition: << pipeline.parameters.largefireboom_fedora >>
+                steps:
+                    - run:
+                        name: Run a LargeFireBoom Fedora workload
+                        command: |
+                            .circleci/firesim-run-workload.sh largefireboom fedora 30m
+            - when:
+                condition: << pipeline.parameters.largefireboom_coremark >>
+                steps:
+                    - run:
+                        name: Run a LargeFireBoom CoreMark workload
+                        command: |
+                            .circleci/firesim-run-workload.sh largefireboom coremark 30m
+            - when:
+                condition: << pipeline.parameters.largefireboom_spec17-intspeed-test-600 >>
+                steps:
+                    - run:
+                        name: Run a LargeFireBoom SPEC17 intspeed test input perlbench_s workload
+                        command: |
+                            .circleci/firesim-run-workload.sh largefireboom spec17-intspeed-test-600 30h
+    largefireboom-workload-finished:
+        executor: aws-cli/default
+        environment:
+            TERM: xterm-256color
+        steps:
+            - ssh-checkout
+            - aws-cli/setup
+            - restore_cache:
+                keys:
+                    - firesim-aws-instance-data-{{ .Branch }}-{{ .Revision }}
+            - when:
+                condition: << pipeline.parameters.largefireboom_buildroot >>
+                steps:
+                    - run:
+                        name: Buildroot workload finished
+                        command: |
+                            .circleci/firesim-run-finished.sh largefireboom buildroot << pipeline.parameters.launchrunfarm_passed >> << pipeline.parameters.infrasetup_passed >> << pipeline.parameters.runworkload_passed >>
+                        no_output_timeout: 30m
+            - when:
+                condition: << pipeline.parameters.largefireboom_fedora >>
+                steps:
+                    - run:
+                        name: Fedora workload finished
+                        command: |
+                            .circleci/firesim-run-finished.sh largefireboom fedora << pipeline.parameters.launchrunfarm_passed >> << pipeline.parameters.infrasetup_passed >> << pipeline.parameters.runworkload_passed >>
+                        no_output_timeout: 30m
+            - when:
+                condition: << pipeline.parameters.largefireboom_coremark >>
+                steps:
+                    - run:
+                        name: CoreMark workload finished
+                        command: |
+                            .circleci/firesim-run-finished.sh largefireboom coremark << pipeline.parameters.launchrunfarm_passed >> << pipeline.parameters.infrasetup_passed >> << pipeline.parameters.runworkload_passed >>
+                        no_output_timeout: 30m
+            - when:
+                condition: << pipeline.parameters.largefireboom_spec17-intspeed-test-600 >>
+                steps:
+                    - run:
+                        name: SPEC17 intspeed test input perlbench_s workload finished
+                        command: |
+                            .circleci/firesim-run-finished.sh largefireboom spec17-intspeed-test-600 << pipeline.parameters.launchrunfarm_passed >> << pipeline.parameters.infrasetup_passed >> << pipeline.parameters.runworkload_passed >>
+                        no_output_timeout: 30m
+
+# Order and dependencies of jobs to run
+workflows:
+    version: 2
+    build-and-test-boom-configs:
+        when: << pipeline.parameters.build-and-test-boom-configs-run >>
+        jobs:
+            # Make the toolchains
+            - install-riscv-toolchain:
+                filters: &ignore_fork
+                    branches:
+                        ignore: /pull\/[0-9]+/
+
+            - install-esp-toolchain:
+                filters:
+                    <<: *ignore_fork
+
+            # Setup build environment
+            - prepare-build-environment:
+                filters:
+                    <<: *ignore_fork
+
+            # Run generic syntax checking
+            # - run-scala-checkstyle:
+            #     filters:
+            #         <<: *ignore_fork
+
+            # Prepare the verilator builds
+            - prepare-smallboomconfig:
+                requires:
+                    - prepare-build-environment
+                    - install-riscv-toolchain
+            - prepare-mediumboomconfig:
+                requires:
+                    - prepare-build-environment
+                    - install-riscv-toolchain
+            - prepare-largeboomconfig:
+                requires:
+                    - prepare-build-environment
+                    - install-riscv-toolchain
+            - prepare-megaboomconfig:
+                requires:
+                    - prepare-build-environment
+                    - install-riscv-toolchain
+            # - prepare-smallrv32boomconfig:
+            #     requires:
+            #         - prepare-build-environment
+            #         - install-riscv-toolchain
+            - prepare-hwachaboomconfig:
+                requires:
+                    - prepare-build-environment
+                    - install-esp-toolchain
+
+            # Run the SmallBoomConfig tests
+            - smallboomconfig-run-csmith-tests:
+                requires:
+                    - prepare-smallboomconfig
+            - smallboomconfig-run-riscv-tests:
+                requires:
+                    - prepare-smallboomconfig
+
+            # Run the MediumBoomConfig tests
+            - mediumboomconfig-run-csmith-tests:
+                requires:
+                    - prepare-mediumboomconfig
+            - mediumboomconfig-run-riscv-tests:
+                requires:
+                    - prepare-mediumboomconfig
+
+            # Run the LargeBoomConfig tests
+            - largeboomconfig-run-csmith-tests:
+                requires:
+                    - prepare-largeboomconfig
+            - largeboomconfig-run-riscv-tests:
+                requires:
+                    - prepare-largeboomconfig
+
+            # Run the MegaBoomConfig tests
+            - megaboomconfig-run-csmith-tests:
+                requires:
+                    - prepare-megaboomconfig
+            - megaboomconfig-run-riscv-tests:
+                requires:
+                    - prepare-megaboomconfig
+
+            # Run the SmallRV32BoomConfig tests
+            # - smallrv32boomconfig-run-riscv-tests:
+            #     requires:
+            #         - prepare-smallrv32boomconfig
+
+            # Run the HwachaBoomConfig tests
+            - hwachaboomconfig-run-riscv-tests:
+                requires:
+                    - prepare-hwachaboomconfig
+
+    init-firesim:
+        # run firesim workflow every thursday
+        triggers:
+            - schedule:
+                cron: "0 0 * * 4"
+                filters:
+                    branches:
+                        only:
+                            - master
+        when: << pipeline.parameters.init-firesim-run >>
+        jobs:
+            - aws-approval:
+                filters:
+                    <<: *ignore_fork
+                type: approval
+
+            - initialize-manager:
+                requires:
+                    - aws-approval
+
+            - launch-largefireboom-afi-build:
+                requires:
+                    - initialize-manager
+
+            - build-largefireboom-buildroot:
+                requires:
+                    - initialize-manager
+
+            - build-largefireboom-fedora:
+                requires:
+                    - initialize-manager
+                    - build-largefireboom-buildroot
+
+            - build-largefireboom-coremark:
+                requires:
+                    - initialize-manager
+                    - build-largefireboom-buildroot
+                    - build-largefireboom-fedora
+
+            - build-largefireboom-spec17-intspeed-test-600:
+                requires:
+                    - initialize-manager
+                    - build-largefireboom-buildroot
+                    - build-largefireboom-fedora
+                    - build-largefireboom-coremark
+
+    finish-firesim-afi:
+        when: << pipeline.parameters.finish-firesim-afi-run >>
+        jobs:
+            - largefireboom-afi-failed
+
+    launch-firesim-workloads:
+        when: << pipeline.parameters.launch-firesim-workloads-run >>
+        jobs:
+            - launch-largefireboom-workloads
+
+    finish-firesim-workload:
+        when: << pipeline.parameters.finish-firesim-workload-run >>
+        jobs:
+            - largefireboom-workload-finished
