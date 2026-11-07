@@ -34,3 +34,6 @@ conda-reqs/chipyard-base.yaml.bak
 
 # boom-ustt: machine-specific env overrides
 ustt-env.local.sh
+
+# boom-ustt: logs and run outputs
+logs/
