@@ -16,6 +16,8 @@ release **1.15.0**. Day-to-day work happens on the `dev` branch.
 | `generators/chipyard/` | SoC configs; add BOOM+µSTT configs here. |
 | `reference/uSTT/` | Original µSTT (gem5 + RTL) as a read-only submodule for reference. |
 | `project-docs/PLAN.md` | **Project plan, workstreams and milestones.** |
+| `project-docs/midterm-report/` | Midterm report (LaTeX, ACM format), imported with history from `vinle0/Project-Report`. |
+| `project-docs/final-report/` | Final report, started from the course template `ece382n-sec/Project-Report-Template`. Build either one with `make` in its folder. |
 | `fpga/` | Chipyard's Vivado FPGA flows (VCU118, VC707, Arty100T, Nexys Video, ...). |
 
 ## Getting started
