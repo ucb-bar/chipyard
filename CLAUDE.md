@@ -47,7 +47,7 @@ Decisions so far (#2): Spectre threat model first (Futuristic is a stretch goal)
 6. **Merge after one approval**, then delete the branch.
 7. **Report on the issue.** Post measurements and decisions as comments before closing it.
 
-There is no CI for this project. Chipyard's upstream GitHub workflows came with the fork and should stay disabled (Actions tab → each workflow → Disable workflow): they need Berkeley's self-hosted runners, and BOOM builds are too heavy for GitHub's runners. All testing happens locally.
+The only CI is the report build (`build-reports.yml`, a few minutes). Chipyard's upstream GitHub workflows came with the fork and should stay disabled (Actions tab → each workflow → Disable workflow): they need Berkeley's self-hosted runners, and BOOM builds are too heavy for GitHub's runners. All testing happens locally.
 
 ## Environment
 
@@ -96,10 +96,10 @@ One-time setup: `cp ustt-env.local.sh.example ustt-env.local.sh`, edit it, then 
 - `fpga/`: Chipyard's Vivado flows. `fpga/src/main/scala/vcu118/` holds `BoomVCU118Config`; `fpga/fpga-shells/xilinx/vcu118/` holds the board files.
 - `reference/uSTT/`: original µSTT (read-only submodule). `rtl/src/` has the standalone Verilog Age Matrix (`stt_age.v`, `stt_control.v`) and baseline STT (`stt_og.v`, `younger.v`); `gem5/src/cpu/o3/` has the impede-uop and taint changes (search `[Boru, STT]`).
 - `project-docs/PLAN.md`: design background and the mapping of STT onto BOOM.
-- `project-docs/midterm-report/`, `project-docs/final-report/`: the reports (LaTeX, ACM `sigplan`). The midterm was imported with history from `vinle0/Project-Report`; the final starts from `ece382n-sec/Project-Report-Template`.
+- `project-docs/midterm-report/`, `project-docs/final-report/`: the reports (LaTeX, ACM `sigplan`). The midterm was imported with history from `vinle0/Project-Report`; the final starts from `ece382n-sec/Project-Report-Template`. Their `paper.pdf` is git-ignored: `.github/workflows/build-reports.yml` builds both on every PR that touches a report (PDFs attached to the run) and, on merge to `dev`/`main`, publishes them to the [`reports` release](https://github.com/Capheuss/boom-ustt/releases/tag/reports). TeX packages are listed in `.github/tex-packages.txt`; add any new `\usepackage` there too.
 - `ustt`, `ustt-env.sh`, `ustt-env.local.sh.example`: environment setup.
 
 ## Conventions
 
-- Logs and run outputs go in `logs/` (git-ignored). Never commit generated Verilog, build outputs or PDFs other than the reports' `paper.pdf`.
+- Logs and run outputs go in `logs/` (git-ignored). Never commit generated Verilog, build outputs or PDFs (the report PDFs come from CI).
 - Pull upstream Chipyard with `git fetch upstream --tags` and merge a release tag; do it in its own PR.

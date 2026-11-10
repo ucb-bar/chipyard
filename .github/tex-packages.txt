@@ -1,0 +1,37 @@
+# TeX Live packages for building project-docs/*-report (ACM acmart, sigplan).
+# Used by .github/workflows/build-reports.yml; install the same set locally with
+#   tlmgr install $(grep -v '^#' .github/tex-packages.txt)
+# after a scheme-small TeX Live install.
+scheme-small
+acmart
+preprint
+ncctools
+newtx
+libertine
+inconsolata
+fontaxes
+mweights
+xstring
+totpages
+environ
+trimspaces
+comment
+draftwatermark
+textcase
+hyperxmp
+ifmtarg
+kastrup
+cmap
+setspace
+upquote
+xpatch
+booktabs
+caption
+float
+fancyhdr
+microtype
+natbib
+refcount
+xkeyval
+etoolbox
+iftex

@@ -1,0 +1,101 @@
+# Builds the LaTeX reports in project-docs/ and publishes the PDFs.
+#
+# The PDFs are git-ignored. Instead:
+#   - Pull requests that touch a report: build only, as a check, with the PDFs
+#     attached to the run as an artifact for reviewers.
+#   - Pushes (merges) to dev or main that touch a report: build, then replace
+#     the assets of the rolling "reports" release. Stable download links:
+#       https://github.com/Capheuss/boom-ustt/releases/download/reports/midterm-report.pdf
+#       https://github.com/Capheuss/boom-ustt/releases/download/reports/final-report.pdf
+#
+# Every report is rebuilt on each run, so the release always holds a matching set.
+name: Build reports
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "project-docs/midterm-report/**"
+      - "project-docs/final-report/**"
+      - ".github/tex-packages.txt"
+      - ".github/workflows/build-reports.yml"
+  pull_request:
+    paths:
+      - "project-docs/midterm-report/**"
+      - "project-docs/final-report/**"
+      - ".github/tex-packages.txt"
+      - ".github/workflows/build-reports.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-reports-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build report PDFs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      # No submodules: the reports don't need Chipyard's.
+      - uses: actions/checkout@v7.0.1
+
+      - uses: TeX-Live/setup-texlive-action@v4.1.1
+        with:
+          package-file: .github/tex-packages.txt
+
+      - name: Build
+        run: |
+          mkdir -p out
+          for r in midterm final; do
+            echo "::group::$r-report"
+            make -C "project-docs/$r-report" paper.pdf
+            cp "project-docs/$r-report/paper.pdf" "out/$r-report.pdf"
+            if grep -q -E "There were undefined (references|citations)|Citation .* undefined" "project-docs/$r-report/paper.log"; then
+              echo "::warning file=project-docs/$r-report/paper.tex::$r-report has undefined references or citations"
+            fi
+            echo "::endgroup::"
+          done
+          ls -l out
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: reports
+          path: out/*.pdf
+          if-no-files-found: error
+
+  publish:
+    name: Publish to the "reports" release
+    needs: build
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    concurrency:
+      group: publish-reports
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: reports
+          path: out
+
+      - name: Replace release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          BRANCH: ${{ github.ref_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # Recreate the release so its tag points at the commit the PDFs were built from.
+          gh release delete reports --repo "$REPO" --cleanup-tag --yes || true
+          gh release create reports out/*.pdf \
+            --repo "$REPO" \
+            --target "$SHA" \
+            --title "Reports (latest)" \
+            --notes "Report PDFs built from \`${SHA::7}\` on \`$BRANCH\` by [this run]($RUN_URL). Rebuilt automatically whenever a report changes; do not edit by hand."

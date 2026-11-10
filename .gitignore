@@ -37,3 +37,6 @@ ustt-env.local.sh
 
 # boom-ustt: logs and run outputs
 logs/
+
+# boom-ustt: report PDFs are built by CI (.github/workflows/build-reports.yml)
+project-docs/*-report/paper.pdf
