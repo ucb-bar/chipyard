@@ -228,6 +228,27 @@ On a multi-socket machine, you will want to make sure all threads are on the sam
 By enabling this, you will use Chipyard's ``numa_prefix`` wrapper, which is a simple wrapper around ``numactl`` that runs your verilated simulator like this: ``$(numa_prefix) ./simulator-<name> <simulator-args>``.
 Note that both these flags are mutually exclusive, you can use either independently (though it makes sense to use ``NUMACTL`` just with ``VERILATOR_THREADS=8`` during a Verilator simulation).
 
+Verilator Stack Size Warning
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When a Verilator simulator starts, it compares the stack size limit of the current process against the amount of stack the compiled model may need, and prints a warning like the following if the limit looks too small:
+
+.. code-block:: text
+
+    %Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 15446' or larger
+
+The command suggested by this warning is incorrect in Verilator versions before 5.024, which includes the version pinned by Chipyard's conda environment.
+``ulimit -c`` sets the core dump size limit and has no effect on the stack, so running it will not resolve the warning.
+The correct command uses ``ulimit -s`` to raise the stack size limit (in KB) to the suggested value or larger, before running the simulator:
+
+.. code-block:: shell
+
+    ulimit -s 15446
+    make run-binary BINARY=../../tests/hello.riscv
+
+The new limit only applies to the current shell session (and processes started from it), and it can be raised at most to the hard limit reported by ``ulimit -Hs``.
+See `verilator/verilator#4956 <https://github.com/verilator/verilator/issues/4956>`__ for details.
+
 
 Speeding up your RTL Simulation by 2x!
 -----------------------------------------------
