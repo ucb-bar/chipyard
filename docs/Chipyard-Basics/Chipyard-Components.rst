@@ -73,13 +73,13 @@ Tools
   See :ref:`Tools/Chisel:Chisel` for more information.
 
 **FIRRTL**
-  An intermediate representation library for RTL description of digital designs.
+  An intermediate representation for RTL description of digital designs.
   FIRRTL is used as a formalized digital circuit representation between Chisel and Verilog.
-  FIRRTL enables digital circuits manipulation between Chisel elaboration and Verilog generation.
+  Chipyard uses ``firtool``, the FIRRTL compiler from the CIRCT project, to transform the FIRRTL emitted by Chisel and generate Verilog.
   See :ref:`Tools/FIRRTL:FIRRTL` for more information.
 
 **Tapeout-Tools (Formerly Barstools)**
-  A collection of common FIRRTL transformations used to manipulate a digital circuit without changing the generator source RTL.
+  A collection of utilities (most notably the MacroCompiler, which maps Chisel memories to technology SRAMs) that post-process the generated design without changing the generator source RTL.
   See :ref:`Tools/Tapeout-Tools:Tapeout-Tools` for more information.
 
 **Dsptools**

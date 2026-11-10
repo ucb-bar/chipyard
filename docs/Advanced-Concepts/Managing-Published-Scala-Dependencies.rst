@@ -1,18 +1,19 @@
 Managing Published Scala Dependencies
 =====================================
 
-In preparation for Chisel 3.5, in Chipyard 1.5 Chisel, FIRRTL, the FIRRTL
-interpreter, and Treadle, were transitioned from being built-from-source to
-managed as published dependencies. Their submodules have been removed.
+Chisel and the other Scala libraries that Chipyard depends on are managed as
+published dependencies rather than built from source.
 Switching between published versions can be achieved by changing the versions
 specified in Chipyard's ``build.sbt``.
 
-Lists of available artifacts can be using search.maven.org or mvnrepository.org:
+Lists of available artifacts can be found using search.maven.org or mvnrepository.org:
 
-- `Chisel3 <https://mvnrepository.com/artifact/edu.berkeley.cs/chisel3>`_
-- `FIRRTL <https://mvnrepository.com/artifact/edu.berkeley.cs/firrtl>`_
-- `FIRRTL Interpreter <https://mvnrepository.com/artifact/edu.berkeley.cs/firrtl-interpreter>`_
-- `Treadle <https://mvnrepository.com/artifact/edu.berkeley.cs/treadle>`_
+- `Chisel <https://mvnrepository.com/artifact/org.chipsalliance/chisel>`_
+- `Chisel3 <https://mvnrepository.com/artifact/edu.berkeley.cs/chisel3>`_ and
+  `FIRRTL <https://mvnrepository.com/artifact/edu.berkeley.cs/firrtl>`_ (legacy
+  versions, only used by the ``tapeout`` project)
+
+.. Note:: The FIRRTL compiler used to generate Verilog, CIRCT's ``firtool``, is a native binary rather than a Scala dependency (see :ref:`Tools/FIRRTL:FIRRTL`).
 
 
 Publishing Local Changes
@@ -37,7 +38,7 @@ In practice, this will require the following steps:
    published dependencies. SBT will be clear about what it is publishing and
    where it is putting it. The ``+`` is generally necessary and ensures that
    all cross versions of the package are published.
-#. Update the Chisel or FIRRTL version in Chipyard's ``build.sbt`` to match the
+#. Update the Chisel version in Chipyard's ``build.sbt`` to match the
    versions of your locally published packages.
 #. Use Chipyard as you would normally. Now when you call out to make in
    Chipyard you should see SBT resolving dependencies to the locally
