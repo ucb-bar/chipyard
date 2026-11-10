@@ -378,24 +378,25 @@ def gh_file_ref_role(name, rawtext, text, lineno, inliner, options={}, content=[
     
     url = f"{repo_url}/blob/{version}/{text}"
 
-    print(f"Testing GitHub URL {url} exists...")
-    try:
-        status_code = requests.get(url).status_code
-        if status_code != 200:
-            message = f"[Line {lineno}] :{name}:`{text}` produces URL {url} returning status code {status_code}. " \
-                    "Ensure your path is correct and all commits that may have moved or renamed files have been pushed to github.com."
-            print(message)
-            sys.exit(1)  # Exit with error in all environments to catch dead links
-    except requests.exceptions.ConnectionError as e:
-        print(f"Warning: Network error when verifying URL {url}: {e}")
-        print("If you're working offline, you can set the SKIP_URL_CHECK=1 environment variable to bypass URL checks.")
-        if os.environ.get("SKIP_URL_CHECK") != "1":
+    # SKIP_URL_CHECK=1 bypasses the external URL verification entirely so local
+    # and offline docs builds (e.g. the Starlight sync) don't depend on network
+    # access to github.com. CI leaves it unset to keep validating for dead links.
+    if os.environ.get("SKIP_URL_CHECK") != "1":
+        print(f"Testing GitHub URL {url} exists...")
+        try:
+            status_code = requests.get(url).status_code
+            if status_code != 200:
+                message = f"[Line {lineno}] :{name}:`{text}` produces URL {url} returning status code {status_code}. " \
+                        "Ensure your path is correct and all commits that may have moved or renamed files have been pushed to github.com."
+                print(message)
+                sys.exit(1)  # Exit with error in all environments to catch dead links
+        except requests.exceptions.ConnectionError as e:
+            print(f"Warning: Network error when verifying URL {url}: {e}")
+            print("If you're working offline, you can set the SKIP_URL_CHECK=1 environment variable to bypass URL checks.")
             sys.exit(1)
-        else:
-            print("Continuing build with SKIP_URL_CHECK=1")
-    except Exception as e:
-        print(f"Warning: Failed to verify URL {url}: {e}")
-        sys.exit(1)
+        except Exception as e:
+            print(f"Warning: Failed to verify URL {url}: {e}")
+            sys.exit(1)
 
     docutils.parsers.rst.roles.set_classes(options)
     node = docutils.nodes.reference(rawtext, text, refuri=url, **options)
