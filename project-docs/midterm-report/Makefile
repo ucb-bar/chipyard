@@ -1,6 +1,6 @@
 # The system TeX Live (/usr/bin, 2017) lacks totpages.sty and environ.sty,
 # which acmart needs. Use the local TeX Live 2026 install when it exists.
-TEXBIN ?= /misc/scratch/crodolph/texlive/2026/bin/x86_64-linux
+TEXBIN ?= /misc/scratch/$(USER)/texlive/2026/bin/x86_64-linux
 ifneq ($(wildcard $(TEXBIN)/pdflatex),)
 export PATH := $(TEXBIN):$(PATH)
 endif
