@@ -26,7 +26,7 @@ public:
   static char KIND;
 
   simplenic_t(simif_t &sim,
-              StreamEngine &stream,
+              HostStreamEngine &stream,
               const SIMPLENICBRIDGEMODULE_struct &addrs,
               int simplenicno,
               const std::vector<std::string> &args,
@@ -58,6 +58,9 @@ private:
 
   // checking for token loss
   int currentround = 0;
+  unsigned empty_pull_polls = 0;
+  // Avoid hundreds of PCIe status reads while waiting for a partial C2H page.
+  static constexpr unsigned flush_poll_limit = 8;
 
   // only for TOKENVERIFY
   const int stream_to_cpu_idx;

@@ -15,7 +15,7 @@ public:
   static char KIND;
 
   cospike_t(simif_t &sim,
-            StreamEngine &stream,
+            HostStreamEngine &stream,
             int cospikeno,
             std::vector<std::string> &args,
             uint32_t iaddr_width,
