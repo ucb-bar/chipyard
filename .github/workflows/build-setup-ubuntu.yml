@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     env:
-      CONDA_INSTALL_DIR: ${{ github.workspace }}/.ci/conda
+      PIXI_HOME: ${{ github.workspace }}/.ci/pixi
       FORCE_NON_EC2: 1
       JVM_OPTS: -Xmx3200m
     steps:
@@ -45,16 +45,10 @@ jobs:
           git checkout --detach FETCH_HEAD
           git rev-parse --short HEAD
 
-      - name: Install conda
+      - name: Install Pixi
         run: |
-          mkdir -p "$(dirname "${CONDA_INSTALL_DIR}")"
-          wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
-          bash Miniforge3.sh -b -p "${CONDA_INSTALL_DIR}"
-          source "${CONDA_INSTALL_DIR}/etc/profile.d/conda.sh"
-          if [ -f "${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh" ]; then
-            source "${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh"
-          fi
-          conda activate
+          ./scripts/install-pixi.sh
+          echo "$PIXI_HOME/bin" >> "$GITHUB_PATH"
 
       - name: Exclude CI-managed directories from ctags
         run: |
@@ -63,10 +57,5 @@ jobs:
       - name: Run build setup
         run: |
           git config --global --add safe.directory "*"
-          source "${CONDA_INSTALL_DIR}/etc/profile.d/conda.sh"
-          if [ -f "${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh" ]; then
-            source "${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh"
-          fi
-          conda activate
           ./build-setup.sh riscv-tools
           grep -F "Setup complete!" build-setup.log

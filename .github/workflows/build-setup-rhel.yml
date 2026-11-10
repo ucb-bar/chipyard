@@ -24,7 +24,7 @@ jobs:
       FORCE_NON_EC2: 1
       JVM_OPTS: -Xmx3200m
       RHEL_IMAGE: registry.access.redhat.com/ubi9/ubi:latest
-      RHEL_CONDA_INSTALL_DIR: /workspace/.ci/rhel-conda
+      RHEL_PIXI_HOME: /workspace/.ci/rhel-pixi
     steps:
       - name: Maximize build space
         uses: jimfangx/maximize-build-space@master
@@ -65,7 +65,7 @@ jobs:
             --privileged \
             --volume "${GITHUB_WORKSPACE}:/workspace" \
             --workdir /workspace \
-            --env "CONDA_INSTALL_DIR=${RHEL_CONDA_INSTALL_DIR}" \
+            --env "PIXI_HOME=${RHEL_PIXI_HOME}" \
             --env "FORCE_NON_EC2=${FORCE_NON_EC2}" \
             --env "JVM_OPTS=${JVM_OPTS}" \
             "${RHEL_IMAGE}" \
@@ -128,25 +128,19 @@ jobs:
               workspace_user="$(getent passwd "${workspace_uid}" | cut -d: -f1)"
               workspace_home="$(getent passwd "${workspace_uid}" | cut -d: -f6)"
 
-              mkdir -p "$(dirname "${CONDA_INSTALL_DIR}")"
-              chown "${workspace_uid}:${workspace_gid}" "$(dirname "${CONDA_INSTALL_DIR}")"
+              mkdir -p "$(dirname "${PIXI_HOME}")"
+              chown "${workspace_uid}:${workspace_gid}" "$(dirname "${PIXI_HOME}")"
 
               runuser -u "${workspace_user}" -- env \
-                "CONDA_INSTALL_DIR=${CONDA_INSTALL_DIR}" \
+                "PIXI_HOME=${PIXI_HOME}" \
                 "FORCE_NON_EC2=${FORCE_NON_EC2}" \
                 "JVM_OPTS=${JVM_OPTS}" \
                 "HOME=${workspace_home}" \
                 bash -leo pipefail -c "
                   cd /workspace
                   git config --global --add safe.directory \"*\"
-                  mkdir -p \"\$(dirname \"\${CONDA_INSTALL_DIR}\")\"
-                  wget -O Miniforge3.sh \"https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-\$(uname)-\$(uname -m).sh\"
-                  bash Miniforge3.sh -b -p \"\${CONDA_INSTALL_DIR}\"
-                  source \"\${CONDA_INSTALL_DIR}/etc/profile.d/conda.sh\"
-                  if [ -f \"\${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh\" ]; then
-                    source \"\${CONDA_INSTALL_DIR}/etc/profile.d/mamba.sh\"
-                  fi
-                  conda activate
+                  ./scripts/install-pixi.sh
+                  export PATH=\"\${PIXI_HOME}/bin:\$PATH\"
                   ./build-setup.sh riscv-tools
                   grep -F \"Setup complete!\" build-setup.log
                 "

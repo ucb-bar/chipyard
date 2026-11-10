@@ -1,0 +1,3 @@
+# Keep Chipyard environments in this checkout, even if user configuration
+# enables detached environments globally. Cache defaults are set by setup/env.sh.
+detached-environments = false

@@ -22,30 +22,11 @@ At that point, instead of cloning FireSim you can clone Chipyard by following :r
 Default Requirements Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In Chipyard, we use the `Conda <https://docs.conda.io/en/latest/>`__ package manager to help manage system dependencies.
-Conda allows users to create an "environment" that holds system dependencies like ``make``, ``gcc``, etc.
-
-.. Note:: Chipyard can also run on systems without a Conda installation. However, users on these systems must manually install toolchains and dependencies.
-
-First, Chipyard requires the latest Conda to be installed on the system.
-Please refer to the `Conda installation instructions <https://github.com/conda-forge/miniforge/#install>`__ on how to install the latest Conda with the **Miniforge** installer.
-
-After Conda is installed and is on your ``PATH``, we need to install a version of ``git`` to initially checkout the repository.
-For this you can use the system package manager like ``yum`` or ``apt`` to install ``git``.
-This ``git`` is only used to first checkout the repository, we will later install a newer version of ``git`` with Conda.
-
-Next ensure that you are able to use Conda.
-By default after Conda's setup you should already be in the ``base`` environment but you can run the following to enter it if needed:
-
-.. code-block:: shell
-
-    conda activate base
-
-If Conda is not present in your path by default, activate it with the following command:
-
-.. code-block:: shell
-
-    source ~/miniforge3/bin/activate # Your miniforge3 install location may vary
+Chipyard uses `Pixi <https://pixi.sh/>`__ to install its compilers, tools, and Python dependencies.
+Install Git and Python 3 with your system package manager, then install Pixi 0.82.1 or newer.
+If Pixi is already installed, run ``pixi self-update`` to update it.
+The repository also provides ``./scripts/install-pixi.sh`` to install the tested Pixi version
+into ``~/.pixi/bin`` after cloning; add that directory to your ``PATH``.
 
 Setting up the Chipyard Repo
 -------------------------------------------
@@ -65,7 +46,7 @@ Next run the following script to fully setup Chipyard with the ``riscv-tools`` t
 .. Warning:: The following script will complete a "full" installation of Chipyard which may take a long time depending on the system.
     Ensure that this script completes fully (no interruptions) before continuing on. User can use the ``--skip`` or ``-s`` flag to skip steps:
 
-    ``-s 1`` skips initializing Conda environment
+    ``-s 1`` skips initializing the Pixi environment
 
     ``-s 2`` skips initializing Chipyard submodules
 
@@ -91,39 +72,40 @@ Next run the following script to fully setup Chipyard with the ``riscv-tools`` t
 
     ./build-setup.sh riscv-tools
 
-This script wraps around the conda environment initialization process, initializes all submodules (with the ``init-submodules-no-riscv-tools.sh`` script), installs a toolchain, and runs other setups.
+This script wraps around Pixi environment installation, initializes all submodules (with the ``init-submodules-no-riscv-tools.sh`` script), installs a toolchain, and runs other setups.
 See ``./build-setup.sh --help`` for more details on what this does and how to disable parts of the setup.
 
 .. Warning:: Using ``git`` directly will try to initialize all submodules; this is not recommended unless you expressly desire this behavior.
 
-.. Note:: If the ``build-setup.sh`` script fails on conflict issues, sometimes it helps to run ``conda update -n base --all`` to upgrade all packages in the conda environment.
+.. Note:: Setup installs the ``default`` environment in ``pixi-reqs/.pixi/envs/default``.
+    ``--use-lean-pixi`` selects ``lean`` and skips FireSim and FireMarshal.
+    The old ``--use-lean-conda`` and ``--skip-conda`` flags remain aliases.
+    Toolchain collateral is installed under ``$CONDA_PREFIX/riscv-tools``;
+    Pixi exports ``CONDA_PREFIX`` for compatibility with existing build scripts.
 
-.. Note:: By default, the ``build-setup.sh`` script installs extra toolchain utilities (RISC-V tests, PK, Spike, etc) to ``$CONDA_PREFIX/<toolchain-type>``. Thus, if you uninstall the compiler using ``conda remove`` these utilities/tests will also have to be re-installed/built.
-
-.. Note:: If you already have a working conda environment setup, separate Chipyard clones can use that pre-used environment in combination with running the aforementioned scripts yourself (``init-submodules...``, ``build-toolchain...``, etc).
+.. Note:: Setup keeps the pinned sysroot on newer hosts. On an older host, it selects the
+    newest published conda-forge sysroot that does not exceed the host glibc, and refreshes
+    the lockfile when the manifest changes. It does not pin an unpublished host version
+    such as glibc 2.31 or 2.35. A compiler sysroot and the host runtime glibc are separate
+    requirements; dependency solving must also satisfy the manifest's virtual glibc baseline.
 
 .. Note for power users: Chipyard includes internal scripts that can selectively initialize generator submodules. The default ``./build-setup.sh`` initializes all standard generator submodules and is the recommended path.
 
 .. Note:: If you are a power user and would like to build your own compiler/toolchain, you can refer to the https://github.com/ucb-bar/riscv-tools-feedstock repository (submoduled in the ``toolchains/*`` directories) on how to build the compiler yourself.
 
-By running the following command you should see an environment listed with the path ``$CHIPYARD_DIRECTORY/.conda-env``.
+To inspect installed packages, run:
 
 .. code-block:: shell
 
-    conda env list
-
-.. Note:: Refer to FireSim's :fsim_doc:`Conda documentation <Advanced-Usage/Conda.html>` on more information
-    on how to use Conda and some of its benefits.
+    pixi list --manifest-path pixi-reqs/pixi.toml --environment default
 
 Sourcing ``env.sh``
 -------------------
 
 Once setup is complete, an emitted ``env.sh`` file should exist in the top-level repository.
-This file activates the conda environment created in ``build-setup.sh`` and sets up necessary environment variables needed for future Chipyard steps (needed for the ``make`` system to work properly).
+This file activates the Pixi environment created in ``build-setup.sh`` and sets up necessary environment variables needed for future Chipyard steps (needed for the ``make`` system to work properly).
 Once the script is run, the ``PATH``, ``RISCV``, and ``LD_LIBRARY_PATH`` environment variables will be set properly for the toolchain requested.
 You can source this file in your ``.bashrc`` or equivalent environment setup file to get the proper variables, or directly include it in your current environment:
-
-.. Note:: If you are on a Mac or a RHEL/CentOS-based Linux distribution, you must deactivate the base conda environment with ``conda deactivate`` first before proceeding. You may also choose to keep it deactivated by default with ``conda config --set auto_activate_base false``. See this `issue <https://github.com/conda/conda/issues/9392>`__ for more details.
 
 .. code-block:: shell
 
@@ -131,7 +113,29 @@ You can source this file in your ``.bashrc`` or equivalent environment setup fil
 
 .. Warning:: This ``env.sh`` file should always be sourced before running any ``make`` commands.
 
-.. Note:: You can deactivate/activate a compiler/toolchain (but keep it installed) by running ``source $CONDA_PREFIX/etc/conda/deactivate.d/deactivate-${PKG_NAME}.sh`` or ``$CONDA_PREFIX/etc/conda/activate.d/activate-${PKG_NAME}.sh`` (``PKG_NAME`` for example is ``ucb-bar-riscv-tools``). This will modify the aforementioned 3 environment variables.
+Activation changes your current Bash or Zsh shell. Use ``source env.sh``;
+executing ``./env.sh`` cannot modify a parent shell. Repeated sourcing is safe.
+Deactivate and reactivate without opening another shell:
+
+.. code-block:: shell
+
+    pixi deactivate          # also available as chipyard_deactivate
+    source ./env.sh
+    pixi activate lean       # switch to another installed environment
+
+After sourcing, add packages from any directory with:
+
+.. code-block:: shell
+
+    pixi add htop
+    pixi add --pypi rich
+
+Packages added without ``--feature`` enter the shared default feature, inherited by all
+Chipyard environments. The shell helper installs and refreshes the active environment,
+including ``lean``, and reports installation failures. Use ``--no-install`` to defer installation
+or an explicit ``--manifest-path`` when working on a different Pixi workspace.
+FireSim library setup uses the same complete ``default`` environment and its added packages.
+Its Fab Classic and Paramiko dependencies are locked in Pixi rather than replaced by pip during setup.
 
 .. Warning:: ``env.sh`` files are generated per-Chipyard repository.
     In a multi-Chipyard repository setup, it is possible to source multiple ``env.sh`` files (in any order).
