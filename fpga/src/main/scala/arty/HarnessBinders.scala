@@ -10,6 +10,7 @@ import sifive.blocks.devices.jtag.{JTAGPins, JTAGPinsFromPort}
 import sifive.blocks.devices.pinctrl.{BasePin}
 
 import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
+import sifive.fpgashells.ip.xilinx.bscan2.JTAGTUNNEL
 
 import chipyard.harness.{HarnessBinder}
 import chipyard.iobinders._
@@ -59,6 +60,34 @@ class WithArtyJTAGHarnessBinder extends HarnessBinder({
     io_jtag.TDI.i.po.map(_ := DontCare)
     io_jtag.TMS.i.po.map(_ := DontCare)
     io_jtag.TDO.i.po.map(_ := DontCare)
+  }
+})
+
+// Route the SoC's JTAG DTM through the Artix-7's own TAP instead of the PMOD
+// pins. fpga-shells' JTAGTUNNEL places a BSCANE2 on USER4 and decodes each
+// USER4 DR scan into a nested JTAG transaction, so the FPGA-programming USB
+// cable (FTDI channel A) also carries hart debug. OpenOCD reaches the DTM with
+// `riscv use_bscan_tunnel <DTM IR width>` (see fpga/scripts/arty35t_bscan_openocd.cfg).
+// The DTM's TCK is the FPGA TCK gated by USER4 SEL (BUFGCE inside JTAGTUNNEL).
+class WithArtyBScanJTAGHarnessBinder extends HarnessBinder({
+  case (th: Arty35THarness, port: JTAGPort, chipId: Int) => {
+    val tck = Wire(Bool())
+    val tms = Wire(Bool())
+    val tdi = Wire(Bool())
+    val tdo = Wire(Bool())
+    val tdo_en = Wire(Bool())
+
+    JTAGTUNNEL(tck, tms, tdi, tdo, tdo_en)
+
+    port.io.TCK := tck.asClock
+    port.io.TMS := tms
+    port.io.TDI := tdi
+    tdo := port.io.TDO
+    tdo_en := true.B
+    port.io.reset.foreach(_ := th.referenceReset)
+
+    // No PMOD SRST_n in this configuration: keep the harness reset vote inactive.
+    th.SRST_n := true.B
   }
 })
 
