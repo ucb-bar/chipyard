@@ -29,9 +29,26 @@
 // SD card, consider changing to the Default Speed mode (12.5 MHz).
 #define SPI_CLK 	25000
 
-// SPI clock divisor value
+// SPI SCLK frequency for card initialization, in kHz. The SD specification
+// requires the identification phase (CMD0 to ACMD41) at 100-400 kHz; the
+// faster SPI_CLK is only used once the card is initialized. 250 kHz keeps a
+// margin from both ends at a cost of a few milliseconds: the card's own
+// power-up, not the SPI clock, sets how long identification takes.
+#define SPI_INIT_CLK 	250
+
+// SPI clock divisor for an SCLK of at most `khz`. The controller produces
+// SCLK = F_CLK / (2 * (div + 1)), so the divisor is rounded up: rounding it
+// down would run the card faster than requested.
 // @see https://ucb-bar.gitbook.io/baremetal-ide/baremetal-ide/using-peripheral-devices/sifive-ips/serial-peripheral-interface-spi
-#define SPI_DIV 	(((F_CLK * 1000) / SPI_CLK) / 2 - 1)
+#define SPI_DIV_FOR(khz) 	(((F_CLK * 1000) + 2 * (khz) - 1) / (2 * (khz)) - 1)
+// Either divisor may instead be set at build time (SPI_DIV=, SPI_INIT_DIV=), by a
+// design whose SPI controller does not run at TL_CLK.
+#ifndef SPI_DIV
+#define SPI_DIV 	SPI_DIV_FOR(SPI_CLK)
+#endif
+#ifndef SPI_INIT_DIV
+#define SPI_INIT_DIV 	SPI_DIV_FOR(SPI_INIT_CLK)
+#endif
 
 static volatile uint32_t * const spi = (void *)(SPI_CTRL_ADDR);
 
@@ -88,9 +105,8 @@ static inline void sd_cmd_end(void)
 static void sd_poweron(void)
 {
 	long i;
-	// HACK: frequency change
 
-	REG32(spi, SPI_REG_SCKDIV) = SPI_DIV;
+	REG32(spi, SPI_REG_SCKDIV) = SPI_INIT_DIV;
 	REG32(spi, SPI_REG_CSMODE) = SPI_CSMODE_OFF;
 	for (i = 10; i > 0; i--) {
 		sd_dummy();
