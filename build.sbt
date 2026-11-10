@@ -195,7 +195,7 @@ lazy val chipyard = {
   val baseProjects: Seq[ProjectReference] =
     Seq(
       testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
-      icenet, tracegen,
+      ethernet, icenet, tracegen,
       constellation, barf, shuttle, rerocc,
     ).map(sbt.Project.projectToRef) ++
     (if (useChisel7) Seq() else Seq(sbt.Project.projectToRef(firrtl2_bridge))) ++
@@ -320,6 +320,27 @@ lazy val icenet = withInitCheck((project in file("generators/icenet")), "icenet"
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
+
+lazy val ethernet = freshProject("ethernet", file("./generators/ethernet"))
+  .dependsOn(rocketchip, rocket_dsp_utils, testchipip)
+  .settings(
+    libraryDependencies ++= rocketLibDeps.value,
+    libraryDependencies ++= Seq("edu.berkeley.cs" %% "chiseltest" % chiselTestVersion),
+    libraryDependencies ++= Seq("com.typesafe.play" %% "play-json" % "2.10.6"),
+    libraryDependencies ++= Seq("org.scalanlp" %% "breeze" % "2.1.0")
+  )
+  .settings(commonSettings)
+  .settings(
+    Compile / resourceDirectory :=
+      baseDirectory.value / "main" / "resources" / "vsrc" / "ethernet" / "rtl",
+    Compile / unmanagedResourceDirectories +=
+      baseDirectory.value / "main" / "resources" / "vsrc" / "ethernet" / "lib" / "axis" / "rtl",
+    Compile / unmanagedResourceDirectories +=
+      baseDirectory.value / "main" / "resources" / "vsrc" / "ethernet" / "example" / "VCU118" / "fpga_1g" / "rtl",
+    Compile / unmanagedResourceDirectories +=
+      baseDirectory.value / "main" / "resources" / "vsrc" / "host",
+    Compile / unmanagedResourceDirectories += baseDirectory.value / "main" / "resources" / "csrc"
+  )
 
 lazy val boom = freshProject("boom", file("generators/boom"))
   .dependsOn(rocketchip, pmu, pmu_tilelink)

@@ -1,7 +1,7 @@
 .. _generator-index:
 
 Included RTL Generators
-============================
+=======================
 
 A Generator can be thought of as a generalized RTL design, written using a mix of meta-programming and standard RTL.
 This type of meta-programming is enabled by the Chisel hardware description language (see :ref:`Tools/Chisel:Chisel`).
@@ -24,6 +24,7 @@ so changes to the generators themselves will automatically be used when building
    Constellation
    Gemmini
    Saturn
+   Ethernet
    IceNet
    TestChipIP
    Rocket-Chip-Generators
