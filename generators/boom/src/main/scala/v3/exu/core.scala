@@ -810,6 +810,47 @@ class BoomCore()(implicit p: Parameters) extends BoomModule
   }
 
   //-------------------------------------------------------------
+  // [boom-ustt] STT taint at dispatch (project-docs/spec-interface.md sections 3-5)
+
+  require(!usingSTTGate || !usingRoCC, "STT configurations do not support RoCC")
+
+  // Exception/flush recovery, from the flush until rollback ends.
+  val stt_flush_recovery = if (usingSTTGate) Some(WireInit(rob.io.flush.valid || RegNext(rob.io.flush.valid) ||
+                             RegNext(RegNext(rob.io.flush.valid)) || rob.io.commit.rollback)) else None
+
+  // Inhibits protected transmitters during mispredict and flush recovery (consumed by track B).
+  val stt_block = stt_flush_recovery.map(f => WireInit(brupdate.b1.mispredict_mask.orR ||
+                                                       brupdate.b2.mispredict || f))
+
+  val stt_taint = if (enableSTT) Some(Module(new STTTaintTable(coreWidth, numIntPhysRegs,
+                    if (usingFPU) numFpPhysRegs else 0, lregSz, maxPregSz, robAddrSz))) else None
+  stt_taint.foreach { t =>
+    for (w <- 0 until coreWidth) {
+      val uop  = dis_uops(w)
+      val lane = t.io.lanes(w)
+      lane.fire       := dis_fire(w)
+      lane.rob_idx    := uop.rob_idx
+      lane.is_root    := uop.uses_ldq || uop.is_amo
+      lane.lrs1       := uop.lrs1
+      lane.lrs2       := uop.lrs2
+      lane.lrs1_rtype := uop.lrs1_rtype
+      lane.lrs2_rtype := uop.lrs2_rtype
+      lane.frs3_en    := uop.frs3_en
+      lane.prs1       := uop.prs1
+      lane.prs2       := uop.prs2
+      lane.prs3       := uop.prs3
+      lane.ldst_val   := uop.ldst_val
+      lane.dst_rtype  := uop.dst_rtype
+      lane.pdst       := uop.pdst
+
+      dis_uops(w).yrot.get := t.io.yrot(w)
+    }
+    t.io.vp    := rob.io.stt_vp.get
+    t.io.head  := rob.io.rob_head_idx
+    t.io.flush := stt_flush_recovery.get
+  }
+
+  //-------------------------------------------------------------
   // RoCC allocation logic
   if (usingRoCC) {
     for (w <- 0 until coreWidth) {

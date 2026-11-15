@@ -15,6 +15,8 @@
 /generators/boom/src/main/scala/v3/common/parameters.scala    @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
 /generators/boom/src/main/scala/v3/common/config-mixins.scala @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
 /generators/boom/src/main/scala/v3/common/consts.scala        @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
+# STT helpers (isSafe, transmitter classification), used by rename, issue and LSU
+/generators/boom/src/main/scala/v3/common/stt.scala           @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
 # top-level core wiring and branch resolution (brupdate), touched by A and B
 /generators/boom/src/main/scala/v3/exu/core.scala             @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
 # visibility point (VP) and isSafe(yrot), produced here and used by A and B

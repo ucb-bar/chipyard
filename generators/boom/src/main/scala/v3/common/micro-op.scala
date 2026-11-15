@@ -141,6 +141,11 @@ class MicroOp(implicit p: Parameters) extends BoomBundle
   // What prediction structure provides the prediction TO this op
   val debug_tsrc       = UInt(BSRC_SZ.W)
 
+  // [boom-ustt] STT metadata (project-docs/spec-interface.md section 2)
+  // Youngest root of taint among the register inputs; invalid means untainted.
+  val yrot             = if (enableSTT) Some(Valid(UInt(robAddrSz.W))) else None
+  val is_transmitter   = if (usingSTTGate) Some(Bool()) else None
+
   // Do we allocate a branch tag for this?
   // SFB branches don't get a mask, they get a predicate bit
   def allocate_brtag   = (is_br && !is_sfb) || is_jalr
