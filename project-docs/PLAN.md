@@ -53,7 +53,7 @@ What shapes the schedule:
 
 Consequences:
 
-- **Small has a decode width of 1, so there is no same-cycle bypass to test on it.** The taint bypass and the Age Matrix first matter on Medium. Small is for bring-up and fast regression; Medium is where A's logic is exercised.
+- **Medium is the primary development and results config.** Its decode width of 2 exercises same-group taint propagation and the Age Matrix, keeping development aligned with the reported configuration. Small has a decode width of 1 and cannot exercise intra-group comparisons; retain it for fast smoke tests (quick builds and ISA checks). This follows [@vinle0's decision comment on #2](https://github.com/Capheuss/boom-ustt/issues/2#issuecomment-6885670157).
 - uSTT's standalone RTL assumes an 8-wide core with 380 physical registers and a 512-entry ROB, well above Mega. #14 has to re-parameterize it before its numbers can be compared with ours.
 - `BoomVCU118Config` is `MegaBoomV3Config` at 50 MHz (`fpga/src/main/scala/vcu118/Configs.scala`).
 
@@ -101,7 +101,7 @@ Threat model, in short (midterm report section 3): attacker and victim share an 
 | STT | taint table + same-cycle bypass | `isSafe(yrot)` at issue, and on every LSU path | `enableSTT` | #4, #7 |
 | µSTT | Age Matrix | impede micro-op | `enableSTT`, Age Matrix flag, `impedeUop` | #5, #8 |
 
-Each exists as a Chipyard config at two sizes: Small for development, Medium for reported results. Switch and config names are fixed in #3.
+Each exists as a Chipyard config at two sizes: Medium for primary development and reported results, Small for fast smoke tests. Required Small and Medium regression coverage remains unchanged. Switch and config names are fixed in #3.
 
 ### 4.2 Where it goes in BOOM v3
 
@@ -255,7 +255,7 @@ Dec 2 to Dec 10 is for the report (#40) and presentation feedback, not for new d
 | 7 | Hardware and performance are reported on different core sizes | Performance on Medium, FPGA flow on Mega: the costs do not describe the same core | Decide in #2 (section 10, question 2) before #16 |
 | 8 | Two environments are not set up | B and D cannot start | #1 first. Known `build-setup.sh` workaround is in #1's comment |
 | 9 | Sixteen days for M0 to M5, with Thanksgiving inside | #16 sits at the end of the longest chain (#3, #4, #7, #8), so any slip lands on the Nov 30 deadline | Tracks run in parallel; D measures each config as it lands instead of waiting for all four. The cut line (section 1) decides what is dropped: µSTT mechanisms before baseline STT |
-| 10 | Verilator time on larger cores | Regression and benchmarks on Medium for four configs | Small for the edit loop, Medium for results. Record the run time of the regression in #10 |
+| 10 | Verilator time on larger cores | Primary development, regression and benchmarks use Medium for four configs | Use Small for fast smoke tests; validate same-group propagation and the Age Matrix on Medium. Record the run time of the regression in #10; relative simulation cost must be measured |
 
 ---
 
@@ -265,7 +265,7 @@ Dec 2 to Dec 10 is for the report (#40) and presentation feedback, not for new d
 | --- | --- | --- |
 | Threat model | Spectre (VP is the oldest unresolved branch). Futuristic is a stretch goal | Does not cover speculative store bypass or exceptions |
 | Core | BOOM v3 only | v4 is left alone |
-| Development and results configs | Small to develop, Medium to report | Small has no same-cycle rename group (section 2.2) |
+| Development and results configs | Medium for primary development and results; Small for fast smoke tests | Medium exercises same-group taint propagation and the Age Matrix; relative simulation cost must be measured (section 2.2 and #2) |
 | FPGA target | VCU118 (`xcvu9p-flga2104-2L-e`), Vivado 2023.2, reports and xsim only | No board, so no on-hardware run |
 | Order | Conservative stand-in before STT | A week spent on a mechanism that is not the final design; it buys early security testing and an upper bound on cost |
 | Switches | Every mechanism behind a parameter, default off, identical Verilog when off | A little more configuration code |
@@ -280,7 +280,7 @@ Dec 2 to Dec 10 is for the report (#40) and presentation feedback, not for new d
 None blocks the work that starts now. Each has an issue that settles it.
 
 1. **Presentation slot:** Dec 2 or Dec 7. Until it is confirmed, we are ready on Dec 1 (#39).
-2. **Which core size does the hardware comparison use?** `BoomVCU118Config` is Mega, results are on Medium. Options: add a Medium VCU118 config for the full flow, or report tile-only synthesis on Medium and the full flow on Mega for baseline only. Decide on #2 before #16.
+2. **Which core size does the hardware comparison use?** `BoomVCU118Config` is Mega; primary development and performance results use Medium. The development-config decision does not settle the hardware flow. Options: add a Medium VCU118 config for the full flow, or report tile-only synthesis on Medium and the full flow on Mega for baseline only. Decide on #2 before #16.
 3. **Owners are provisional** in the midterm report. Change the assignee on the issue and the table in section 5 if the team moves a task.
 4. **How much of uSTT's published evaluation can we compare against?** Its gem5 numbers are ARM and 8-wide. #14 says which claims we can test at BOOM's sizes.
 5. **Benchmarks heavier than CoreMark:** only if they finish in reasonable Verilator time. #11 records what was tried.
@@ -298,4 +298,4 @@ cp ustt-env.local.sh.example ustt-env.local.sh   # edit for your machine
 ./ustt --vivado vivado -version                  # should print Vivado v2023.2
 ```
 
-Then comment on #1 with your machine and the commit.
+Then comment on #1 with your machine and the commit. This Small build is the environment smoke test; use `MediumBoomV3Config` for primary development and reported results.
