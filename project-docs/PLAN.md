@@ -55,7 +55,7 @@ Consequences:
 
 - **Medium is the primary development and results config.** Its decode width of 2 exercises same-group taint propagation and the Age Matrix, keeping development aligned with the reported configuration. Small has a decode width of 1 and cannot exercise intra-group comparisons; retain it for fast smoke tests (quick builds and ISA checks). This follows [@vinle0's decision comment on #2](https://github.com/Capheuss/boom-ustt/issues/2#issuecomment-6885670157).
 - uSTT's standalone RTL assumes an 8-wide core with 380 physical registers and a 512-entry ROB, well above Mega. #14 has to re-parameterize it before its numbers can be compared with ours.
-- `BoomVCU118Config` is `MegaBoomV3Config` at 50 MHz (`fpga/src/main/scala/vcu118/Configs.scala`).
+- The existing `BoomVCU118Config` is `MegaBoomV3Config` at 50 MHz (`fpga/src/main/scala/vcu118/Configs.scala`). The selected evaluation target is a new `MediumBoomVCU118Config`, with corresponding protected variants, using the full VCU118 flow at the same 50 MHz target. These configurations are planned additions in #12/#16, not existing build targets.
 
 ### 2.3 What BOOM already has
 
@@ -102,6 +102,10 @@ Threat model, in short (midterm report section 3): attacker and victim share an 
 | µSTT | Age Matrix | impede micro-op | `enableSTT`, Age Matrix flag, `impedeUop` | #5, #8 |
 
 Each exists as a Chipyard config at two sizes: Medium for primary development and reported results, Small for fast smoke tests. Required Small and Medium regression coverage remains unchanged. Switch and config names are fixed in #3.
+
+The primary hardware comparison uses full-system Medium VCU118 synthesis, placement and routing for Baseline, Conservative, STT and µSTT. Keep the part (`xcvu9p-flga2104-2L-e`), target clock (50 MHz), shell, memory/peripheral configuration and implementation/reporting procedure consistent across variants. Tile-only synthesis (#13) supports iteration and attribution; it does not replace the full-system comparison. The existing Mega configuration may supply supplemental results, but cannot serve as the baseline for Medium deltas. The frozen `baseline-v0` core remains the reference; adding the Medium FPGA wrapper does not move that tag.
+
+Full implementation supplies integrated resource and timing evidence, not proof of security. Combine it with functional regression and the #9 attacks on Medium in Verilator, plus targeted xsim validation of the synthesized Medium baseline and a protected system in #15. Record the exact simulated hierarchy, memory model, initialization/result transport and any substitutions; a tile-only simulation is partial evidence for the full-system objective. No physical-board execution is claimed. Vectorless power is an estimate, and negative timing slack must be reported as a failure to meet the target.
 
 ### 4.2 Where it goes in BOOM v3
 
@@ -157,11 +161,11 @@ Each issue carries a *Done when* checklist and its blockers; the issue is the au
 | 9 | C1 Spectre PoCs | v1, v2 and RSB each recover a known secret on baseline Small and Medium, with a PASS/LEAK line a script can read; cycles per attack recorded | |
 | 10 | C2 Regression script | One command runs riscv-tests, the attacks, co-simulation and the switches-off Verilog diff for a config, treats a timeout as a failure, and prints a summary | #9 |
 | 11 | C3 Performance harness | Cycles and IPC for CoreMark, Dhrystone and the riscv-tests benchmarks, normalized to baseline, written to a CSV with config and commit | |
-| 12 | D1 VCU118 baseline | Full flow completes on `BoomVCU118Config`; hierarchical utilization, WNS/TNS and vectorless power collected by a script into a CSV; run time and peak memory recorded | |
+| 12 | D1 VCU118 baseline | Add the Medium VCU118 config and complete its full flow at 50 MHz; hierarchical utilization, WNS/TNS and vectorless power collected by a script into a CSV; run time and peak memory recorded | |
 | 13 | D2 Out-of-context synthesis | Tile-only synthesis for Small, Medium and Mega, reported by the same script | #12 for the script |
 | 14 | D3 uSTT RTL reproduction | `stt_og` and `stt_age` synthesized at uSTT's parameters and at BOOM's; uSTT's testbenches pass in xsim; area and delay compared with the paper | |
-| 15 | D4 Vivado simulation | Approach chosen and written up; the Spectre gadget runs in xsim on the synthesized design, on baseline and one protected config | #9, #12 |
-| 16 | D5 Cost comparison | One table: LUT, FF, BRAM, DSP, WNS and power for all four configs, same part, clock and flow, with deltas attributed to rename, issue, ROB and LSU | #5, #6, #7, #8, #12, #13 |
+| 15 | D4 Vivado simulation | Approach chosen and written up for the synthesized Medium system; the Spectre gadget runs on baseline and one protected config, with simulation scope and substitutions explicit | #9, #12 |
+| 16 | D5 Cost comparison | One full-system Medium table: LUT, FF, BRAM, DSP, WNS and power for all four configs, same part, 50 MHz clock target and flow, with deltas attributed to rename, issue, ROB and LSU | #5, #6, #7, #8, #12, #13 |
 | 39 | Presentation (everyone) | Slides ready and rehearsed by Dec 1; every number already on its issue; measured and planned work kept apart | #10, #11, #16 |
 | 40 | Final report (everyone) | Midterm sections carried into `project-docs/final-report/`, evaluation added, builds in CI, submitted by Dec 11 | #39, #10, #11, #15, #16 |
 
@@ -196,7 +200,7 @@ Reporting rule: module tests, riscv-tests, co-simulation, attack runs, Verilator
 | --- | --- | --- | --- |
 | Security | Secret recovered or not, per attack | Verilator | Leak / no leak, per config |
 | Performance | Cycles and IPC: CoreMark, Dhrystone, riscv-tests benchmarks | Verilator (never Spike) | Normalized to baseline, on Medium |
-| Hardware | LUT, FF, BRAM, DSP, WNS, vectorless power, hierarchical | Vivado 2023.2, `xcvu9p-flga2104-2L-e` | Absolute and delta against baseline, same clock and flow |
+| Hardware | LUT, FF, BRAM, DSP, WNS, vectorless power, hierarchical | Vivado 2023.2, full Medium VCU118 implementation, `xcvu9p-flga2104-2L-e`, 50 MHz target | Absolute and delta against the Medium baseline, same shell and flow; vectorless power is estimated |
 
 Every number carries its config and commit and is posted on its issue. A mitigation that breaks timing is reported as such.
 
@@ -251,8 +255,8 @@ Dec 2 to Dec 10 is for the report (#40) and presentation feedback, not for new d
 | 3 | Deadlock: a transmitter waits on a taint that never clears, or the oldest branch cannot resolve | Tests hang | Timeout counts as failure. In #6, check the oldest branch can always issue |
 | 4 | The PoCs do not leak on our baseline | No security result at all | #9 is the first task on track C. `boom-attacks` was written for BOOM; check its config assumptions against Small and Medium |
 | 5 | The impede uop does not fit BOOM cleanly | BOOM does not crack instructions into uops as gem5-ARM does | Design note before code (#8). Cut line: report STT plus the Age Matrix, and the impede uop as designed but not built |
-| 6 | The full Mega flow on the VCU118 is slow | Each config costs hours [E]; four configs plus reruns may not fit | Measure run time once in #12. Iterate with tile-only synthesis (#13); run the full flow once per config |
-| 7 | Hardware and performance are reported on different core sizes | Performance on Medium, FPGA flow on Mega: the costs do not describe the same core | Decide in #2 (section 10, question 2) before #16 |
+| 6 | The full Medium flow on the VCU118 may be slow | Four implementations plus reruns may not fit; turnaround is not yet measured | Measure run time in #12. Iterate with tile-only synthesis (#13), then run full implementation for each reported variant; report incomplete full-flow coverage explicitly |
+| 7 | Simulation and FPGA system configurations differ | Medium core size alone does not establish matching memory, boot or result-transport behavior | Record configuration differences in #12/#15; adapt the #9 gadget harness and re-establish baseline leakage before evaluating a protected system |
 | 8 | Two environments are not set up | B and D cannot start | #1 first. Known `build-setup.sh` workaround is in #1's comment |
 | 9 | Sixteen days for M0 to M5, with Thanksgiving inside | #16 sits at the end of the longest chain (#3, #4, #7, #8), so any slip lands on the Nov 30 deadline | Tracks run in parallel; D measures each config as it lands instead of waiting for all four. The cut line (section 1) decides what is dropped: µSTT mechanisms before baseline STT |
 | 10 | Verilator time on larger cores | Primary development, regression and benchmarks use Medium for four configs | Use Small for fast smoke tests; validate same-group propagation and the Age Matrix on Medium. Record the run time of the regression in #10; relative simulation cost must be measured |
@@ -267,6 +271,7 @@ Dec 2 to Dec 10 is for the report (#40) and presentation feedback, not for new d
 | Core | BOOM v3 only | v4 is left alone |
 | Development and results configs | Medium for primary development and results; Small for fast smoke tests | Medium exercises same-group taint propagation and the Age Matrix; relative simulation cost must be measured (section 2.2 and #2) |
 | FPGA target | VCU118 (`xcvu9p-flga2104-2L-e`), Vivado 2023.2, reports and xsim only | No board, so no on-hardware run |
+| Hardware comparison flow | Full-system Medium VCU118 synthesis through placement and routing at 50 MHz for all four variants | Integrated timing and resource evidence costs more implementation time; tile-only results are supplemental |
 | Order | Conservative stand-in before STT | A week spent on a mechanism that is not the final design; it buys early security testing and an upper bound on cost |
 | Switches | Every mechanism behind a parameter, default off, identical Verilog when off | A little more configuration code |
 | Cycles | RTL simulation only | Slower than Spike |
@@ -280,7 +285,7 @@ Dec 2 to Dec 10 is for the report (#40) and presentation feedback, not for new d
 None blocks the work that starts now. Each has an issue that settles it.
 
 1. **Presentation slot:** Dec 2 or Dec 7. Until it is confirmed, we are ready on Dec 1 (#39).
-2. **Which core size does the hardware comparison use?** `BoomVCU118Config` is Mega; primary development and performance results use Medium. The development-config decision does not settle the hardware flow. Options: add a Medium VCU118 config for the full flow, or report tile-only synthesis on Medium and the full flow on Mega for baseline only. Decide on #2 before #16.
+2. **How will xsim exercise the selected Medium FPGA system?** The full Medium hardware flow is selected (section 9 and #2). #12/#15 still need to establish the simulation boundary, boot/memory initialization and result transport, with #9 supplying the gadget. Record any behavioral models or omitted components; full-system implementation alone does not verify the attacks are blocked.
 3. **Owners are provisional** in the midterm report. Change the assignee on the issue and the table in section 5 if the team moves a task.
 4. **How much of uSTT's published evaluation can we compare against?** Its gem5 numbers are ARM and 8-wide. #14 says which claims we can test at BOOM's sizes.
 5. **Benchmarks heavier than CoreMark:** only if they finish in reasonable Verilator time. #11 records what was tried.
