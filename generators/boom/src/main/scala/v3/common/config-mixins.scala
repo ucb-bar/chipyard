@@ -64,6 +64,16 @@ class WithBoomBranchPrintf extends Config((site, here, up) => {
   }
 })
 
+// [boom-ustt] Baseline STT: taint tracking and the visibility point.
+class WithSTT extends Config((site, here, up) => {
+  case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
+    case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core = tp.tileParams.core.copy(
+      enableSTT = true
+    )))
+    case other => other
+  }
+})
+
 class WithNBoomPerfCounters(n: Int) extends Config((site, here, up) => {
   case TilesLocated(InSubsystem) => up(TilesLocated(InSubsystem), site) map {
     case tp: BoomTileAttachParams => tp.copy(tileParams = tp.tileParams.copy(core = tp.tileParams.core.copy(

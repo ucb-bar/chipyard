@@ -57,6 +57,13 @@ case class BoomCoreParams(
   nPMPs: Int = 8,
   enableICacheDelay: Boolean = false,
 
+  /* [boom-ustt] Spectre mitigations, all off by default (project-docs/spec-interface.md section 7) */
+  conservativeSTT: Boolean = false,
+  enableSTT: Boolean = false,
+  enableAgeMatrix: Boolean = false,
+  impedeUop: Boolean = false,
+  threatModel: String = "spectre",
+
   /* branch prediction */
   enableBranchPrediction: Boolean = true,
   branchPredictor: Function2[BranchPredictionBankResponse, Parameters, Tuple2[Seq[BranchPredictorBank], BranchPredictionBankResponse]] = ((resp_in: BranchPredictionBankResponse, p: Parameters) => (Nil, resp_in)),
@@ -272,6 +279,25 @@ trait HasBoomCoreParameters extends freechips.rocketchip.tile.HasCoreParameters
   val enableSFBOpt = boomParams.enableSFBOpt
   val enableGHistStallRepair = boomParams.enableGHistStallRepair
   val enableBTBFastRepair = boomParams.enableBTBFastRepair
+
+  //************************************
+  // [boom-ustt] Spectre mitigations
+  val conservativeSTT = boomParams.conservativeSTT
+  val enableSTT       = boomParams.enableSTT
+  val enableAgeMatrix = boomParams.enableAgeMatrix
+  val impedeUop       = boomParams.impedeUop
+  val threatModel     = boomParams.threatModel
+  // is_transmitter and stt_block exist with either mitigation.
+  val usingSTTGate    = enableSTT || conservativeSTT
+
+  require(!(conservativeSTT && enableSTT), "conservativeSTT and enableSTT are exclusive")
+  require(!enableAgeMatrix || enableSTT, "enableAgeMatrix requires enableSTT")
+  require(!impedeUop || enableSTT, "impedeUop requires enableSTT")
+  require(threatModel == "spectre", s"unsupported threatModel '$threatModel'")
+  require(!enableAgeMatrix, "enableAgeMatrix is not implemented yet (#5)")
+  require(!impedeUop, "impedeUop is not implemented yet (#8)")
+  require(!usingSTTGate || (!enableSFBOpt && !enablePrefetching),
+    "STT configurations require enableSFBOpt and enablePrefetching off")
 
   //************************************
   // Implicitly calculated constants

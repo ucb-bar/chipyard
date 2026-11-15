@@ -595,6 +595,10 @@ class DecodeUnit(implicit p: Parameters) extends BoomModule
   // uop.is_call        := (uop.uopc === uopJALR || uop.uopc === uopJAL) &&
   //                       (uop.ldst === RA)
 
+  // [boom-ustt] Uops start untainted; the tag is computed at dispatch.
+  uop.yrot.foreach(_ := STTUntainted(robAddrSz))
+  uop.is_transmitter.foreach(_ := STTIsTransmitter(uop))
+
   //-------------------------------------------------------------
 
   io.deq.uop := uop
