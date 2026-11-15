@@ -44,6 +44,7 @@
 
 # --- CI, review rules, project rules and design specs ------------------------
 /.github/                    @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
+/AGENTS.md                   @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
 /CLAUDE.md                   @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
 /project-docs/PLAN.md        @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
 /project-docs/spec-*.md      @Capheuss @vinle0 @erickan2002-del @SamirJoshiGit
