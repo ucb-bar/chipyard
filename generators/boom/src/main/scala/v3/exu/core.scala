@@ -823,7 +823,7 @@ class BoomCore()(implicit p: Parameters) extends BoomModule
                                                        brupdate.b2.mispredict || f))
 
   val stt_taint = if (enableSTT) Some(Module(new STTTaintTable(coreWidth, numIntPhysRegs,
-                    if (usingFPU) numFpPhysRegs else 0, lregSz, maxPregSz, robAddrSz))) else None
+                    if (usingFPU) numFpPhysRegs else 0, lregSz, maxPregSz, robAddrSz, enableAgeMatrix))) else None
   stt_taint.foreach { t =>
     for (w <- 0 until coreWidth) {
       val uop  = dis_uops(w)
