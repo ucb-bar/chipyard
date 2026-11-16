@@ -19,8 +19,10 @@ import org.scalatest.funspec.AnyFunSpec
 /** One bypass table and one Age Matrix table on the same inputs. */
 class STTTaintPair(plWidth: Int, numInt: Int, numFp: Int, lregSz: Int, pregSz: Int, robAddrSz: Int) extends Module
 {
-  val bypass = Module(new STTTaintTable(plWidth, numInt, numFp, lregSz, pregSz, robAddrSz, ageMatrix = false))
-  val age    = Module(new STTTaintTable(plWidth, numInt, numFp, lregSz, pregSz, robAddrSz, ageMatrix = true))
+  val bypass = Module(new STTTaintTable(plWidth, numInt, numFp, lregSz, pregSz, robAddrSz,
+                                        ageMatrix = false, debugTables = true))
+  val age    = Module(new STTTaintTable(plWidth, numInt, numFp, lregSz, pregSz, robAddrSz,
+                                        ageMatrix = true, debugTables = true))
 
   val io = IO(new Bundle {
     val lanes     = Input(Vec(plWidth, new STTTaintLane(lregSz, pregSz, robAddrSz)))
@@ -29,6 +31,8 @@ class STTTaintPair(plWidth: Int, numInt: Int, numFp: Int, lregSz: Int, pregSz: I
     val flush     = Input(Bool())
     val yrot      = Output(Vec(plWidth, Valid(UInt(robAddrSz.W))))
     val yrot_age  = Output(Vec(plWidth, Valid(UInt(robAddrSz.W))))
+    val debug     = Output(chiselTypeOf(bypass.io.debug.get))
+    val debug_age = Output(chiselTypeOf(age.io.debug.get))
   })
 
   for (t <- Seq(bypass, age)) {
@@ -39,6 +43,8 @@ class STTTaintPair(plWidth: Int, numInt: Int, numFp: Int, lregSz: Int, pregSz: I
   }
   io.yrot     := bypass.io.yrot
   io.yrot_age := age.io.yrot
+  io.debug     := bypass.io.debug.get
+  io.debug_age := age.io.debug.get
 }
 
 object STTAgeMatrixSpec
@@ -238,13 +244,31 @@ class STTAgeMatrixSpec extends AnyFunSpec
             !vp.exists(v => (v >> bankSz) == headRow)) headRow = (headRow + 1) % robRows
         for (b <- pending.toSeq if rng.nextInt(5) == 0) pending -= b
 
-        // Lifetime: every stored tag names an entry still in the ROB window
-        // (or in the tail row of a group that is still dispatching).
+        // Lifetime (spec section 5): every stored tag names an entry still in
+        // the ROB window, or in the tail row of a group that is still dispatching.
         val newHead = headRow << bankSz
         val tail = tailRow << bankSz
+        def live(t: Int) = older(t, tail, newHead) || (group.isDefined && (t >> bankSz) == tailRow)
+        // On the model: a sanity check that the stimulus itself respects the ROB.
         for (t <- tagInt.values ++ tagFp.values)
-          assert(older(t, tail, newHead) || (group.isDefined && (t >> bankSz) == tailRow),
-            s"tag $t outside window [$newHead, $tail), width=$width seed=$seed cycle=$cycle")
+          assert(live(t), s"model tag $t outside window [$newHead, $tail), width=$width seed=$seed cycle=$cycle")
+        // On the hardware: both tables, every entry, read out after the edge. Each
+        // must equal the model exactly, so a stale tag that is never read again
+        // still fails here even though no lane's yrot would show it.
+        for ((d, name) <- Seq((c.io.debug, "bypass"), (c.io.debug_age, "Age Matrix"))) {
+          for ((valid, tags, n, model, cls) <- Seq(
+                 (d.int_valid, d.int_tags, numInt, tagInt, "int"),
+                 (d.fp_valid, d.fp_tags, numFp, tagFp, "fp"))) {
+            val v = valid.peek().litValue
+            val b = tags.peek().litValue
+            for (i <- 0 until n) {
+              val hw = if (v.testBit(i)) Some(((b >> (i * robAddrSz)) & ((BigInt(1) << robAddrSz) - 1)).toInt) else None
+              val ctx = s"$name $cls preg $i, width=$width seed=$seed cycle=$cycle"
+              assert(hw === model.get(i), s"table differs from model, $ctx")
+              hw.foreach(t => assert(live(t), s"stored tag $t outside window [$newHead, $tail), $ctx"))
+            }
+          }
+        }
       }
     }
     info(s"width $width: $compared firing lanes compared, $bypassHits read a same-cycle older lane")

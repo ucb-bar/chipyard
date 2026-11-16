@@ -52,6 +52,7 @@ class STTTaintLane(val lregSz: Int, val pregSz: Int, val robAddrSz: Int) extends
  * @param numIntPregs integer physical registers
  * @param numFpPregs FP physical registers, 0 without an FPU
  * @param ageMatrix compute same-group tags with the uSTT Age Matrix instead of the bypass chain
+ * @param debugTables expose the stored tags for module tests; off in the core
  */
 class STTTaintTable(
   val plWidth: Int,
@@ -60,7 +61,8 @@ class STTTaintTable(
   val lregSz: Int,
   val pregSz: Int,
   val robAddrSz: Int,
-  val ageMatrix: Boolean = false) extends Module
+  val ageMatrix: Boolean = false,
+  val debugTables: Boolean = false) extends Module
 {
   val io = IO(new Bundle {
     val lanes = Input(Vec(plWidth, new STTTaintLane(lregSz, pregSz, robAddrSz)))
@@ -71,6 +73,14 @@ class STTTaintTable(
 
     // Aggregate source tag of each lane; meaningful when that lane is valid.
     val yrot  = Output(Vec(plWidth, Valid(UInt(robAddrSz.W))))
+
+    // Stored state, entry i at bit i (valid) and bits [i*robAddrSz, (i+1)*robAddrSz) (tag).
+    val debug = if (debugTables) Some(Output(new Bundle {
+      val int_valid = UInt(numIntPregs.W)
+      val int_tags  = UInt((numIntPregs * robAddrSz).W)
+      val fp_valid  = UInt((numFpPregs max 1).W)
+      val fp_tags   = UInt(((numFpPregs max 1) * robAddrSz).W)
+    })) else None
   })
 
   def tagType = Valid(UInt(robAddrSz.W))
@@ -218,4 +228,11 @@ class STTTaintTable(
 
   update(int_table, writes_int)
   fp_table.foreach(t => update(t, writes_fp))
+
+  io.debug.foreach { d =>
+    d.int_valid := VecInit(int_table.map(_.valid)).asUInt
+    d.int_tags  := VecInit(int_table.map(_.bits)).asUInt
+    d.fp_valid  := fp_table.map(t => VecInit(t.map(_.valid)).asUInt).getOrElse(0.U)
+    d.fp_tags   := fp_table.map(t => VecInit(t.map(_.bits)).asUInt).getOrElse(0.U)
+  }
 }

@@ -1,6 +1,7 @@
 // [boom-ustt] Age Matrix and bypass against uSTT's own test vectors (#5).
 //
-// Runs reference/uSTT/rtl/test/STTTestGen.py unmodified and replays its vectors.
+// Replays vectors from reference/uSTT/rtl/test/STTTestGen.py, run unmodified:
+// a committed corpus (fixed regression) and fresh runs (new random cases).
 // Two encodings differ and are translated:
 //  - uSTT tags a load's result with its branch epoch (the ROB index of the
 //    youngest older branch); our table tags it with the load's own ROB index.
@@ -37,7 +38,7 @@ class STTAgeMatrixUSTTVectorsSpec extends AnyFunSpec
 
   case class Inst(load: Boolean, branch: Boolean, dest: Int, src1: Int, src2: Int)
   case class Line(rat: Seq[Int], phyreg: Seq[Int], insts: Seq[Inst], outInsts: Seq[(Int, Int, Int)],
-                  lastEpoch: Int, branchTail: Int, youngerOutputs: Seq[Int])
+                  yrotTable: Seq[Int], lastEpoch: Int, branchTail: Int, youngerOutputs: Seq[Int])
 
   def parse(s: String): Line = {
     var pos = 0
@@ -50,13 +51,13 @@ class STTAgeMatrixUSTTVectorsSpec extends AnyFunSpec
       Inst(load = (ty & 1) == 1, branch = (ty & 2) == 2, dest = take(ARCH_W), src1 = take(ARCH_W), src2 = take(ARCH_W))
     }
     val outInsts = Seq.fill(NUM_DECODE)((take(PHY_W), take(PHY_W), take(PHY_W)))
-    Seq.fill(NUM_ARCH)(tag()) // yrot_table, not needed
+    val yrotTable = Seq.fill(NUM_ARCH)(tag())
     val lastEpoch = tag()
     val branchTail = take(YROT_W)
     take(1) // wrap_bit
     val younger = Seq.fill(NUM_DECODE)(tag())
     require(pos == s.length, s"vector length ${s.length}, parsed $pos")
-    Line(rat, phyreg, insts, outInsts, lastEpoch, branchTail, younger)
+    Line(rat, phyreg, insts, outInsts, yrotTable, lastEpoch, branchTail, younger)
   }
 
   def repoRoot: File = {
@@ -66,11 +67,23 @@ class STTAgeMatrixUSTTVectorsSpec extends AnyFunSpec
     d
   }
 
-  /** Runs the generator in a fresh directory and returns its vector file. */
-  def generate(run: Int): File = {
-    val out = new File(repoRoot, s"logs/issue-5/sttgen/run$run")
-    out.mkdirs()
-    out.listFiles.foreach(_.delete())
+  /** Vectors committed from earlier generator runs: a fixed regression corpus. */
+  def corpus: Seq[File] = {
+    val dir = new File(repoRoot, "generators/boom/src/test/resources/ustt-vectors")
+    val files = Option(dir.listFiles).toSeq.flatten.filter(_.getName.endsWith(".input")).sortBy(_.getName)
+    assert(files.nonEmpty, s"no vectors in $dir")
+    files
+  }
+
+  /**
+   * Runs the generator in a new directory and returns its vector file. The
+   * generator seeds itself from os.urandom, so every corpus is different; each
+   * one is kept under logs/sttgen/ (never overwritten) so a failure can be replayed.
+   */
+  def generate(): File = {
+    val stamp = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new java.util.Date)
+    val out = new File(repoRoot, s"logs/sttgen/$stamp")
+    assert(out.mkdirs(), s"could not create $out")
     val gen = new File(repoRoot, "reference/uSTT/rtl/test/STTTestGen.py").getPath
     val rc = (Process(Seq("python3", "-I", gen), out) #> new File(out, "debug.txt")).!
     assert(rc == 0, s"STTTestGen.py exited with $rc")
@@ -110,7 +123,12 @@ class STTAgeMatrixUSTTVectorsSpec extends AnyFunSpec
         c.clock.step()
       }
 
-      val epochOf = mutable.Map[Int, Int]().withDefault(identity)
+      // The priming tag is the only root not created by a vector. Every other
+      // tag must have been mapped by a load, so an unexpected tag cannot pass by
+      // comparing its own index with the expected epoch.
+      val initial = lines(0).yrotTable.distinct
+      assert(initial.size == 1, s"$vectors: initial yrot_table is not uniform: $initial")
+      val epochOf = mutable.Map(HEAD -> initial.head)
       for (k <- 0 until lines.size - 1) {
         val in  = lines(k)
         val out = lines(k + 1)
@@ -122,7 +140,11 @@ class STTAgeMatrixUSTTVectorsSpec extends AnyFunSpec
           assert(pdst == in.phyreg(w), s"line ${k + 1} lane $w: out_insts dest != allocated phyreg")
           lane(w, fire = true, root = i.load, rob = rob, prs1 = p1, prs2 = p2, pdst = pdst,
             lrs1 = i.src1 + 1, lrs2 = i.src2 + 1)
-          if (i.load) epochOf(rob) = epoch
+          if (i.load) {
+            epochOf.get(rob).foreach(e => assert(e == epoch,
+              s"$vectors group $k lane $w: root $rob already maps to epoch $e, now $epoch"))
+            epochOf(rob) = epoch
+          }
           if (i.branch) epoch = rob
           if ((0 until w).exists(j => in.phyreg(j) == p1 || in.phyreg(j) == p2)) sameGroup += 1
         }
@@ -132,7 +154,9 @@ class STTAgeMatrixUSTTVectorsSpec extends AnyFunSpec
           for ((y, name) <- Seq((c.io.yrot(w), "bypass"), (c.io.yrot_age(w), "Age Matrix"))) {
             assert(y.valid.peek().litToBoolean, s"$name: untainted, $ctx")
             val got = y.bits.peek().litValue.toInt
-            assert(epochOf(got) === expected, s"$name: root $got has epoch ${epochOf(got)}, uSTT expects $expected, $ctx")
+            val epoch = epochOf.get(got)
+            assert(epoch.isDefined, s"$name: tag $got names no root in this run, $ctx")
+            assert(epoch.get === expected, s"$name: root $got has epoch ${epoch.get}, uSTT expects $expected, $ctx")
           }
           compared += 1
         }
@@ -143,13 +167,18 @@ class STTAgeMatrixUSTTVectorsSpec extends AnyFunSpec
   }
 
   describe("STTTaintTable on uSTT's STTTestGen.py vectors") {
-    it("matches uSTT's expected YRoTs with the bypass and the Age Matrix (10-wide groups)") {
-      for (run <- 1 to 5) {
-        val f = generate(run)
-        val (n, dep) = replay(f)
-        info(s"run $run (${f.getPath}): $n lanes compared, $dep read a same-group older lane")
-        assert(dep > 0, "no same-group dependencies in this run")
-      }
+    def check(f: File): Unit = {
+      val (n, dep) = replay(f)
+      info(s"${f.getPath}: $n lanes compared, $dep read a same-group older lane")
+      assert(dep > 0, s"$f: no same-group dependencies")
+    }
+
+    it("matches uSTT's expected YRoTs on the committed vectors (10-wide groups)") {
+      corpus.foreach(check)
+    }
+
+    it("matches uSTT's expected YRoTs on fresh generator runs (10-wide groups)") {
+      for (_ <- 1 to 3) check(generate())
     }
   }
 }
