@@ -294,6 +294,7 @@ trait HasBoomCoreParameters extends freechips.rocketchip.tile.HasCoreParameters
   require(!enableAgeMatrix || enableSTT, "enableAgeMatrix requires enableSTT")
   require(!impedeUop || enableSTT, "impedeUop requires enableSTT")
   require(threatModel == "spectre", s"unsupported threatModel '$threatModel'")
+  require(!conservativeSTT, "conservativeSTT is not implemented yet (#6)")
   require(!impedeUop, "impedeUop is not implemented yet (#8)")
   require(!usingSTTGate || (!enableSFBOpt && !enablePrefetching),
     "STT configurations require enableSFBOpt and enablePrefetching off")
