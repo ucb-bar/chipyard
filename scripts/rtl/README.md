@@ -15,19 +15,19 @@ Byte-for-byte identity is impossible once a BOOM file is edited, because the gen
 Record the reference once, on a checkout whose generators match `baseline-v0` (`git diff --stat baseline-v0 -- generators/` is empty):
 
 ```bash
-tests/rtl/switches-off.sh --save-ref SmallBoomV3Config MediumBoomV3Config
+scripts/rtl/switches-off.sh --save-ref SmallBoomV3Config MediumBoomV3Config
 ```
 
 Then, on any branch:
 
 ```bash
-tests/rtl/switches-off.sh SmallBoomV3Config MediumBoomV3Config
+scripts/rtl/switches-off.sh SmallBoomV3Config MediumBoomV3Config
 ```
 
 ## riscv-tests
 
 ```bash
-tests/rtl/riscv-tests.sh MediumBoomV3STTConfig SmallBoomV3STTConfig
+scripts/rtl/riscv-tests.sh MediumBoomV3STTConfig SmallBoomV3STTConfig
 tail -f logs/riscv-tests/progress.log   # one line per step
 ```
 

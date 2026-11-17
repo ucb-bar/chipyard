@@ -3,6 +3,7 @@
 package boom.v3.exu
 
 import chisel3._
+import chisel3.util.log2Ceil
 import chisel3.simulator.EphemeralSimulator._
 import org.scalatest.funspec.AnyFunSpec
 
@@ -264,6 +265,32 @@ class STTTaintTableSpec extends AnyFunSpec
         lanes(c)
         c.clock.step(3)
         assert(probe(c, int(7, 7)) === Some(11))
+      }
+    }
+
+    // index() truncates a physical register to log2Ceil(n) bits. For any n that is
+    // not a power of two, some encodings are never allocated, which is where a
+    // cross-register aliasing mistake would hide. Sweep the real BOOM sizes
+    // (Small, Medium, Large, Mega) and a few awkward ones.
+    for ((nInt, nFp) <- Seq((52, 48), (80, 64), (100, 96), (128, 128), (5, 3), (9, 17))) {
+      it(s"keeps every register distinct with $nInt int and $nFp FP physical registers") {
+        val pSz = log2Ceil(nInt max nFp)
+        val rSz = log2Ceil(nInt + nFp + 1)
+        simulate(new STTTaintTable(plWidth, nInt, nFp, lregSz, pSz, rSz)) { c =>
+          reset(c)
+          // A VP at the head makes every tag unsafe, so nothing clears.
+          vp(c, valid = true, idx = 0, head = 0)
+          // A distinct root per register: int p gets ROB index p, FP p gets nInt + p.
+          val writes = (0 until nInt).map(p => Op(fire = true, rob = p, root = true, rs1 = int(1, 1), dst = (FIX, p))) ++
+                       (0 until nFp).map(p => Op(fire = true, rob = nInt + p, root = true, rs1 = int(1, 1), dst = (FLT, p)))
+          for (group <- writes.grouped(plWidth)) {
+            lanes(c, group: _*)
+            c.clock.step()
+          }
+          lanes(c)
+          for (p <- 0 until nInt) assert(probe(c, int(1, p)) === Some(p), s"int preg $p of $nInt")
+          for (p <- 0 until nFp) assert(probe(c, (FLT, 1, p)) === Some(nInt + p), s"fp preg $p of $nFp")
+        }
       }
     }
 

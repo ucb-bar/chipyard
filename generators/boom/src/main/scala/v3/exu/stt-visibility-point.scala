@@ -3,9 +3,14 @@
 //------------------------------------------------------------------------------
 //
 // One pending bit per ROB entry, set when a conditional branch or jalr enters
-// the ROB and cleared when its branch tag resolves. The VP is the oldest valid
-// entry with its bit set, from registered state only. Contract:
+// the ROB and cleared when its branch tag resolves or the entry stops being
+// valid (kill, flush, rollback, commit). The VP is the oldest valid entry with
+// its bit set, from registered state only. Contract:
 // project-docs/spec-interface.md section 4.
+//
+// Invariant: a set bit means the entry held an unresolved branch in the
+// previous cycle. A bit outlives its entry's invalidation by at most one cycle,
+// so consumers and assertions use valid && pending, which is exact.
 
 package boom.v3.exu
 
@@ -45,7 +50,7 @@ class STTVisibilityPoint(
   val pending = RegInit(VecInit(Seq.fill(numEntries)(false.B)))
 
   for (i <- 0 until numEntries) {
-    when (io.resolve_mask(io.entry_br_tag(i))) {
+    when (!io.entry_valid(i) || io.resolve_mask(io.entry_br_tag(i))) {
       pending(i) := false.B
     }
   }

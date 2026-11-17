@@ -3,7 +3,7 @@
 # ignoring source locators (// @[file.scala:line]) and the file:line text in
 # assertion messages, which shift whenever a Scala file is edited.
 #
-# Usage: tests/rtl/verilog-diff.sh REF_DIR NEW_DIR
+# Usage: scripts/rtl/verilog-diff.sh REF_DIR NEW_DIR
 #   e.g. REF_DIR = logs/ref/chipyard.harness.TestHarness.SmallBoomV3Config
 # Exit status: 0 if every .sv/.v file matches, 1 otherwise.
 
