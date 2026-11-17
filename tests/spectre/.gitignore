@@ -1,0 +1,4 @@
+# Track the maintained build recipe: tests/.gitignore excludes Makefile for
+# the CMake-generated files elsewhere under tests/.
+!Makefile
+*.riscv
