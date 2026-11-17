@@ -184,5 +184,21 @@ class STTVisibilityPointSpec extends AnyFunSpec
         assert(vp(c) === None)
       }
     }
+
+    it("clears the pending bit of an entry that stops being valid") {
+      simulate(dut) { c =>
+        val rob = reset(c)
+        enq(c, rob, 2, Seq(None, Some(0)))   // index 5
+        assert(vp(c) === Some(5))
+        // Kill or flush: the entry goes invalid without its branch resolving.
+        rob.valid(5) = false
+        rob.drive()
+        c.clock.step()
+        // A bit that survived would make the slot live again here; none may.
+        rob.valid(5) = true
+        rob.drive()
+        assert(vp(c) === None, "pending bit outlived its entry")
+      }
+    }
   }
 }

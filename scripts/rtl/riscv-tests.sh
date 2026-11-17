@@ -3,7 +3,7 @@
 # ISA suite and benchmarks. A config fails if the build fails, make exits
 # non-zero (a failed or timed-out test), or any test run did not finish.
 #
-# Usage: tests/rtl/riscv-tests.sh [-j N] CONFIG...
+# Usage: scripts/rtl/riscv-tests.sh [-j N] CONFIG...
 # Logs go to logs/riscv-tests/<CONFIG>/; a one-line-per-step summary is
 # appended to logs/riscv-tests/progress.log, which can be followed with tail -f.
 
