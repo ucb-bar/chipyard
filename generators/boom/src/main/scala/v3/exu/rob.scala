@@ -60,6 +60,9 @@ class RobIo(
   val rob_pnr_idx  = Output(UInt(robAddrSz.W))
   val rob_head_idx = Output(UInt(robAddrSz.W))
 
+  // [boom-ustt] STT visibility point: oldest unresolved branch, invalid when none
+  val stt_vp = if (enableSTT) Some(Output(Valid(UInt(robAddrSz.W)))) else None
+
   // Handle Branch Misspeculations
   val brupdate = Input(new BrUpdateInfo())
 
@@ -305,6 +308,14 @@ class Rob(
 
   val rob_fflags    = Seq.fill(coreWidth)(Reg(Vec(numRobRows, UInt(freechips.rocketchip.tile.FPConstants.FLAGS_SZ.W))))
 
+  // [boom-ustt] STT visibility point over the banked entries
+  val stt_vp = if (enableSTT) Some(Module(new STTVisibilityPoint(numRobRows, coreWidth, maxBrCount))) else None
+  // Unused bank encodings (non-power-of-two width) stay invalid.
+  stt_vp.foreach { vp =>
+    vp.io.entry_valid  := VecInit(Seq.fill(vp.numEntries)(false.B))
+    vp.io.entry_br_tag := VecInit(Seq.fill(vp.numEntries)(0.U(vp.brTagSz.W)))
+  }
+
   for (w <- 0 until coreWidth) {
     def MatchBank(bank_idx: UInt): Bool = (bank_idx === w.U)
 
@@ -330,6 +341,8 @@ class Rob(
                                    io.enq_uops(w).is_fencei)
       rob_unsafe(rob_tail)    := io.enq_uops(w).unsafe
       rob_uop(rob_tail)       := io.enq_uops(w)
+      // [boom-ustt] No consumer reads the ROB's copy of the tag; keep it untainted.
+      rob_uop(rob_tail).yrot.foreach(_ := STTUntainted(robAddrSz))
       rob_exception(rob_tail) := io.enq_uops(w).exception
       rob_predicated(rob_tail)   := false.B
       rob_fflags(w)(rob_tail)    := 0.U
@@ -503,6 +516,16 @@ class Rob(
     }
     // Read unsafe status of PNR row.
     rob_pnr_unsafe(w) := rob_val(rob_pnr) && (rob_unsafe(rob_pnr) || rob_exception(rob_pnr))
+
+    // [boom-ustt] Entry state for the STT visibility point.
+    stt_vp.foreach { vp =>
+      for (i <- 0 until numRobRows) {
+        vp.io.entry_valid((i << vp.bankSz) + w)  := rob_val(i)
+        vp.io.entry_br_tag((i << vp.bankSz) + w) := rob_uop(i).br_tag
+      }
+      vp.io.enq_valids(w) := io.enq_valids(w)
+      vp.io.enq_is_br(w)  := io.enq_uops(w).allocate_brtag
+    }
 
     // -----------------------------------------------
     // debugging write ports that should not be synthesized
@@ -826,6 +849,12 @@ class Rob(
   io.rob_head_idx := rob_head_idx
   io.rob_tail_idx := rob_tail_idx
   io.rob_pnr_idx  := rob_pnr_idx
+  stt_vp.foreach { vp =>
+    vp.io.enq_row      := rob_tail
+    vp.io.resolve_mask := io.brupdate.b1.resolve_mask
+    vp.io.head         := rob_head_idx
+    io.stt_vp.get      := vp.io.vp
+  }
   io.empty        := empty
   io.ready        := (rob_state === s_normal) && !full && !r_xcpt_val
 

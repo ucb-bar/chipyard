@@ -325,6 +325,9 @@ lazy val boom = freshProject("boom", file("generators/boom"))
   .dependsOn(rocketchip, pmu, pmu_tilelink)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
+  // [boom-ustt] module tests: freshProject's base is generators/boom/src, so sbt's default
+  // test path would be src/src/test/scala; point it at generators/boom/src/test/scala
+  .settings(Test / scalaSource := baseDirectory.value / "test" / "scala")
 
 lazy val shuttle = withInitCheck((project in file("generators/shuttle")), "shuttle")
   .dependsOn(rocketchip)
