@@ -516,7 +516,7 @@ build-ramulator2:
 
 $(ramulator2_lib): build-ramulator2
 	test -f $(ramulator2_lib)
-	
+
 ################################################
 # Helper to run SBT
 ################################################
