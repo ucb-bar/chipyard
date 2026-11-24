@@ -1,7 +1,5 @@
 #!/bin/bash
-# Compare the generated Verilog of two Chipyard generated-src config directories,
-# ignoring source locators (// @[file.scala:line]) and the file:line text in
-# assertion messages, which shift whenever a Scala file is edited.
+# Compare the generated Verilog of two Chipyard generated-src config directories, ignoring source locators (// @[file.scala:line]) and the file:line text in assertion messages, which shift whenever a Scala file is edited.
 #
 # Usage: scripts/rtl/verilog-diff.sh REF_DIR NEW_DIR
 #   e.g. REF_DIR = logs/ref/chipyard.harness.TestHarness.SmallBoomV3Config

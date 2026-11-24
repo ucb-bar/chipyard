@@ -1,11 +1,8 @@
 #!/bin/bash
-# Build the Verilator simulator for each config and run the fast riscv-tests
-# ISA suite and benchmarks. A config fails if the build fails, make exits
-# non-zero (a failed or timed-out test), or any test run did not finish.
+# Build the Verilator simulator for each config and run the fast riscv-tests ISA suite and benchmarks. A config fails if the build fails, make exits non-zero (a failed or timed-out test), or any test run did not finish.
 #
 # Usage: scripts/rtl/riscv-tests.sh [-j N] CONFIG...
-# Logs go to logs/riscv-tests/<CONFIG>/; a one-line-per-step summary is
-# appended to logs/riscv-tests/progress.log, which can be followed with tail -f.
+# Logs go to logs/riscv-tests/<CONFIG>/; a one-line-per-step summary is appended to logs/riscv-tests/progress.log, which can be followed with tail -f.
 
 set -uo pipefail
 

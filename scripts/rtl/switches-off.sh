@@ -1,16 +1,13 @@
 #!/bin/bash
-# Switches-off check (AGENTS.md section 4): with every mitigation switch off, a
-# config's generated Verilog must match the frozen baseline-v0 output.
+# Switches-off check (AGENTS.md section 4): with every mitigation switch off, a config's generated Verilog must match the frozen baseline-v0 output.
 #
 # Usage:
 #   scripts/rtl/switches-off.sh [--ref DIR] CONFIG...
 #   scripts/rtl/switches-off.sh [--ref DIR] --save-ref CONFIG...
 #
-# --save-ref records the reference: run it on a checkout whose generators match
-# baseline-v0 (git diff --stat baseline-v0 -- generators/ is empty).
+# --save-ref records the reference: run it on a checkout whose generators match baseline-v0 (git diff --stat baseline-v0 -- generators/ is empty).
 # The reference defaults to logs/ref/ (git-ignored; about 100-400 MB per config).
-# Elaboration logs go to logs/switches-off/. Exit status is non-zero if any
-# config fails to elaborate or differs.
+# Elaboration logs go to logs/switches-off/. Exit status is non-zero if any config fails to elaborate or differs.
 
 set -uo pipefail
 
