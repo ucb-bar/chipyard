@@ -29,6 +29,16 @@ object STTIsSafe
     !yrot.valid || !vp.valid || IsOlder(yrot.bits, vp.bits, head)
 }
 
+/**
+ * Conservative stand-in permission (#6, spec section 6): a transmitter may issue
+ * only outside recovery and with no unresolved older branch in its updated mask.
+ */
+object STTConservativeOk
+{
+  def apply(is_transmitter: Bool, stt_block: Bool, updated_br_mask: UInt): Bool =
+    !is_transmitter || (!stt_block && !updated_br_mask.orR)
+}
+
 /** An invalid tag with a zero payload. */
 object STTUntainted
 {

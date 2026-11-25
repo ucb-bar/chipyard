@@ -241,7 +241,6 @@ class IssueSlot(val numWakeupPorts: Int)(implicit p: Parameters)
   // Request Logic
   io.request := is_valid && p1 && p2 && p3 && ppred && !io.kill
   val high_priority = slot_uop.is_br || slot_uop.is_jal || slot_uop.is_jalr
-  io.request_hp := io.request && high_priority
 
   when (state === s_valid_1) {
     io.request := p1 && p2 && p3 && ppred && !io.kill
@@ -250,6 +249,15 @@ class IssueSlot(val numWakeupPorts: Int)(implicit p: Parameters)
   } .otherwise {
     io.request := false.B
   }
+
+  // [boom-ustt] Conservative stand-in (#6): a transmitter waits until no older branch is unresolved.
+  // Both halves of a split store carry is_transmitter, so this covers STA and STD.
+  if (conservativeSTT) {
+    when (!STTConservativeOk(slot_uop.is_transmitter.get, io.stt_block.get, next_br_mask)) {
+      io.request := false.B
+    }
+  }
+  io.request_hp := io.request && high_priority // [boom-ustt] derived from the gated request
 
   //assign outputs
   io.valid := is_valid
