@@ -36,6 +36,7 @@ class FpPipeline(implicit p: Parameters) extends BoomModule with tile.HasFPUPara
   val io = IO(new Bundle {
     val brupdate         = Input(new BrUpdateInfo())
     val flush_pipeline   = Input(Bool())
+    val stt_block        = if (usingSTTGate) Some(Input(Bool())) else None // [boom-ustt]
     val fcsr_rm          = Input(UInt(width=freechips.rocketchip.tile.FPConstants.RM_SZ.W))
     val status           = Input(new freechips.rocketchip.rocket.MStatus())
 
@@ -91,6 +92,7 @@ class FpPipeline(implicit p: Parameters) extends BoomModule with tile.HasFPUPara
   issue_unit.io.tsc_reg := io.debug_tsc_reg
   issue_unit.io.brupdate := io.brupdate
   issue_unit.io.flush_pipeline := io.flush_pipeline
+  issue_unit.io.stt_block.foreach(_ := io.stt_block.get) // [boom-ustt] FP store data
   // Don't support ld-hit speculation to FP window.
   for (w <- 0 until memWidth) {
     issue_unit.io.spec_ld_wakeup(w).valid := false.B

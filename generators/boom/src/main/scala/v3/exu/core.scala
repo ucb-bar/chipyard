@@ -1043,6 +1043,9 @@ class BoomCore()(implicit p: Parameters) extends BoomModule
   issue_units.map(_.io.tsc_reg := debug_tsc_reg)
   issue_units.map(_.io.brupdate := brupdate)
   issue_units.map(_.io.flush_pipeline := RegNext(rob.io.flush.valid))
+  // [boom-ustt] stt_block is defined after fp_pipeline's other inputs, so it is connected here.
+  issue_units.foreach(_.io.stt_block.foreach(_ := stt_block.get))
+  if (usingFPU) fp_pipeline.io.stt_block.foreach(_ := stt_block.get)
 
   // Load-hit Misspeculations
   require (mem_iss_unit.issueWidth <= 2)
