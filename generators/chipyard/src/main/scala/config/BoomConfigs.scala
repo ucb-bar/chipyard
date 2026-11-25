@@ -61,6 +61,19 @@ class MediumBoomV3CosimConfig extends Config(
   new boom.v3.common.WithNMediumBooms(1) ++
   new chipyard.config.AbstractConfig)
 
+// [boom-ustt] Conservative stand-in (#6)
+class SmallBoomV3ConservativeConfig extends Config(
+  new boom.v3.common.WithConservativeSTT ++
+  new SmallBoomV3Config)
+
+class MediumBoomV3ConservativeConfig extends Config(
+  new boom.v3.common.WithConservativeSTT ++
+  new MediumBoomV3Config)
+
+class MediumBoomV3ConservativeCosimConfig extends Config(
+  new boom.v3.common.WithConservativeSTT ++
+  new MediumBoomV3CosimConfig)
+
 // [boom-ustt] Baseline STT (project-docs/spec-interface.md section 7)
 class SmallBoomV3STTConfig extends Config(
   new boom.v3.common.WithSTT ++
